@@ -64,6 +64,7 @@ export function EditProjectSheet({
         confirmDisabledReason={nameErrorText(error, 'project')}
         onConfirm={save}
         onDismiss={() => setConfirming(true)}
+        onRequestClose={onClose}
       >
         <View className="mt-4">
           <Field
@@ -102,6 +103,7 @@ export function EditProjectSheet({
         tone="destructive"
         onConfirm={destroy}
         onDismiss={() => setConfirming(false)}
+        onRequestClose={() => setConfirming(false)}
       />
     </>
   );

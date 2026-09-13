@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { ChevronDown, Search } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { ProjectList } from '@/components/cellar/ProjectList';
+import { ProjectGrid } from '@/components/cellar/ProjectGrid';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
@@ -33,7 +33,7 @@ export default function ShelfScreen() {
   return (
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
       <ScreenTop />
-      <ContentShell maxWidth={MAX_W.text}>
+      <ContentShell maxWidth={MAX_W.grid}>
         <View className="px-4">
           <View className="flex-row items-baseline justify-between gap-3">
             <Pressable
@@ -72,7 +72,7 @@ export default function ShelfScreen() {
                 action={{ label: 'new project', onPress: () => openNewProject?.(null) }}
               />
             ) : (
-              <ProjectList
+              <ProjectGrid
                 projects={shelf.tiles}
                 onPress={(id) => router.navigate(`/project/${id}`)}
                 onEdit={(id) => openEditProject?.(id)}

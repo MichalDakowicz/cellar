@@ -12,7 +12,6 @@
 - Shelves: the layer above projects, so apps and minecraft mods are never one list
 - Shelves: rename or delete a shelf from the shelf picker
 - Projects: rename one, move it to another shelf, or delete it
-- Projects: a shelf reads as a list, so the names and the counts get the width
 - Projects: read one two ways — grouped by kind, or one stream cut into days
 - Projects: filter by kind and state from the funnel beside the view toggle
 - Seven kinds, not eight — addition was the same thought as idea, so it is gone

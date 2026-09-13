@@ -15,7 +15,17 @@ type SheetDialogProps = {
   /** Disables the confirm button and explains why, instead of hiding the sheet. */
   confirmDisabledReason?: string | null;
   onConfirm: () => void;
+  /** The secondary *button*. May be destructive — see onRequestClose. */
   onDismiss: () => void;
+  /**
+   * Clicking off: the backdrop, Escape, and the Android back gesture.
+   *
+   * Separate from `onDismiss` because the secondary button is not always "close
+   * this" — on the edit sheets it is "delete it", and a stray tap outside must
+   * never arm a destructive step. Defaults to `onDismiss` for every sheet whose
+   * secondary button really is just cancel.
+   */
+  onRequestClose?: () => void;
   children?: ReactNode;
 };
 
@@ -36,29 +46,31 @@ export function SheetDialog({
   confirmDisabledReason = null,
   onConfirm,
   onDismiss,
+  onRequestClose,
   children,
 }: SheetDialogProps) {
   const insets = useSafeAreaInsets();
+  const close = onRequestClose ?? onDismiss;
 
   // Escape closes it on web, where a sheet with no visible close affordance is
   // otherwise a trap for anyone on a keyboard.
   useEffect(() => {
     if (Platform.OS !== 'web' || !open || typeof document === 'undefined') return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onDismiss();
+      if (event.key === 'Escape') close();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onDismiss]);
+  }, [open, close]);
 
   const disabled = !!confirmDisabledReason;
 
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={onDismiss}>
+    <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="close"
-        onPress={onDismiss}
+        onPress={close}
         style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}
       >
         {/* The sheet swallows its own taps so a press inside does not dismiss. */}

@@ -27,6 +27,8 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
         clear();
         onClose();
       }}
+      // "clear" is the secondary button here, so clicking off must not clear.
+      onRequestClose={onClose}
     >
       <View className="mt-5 gap-2">
         <Overline>kind</Overline>

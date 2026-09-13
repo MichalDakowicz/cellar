@@ -74,6 +74,7 @@ export function EditShelfSheet({
         confirmDisabledReason={nameErrorText(error, 'shelf')}
         onConfirm={save}
         onDismiss={() => (deletable ? setConfirming(true) : onClose())}
+        onRequestClose={onClose}
       >
         <View className="mt-4">
           <Field
@@ -95,6 +96,7 @@ export function EditShelfSheet({
         tone="destructive"
         onConfirm={destroy}
         onDismiss={() => setConfirming(false)}
+        onRequestClose={() => setConfirming(false)}
       />
     </>
   );
