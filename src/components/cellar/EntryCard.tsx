@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { StateBadge } from '@/components/cellar/StateBadge';
-import { KIND_GUTTER, KindGlyph, kindLabel } from '@/components/media/Glyphs';
+import { KIND_GUTTER, KindGlyph, kindLabel, TEXT_LINE } from '@/components/media/Glyphs';
 import { stateMeta } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
 import type { Entry } from '@/types/cellar';
@@ -48,10 +48,18 @@ export const EntryCard = memo(function EntryCard({
   return (
     <View className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}>
       {showCode && (
+        // Centred in the gutter on both axes, and the box is exactly one line
+        // of `text-sm` tall (14px over a 20px line box) so the glyph sits on the
+        // first line of a thought that wraps to three — not floated above it by
+        // a guessed top padding.
         <View
           accessibilityLabel={kindLabel(entry.kind)}
-          className="pt-0.5"
-          style={{ width: KIND_GUTTER }}
+          style={{
+            width: KIND_GUTTER,
+            height: TEXT_LINE,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <KindGlyph kind={entry.kind} />
         </View>

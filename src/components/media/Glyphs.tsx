@@ -56,6 +56,15 @@ export function KindGlyph({
 /** The gutter's width. Fixed, so every row's text starts at the same x. */
 export const KIND_GUTTER = 22;
 
+/**
+ * The line box of `text-sm` — 14px type on 20px leading.
+ *
+ * The gutter is one of these tall so the glyph centres on the *first* line of
+ * an entry, whether that entry is one line or three. Padding the glyph down by
+ * a guessed amount instead is what leaves it floating above a wrapped row.
+ */
+export const TEXT_LINE = 20;
+
 /** What a screen reader says where a sighted reader sees the glyph. */
 export function kindLabel(kind: Kind): string {
   return kindMeta(kind).label;
