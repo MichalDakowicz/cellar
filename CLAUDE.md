@@ -157,7 +157,21 @@ claiming it is running. Never `input keyevent`/`swipe` past a lock screen.
 Report the actual result — if the build fails or the install rejects, say so with the
 error; do not describe the change as shipped.
 
-**Two traps, both of which fail quietly.**
+**Three traps. Two fail quietly; the third lies about what is wrong.**
+
+**Build with a JDK 21, not the machine default.** On JDK 24+ the release build dies at
+`:react-native-screens:configureCMakeRelWithDebInfo` and two sibling tasks with
+`WARNING: A restricted method in java.lang.System has been called`. That is not the error —
+AGP's `GeneratePrefabPackages.reportErrors` fails the task on *any* line prefab writes to
+stderr, and the newer JVM writes that warning on every run. Nothing is wrong with the code.
+
+```sh
+export JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"   # 21.0.8
+```
+
+`android/` is gitignored prebuild output, so this cannot be fixed in the repo — it is a
+machine setting, and a fresh `expo prebuild` resets `android/gradle.properties` (bump
+`org.gradle.jvmargs` back to `-Xmx4096m -XX:MaxMetaspaceSize=1536m` after one).
 
 **The seed RPC is not optional.** A brand new cellar has no shelves, and the capture
 screen is the home route — so a user with no shelf row would land on a picker with nothing
