@@ -6,7 +6,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useInboxScreen } from '@/features/cellar/useInboxScreen';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 
@@ -21,6 +21,7 @@ export default function InboxScreen() {
   const inbox = useInboxScreen();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
+  const gutter = useGutter();
 
   if (inbox.error) return <ErrorState message={readError(inbox.error)} onRetry={inbox.refetch} />;
   if (inbox.loading) return <LoadingState label="opening the inbox" />;
@@ -37,7 +38,7 @@ export default function InboxScreen() {
           header={
             <View>
               <ScreenTop />
-              <View className="px-4 pb-4">
+              <View className={`pb-4 ${gutter}`}>
                 <View className="flex-row items-baseline justify-between gap-3">
                   <Text className="text-2xl font-bold tracking-tight text-foreground">inbox</Text>
                   <Text className="text-xs text-muted-foreground">{inbox.meta}</Text>

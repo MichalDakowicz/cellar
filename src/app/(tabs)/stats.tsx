@@ -8,9 +8,10 @@ import { Overline } from '@/components/ui/controls';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useStatsScreen } from '@/features/cellar/useStatsScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useHover, webTransition } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
+import { COLORS } from '@/theme/colors';
 
 /**
  * What you dump, and where.
@@ -25,6 +26,7 @@ export default function StatsScreen() {
   const router = useRouter();
   const openScope = useCellarSheets((state) => state.statsScope);
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
 
   if (stats.error) return <ErrorState message={readError(stats.error)} onRetry={stats.refetch} />;
   if (stats.loading) return <LoadingState label="counting the cellar" />;
@@ -33,7 +35,7 @@ export default function StatsScreen() {
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.detail}>
-        <View className="px-4">
+        <View className={gutter}>
           <Text className="text-2xl font-bold tracking-tight text-foreground">what you dump</Text>
           <Pressable
             accessibilityRole="button"
@@ -52,13 +54,13 @@ export default function StatsScreen() {
           />
         ) : (
           <>
-            <View className="my-6 flex-row border-y border-border/50 px-4 py-7">
+            <View className={`my-6 flex-row border-y border-border/50 py-7 ${gutter}`}>
               <Figure label="total" value={stats.total} />
               <Figure label="open" value={stats.open} />
               <Figure label="projects" value={stats.projectCount} />
             </View>
 
-            <View className="border-y border-border/50 px-4 py-4">
+            <View className={`border-y border-border/50 py-4 ${gutter}`}>
               <Overline>by kind</Overline>
               <View className="mt-3.5 gap-3">
                 {stats.kindBars.map((bar) => (
@@ -78,22 +80,16 @@ export default function StatsScreen() {
               </View>
             </View>
 
-            <View className="px-4 py-4">
+            <View className={`py-4 ${gutter}`}>
               <Overline>busiest projects</Overline>
               <View className="mt-2">
                 {stats.busiest.map((project) => (
-                  <Pressable
+                  <BusiestRow
                     key={project.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={project.name}
+                    name={project.name}
+                    meta={project.meta}
                     onPress={() => router.navigate(`/project/${project.id}`)}
-                    className="flex-row items-baseline gap-2.5 rounded-lg px-2 py-2.5 active:opacity-80"
-                  >
-                    <Text className="min-w-0 flex-1 text-sm font-semibold text-foreground" numberOfLines={1}>
-                      {project.name}
-                    </Text>
-                    <Text className="text-xs text-muted-foreground">{project.meta}</Text>
-                  </Pressable>
+                  />
                 ))}
               </View>
             </View>
@@ -101,6 +97,27 @@ export default function StatsScreen() {
         )}
       </ContentShell>
     </ScrollView>
+  );
+}
+
+/** Its own component so the row can hold the hover state a mouse expects. */
+function BusiestRow({ name, meta, onPress }: { name: string; meta: string; onPress: () => void }) {
+  const { hovered, bind } = useHover();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={name}
+      onPress={onPress}
+      {...bind}
+      style={[webTransition('background-color'), hovered ? { backgroundColor: COLORS.rowHover } : null]}
+      className="flex-row items-baseline gap-2.5 rounded-lg px-2 py-2.5 active:opacity-80"
+    >
+      <Text className="min-w-0 flex-1 text-sm font-semibold text-foreground" numberOfLines={1}>
+        {name}
+      </Text>
+      <Text className="text-xs text-muted-foreground">{meta}</Text>
+    </Pressable>
   );
 }
 

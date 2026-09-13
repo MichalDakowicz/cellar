@@ -23,3 +23,8 @@
 - Stats: what you dump, by kind and by project, narrowed to one shelf from the nav bar
 - Search: every shelf, every project and the inbox at once, archived included
 - Settings: the gutter codes, the default kind and view, and the theme you share with the siblings
+- Web: the nav bar follows you into a project, an entry, search and settings, with back on it
+- Web: press 1 to 5 for the destinations, n for the capture field and / to search
+- Web: rows, tiles, chips and the nav bar answer the mouse, and a tile shows its edit dot on hover
+- Web: a sheet opens as a dialog in the middle of a wide window instead of off the bottom edge
+- Web: the capture screen sits in the middle of the window instead of against the top edge

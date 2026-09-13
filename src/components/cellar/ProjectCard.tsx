@@ -2,6 +2,7 @@ import { MoreHorizontal } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
 import { plural } from '@/lib/utils';
 
 export type ProjectTile = {
@@ -36,12 +37,25 @@ export const ProjectCard = memo(function ProjectCard({
   /** Presence of a handler is what shows the affordance. */
   onEdit?: (id: string) => void;
 }) {
+  const { hovered, bind } = useHover();
+  const isDesktop = useIsDesktop();
+  // A mouse can reveal a control; a thumb cannot. The edit dot is permanent on
+  // phone and hover-only on desktop, where five always-lit dots across a grid
+  // are five things competing with the tile they sit on.
+  const showEdit = !!onEdit && (!isDesktop || hovered);
+
   return (
-    <View>
+    <View
+      // The lift renders over its neighbours, or the tile to its right clips it.
+      style={[webTransition('transform'), hovered ? { transform: [{ scale: 1.035 }], zIndex: 10 } : null]}
+    >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={project.name}
         onPress={() => onPress(project.id)}
+        // react-native-web implements hover on Pressable only, so the bind can
+        // never sit on the View that carries the lift.
+        {...bind}
         className="active:opacity-80"
       >
         <View className="aspect-[4/3] justify-end rounded-md bg-neutral-900 p-3">
@@ -65,12 +79,12 @@ export const ProjectCard = memo(function ProjectCard({
         </Text>
       </Pressable>
 
-      {onEdit && (
+      {showEdit && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`edit ${project.name}`}
           hitSlop={8}
-          onPress={() => onEdit(project.id)}
+          onPress={() => onEdit?.(project.id)}
           // Its own Pressable over the tile's, not nested inside it — a nested
           // pressable inside a pressed parent swallows the press on Android.
           className="absolute bottom-[46px] right-2 h-8 w-8 items-center justify-center rounded-full bg-black/50 active:opacity-70"

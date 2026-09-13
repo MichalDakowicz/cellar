@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Platform, Pressable, Text, TextInput, View, type TextInputProps } from 'react-native';
 
+import { useHover, webFocusRing, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
 /**
@@ -18,6 +20,8 @@ type ChipProps = {
 
 /** A wrap-friendly toggle. Multi-select by convention; the caller owns the set. */
 export function Chip({ label, selected, onPress, disabled }: ChipProps) {
+  const { hovered, bind } = useHover();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -25,6 +29,11 @@ export function Chip({ label, selected, onPress, disabled }: ChipProps) {
       accessibilityState={{ selected, disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
+      {...bind}
+      style={[
+        webTransition('background-color'),
+        hovered && !disabled && !selected ? { backgroundColor: COLORS.chipGround } : null,
+      ]}
       className={[
         'rounded-full border px-3.5 py-2',
         selected ? 'border-primary bg-primary/15' : 'border-border bg-transparent',
@@ -49,27 +58,39 @@ type SegmentedProps<T extends string> = {
 export function Segmented<T extends string>({ options, value, onChange, label }: SegmentedProps<T>) {
   return (
     <View accessibilityRole="tablist" accessibilityLabel={label} className="flex-row gap-1 rounded-lg bg-secondary p-[3px]">
-      {options.map((option) => {
-        const active = option.value === value;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
-            accessibilityLabel={option.label}
-            onPress={() => onChange(option.value)}
-            className={['flex-1 items-center rounded-lg py-2.5', active ? 'bg-white/10' : ''].join(' ')}
-          >
-            <Text
-              className={['text-sm font-semibold', active ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
-              numberOfLines={1}
-            >
-              {option.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+      {options.map((option) => (
+        <SegmentOption
+          key={option.value}
+          label={option.label}
+          active={option.value === value}
+          onPress={() => onChange(option.value)}
+        />
+      ))}
     </View>
+  );
+}
+
+/** Its own component so each option can hold its own hover state. */
+function SegmentOption({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const { hovered, bind } = useHover();
+
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
+      onPress={onPress}
+      {...bind}
+      style={[webTransition('background-color'), hovered && !active ? { backgroundColor: COLORS.chipGround } : null]}
+      className={['flex-1 items-center rounded-lg py-2.5', active ? 'bg-white/10' : ''].join(' ')}
+    >
+      <Text
+        className={['text-sm font-semibold', active ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -157,18 +178,28 @@ type FieldProps = TextInputProps & {
 };
 
 /** Every text input in the app goes through this. */
-export function Field({ error, style, multiline, ...props }: FieldProps) {
+export function Field({ error, style, multiline, onFocus, onBlur, ...props }: FieldProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View>
       <TextInput
         placeholderTextColor={COLORS.muted}
         multiline={multiline}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
         className={[
           'rounded-lg border bg-secondary px-3.5 text-foreground',
           error ? 'border-destructive' : 'border-input',
           multiline ? 'py-3' : 'py-3.5',
         ].join(' ')}
-        style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, style]}
+        style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(focused), style]}
         {...props}
       />
       {!!error && <Text className="mt-1.5 text-xs text-destructive-foreground">{error}</Text>}

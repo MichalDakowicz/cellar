@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Platform, useWindowDimensions, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 
+import { COLORS } from '@/theme/colors';
+
 // Web/desktop layout tier. The app is phone-first everywhere else; these are the
 // only knobs that let a screen opt into the wide-viewport variant (sidebar nav,
 // centred max-width column, hover affordances) instead of being a stretched
@@ -49,6 +51,36 @@ export function useHover() {
     ? { onHoverIn: () => setHovered(true), onHoverOut: () => setHovered(false) }
     : {};
   return { hovered: isWeb && hovered, bind } as const;
+}
+
+/**
+ * The screen gutter: `px-4` on phone, `px-8` once the desktop shell is on
+ * (PING.md §6). A class rather than a number because every gutter in this app
+ * is a NativeWind class on the block it pads, not a padding on the shell —
+ * blocks with a hairline rule have to bleed to the column edge while their text
+ * insets.
+ */
+export function useGutter(): string {
+  return useIsDesktop() ? 'px-8' : 'px-4';
+}
+
+/**
+ * Focus-ring style for a web text field, `undefined` when the field is not
+ * focused and off web entirely.
+ *
+ * react-native-web renders every input with `outline: none`, so a keyboard user
+ * gets no indication of where they are — on a phone that is invisible and
+ * correct, on a desktop it is a broken form. RN's ViewStyle has no outline keys,
+ * hence the cast, same lie as webTransition.
+ */
+export function webFocusRing(focused: boolean): ViewStyle | undefined {
+  if (!isWeb || !focused) return undefined;
+  return {
+    outlineWidth: 2,
+    outlineStyle: 'solid',
+    outlineColor: COLORS.accent,
+    outlineOffset: 2,
+  } as unknown as ViewStyle;
 }
 
 /**

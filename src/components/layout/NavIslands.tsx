@@ -13,6 +13,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useUnfiledCount } from '@/features/cellar/useUnfiledCount';
 import { NAV_ISLAND_GAP, NAV_ISLAND_HEIGHT } from '@/hooks/useNavBarSpace';
 import { useProfile } from '@/hooks/useProfile';
+import { useHover } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
 // Real backdrop blur on Android needs the Dimezis backend; without it BlurView
@@ -65,6 +66,10 @@ export function NavIslands() {
 
   const go = useCallback((destination: NavDestination) => router.navigate(destination.href), [router]);
   const profileActive = activeTab === PROFILE.tabName;
+  // Web only: the round plates have no label, so hover is the only thing that
+  // tells a mouse the glass is a button before it is clicked.
+  const actionHover = useHover();
+  const profileHover = useHover();
 
   return (
     <View
@@ -78,7 +83,8 @@ export function NavIslands() {
           onPress={action.onPress}
           accessibilityRole="button"
           accessibilityLabel={action.label}
-          style={styles.roundPress}
+          {...actionHover.bind}
+          style={[styles.roundPress, actionHover.hovered ? styles.roundHover : null]}
         >
           <action.Icon size={21} color="#fafafa" strokeWidth={2.2} />
           {action.badge > 0 && (
@@ -114,7 +120,8 @@ export function NavIslands() {
           accessibilityRole="tab"
           accessibilityState={{ selected: profileActive }}
           accessibilityLabel={PROFILE.label}
-          style={styles.roundPress}
+          {...profileHover.bind}
+          style={[styles.roundPress, profileHover.hovered ? styles.roundHover : null]}
         >
           <Avatar profile={profile} size={44} />
         </Pressable>
@@ -159,6 +166,7 @@ const styles = StyleSheet.create({
   },
   round: { width: NAV_ISLAND_HEIGHT },
   roundPress: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  roundHover: { backgroundColor: COLORS.chipGround },
   pill: { flexDirection: 'row', alignItems: 'center', gap: DEST_GAP, paddingHorizontal: PILL_PAD },
   marker: {
     position: 'absolute',

@@ -11,7 +11,7 @@ import { useCellar } from '@/features/cellar/useCellar';
 import { Avatar } from '@/features/friends/Avatar';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { useProfile } from '@/hooks/useProfile';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useHover, webTransition } from '@/hooks/useResponsive';
 import { countLive } from '@/lib/entryGroups';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
@@ -32,6 +32,8 @@ export default function ProfileScreen() {
   const { profile, loading } = useProfile(user?.id);
   const { shelves, projects, entries } = useCellar();
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
+  const settingsHover = useHover();
 
   if (loading) {
     return (
@@ -53,7 +55,7 @@ export default function ProfileScreen() {
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.text}>
-        <View className="flex-row items-center gap-3 px-4">
+        <View className={`flex-row items-center gap-3 ${gutter}`}>
           <Avatar profile={profile} size={56} />
           <View className="min-w-0 flex-1">
             <Text className="text-2xl font-bold tracking-tight text-foreground" numberOfLines={1}>
@@ -65,7 +67,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View className="my-6 flex-row flex-wrap gap-y-6 border-y border-border/50 px-4 py-7">
+        <View className={`my-6 flex-row flex-wrap gap-y-6 border-y border-border/50 py-7 ${gutter}`}>
           {figures.map((figure) => (
             <View key={figure.label} className="w-1/2">
               <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -76,7 +78,7 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <View className="px-4">
+        <View className={gutter}>
           <Overline>today</Overline>
           <Text className="mt-2 text-sm text-muted-foreground">
             {plural(countToday(entries.map((entry) => entry.createdAt)), 'thought')} in the last day.
@@ -88,7 +90,12 @@ export default function ProfileScreen() {
           accessibilityRole="button"
           accessibilityLabel="settings"
           onPress={() => router.navigate('/settings')}
-          className="mt-6 flex-row items-center gap-3 px-4 py-4 active:opacity-80"
+          {...settingsHover.bind}
+          style={[
+            webTransition('background-color'),
+            settingsHover.hovered ? { backgroundColor: COLORS.rowHover } : null,
+          ]}
+          className={`mt-6 flex-row items-center gap-3 py-4 active:opacity-80 ${gutter}`}
         >
           <Text className="flex-1 text-base font-semibold text-foreground">settings</Text>
           <ChevronRight size={18} color={COLORS.muted} />

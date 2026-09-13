@@ -4,10 +4,11 @@ import { Text, TextInput, View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { NavIslands } from '@/components/layout/NavIslands';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { useCellar } from '@/features/cellar/useCellar';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, webFocusRing } from '@/hooks/useResponsive';
 import { searchEntries } from '@/lib/entryGroups';
 import { plural } from '@/lib/utils';
 import { COLORS } from '@/theme/colors';
@@ -24,6 +25,8 @@ export default function SearchScreen() {
   const { entries, projects } = useCellar();
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
+  const gutter = useGutter();
 
   const hits = useMemo(() => searchEntries(entries, query), [entries, query]);
 
@@ -56,10 +59,12 @@ export default function SearchScreen() {
           header={
             <View>
               <ScreenTop />
-              <View className="px-4 pb-2">
+              <View className={`pb-2 ${gutter}`}>
                 <TextInput
                   className="h-[42px] rounded-lg bg-secondary px-3.5 text-foreground"
-                  style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS]}
+                  style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(focused)]}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
                   placeholder="search every entry"
                   placeholderTextColor={COLORS.muted}
                   value={query}
@@ -83,6 +88,11 @@ export default function SearchScreen() {
           }
         />
       </ContentShell>
+
+      {/* Pushed out of the tabs, so the navigator's own bar is gone — the screen
+          mounts it itself, which is also where the left island turns into Back
+          (components/layout/navActions). */}
+      <NavIslands />
     </View>
   );
 }

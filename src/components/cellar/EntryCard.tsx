@@ -3,8 +3,10 @@ import { Pressable, Text, View } from 'react-native';
 
 import { StateBadge } from '@/components/cellar/StateBadge';
 import { KIND_GUTTER, KindGlyph, kindLabel, TEXT_LINE } from '@/components/media/Glyphs';
+import { useHover, webTransition } from '@/hooks/useResponsive';
 import { stateMeta } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
+import { COLORS } from '@/theme/colors';
 import type { Entry } from '@/types/cellar';
 
 export type EntryVariant = 'line' | 'inbox' | 'hit';
@@ -44,9 +46,19 @@ export const EntryCard = memo(function EntryCard({
 }: EntryCardProps) {
   const settled = stateMeta(entry.state).settled;
   const grown = entry.lines.length;
+  const { hovered, bind } = useHover();
 
   return (
-    <View className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}>
+    <View
+      className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}
+      // A row is a click target on web and looks like plain text until the
+      // ground moves under the mouse (PING.md §4.5). The inbox row already has
+      // a ground, so it lifts; a bare line grows one.
+      style={[
+        webTransition('background-color'),
+        hovered ? { backgroundColor: COLORS.rowHover, borderRadius: 12 } : null,
+      ]}
+    >
       {showCode && (
         // Centred in the gutter on both axes, and the box is exactly one line
         // of `text-sm` tall (14px over a 20px line box) so the glyph sits on the
@@ -69,6 +81,9 @@ export const EntryCard = memo(function EntryCard({
         accessibilityRole="button"
         accessibilityLabel={entry.text}
         onPress={() => onPress(entry)}
+        // Hover binds to the Pressable, never to the View around it —
+        // react-native-web only implements onHoverIn/Out on Pressable.
+        {...bind}
         className={[
           'min-w-0 flex-1 flex-row items-start gap-2.5 rounded-lg active:opacity-80',
           variant === 'inbox' ? '' : 'px-2 py-2.5',

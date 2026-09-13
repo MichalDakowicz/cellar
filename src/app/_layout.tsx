@@ -1,15 +1,18 @@
 import '@/global.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { useWebShortcuts } from '@/hooks/useWebShortcuts';
 import { queryClient } from '@/lib/queryClient';
+import { useCaptureFocus } from '@/store/cellarPrefs';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync();
@@ -29,6 +32,34 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * Keyboard wiring for the browser build. It has to sit above the navigator so
+ * the keys work on every route, not only on the five that are tabs.
+ */
+function AppShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const requestCapture = useCaptureFocus((state) => state.request);
+
+  const selectTab = useCallback(
+    (index: number) => {
+      const destination = NAV_DESTINATIONS[index];
+      if (destination) router.navigate(destination.href);
+    },
+    [router],
+  );
+
+  const capture = useCallback(() => {
+    router.navigate('/');
+    requestCapture();
+  }, [router, requestCapture]);
+
+  const search = useCallback(() => router.navigate('/search'), [router]);
+
+  useWebShortcuts({ onSelectTab: selectTab, onCapture: capture, onSearch: search });
+
+  return <>{children}</>;
+}
+
+/**
  * The shell, top to bottom. There is no header anywhere in this app — the nav
  * islands are the only chrome, and every screen starts with its own ScreenTop.
  */
@@ -41,7 +72,9 @@ export default function RootLayout() {
             <ThemeProvider>
               <ToastProvider>
                 <AuthGate>
-                  <Stack screenOptions={{ headerShown: false }} />
+                  <AppShell>
+                    <Stack screenOptions={{ headerShown: false }} />
+                  </AppShell>
                 </AuthGate>
               </ToastProvider>
             </ThemeProvider>

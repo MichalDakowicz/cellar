@@ -4,10 +4,11 @@ import { Pressable, Text, View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { NavIslands } from '@/components/layout/NavIslands';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -26,6 +27,7 @@ export default function ProjectScreen() {
   const project = useProjectScreen(id);
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
+  const gutter = useGutter();
 
   if (project.error) return <ErrorState message={readError(project.error)} onRetry={project.refetch} />;
   if (project.loading) return <LoadingState label="opening the project" />;
@@ -40,7 +42,7 @@ export default function ProjectScreen() {
           header={
             <View>
               <ScreenTop />
-              <View className="flex-row items-end justify-between gap-3 px-4 pb-2">
+              <View className={`flex-row items-end justify-between gap-3 pb-2 ${gutter}`}>
                 <View className="min-w-0 flex-1">
                   <Text className="text-2xl font-bold leading-tight tracking-tight text-foreground" numberOfLines={2}>
                     {project.name}
@@ -84,7 +86,7 @@ export default function ProjectScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`${project.showArchived ? 'hide' : 'show'} archived`}
                   onPress={project.toggleArchived}
-                  className="px-4 pb-1 pt-2 active:opacity-80"
+                  className={`pb-1 pt-2 active:opacity-80 ${gutter}`}
                 >
                   <Text className="text-xs font-semibold text-muted-foreground">
                     {project.showArchived ? 'hide' : 'show'} {project.archivedCount} archived
@@ -107,6 +109,11 @@ export default function ProjectScreen() {
           }
         />
       </ContentShell>
+
+      {/* Pushed out of the tabs, so the navigator's own bar is gone — the screen
+          mounts it itself, which is also where the left island turns into Back
+          (components/layout/navActions). */}
+      <NavIslands />
     </View>
   );
 }

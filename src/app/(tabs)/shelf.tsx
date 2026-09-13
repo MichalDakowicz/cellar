@@ -8,7 +8,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useShelfScreen } from '@/features/cellar/useShelfScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -27,6 +27,7 @@ export default function ShelfScreen() {
   const openNewProject = useCellarSheets((state) => state.newProject);
   const openEditProject = useCellarSheets((state) => state.editProject);
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
 
   if (shelf.error) return <ErrorState message={readError(shelf.error)} onRetry={shelf.refetch} />;
 
@@ -34,7 +35,7 @@ export default function ShelfScreen() {
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.grid}>
-        <View className="px-4">
+        <View className={gutter}>
           <View className="flex-row items-baseline justify-between gap-3">
             <Pressable
               accessibilityRole="button"

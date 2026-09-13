@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
 import type { NavDestination } from '@/components/layout/navDestinations';
+import { useHover, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
 export const DEST_WIDTH = 46;
@@ -28,15 +29,24 @@ export function NavDestinationButton({
   badge?: number;
   onPress: () => void;
 }) {
+  const { hovered, bind } = useHover();
+
   return (
     <Pressable
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       accessibilityLabel={destination.label}
       onPress={onPress}
-      style={{ width: DEST_WIDTH, height: DEST_HEIGHT, alignItems: 'center', justifyContent: 'center', zIndex: 1 }}
+      {...bind}
+      style={[
+        { width: DEST_WIDTH, height: DEST_HEIGHT, alignItems: 'center', justifyContent: 'center', zIndex: 1 },
+        webTransition('background-color'),
+        // Under the mouse an inactive slot shows the ground the marker would
+        // land on, so the bar answers a hover the way a menu does.
+        hovered && !active ? { backgroundColor: COLORS.chipGround, borderRadius: 99 } : null,
+      ]}
     >
-      {destination.icon(active ? ICON_ON : ICON_OFF, 20)}
+      {destination.icon(active || hovered ? ICON_ON : ICON_OFF, 20)}
       {badge > 0 && (
         <View
           style={{

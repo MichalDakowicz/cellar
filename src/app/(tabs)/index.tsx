@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ChevronDown } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
@@ -11,9 +12,9 @@ import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { ErrorState } from '@/components/ui/states';
 import { useDumpScreen } from '@/features/cellar/useDumpScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop, webFocusRing } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
-import { useCellarSheets } from '@/store/cellarPrefs';
+import { useCaptureFocus, useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 
 /**
@@ -28,18 +29,41 @@ export default function DumpScreen() {
   const router = useRouter();
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
+  const isDesktop = useIsDesktop();
+  const field = useRef<TextInput>(null);
+  const [focused, setFocused] = useState(false);
+
+  // The web `n` shortcut navigates here and leaves a flag rather than calling a
+  // focus handle, because on every other route this screen is not mounted yet
+  // (store/cellarPrefs.ts).
+  const focusPending = useCaptureFocus((state) => state.pending);
+  const clearFocusRequest = useCaptureFocus((state) => state.clear);
+  useEffect(() => {
+    if (!focusPending) return;
+    field.current?.focus();
+    clearFocusRequest();
+  }, [focusPending, clearFocusRequest]);
 
   if (dump.error) return <ErrorState message={readError(dump.error)} onRetry={dump.refetch} />;
 
   return (
     <ScrollView
       className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+      contentContainerStyle={{
+        paddingBottom: navBarSpace + 8,
+        // A capture screen is short, and on a desktop window that leaves the
+        // field pinned to the top edge with two thirds of the screen empty
+        // beneath it. Centred, the one thing this screen is for sits at eye
+        // height and next to the nav islands. It grows downward past the
+        // viewport exactly as it does on a phone.
+        ...(isDesktop ? { flexGrow: 1, justifyContent: 'center' as const } : null),
+      }}
       keyboardShouldPersistTaps="handled"
     >
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.text}>
-        <View className="px-4">
+        <View className={gutter}>
           <View className="flex-row items-baseline justify-between gap-3">
             <Text className="text-2xl font-bold tracking-tight text-foreground">dump</Text>
             <Text className="text-xs text-muted-foreground" numberOfLines={1}>
@@ -48,8 +72,11 @@ export default function DumpScreen() {
           </View>
 
           <TextInput
+            ref={field}
             className="mt-3.5 rounded-xl bg-secondary p-4 text-foreground"
-            style={[{ minHeight: 118, fontSize: 17, lineHeight: 25 }, ANDROID_METRICS]}
+            style={[{ minHeight: 118, fontSize: 17, lineHeight: 25 }, ANDROID_METRICS, webFocusRing(focused)]}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder={dump.placeholder}
             placeholderTextColor={COLORS.muted}
             multiline
@@ -112,7 +139,7 @@ export default function DumpScreen() {
         </View>
 
         {dump.justDropped.length > 0 && (
-          <View className="mt-7 border-y border-border/50 px-4 py-4">
+          <View className={`mt-7 border-y border-border/50 py-4 ${gutter}`}>
             <Overline>just dropped</Overline>
             <View className="mt-1.5">
               {dump.justDropped.map((entry) => (
