@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
+import { kindChips } from '@/components/cellar/kindChips';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
@@ -12,7 +13,6 @@ import { signOut } from '@/features/auth/authActions';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W } from '@/hooks/useResponsive';
-import { KINDS } from '@/lib/kinds';
 import type { ProjectViewPref } from '@/lib/cellarSettings';
 import type { ThemePref } from '@/lib/userSettings';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -51,8 +51,8 @@ export default function Settings() {
 
         <View className="mt-6 border-t border-border/50 px-4">
           <SwitchRow
-            label="kind codes in the gutter"
-            sub="the mono column that makes a list scan like a ledger"
+            label="kind glyphs in the gutter"
+            sub="the column of marks that makes a list scan like a ledger"
             value={settings.showCodes}
             onChange={(value) => void updateSettings({ showCodes: value })}
           />
@@ -77,7 +77,7 @@ export default function Settings() {
           <Overline>default kind</Overline>
           <ChipWrap
             label="default kind"
-            options={KINDS.map((kind) => ({ value: kind.value, label: kind.label }))}
+            options={kindChips(settings.defaultKind)}
             selected={settings.defaultKind}
             onToggle={(kind) => {
               setDraftKind(kind);

@@ -16,7 +16,12 @@ import type { Kind } from '@/types/cellar';
 export type KindMeta = {
   value: Kind;
   label: Kind;
-  /** Four characters at most, so the gutter is one column wide at every row. */
+  /**
+   * A short, stable id for the kind. The list gutter draws a glyph now
+   * (components/media/Glyphs), but this stays: it is what a grouped section
+   * keys on, and it is the value to log or export a kind as without shipping
+   * the display string into a file format.
+   */
   code: string;
 };
 
@@ -45,6 +50,3 @@ export function kindMeta(value: string | null | undefined): KindMeta {
 export function isKind(value: unknown): value is Kind {
   return typeof value === 'string' && BY_VALUE.has(value as Kind);
 }
-
-/** The gutter's width in characters — the longest code, so nothing shifts. */
-export const KIND_CODE_WIDTH = KINDS.reduce((widest, kind) => Math.max(widest, kind.code.length), 0);

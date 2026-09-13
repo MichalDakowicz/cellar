@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
+import { kindChips } from '@/components/cellar/kindChips';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -94,7 +95,7 @@ export default function DumpScreen() {
           <View className="mb-2 mt-5">
             <Overline>kind</Overline>
           </View>
-          <ChipWrap label="kind" options={dump.kindOptions} selected={dump.kind} onToggle={dump.setKind} />
+          <ChipWrap label="kind" options={kindChips(dump.kind)} selected={dump.kind} onToggle={dump.setKind} />
 
           <Pressable
             accessibilityRole="button"

@@ -68,7 +68,10 @@ export function useProjectScreen(projectId: string | undefined) {
 
 function groupedItems(entries: Entry[]): EntryListItem[] {
   return groupByKind(entries).flatMap((group) => [
-    { type: 'section' as const, section: { key: group.kind, label: group.kind, meta: String(group.entries.length) } },
+    {
+      type: 'section' as const,
+      section: { key: group.kind, label: group.kind, meta: String(group.entries.length), kind: group.kind },
+    },
     ...group.entries.map((entry) => ({ type: 'entry' as const, entry })),
   ]);
 }

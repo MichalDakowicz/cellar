@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
-import { KINDS } from '@/lib/kinds';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -94,7 +93,6 @@ export function useDumpScreen() {
     onReturn,
     kind,
     setKind: (next: Kind) => setKind(next),
-    kindOptions: KINDS.map((meta) => ({ value: meta.value, label: meta.label })),
     projectId,
     setProject: setLastProject,
     projectOptions: [

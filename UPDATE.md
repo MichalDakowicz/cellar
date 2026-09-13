@@ -15,6 +15,7 @@
 - Projects: read one two ways — grouped by kind, or one stream cut into days
 - Projects: filter by kind and state from the funnel beside the view toggle
 - Seven kinds, not eight — addition was the same thought as idea, so it is gone
+- Kinds wear a glyph in the list gutter instead of a mono code, and on every chip
 - Entries: one line, and you can dump more into it later without editing what you first thought
 - Entries: archive takes something out of the way without losing it, and search still finds it
 - Deleting a project or a shelf never destroys entries — they move back to the inbox

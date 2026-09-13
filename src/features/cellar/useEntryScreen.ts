@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { ENTRY_STATES } from '@/lib/entryState';
-import { KINDS, kindMeta } from '@/lib/kinds';
 import { dropStamp, shortRel } from '@/lib/relTime';
 import type { Entry, EntryState, Kind } from '@/types/cellar';
 
@@ -60,13 +59,11 @@ export function useEntryScreen(entryId: string | undefined) {
   return {
     entry,
     projectName,
-    code: entry ? kindMeta(entry.kind).code : '',
     stamp: entry ? dropStamp(entry.createdAt) : '',
     thread: (entry?.lines ?? []).map((entryLine) => ({ ...entryLine, rel: shortRel(entryLine.createdAt) })),
     line,
     setLine,
     appendLine,
-    kindOptions: KINDS.map((meta) => ({ value: meta.value, label: meta.label })),
     setKind: (kind: Kind) => patch({ kind }),
     stateOptions: ENTRY_STATES.map((meta) => ({ value: meta.value, label: meta.label })),
     setState: (state: EntryState) => patch({ state }),

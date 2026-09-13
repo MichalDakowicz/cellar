@@ -3,11 +3,13 @@ import { type ReactElement } from 'react';
 import { Text, View } from 'react-native';
 
 import { EntryCard, type EntryVariant } from '@/components/cellar/EntryCard';
+import { KindGlyph } from '@/components/media/Glyphs';
 import { EmptyState } from '@/components/ui/states';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import type { Entry } from '@/types/cellar';
+import type { Entry, Kind } from '@/types/cellar';
 
-export type EntrySection = { key: string; label: string; meta?: string };
+/** `kind` is set on a grouped-by-kind heading, and absent on a day heading. */
+export type EntrySection = { key: string; label: string; meta?: string; kind?: Kind };
 
 /** A section heading, or one entry. The list is flat so it virtualizes properly. */
 export type EntryListItem = { type: 'section'; section: EntrySection } | { type: 'entry'; entry: Entry };
@@ -80,10 +82,13 @@ export function EntryList({
 
 function SectionRow({ section }: { section: EntrySection }) {
   return (
-    <View className="flex-row items-baseline justify-between gap-3 px-4 pb-1.5 pt-6">
-      <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
-        {section.label}
-      </Text>
+    <View className="flex-row items-center justify-between gap-3 px-4 pb-1.5 pt-6">
+      <View className="min-w-0 flex-1 flex-row items-center gap-2">
+        {section.kind && <KindGlyph kind={section.kind} size={13} />}
+        <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
+          {section.label}
+        </Text>
+      </View>
       {!!section.meta && <Text className="text-[11px] font-semibold text-muted-foreground">{section.meta}</Text>}
     </View>
   );

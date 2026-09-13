@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
+import { kindChips } from '@/components/cellar/kindChips';
+import { KindGlyph } from '@/components/media/Glyphs';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -54,8 +56,9 @@ export default function EntryScreen() {
       <ContentShell maxWidth={MAX_W.text}>
         <View className="px-4">
           <View className="flex-row items-center gap-2">
-            <Text className="font-mono text-[11px] text-primary">{entry.code}</Text>
-            <Text className="text-xs text-muted-foreground">{entry.projectName}</Text>
+            <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />
+            <Text className="text-xs font-semibold text-primary">{entry.entry.kind}</Text>
+            <Text className="text-xs text-muted-foreground">· {entry.projectName}</Text>
           </View>
           <Text className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground">
             {entry.entry.text}
@@ -110,7 +113,7 @@ export default function EntryScreen() {
           <View className="mb-2 mt-5">
             <Overline>kind</Overline>
           </View>
-          <ChipWrap label="kind" options={entry.kindOptions} selected={entry.entry.kind} onToggle={entry.setKind} />
+          <ChipWrap label="kind" options={kindChips(entry.entry.kind)} selected={entry.entry.kind} onToggle={entry.setKind} />
 
           <View className="mt-7 flex-row gap-2.5">
             <Pressable

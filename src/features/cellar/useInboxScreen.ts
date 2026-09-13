@@ -43,7 +43,10 @@ export function useInboxScreen() {
 function buildItems(entries: Entry[], sort: InboxSort): EntryListItem[] {
   if (sort === 'kind') {
     return groupByKind(entries).flatMap((group) => [
-      { type: 'section' as const, section: { key: group.kind, label: group.kind, meta: String(group.entries.length) } },
+      {
+        type: 'section' as const,
+        section: { key: group.kind, label: group.kind, meta: String(group.entries.length), kind: group.kind },
+      },
       ...group.entries.map((entry) => ({ type: 'entry' as const, entry })),
     ]);
   }

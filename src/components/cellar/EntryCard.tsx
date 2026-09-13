@@ -2,8 +2,8 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { StateBadge } from '@/components/cellar/StateBadge';
+import { KIND_GUTTER, KindGlyph, kindLabel } from '@/components/media/Glyphs';
 import { stateMeta } from '@/lib/entryState';
-import { KIND_CODE_WIDTH, kindMeta } from '@/lib/kinds';
 import { shortRel } from '@/lib/relTime';
 import type { Entry } from '@/types/cellar';
 
@@ -12,7 +12,7 @@ export type EntryVariant = 'line' | 'inbox' | 'hit';
 type EntryCardProps = {
   entry: Entry;
   variant?: EntryVariant;
-  /** The mono kind code in the left gutter. Off is a real setting, not a size. */
+  /** The kind glyph in the left gutter. Off is a real setting, not a size. */
   showCode?: boolean;
   /** Where it lives, for a list that spans projects — the inbox and search. */
   where?: string;
@@ -28,7 +28,7 @@ type EntryCardProps = {
  *
  * It is a *line*, not a tile: this app has no artwork, and a wall of thoughts
  * only stays readable if the text starts at the same x on every row. That is
- * what the fixed-width mono gutter buys — the codes are alignment first and
+ * what the fixed-width glyph gutter buys — the kind is alignment first and
  * information second.
  *
  * Memoized: it renders in every virtualized cell, and without this a filter
@@ -42,20 +42,19 @@ export const EntryCard = memo(function EntryCard({
   onPress,
   onFile,
 }: EntryCardProps) {
-  const kind = kindMeta(entry.kind);
   const settled = stateMeta(entry.state).settled;
   const grown = entry.lines.length;
 
   return (
     <View className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}>
       {showCode && (
-        <Text
-          className="pt-0.5 font-mono text-[11px] text-muted-foreground"
-          style={{ width: KIND_CODE_WIDTH * 7.5 }}
-          numberOfLines={1}
+        <View
+          accessibilityLabel={kindLabel(entry.kind)}
+          className="pt-0.5"
+          style={{ width: KIND_GUTTER }}
         >
-          {kind.code}
-        </Text>
+          <KindGlyph kind={entry.kind} />
+        </View>
       )}
 
       <Pressable

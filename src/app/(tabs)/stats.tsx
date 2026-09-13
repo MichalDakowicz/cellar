@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { KindGlyph } from '@/components/media/Glyphs';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline } from '@/components/ui/controls';
@@ -62,8 +63,11 @@ export default function StatsScreen() {
               <View className="mt-3.5 gap-3">
                 {stats.kindBars.map((bar) => (
                   <View key={bar.kind}>
-                    <View className="flex-row items-baseline justify-between gap-2.5">
-                      <Text className="text-sm font-semibold text-foreground">{bar.kind}</Text>
+                    <View className="flex-row items-center justify-between gap-2.5">
+                      <View className="flex-row items-center gap-2">
+                        <KindGlyph kind={bar.kind} size={13} />
+                        <Text className="text-sm font-semibold text-foreground">{bar.kind}</Text>
+                      </View>
                       <Text className="text-xs text-muted-foreground">{bar.count}</Text>
                     </View>
                     <View className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary">

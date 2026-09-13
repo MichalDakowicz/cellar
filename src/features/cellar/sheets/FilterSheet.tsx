@@ -1,10 +1,10 @@
 import { View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
+import { kindChips } from '@/components/cellar/kindChips';
 import { Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { ENTRY_STATES } from '@/lib/entryState';
-import { KINDS } from '@/lib/kinds';
 import { useEntryFilter } from '@/store/cellarPrefs';
 import type { EntryState, Kind } from '@/types/cellar';
 
@@ -34,7 +34,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
         <Overline>kind</Overline>
         <ChipWrap
           label="kind"
-          options={KINDS.map((kind) => ({ value: kind.value, label: kind.label }))}
+          options={kindChips(filter.kinds)}
           selected={filter.kinds}
           onToggle={(kind: Kind) => toggleKind(kind)}
         />
