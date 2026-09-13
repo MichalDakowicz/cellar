@@ -37,7 +37,7 @@ Structure rules (they are why the siblings are maintainable):
   `EntryList`. No screen renders a row of its own — this is the rule PING.md §13 calls
   hard, and it is the one that keeps a wall of one-line text readable.
 
-The design language is `../design-language/PING.md`. Colour tokens, type scale, spacing,
+The design language is `../.design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —
 do not invent a value it does not define.
 

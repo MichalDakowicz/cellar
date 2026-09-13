@@ -54,10 +54,3 @@ Three levels, and they are the whole idea: **shelf → project → entry.**
 | Web build      | `npm run build:web`             |
 | Deploy web     | `npm run deploy:web`            |
 | App icons      | `npm run icons`                 |
-
-## The design language
-
-Cellar is the fifth implementation of [Ping](../design-language/PING.md) — dark near-black
-ground, one accent, no top bar, three floating glass nav islands at the bottom. Its accent
-is slate `#64748B`, the quietest in the family on purpose: the other four sit on artwork
-and have to compete with it, and Cellar is text on a dark ground all the way down.
