@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { ChevronDown, Search } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { ProjectGrid } from '@/components/cellar/ProjectGrid';
+import { ProjectList } from '@/components/cellar/ProjectList';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
@@ -25,6 +25,7 @@ export default function ShelfScreen() {
   const router = useRouter();
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
   const openNewProject = useCellarSheets((state) => state.newProject);
+  const openEditProject = useCellarSheets((state) => state.editProject);
   const navBarSpace = useNavBarSpace();
 
   if (shelf.error) return <ErrorState message={readError(shelf.error)} onRetry={shelf.refetch} />;
@@ -32,7 +33,7 @@ export default function ShelfScreen() {
   return (
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
       <ScreenTop />
-      <ContentShell maxWidth={MAX_W.grid}>
+      <ContentShell maxWidth={MAX_W.text}>
         <View className="px-4">
           <View className="flex-row items-baseline justify-between gap-3">
             <Pressable
@@ -67,11 +68,15 @@ export default function ShelfScreen() {
             ) : shelf.tiles.length === 0 ? (
               <EmptyState
                 title="no projects on this shelf"
-                body="tap the folder on the left of the nav bar to start one, or switch shelves above."
+                body="tap the folder on the left of the nav bar to start one, or tap the shelf name to switch shelves."
                 action={{ label: 'new project', onPress: () => openNewProject?.(null) }}
               />
             ) : (
-              <ProjectGrid projects={shelf.tiles} onPress={(id) => router.navigate(`/project/${id}`)} />
+              <ProjectList
+                projects={shelf.tiles}
+                onPress={(id) => router.navigate(`/project/${id}`)}
+                onEdit={(id) => openEditProject?.(id)}
+              />
             )}
           </View>
         </View>

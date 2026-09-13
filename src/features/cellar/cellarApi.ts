@@ -130,6 +130,32 @@ export async function createProject(
   return normalizeProject(data as ProjectRow);
 }
 
+export async function renameShelf(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from('cellar_shelves').update({ name }).eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Projects cascade with the shelf, and their entries then fall to the inbox
+ * through `project_id`'s own `on delete set null` — Postgres chains the two, so
+ * one delete here loses a container and nothing that was in it.
+ */
+export async function deleteShelf(id: string): Promise<void> {
+  const { error } = await supabase.from('cellar_shelves').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function renameProject(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ name }).eq('id', id);
+  if (error) throw error;
+}
+
+/** Moves a project to another shelf. The entries do not move — they are the project's. */
+export async function moveProject(id: string, shelfId: string): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ shelf_id: shelfId }).eq('id', id);
+  if (error) throw error;
+}
+
 export async function deleteProject(id: string): Promise<void> {
   // The entries survive: `project_id` is `on delete set null`, so they land
   // back in the inbox rather than going with the project.

@@ -108,6 +108,10 @@ type SheetHandles = {
   fileUnder: ((entryId: string) => void) | null;
   inboxSort: (() => void) | null;
   statsScope: (() => void) | null;
+  /** Rename, move or delete one project. */
+  editProject: ((projectId: string) => void) | null;
+  /** Rename or delete one shelf. */
+  editShelf: ((shelfId: string) => void) | null;
   register: (handles: Partial<Omit<SheetHandles, 'register'>>) => void;
 };
 
@@ -118,5 +122,7 @@ export const useCellarSheets = create<SheetHandles>((set) => ({
   fileUnder: null,
   inboxSort: null,
   statsScope: null,
+  editProject: null,
+  editShelf: null,
   register: (handles) => set(handles),
 }));
