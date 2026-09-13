@@ -195,7 +195,7 @@ asking:
 npm run deploy:web        # = expo export -p web --output-dir dist --clear && firebase deploy --only hosting
 ```
 
-- Firebase project is `cellar-dump` (`.firebaserc`, gitignored); hosting serves `dist/`
+- Firebase project is `cellar-stash` (`.firebaserc`, gitignored); hosting serves `dist/`
   with an SPA rewrite to `/index.html` (`firebase.json`). `dist/` is gitignored — never
   commit build output.
 - Requires an authenticated Firebase CLI. If it fails on auth, stop and tell the user to
