@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import type { EntryListItem } from '@/components/cellar/EntryList';
 import { useCellar } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
-import { applyFilter, countLive, groupByDay, groupByKind, hasFilter } from '@/lib/entryGroups';
+import { applyFilter, countLive, groupByDay, groupByKind, hasFilter, tallyKinds } from '@/lib/entryGroups';
+import { ENTRY_STATES } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs, useEntryFilter } from '@/store/cellarPrefs';
@@ -33,6 +34,28 @@ export function useProjectScreen(projectId: string | undefined) {
     [entries, projectId],
   );
 
+  const live = useMemo(() => all.filter((entry) => !entry.archived), [all]);
+
+  // The desktop rail's two blocks. Derived here rather than in the route,
+  // because a screen is a composition (PING.md §13) — and they are the same
+  // numbers the meta line quotes, so they cannot disagree with it.
+  const stateCounts = useMemo(
+    () =>
+      ENTRY_STATES.map((state) => ({
+        value: state.value,
+        label: state.label,
+        color: state.color,
+        count: live.filter((entry) => entry.state === state.value).length,
+      })),
+    [live],
+  );
+
+  const kindBars = useMemo(() => {
+    const tallies = tallyKinds(live);
+    const top = Math.max(1, ...tallies.map((tally) => tally.count));
+    return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / top) * 100) }));
+  }, [live]);
+
   const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
   const items = useMemo(() => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)), [visible, view]);
   const archivedCount = all.filter((entry) => entry.archived).length;
@@ -52,7 +75,12 @@ export function useProjectScreen(projectId: string | undefined) {
     refetch,
     project,
     name: project?.name ?? 'project',
+    /** The tile's two letters, so the detail page wears the same mark as the grid. */
+    initials: (project?.name ?? '').trim().slice(0, 2).toLowerCase() || '··',
     meta,
+    stateCounts,
+    kindBars,
+    entryCount: live.length,
     view,
     setView,
     items,

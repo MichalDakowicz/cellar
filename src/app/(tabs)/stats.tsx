@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { KindGlyph } from '@/components/media/Glyphs';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline } from '@/components/ui/controls';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
@@ -41,7 +42,10 @@ export default function StatsScreen() {
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.detail}>
         <View className={gutter}>
-          <Text className="text-2xl font-bold tracking-tight text-foreground">what you dump</Text>
+          <View className="flex-row items-center justify-between gap-3">
+            <Text className="text-2xl font-bold tracking-tight text-foreground">what you dump</Text>
+            <ScreenAction />
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="narrow to a shelf"

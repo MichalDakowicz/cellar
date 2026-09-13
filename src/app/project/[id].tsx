@@ -1,32 +1,38 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Funnel, List, Rows3 } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
-import { ContentShell } from '@/components/layout/ContentShell';
+import { ProjectAside } from '@/components/cellar/ProjectAside';
+import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { AppChrome } from '@/components/layout/AppChrome';
+import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
-import { COLORS } from '@/theme/colors';
 
 /**
  * One project, in whichever of the two readings you left it in.
  *
- * This is a pushed route, so the nav island's left plate is Back and the
- * screen's own controls live top right: the view toggle, and the filter. The
- * filter belongs here rather than on the bar because it narrows *this* project
- * and nothing else — a filter on a global control that only affects one screen
- * is a filter you forget is on.
+ * Two shapes. On a phone the whole screen is the list, and the things that act
+ * on it — the filter, the archived toggle, Back — are a sheet, a line of text
+ * and the nav island, because that is all the room there is.
+ *
+ * On desktop the list is a column and a rail beside it carries what the phone
+ * has to hide: where the project stands by state, what it is made of by kind,
+ * the filter *open* rather than behind a funnel, and the rename/move/delete the
+ * phone reaches through the shelf. The heading grows the tile's own mark so the
+ * page is recognisably this project rather than a list of sentences.
  */
 export default function ProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const project = useProjectScreen(id);
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
+  const openEditProject = useCellarSheets((state) => state.editProject);
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const isDesktop = useIsDesktop();
@@ -34,85 +40,70 @@ export default function ProjectScreen() {
   if (project.error) return <ErrorState message={readError(project.error)} onRetry={project.refetch} />;
   if (project.loading) return <LoadingState label="opening the project" />;
 
+  const list = (
+    <EntryList
+      items={project.items}
+      showCode={project.showCodes}
+      onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+      header={isDesktop ? undefined : <PhoneHeader project={project} gutter={gutter} onFilter={() => openFilter?.()} />}
+      empty={
+        project.emptyKind === 'filtered'
+          ? {
+              title: 'nothing matches',
+              body: 'loosen a kind or clear the state to see the rest of this project.',
+              action: isDesktop ? undefined : { label: 'open the filter', onPress: () => openFilter?.() },
+            }
+          : {
+              title: 'nothing in here yet',
+              body: isDesktop
+                ? 'press n and pick this project on the capture screen.'
+                : 'tap + in the nav bar and pick this project on the capture screen.',
+            }
+      }
+    />
+  );
+
   return (
     <View className="flex-1 bg-background">
       <View className="flex-1" style={{ marginLeft: sidebar }}>
-        <ContentShell maxWidth={MAX_W.detail} fill>
-          <EntryList
-            items={project.items}
-            showCode={project.showCodes}
-            onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-            header={
-              <View>
-                <ScreenTop />
-                <View className={`flex-row items-end justify-between gap-3 pb-2 ${gutter}`}>
-                  <View className="min-w-0 flex-1">
-                    <Text className="text-2xl font-bold leading-tight tracking-tight text-foreground" numberOfLines={2}>
-                      {project.name}
-                    </Text>
-                    <Text className="mt-1 text-xs text-muted-foreground" numberOfLines={1}>
-                      {project.meta}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center gap-1 rounded-lg bg-secondary p-[3px]">
-                    <Segment
-                      label="grouped by kind"
-                      active={project.view === 'grouped'}
-                      onPress={() => project.setView('grouped')}
-                    >
-                      <Rows3
-                        size={16}
-                        color={project.view === 'grouped' ? COLORS.foreground : COLORS.muted}
-                        strokeWidth={2}
-                      />
-                    </Segment>
-                    <Segment
-                      label="one stream"
-                      active={project.view === 'stream'}
-                      onPress={() => project.setView('stream')}
-                    >
-                      <List
-                        size={16}
-                        color={project.view === 'stream' ? COLORS.foreground : COLORS.muted}
-                        strokeWidth={2}
-                      />
-                    </Segment>
-                    <Segment label="filter" active={project.filtered} onPress={() => openFilter?.()}>
-                      <Funnel size={16} color={project.filtered ? COLORS.accent : COLORS.muted} strokeWidth={2} />
-                    </Segment>
-                  </View>
-                </View>
-
-                {project.archivedCount > 0 && (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`${project.showArchived ? 'hide' : 'show'} archived`}
-                    onPress={project.toggleArchived}
-                    className={`pb-1 pt-2 active:opacity-80 ${gutter}`}
-                  >
-                    <Text className="text-xs font-semibold text-muted-foreground">
-                      {project.showArchived ? 'hide' : 'show'} {project.archivedCount} archived
-                    </Text>
-                  </Pressable>
-                )}
+        <ContentShell maxWidth={MAX_W.grid} fill>
+          {isDesktop ? (
+            <View className="flex-1">
+              <ScreenTop />
+              {/* Back sits above the title, where a browser user looks for it,
+                  rather than in the sidebar a screen-width away. */}
+              <View className={`flex-row pb-3 ${gutter}`}>
+                <ScreenAction />
               </View>
-            }
-            empty={
-              project.emptyKind === 'filtered'
-                ? {
-                    title: 'nothing matches',
-                    body: 'loosen a kind or clear the state to see the rest of this project.',
-                    action: { label: 'open the filter', onPress: () => openFilter?.() },
-                  }
-                : {
-                    title: 'nothing in here yet',
-                    body: isDesktop
-                      ? 'press n and pick this project on the capture screen.'
-                      : 'tap + in the nav bar and pick this project on the capture screen.',
-                  }
-            }
-          />
+              <View className={`pb-5 ${gutter}`}>
+                <ProjectHeader
+                  name={project.name}
+                  meta={project.meta}
+                  initials={project.initials}
+                  view={project.view}
+                  onView={project.setView}
+                  filtered={project.filtered}
+                  large
+                />
+              </View>
+
+              <View className="flex-1 flex-row">
+                <View className="min-w-0 flex-1">{list}</View>
+                <View className={`w-[300px] border-l border-border/60 pl-6 pr-8 pt-1`}>
+                  <ProjectAside
+                    stateCounts={project.stateCounts}
+                    kindBars={project.kindBars}
+                    archivedCount={project.archivedCount}
+                    showArchived={project.showArchived}
+                    onToggleArchived={project.toggleArchived}
+                    onEdit={() => project.project && openEditProject?.(project.project.id)}
+                  />
+                </View>
+              </View>
+            </View>
+          ) : (
+            list
+          )}
         </ContentShell>
       </View>
 
@@ -124,27 +115,43 @@ export default function ProjectScreen() {
   );
 }
 
-function Segment({
-  label,
-  active,
-  onPress,
-  children,
+/** The phone's list header: heading, the two readings, the funnel, archived. */
+function PhoneHeader({
+  project,
+  gutter,
+  onFilter,
 }: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  children: React.ReactNode;
+  project: ReturnType<typeof useProjectScreen>;
+  gutter: string;
+  onFilter: () => void;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: active }}
-      hitSlop={4}
-      onPress={onPress}
-      className={['h-[30px] w-[34px] items-center justify-center rounded-md', active ? 'bg-white/10' : ''].join(' ')}
-    >
-      {children}
-    </Pressable>
+    <View>
+      <ScreenTop />
+      <View className={`pb-2 ${gutter}`}>
+        <ProjectHeader
+          name={project.name}
+          meta={project.meta}
+          initials={project.initials}
+          view={project.view}
+          onView={project.setView}
+          filtered={project.filtered}
+          onFilter={onFilter}
+        />
+      </View>
+
+      {project.archivedCount > 0 && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${project.showArchived ? 'hide' : 'show'} archived`}
+          onPress={project.toggleArchived}
+          className={`pb-1 pt-2 active:opacity-80 ${gutter}`}
+        >
+          <Text className="text-xs font-semibold text-muted-foreground">
+            {project.showArchived ? 'hide' : 'show'} {project.archivedCount} archived
+          </Text>
+        </Pressable>
+      )}
+    </View>
   );
 }

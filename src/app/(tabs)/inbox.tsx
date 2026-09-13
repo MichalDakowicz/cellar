@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useInboxScreen } from '@/features/cellar/useInboxScreen';
@@ -42,9 +43,12 @@ export default function InboxScreen() {
               <View>
                 <ScreenTop />
                 <View className={`pb-4 ${gutter}`}>
-                  <View className="flex-row items-baseline justify-between gap-3">
+                  <View className="flex-row items-center justify-between gap-3">
                     <Text className="text-2xl font-bold tracking-tight text-foreground">inbox</Text>
-                    <Text className="text-xs text-muted-foreground">{inbox.meta}</Text>
+                    <View className="flex-row items-center gap-3">
+                      <Text className="text-xs text-muted-foreground">{inbox.meta}</Text>
+                      <ScreenAction />
+                    </View>
                   </View>
                   <Text className="mt-2 text-sm text-muted-foreground">
                     everything you dumped without picking a project. file it or leave it — {inbox.sortLabel}.

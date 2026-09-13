@@ -27,6 +27,9 @@
 - Web: press 1 to 5 for the destinations, n for the capture field and / to search
 - Web: rows, tiles, chips and the nav bar answer the mouse, and a tile shows its edit dot on hover
 - Web: a sheet opens as a dialog in the middle of a wide window instead of off the bottom edge
-- Web: a wide window gets a sidebar — the destinations by name, the shelf, and the screen's action
+- Web: a wide window gets a sidebar — the destinations by name with their keys, and the shelf
 - Web: the capture screen shows what you have caught lately in a column beside the field
 - Web: every screen uses the width of the window instead of a phone column down the middle
+- Web: a project opens with its state, its kinds and the filter beside the entries, not behind a funnel
+- Web: a project page wears its own mark, and back sits above the title
+- Web: the screen's action sits beside the heading it acts on instead of across the window

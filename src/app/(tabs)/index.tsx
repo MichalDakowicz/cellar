@@ -8,6 +8,7 @@ import { kindChips } from '@/components/cellar/kindChips';
 import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { ErrorState } from '@/components/ui/states';
@@ -71,11 +72,14 @@ export default function DumpScreen() {
       <ContentShell maxWidth={isDesktop ? MAX_W.detail : MAX_W.text}>
         <View className={isDesktop ? `flex-row items-start gap-10 ${gutter}` : undefined}>
         <View className={isDesktop ? 'min-w-0 flex-1' : gutter}>
-          <View className="flex-row items-baseline justify-between gap-3">
+          <View className="flex-row items-center justify-between gap-3">
             <Text className="text-2xl font-bold tracking-tight text-foreground">dump</Text>
-            <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-              {dump.todayLine}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                {dump.todayLine}
+              </Text>
+              <ScreenAction />
+            </View>
           </View>
 
           <TextInput

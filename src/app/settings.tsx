@@ -6,6 +6,7 @@ import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
@@ -49,6 +50,9 @@ export default function Settings() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
+          <View className={`flex-row pt-4 ${gutter}`}>
+            <ScreenAction />
+          </View>
           <View className={`pt-4 ${gutter}`}>
             <Text className="text-2xl font-bold tracking-tight text-foreground">settings</Text>
           </View>

@@ -9,6 +9,7 @@ import { KindGlyph } from '@/components/media/Glyphs';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
@@ -64,6 +65,9 @@ export default function EntryScreen() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
+          <View className={`flex-row pb-3 ${gutter}`}>
+            <ScreenAction />
+          </View>
           <View className={gutter}>
             <View className="flex-row items-center gap-2">
               <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />

@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline } from '@/components/ui/controls';
 import { LoadingState } from '@/components/ui/states';
@@ -70,6 +71,7 @@ export default function ProfileScreen() {
               one ping account · radar · lidar · sonar · pulsar · cellar
             </Text>
           </View>
+          <ScreenAction />
         </View>
 
         <View className={`my-6 flex-row flex-wrap gap-y-6 border-y border-border/50 py-7 ${gutter}`}>

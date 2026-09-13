@@ -2,7 +2,6 @@ import { usePathname, useRouter } from 'expo-router';
 import { ChevronDown, Settings } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { useNavAction } from '@/components/layout/navActions';
 import { activeTabFor, NAV_DESTINATIONS, type NavDestination } from '@/components/layout/navDestinations';
 import { Overline } from '@/components/ui/controls';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -21,13 +20,14 @@ import { COLORS } from '@/theme/colors';
  * the bottom of the screen and a glyph is all that fits. A mouse has the
  * opposite constraints: 232px of permanent left margin costs nothing on a
  * window this wide, and a pointer user should not have to learn five glyphs or
- * hover a plate to find out what the screen's one action is. So everything the
- * islands compress is spelled out here — the destination names, the shortcut
- * digits, the shelf you are standing in front of, and the contextual action as
- * a labelled button rather than an unexplained icon.
+ * hover a plate to find out where a glyph goes. So what the islands compress is
+ * spelled out here — the destination names, their shortcut digits, and the
+ * shelf you are standing in front of.
  *
- * It reads the same two sources the islands do (NAV_DESTINATIONS, useNavAction)
- * so the two can never disagree about what the current screen's action is.
+ * It carries navigation and nothing else. The screen's contextual action is
+ * *not* here: on a window this wide the sidebar is a screen's width away from
+ * the content it would act on, so that button lives on the page itself
+ * (components/layout/ScreenAction) where the thing it acts on is.
  */
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -39,7 +39,6 @@ export function DesktopSidebar() {
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
 
   const activeTab = activeTabFor(pathname);
-  const action = useNavAction(pathname, activeTab);
   const unfiled = useUnfiledCount();
 
   return (
@@ -83,28 +82,6 @@ export function DesktopSidebar() {
           ))}
         </View>
 
-        {/* The left island's action, with its name on it. */}
-        <View className="mt-6 px-3">
-          <Overline>on this screen</Overline>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={action.label}
-            onPress={action.onPress}
-            className={[
-              'mt-2 flex-row items-center gap-2.5 rounded-lg px-3 py-2.5 active:opacity-80',
-              action.active ? 'bg-primary/15' : 'bg-secondary',
-            ].join(' ')}
-          >
-            <action.Icon size={16} color={action.active ? COLORS.accent : COLORS.foreground} strokeWidth={2.2} />
-            <Text
-              className={['min-w-0 flex-1 text-xs font-semibold', action.active ? 'text-primary' : 'text-foreground'].join(' ')}
-              numberOfLines={2}
-            >
-              {action.label}
-            </Text>
-            {action.badge > 0 && <Badge count={action.badge} />}
-          </Pressable>
-        </View>
       </ScrollView>
 
       {/* Two Pressables side by side, never one inside the other: on web a

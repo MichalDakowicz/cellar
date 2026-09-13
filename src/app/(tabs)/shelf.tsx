@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ProjectGrid } from '@/components/cellar/ProjectGrid';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useShelfScreen } from '@/features/cellar/useShelfScreen';
@@ -54,9 +55,12 @@ export default function ShelfScreen() {
               </Text>
               <ChevronDown size={18} color={COLORS.muted} strokeWidth={2.2} />
             </Pressable>
-            <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-              {shelf.meta}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                {shelf.meta}
+              </Text>
+              <ScreenAction />
+            </View>
           </View>
 
           <Pressable

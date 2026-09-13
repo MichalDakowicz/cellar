@@ -5,6 +5,7 @@ import { Text, TextInput, View } from 'react-native';
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { useCellar } from '@/features/cellar/useCellar';
@@ -61,6 +62,9 @@ export default function SearchScreen() {
             header={
               <View>
                 <ScreenTop />
+                <View className={`flex-row pb-3 ${gutter}`}>
+                  <ScreenAction />
+                </View>
                 <View className={`pb-2 ${gutter}`}>
                   <TextInput
                     className="h-[42px] rounded-lg bg-secondary px-3.5 text-foreground"
