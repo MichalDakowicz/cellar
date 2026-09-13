@@ -12,7 +12,7 @@
  * array rather than a body field.
  */
 
-export type Kind = 'idea' | 'addition' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
+export type Kind = 'idea' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
 
 export type EntryState = 'open' | 'doing' | 'done' | 'dropped';
 

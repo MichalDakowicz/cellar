@@ -82,7 +82,7 @@ create index if not exists cellar_projects_user_idx  on public.cellar_projects (
 -- get it out of the way.
 --
 -- `kind` and `state` are text, and the stored value is the display string
--- (PING.md §2.3). Not enums: adding a ninth kind should not need a migration,
+-- (PING.md §2.3). Not enums: adding an eighth kind should not need a migration,
 -- and a mapping table back to display text is a second source of truth.
 -- ----------------------------------------------------------------------------
 create table if not exists public.cellar_entries (
@@ -90,7 +90,7 @@ create table if not exists public.cellar_entries (
   user_id    uuid not null references auth.users(id) on delete cascade,
   project_id uuid references public.cellar_projects(id) on delete set null,
   text       text not null,
-  -- idea | addition | removal | glitch | question | research | copy | design
+  -- idea | removal | glitch | question | research | copy | design
   kind       text not null default 'idea',
   -- open | doing | done | dropped
   state      text not null default 'open',
@@ -259,4 +259,13 @@ end $$;
 -- Everything above is skipped on a live database — `create table if not exists`
 -- does not reconcile columns. A new column goes here, and only here.
 -- ============================================================================
--- (none yet)
+
+-- 2026-09-13 — "addition" folded into "idea".
+--
+-- The two named the same act: a thing you want that is not there yet. Two chips
+-- for one thought is a decision you have to make on every drop, and the answer
+-- never mattered. `kind` is free text, so an un-migrated row would keep reading
+-- back as 'addition' and normalizeEntry would show it as 'idea' without ever
+-- fixing it. Idempotent: a second run matches nothing.
+update public.cellar_entries set kind = 'idea' where kind = 'addition';
+update public.cellar_settings set default_kind = 'idea' where default_kind = 'addition';

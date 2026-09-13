@@ -30,6 +30,12 @@ describe('normalizeCellarSettings', () => {
     expect(normalizeCellarSettings(row({ default_kind: 'sketch' })).defaultKind).toBe('idea');
   });
 
+  // 'addition' was folded into 'idea'. A row written before that still says
+  // 'addition', and reading it back as anything but idea is a blank chip.
+  it('reads a retired kind as idea', () => {
+    expect(normalizeCellarSettings(row({ default_kind: 'addition' })).defaultKind).toBe('idea');
+  });
+
   it('treats anything but stream as grouped', () => {
     expect(normalizeCellarSettings(row({ default_view: 'nonsense' })).defaultView).toBe('grouped');
     expect(normalizeCellarSettings(row({ default_view: 'stream' })).defaultView).toBe('stream');
@@ -45,7 +51,7 @@ describe('cellarSettingsToRow', () => {
     expect(cellarSettingsToRow({})).toEqual({});
   });
 
-  it('drops a kind that is not one of the eight', () => {
+  it('drops a kind that is not one of the seven', () => {
     expect(cellarSettingsToRow({ defaultKind: 'sketch' as never })).toEqual({});
   });
 

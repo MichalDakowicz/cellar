@@ -1,12 +1,12 @@
 import type { Kind } from '@/types/cellar';
 
 /**
- * The eight kinds of thought this app catches, and the mono code each one wears
+ * The seven kinds of thought this app catches, and the mono code each one wears
  * in the gutter of a list.
  *
  * The codes are monochrome and they are the whole reason a wall of one-line
- * entries scans. Eight colours would be a legend you have to learn, and would
- * also spend the accent eight times over on a screen where it is supposed to
+ * entries scans. Seven colours would be a legend you have to learn, and would
+ * also spend the accent seven times over on a screen where it is supposed to
  * mark exactly one live thing (PING.md §1.2). A fixed-width column of `bug` /
  * `idea` / `dsgn` reads like a ledger instead.
  *
@@ -21,8 +21,10 @@ export type KindMeta = {
 };
 
 export const KINDS: KindMeta[] = [
+  // "addition" used to sit between idea and removal. It was the same act as
+  // idea — a thing you want that is not there yet — and two chips for one
+  // thought is a decision you have to make every time you dump something.
   { value: 'idea', label: 'idea', code: 'idea' },
-  { value: 'addition', label: 'addition', code: 'add' },
   { value: 'removal', label: 'removal', code: 'rm' },
   { value: 'glitch', label: 'glitch', code: 'bug' },
   { value: 'question', label: 'question', code: 'q' },

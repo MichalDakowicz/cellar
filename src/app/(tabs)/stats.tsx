@@ -14,7 +14,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
 /**
  * What you dump, and where.
  *
- * Three figures, the eight kinds as bars, and the projects you cannot stop
+ * Three figures, the seven kinds as bars, and the projects you cannot stop
  * thinking about. The scope — one shelf, or every shelf — is the left island's
  * action, and it is named on the page too so the figures are never ambiguous
  * about what they are counting.
