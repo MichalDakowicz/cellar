@@ -11,7 +11,7 @@ import { useCellar } from '@/features/cellar/useCellar';
 import { Avatar } from '@/features/friends/Avatar';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { useProfile } from '@/hooks/useProfile';
-import { MAX_W, useGutter, useHover, webTransition } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useHover, webTransition, useSidebarSpace } from '@/hooks/useResponsive';
 import { countLive } from '@/lib/entryGroups';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
@@ -33,6 +33,7 @@ export default function ProfileScreen() {
   const { shelves, projects, entries } = useCellar();
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
   const settingsHover = useHover();
 
   if (loading) {
@@ -52,7 +53,11 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
+    <ScrollView
+      className="flex-1 bg-background"
+      style={{ marginLeft: sidebar }}
+      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+    >
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.text}>
         <View className={`flex-row items-center gap-3 ${gutter}`}>

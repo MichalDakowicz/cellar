@@ -8,7 +8,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useShelfScreen } from '@/features/cellar/useShelfScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -28,11 +28,17 @@ export default function ShelfScreen() {
   const openEditProject = useCellarSheets((state) => state.editProject);
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
+  const isDesktop = useIsDesktop();
 
   if (shelf.error) return <ErrorState message={readError(shelf.error)} onRetry={shelf.refetch} />;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
+    <ScrollView
+      className="flex-1 bg-background"
+      style={{ marginLeft: sidebar }}
+      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+    >
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.grid}>
         <View className={gutter}>
@@ -69,7 +75,11 @@ export default function ShelfScreen() {
             ) : shelf.tiles.length === 0 ? (
               <EmptyState
                 title="no projects on this shelf"
-                body="tap the folder on the left of the nav bar to start one, or tap the shelf name to switch shelves."
+                body={
+                  isDesktop
+                    ? 'use new project in the sidebar to start one, or switch shelves at the top of it.'
+                    : 'tap the folder on the left of the nav bar to start one, or tap the shelf name to switch shelves.'
+                }
                 action={{ label: 'new project', onPress: () => openNewProject?.(null) }}
               />
             ) : (

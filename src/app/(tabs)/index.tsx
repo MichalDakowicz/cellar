@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
+import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -12,7 +13,7 @@ import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { ErrorState } from '@/components/ui/states';
 import { useDumpScreen } from '@/features/cellar/useDumpScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, useIsDesktop, webFocusRing } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop, webFocusRing, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCaptureFocus, useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -30,6 +31,7 @@ export default function DumpScreen() {
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
   const isDesktop = useIsDesktop();
   const field = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
@@ -50,6 +52,7 @@ export default function DumpScreen() {
   return (
     <ScrollView
       className="flex-1 bg-background"
+      style={{ marginLeft: sidebar }}
       contentContainerStyle={{
         paddingBottom: navBarSpace + 8,
         // A capture screen is short, and on a desktop window that leaves the
@@ -62,8 +65,12 @@ export default function DumpScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <ScreenTop />
-      <ContentShell maxWidth={MAX_W.text}>
-        <View className={gutter}>
+      {/* On desktop the field and the pile sit side by side: the window is wide
+          enough to show what you have been catching while you catch the next
+          one, and a phone never is. */}
+      <ContentShell maxWidth={isDesktop ? MAX_W.detail : MAX_W.text}>
+        <View className={isDesktop ? `flex-row items-start gap-10 ${gutter}` : undefined}>
+        <View className={isDesktop ? 'min-w-0 flex-1' : gutter}>
           <View className="flex-row items-baseline justify-between gap-3">
             <Text className="text-2xl font-bold tracking-tight text-foreground">dump</Text>
             <Text className="text-xs text-muted-foreground" numberOfLines={1}>
@@ -138,7 +145,18 @@ export default function DumpScreen() {
           <Text className="mt-2 text-center text-xs text-muted-foreground">{dump.keyHint}</Text>
         </View>
 
-        {dump.justDropped.length > 0 && (
+        {isDesktop && (
+          <View style={{ width: 340 }}>
+            <DumpAside
+              entries={dump.recent}
+              showCode={dump.showCodes}
+              onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+            />
+          </View>
+        )}
+        </View>
+
+        {!isDesktop && dump.justDropped.length > 0 && (
           <View className={`mt-7 border-y border-border/50 py-4 ${gutter}`}>
             <Overline>just dropped</Overline>
             <View className="mt-1.5">

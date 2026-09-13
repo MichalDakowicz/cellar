@@ -5,7 +5,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { ContentShell } from '@/components/layout/ContentShell';
-import { NavIslands } from '@/components/layout/NavIslands';
+import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
@@ -13,7 +13,7 @@ import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
 import type { ProjectViewPref } from '@/lib/cellarSettings';
 import type { ThemePref } from '@/lib/userSettings';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -35,13 +35,18 @@ export default function Settings() {
   const { say } = useToast();
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
   const [signingOut, setSigningOut] = useState(false);
 
   const version = Constants.expoConfig?.version ?? '0.1.0';
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView contentContainerStyle={{ paddingBottom: navBarSpace }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ marginLeft: sidebar }}
+        contentContainerStyle={{ paddingBottom: navBarSpace }}
+        showsVerticalScrollIndicator={false}
+      >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
           <View className={`pt-4 ${gutter}`}>
@@ -160,10 +165,10 @@ export default function Settings() {
         onDismiss={() => setSigningOut(false)}
       />
 
-      {/* Pushed out of the tabs, so the navigator's own bar is gone — the screen
-          mounts it itself, which is also where the left island turns into Back
-          (components/layout/navActions). */}
-      <NavIslands />
+      {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
+          screen mounts it itself, which is also where the phone build's left
+          island turns into Back (components/layout/navActions). */}
+      <AppChrome />
     </View>
   );
 }

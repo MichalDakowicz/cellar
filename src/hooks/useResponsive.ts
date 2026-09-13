@@ -54,6 +54,15 @@ export function useHover() {
 }
 
 /**
+ * Horizontal space a screen must leave on its left for the desktop sidebar.
+ * Zero on phone, where navigation is the floating islands and the mirror of
+ * this is `useNavBarSpace` at the bottom.
+ */
+export function useSidebarSpace(): number {
+  return useIsDesktop() ? SIDEBAR_WIDTH : 0;
+}
+
+/**
  * The screen gutter: `px-4` on phone, `px-8` once the desktop shell is on
  * (PING.md §6). A class rather than a number because every gutter in this app
  * is a NativeWind class on the block it pads, not a padding on the shell —

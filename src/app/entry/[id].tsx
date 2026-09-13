@@ -8,14 +8,14 @@ import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
-import { NavIslands } from '@/components/layout/NavIslands';
+import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { EmptyState } from '@/components/ui/states';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, webFocusRing } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, webFocusRing, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 
@@ -34,6 +34,8 @@ export default function EntryScreen() {
   const fileUnder = useCellarSheets((state) => state.fileUnder);
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
+  const isDesktop = useIsDesktop();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [lineFocused, setLineFocused] = useState(false);
 
@@ -43,7 +45,11 @@ export default function EntryScreen() {
         <ScreenTop />
         <EmptyState
           title="that entry is gone"
-          body="it was deleted, or it never made it here. tap back on the left of the nav bar."
+          body={
+            isDesktop
+              ? 'it was deleted, or it never made it here. use back in the sidebar.'
+              : 'it was deleted, or it never made it here. tap back on the left of the nav bar.'
+          }
         />
       </View>
     );
@@ -52,6 +58,7 @@ export default function EntryScreen() {
   return (
     <View className="flex-1 bg-background">
       <ScrollView
+        style={{ marginLeft: sidebar }}
         contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
         keyboardShouldPersistTaps="handled"
       >
@@ -190,10 +197,10 @@ export default function EntryScreen() {
         }}
       />
 
-      {/* Pushed out of the tabs, so the navigator's own bar is gone — the screen
-          mounts it itself, which is also where the left island turns into Back
-          (components/layout/navActions). */}
-      <NavIslands />
+      {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
+          screen mounts it itself, which is also where the phone build's left
+          island turns into Back (components/layout/navActions). */}
+      <AppChrome />
     </View>
   );
 }

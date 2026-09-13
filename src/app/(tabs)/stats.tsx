@@ -8,7 +8,7 @@ import { Overline } from '@/components/ui/controls';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useStatsScreen } from '@/features/cellar/useStatsScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, useHover, webTransition } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useHover, webTransition, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -27,12 +27,17 @@ export default function StatsScreen() {
   const openScope = useCellarSheets((state) => state.statsScope);
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  const sidebar = useSidebarSpace();
 
   if (stats.error) return <ErrorState message={readError(stats.error)} onRetry={stats.refetch} />;
   if (stats.loading) return <LoadingState label="counting the cellar" />;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
+    <ScrollView
+      className="flex-1 bg-background"
+      style={{ marginLeft: sidebar }}
+      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+    >
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.detail}>
         <View className={gutter}>

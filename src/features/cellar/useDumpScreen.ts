@@ -68,6 +68,20 @@ export function useDumpScreen() {
     [raw, submit],
   );
 
+  // The desktop column beside the field. The last few thoughts in the cellar,
+  // whichever project they landed in — the point is that a wide window can show
+  // you what you have been catching while you catch the next one, which is the
+  // one thing a phone has no room for.
+  const recent = useMemo(
+    () =>
+      entries
+        .filter((entry) => !entry.archived)
+        .slice()
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 12),
+    [entries],
+  );
+
   const justDropped = useMemo(
     () => justIds.map((id) => entries.find((entry) => entry.id === id)).filter((entry): entry is Entry => !!entry),
     [justIds, entries],
@@ -100,6 +114,7 @@ export function useDumpScreen() {
       ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
     ],
     justDropped,
+    recent,
     showCodes: settings.showCodes,
   };
 }
