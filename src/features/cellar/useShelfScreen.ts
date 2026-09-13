@@ -1,0 +1,51 @@
+import { useMemo } from 'react';
+
+import type { ProjectTile } from '@/components/cellar/ProjectCard';
+import { useCellar, useCurrentShelf } from '@/features/cellar/useCellar';
+import { countLive } from '@/lib/entryGroups';
+import { plural } from '@/lib/utils';
+
+/**
+ * The shelf: every project on the shelf you are standing in front of, and the
+ * counts that tell you which one is on fire.
+ *
+ * `liveCount` is the badge on the tile and it deliberately counts open *and*
+ * doing — "how much is still owed here" is one number, and splitting it into
+ * two badges makes a grid of tiles unreadable at a glance.
+ */
+export function useShelfScreen() {
+  const { shelves, projects, entries, loading, error, refetch } = useCellar();
+  const { shelf } = useCurrentShelf(shelves);
+
+  const tiles = useMemo<ProjectTile[]>(() => {
+    if (!shelf) return [];
+    return projects
+      .filter((project) => project.shelfId === shelf.id)
+      .map((project) => {
+        const mine = entries.filter((entry) => entry.projectId === project.id && !entry.archived);
+        return {
+          id: project.id,
+          name: project.name,
+          initials: project.name.trim().slice(0, 2).toLowerCase() || '··',
+          entryCount: mine.length,
+          liveCount: countLive(mine),
+          glitchCount: mine.filter((entry) => entry.kind === 'glitch').length,
+        };
+      });
+  }, [projects, entries, shelf]);
+
+  const shelfEntryCount = useMemo(() => {
+    const ids = new Set(tiles.map((tile) => tile.id));
+    return entries.filter((entry) => entry.projectId && ids.has(entry.projectId)).length;
+  }, [entries, tiles]);
+
+  return {
+    loading,
+    error,
+    refetch,
+    shelf,
+    shelfName: shelf?.name ?? 'cellar',
+    meta: `${plural(tiles.length, 'project')} · ${plural(shelfEntryCount, 'entry', 'entries')}`,
+    tiles,
+  };
+}
