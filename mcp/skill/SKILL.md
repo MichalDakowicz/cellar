@@ -32,6 +32,20 @@ cellar_orient  →  claim  →  work  →  append lines  →  finish
 Claim one entry at a time and finish it before claiming the next. A queue of half-claimed
 thoughts is worse than an untouched one.
 
+## The lookups, when you are not working anything
+
+Three slash commands sit beside this skill for the times you only want to see what is there.
+They are read-only and they do not claim:
+
+| command        | for                                                           |
+| -------------- | ------------------------------------------------------------- |
+| `/cellar-list` | what is open here, or in a named project, `all` or `inbox`     |
+| `/cellar-find` | search the thoughts and the lines under them, across projects  |
+| `/cellar-view` | one entry in full, by id prefix                                |
+
+They live in `mcp/skill/commands/` and install next to this file — `mcp/README.md` has the
+copy. Picking something up is still `pick up cellar entry <id>`, which lands back here.
+
 ## Ask instead of guessing
 
 `cellar_ask` puts a question on the entry and blocks it. **This is a correct outcome.** It

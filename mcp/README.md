@@ -137,6 +137,37 @@ and the shared `user_settings` as well; four other apps live in this database.
 shown once, stored as a hash, scoped to nothing else, and revocable from the phone in your
 pocket.
 
+## The skill and the lookups
+
+The tools are only half of it. `skill/SKILL.md` is the working agreement an agent reads
+before it touches a thought — the loop, when to ask instead of guessing, what each kind is
+asking for, and the voice its lines have to be written in. `skill/commands/` holds three
+slash commands for the other case, when you only want to look:
+
+| command        | for                                                           |
+| -------------- | ------------------------------------------------------------- |
+| `/cellar-list` | what is open here, or in a named project, `all` or `inbox`     |
+| `/cellar-find` | search the thoughts and the lines under them, across projects  |
+| `/cellar-view` | one entry in full, by id prefix                                |
+
+They are read-only on purpose. Nothing here claims an entry, because a lookup that quietly
+put your name on something would make the list lie about who is working what — starting a
+thought stays one line, `pick up cellar entry <id>`, which is what the app's copy button
+puts on your clipboard.
+
+Install both **user-wide, not per repo**. The server is registered in every repo you dump
+thoughts about, so a copy under one project's `.claude/` would leave the commands missing
+everywhere the cellar is actually read:
+
+```sh
+mkdir -p ~/.claude/skills/cellar ~/.claude/commands
+cp mcp/skill/SKILL.md      ~/.claude/skills/cellar/
+cp mcp/skill/commands/*.md ~/.claude/commands/
+```
+
+Copies, so re-copy after changing either side — the files here are the source and the ones
+under `~/.claude` are the install.
+
 ## Configuration
 
 | Variable                    | Default                          | For                                               |
