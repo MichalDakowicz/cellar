@@ -2,6 +2,10 @@
 
 ## 1.3.0 — Unreleased
 
+### Added
+
+- Stats: a spread line for where the cellar stands, open to dropped, with each state's share
+
 ### Changed
 
 - Web: the scrollbar matches the app instead of the browser default

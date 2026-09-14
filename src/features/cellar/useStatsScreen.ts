@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
 import { useCellar } from '@/features/cellar/useCellar';
-import { countLive, tallyKinds } from '@/lib/entryGroups';
+import { countLive, tallyKinds, tallyStates } from '@/lib/entryGroups';
+import { stateMeta } from '@/lib/entryState';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 
@@ -41,6 +42,17 @@ export function useStatsScreen() {
     return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / peak) * 100) }));
   }, [scoped]);
 
+  // The spread line. tallyStates already walks ENTRY_STATES, so the legend
+  // under the bar reads in the same order the bar is drawn in.
+  const stateSpread = useMemo(
+    () =>
+      tallyStates(scoped).map((tally) => {
+        const meta = stateMeta(tally.state);
+        return { value: tally.state, label: meta.label, color: meta.color, count: tally.count, pct: tally.pct };
+      }),
+    [scoped],
+  );
+
   const busiest = useMemo(
     () =>
       scopedProjects
@@ -71,6 +83,7 @@ export function useStatsScreen() {
     open: countLive(scoped),
     projectCount: scopedProjects.length,
     kindBars,
+    stateSpread,
     busiest,
     isEmpty: scoped.length === 0,
   };

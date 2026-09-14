@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { StateSpread } from '@/components/cellar/StateSpread';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -67,6 +68,13 @@ export default function StatsScreen() {
               <Figure label="total" value={stats.total} />
               <Figure label="open" value={stats.open} />
               <Figure label="projects" value={stats.projectCount} />
+            </View>
+
+            <View className={`pb-5 ${gutter}`}>
+              <Overline>where it stands</Overline>
+              <View className="mt-3.5">
+                <StateSpread rows={stats.stateSpread} />
+              </View>
             </View>
 
             <View className={`border-y border-border/50 py-4 ${gutter}`}>

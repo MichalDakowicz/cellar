@@ -1,4 +1,4 @@
-import { isLive } from '@/lib/entryState';
+import { ENTRY_STATES, isLive } from '@/lib/entryState';
 import { KINDS } from '@/lib/kinds';
 import type { Entry, EntryState, Kind } from '@/types/cellar';
 
@@ -84,6 +84,26 @@ export type KindTally = { kind: Kind; count: number };
 /** Every kind, including the ones at zero — a kind you never dump is information. */
 export function tallyKinds(entries: Entry[]): KindTally[] {
   return KINDS.map((meta) => ({ kind: meta.value, count: entries.filter((e) => e.kind === meta.value).length }));
+}
+
+export type StateTally = { state: EntryState; count: number; pct: number };
+
+/**
+ * Every state, including the ones at zero, with its share of the whole — the
+ * numbers behind the spread line on stats.
+ *
+ * `pct` is share of the total, not width against the biggest state the way the
+ * kind bars read: the five segments are one bar and have to add up to it. The
+ * rounding is per segment and can land a point either side of 100; a stacked
+ * bar drawn from percentages absorbs that, and a legend that reads 33/33/33 is
+ * the honest answer anyway.
+ */
+export function tallyStates(entries: Entry[]): StateTally[] {
+  const total = entries.length;
+  return ENTRY_STATES.map((meta) => {
+    const count = entries.filter((entry) => entry.state === meta.value).length;
+    return { state: meta.value, count, pct: total > 0 ? Math.round((count / total) * 100) : 0 };
+  });
 }
 
 export function countLive(entries: Entry[]): number {

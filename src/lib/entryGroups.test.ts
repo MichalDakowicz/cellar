@@ -8,7 +8,9 @@ import {
   NO_FILTER,
   searchEntries,
   tallyKinds,
+  tallyStates,
 } from '@/lib/entryGroups';
+import { ENTRY_STATES } from '@/lib/entryState';
 import { KINDS } from '@/lib/kinds';
 import type { Entry, EntryState, Kind } from '@/types/cellar';
 
@@ -103,6 +105,30 @@ describe('tallyKinds', () => {
   it('keeps kinds at zero — a kind you never dump is information', () => {
     expect(tallyKinds([entry({ kind: 'idea' })])).toHaveLength(KINDS.length);
     expect(tallyKinds([entry({ kind: 'idea' })]).find((t) => t.kind === 'copy')?.count).toBe(0);
+  });
+});
+
+describe('tallyStates', () => {
+  it('keeps every state, in the order the spread line draws them', () => {
+    const tallies = tallyStates([entry({ state: 'open' })]);
+    expect(tallies.map((t) => t.state)).toEqual(ENTRY_STATES.map((s) => s.value));
+    expect(tallies.find((t) => t.state === 'blocked')?.count).toBe(0);
+  });
+
+  it('reads pct as share of the whole, not against the biggest state', () => {
+    const entries = [
+      entry({ state: 'open' }),
+      entry({ state: 'open' }),
+      entry({ state: 'open' }),
+      entry({ state: 'done' }),
+    ];
+    const tallies = tallyStates(entries);
+    expect(tallies.find((t) => t.state === 'open')).toMatchObject({ count: 3, pct: 75 });
+    expect(tallies.find((t) => t.state === 'done')).toMatchObject({ count: 1, pct: 25 });
+  });
+
+  it('is all zeroes on an empty cellar rather than NaN', () => {
+    expect(tallyStates([]).every((t) => t.count === 0 && t.pct === 0)).toBe(true);
   });
 });
 
