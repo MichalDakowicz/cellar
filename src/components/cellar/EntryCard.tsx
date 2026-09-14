@@ -1,3 +1,4 @@
+import { Copy } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -21,6 +22,8 @@ type EntryCardProps = {
   onPress: (entry: Entry) => void;
   /** Presence of a handler is what shows the file affordance. */
   onFile?: (entry: Entry) => void;
+  /** Copies the line that starts this thought in an agent. Same rule. */
+  onCopy?: (entry: Entry) => void;
 };
 
 /**
@@ -43,6 +46,7 @@ export const EntryCard = memo(function EntryCard({
   where,
   onPress,
   onFile,
+  onCopy,
 }: EntryCardProps) {
   const settled = stateMeta(entry.state).settled;
   const grown = entry.lines.length;
@@ -105,6 +109,22 @@ export const EntryCard = memo(function EntryCard({
           </Text>
         )}
       </Pressable>
+
+      {onCopy && (
+        // Muted and small, never the accent: it is on every row, and an accent
+        // repeated down a list stops marking anything (PING.md §1.2). It sits
+        // outside the text Pressable so a tap here cannot open the entry.
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`copy a prompt for ${entry.text}`}
+          hitSlop={10}
+          onPress={() => onCopy(entry)}
+          className="items-center justify-center self-start rounded-md px-1.5 active:opacity-60"
+          style={{ height: TEXT_LINE + 20 }}
+        >
+          <Copy size={13} color={COLORS.muted} strokeWidth={2} />
+        </Pressable>
+      )}
 
       {onFile && (
         <Pressable

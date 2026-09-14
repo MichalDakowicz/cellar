@@ -9,6 +9,7 @@ import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { useCellar } from '@/features/cellar/useCellar';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { MAX_W, useGutter, webFocusRing, useSidebarSpace } from '@/hooks/useResponsive';
 import { searchEntries } from '@/lib/entryGroups';
 import { plural } from '@/lib/utils';
@@ -25,6 +26,7 @@ import { COLORS } from '@/theme/colors';
 export default function SearchScreen() {
   const { entries, projects } = useCellar();
   const router = useRouter();
+  const copyPrompt = useCopyPrompt();
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
   const gutter = useGutter();
@@ -59,6 +61,7 @@ export default function SearchScreen() {
             items={items}
             variant="hit"
             onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+            onCopy={copyPrompt}
             header={
               <View>
                 <ScreenTop />

@@ -21,6 +21,8 @@ export type CellarSettings = {
   rememberLast: boolean;
   defaultKind: Kind;
   defaultView: ProjectViewPref;
+  /** Raise a banner when an agent stops and asks something. */
+  notifyQuestions: boolean;
 };
 
 export type CellarSettingsRow = {
@@ -29,6 +31,7 @@ export type CellarSettingsRow = {
   remember_last: boolean | null;
   default_kind: string | null;
   default_view: string | null;
+  notify_questions: boolean | null;
 };
 
 export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
@@ -37,6 +40,7 @@ export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   rememberLast: true,
   defaultKind: 'idea',
   defaultView: 'grouped',
+  notifyQuestions: true,
 };
 
 /** A missing row is the defaults, not an error — the row is created on first write. */
@@ -48,6 +52,7 @@ export function normalizeCellarSettings(row: CellarSettingsRow | null): CellarSe
     rememberLast: row.remember_last ?? DEFAULT_CELLAR_SETTINGS.rememberLast,
     defaultKind: isKind(row.default_kind) ? row.default_kind : DEFAULT_CELLAR_SETTINGS.defaultKind,
     defaultView: row.default_view === 'stream' ? 'stream' : 'grouped',
+    notifyQuestions: row.notify_questions ?? DEFAULT_CELLAR_SETTINGS.notifyQuestions,
   };
 }
 
@@ -63,5 +68,6 @@ export function cellarSettingsToRow(patch: Partial<CellarSettings>): Record<stri
   if (patch.rememberLast !== undefined) row.remember_last = patch.rememberLast;
   if (patch.defaultKind !== undefined && isKind(patch.defaultKind)) row.default_kind = patch.defaultKind;
   if (patch.defaultView !== undefined) row.default_view = patch.defaultView;
+  if (patch.notifyQuestions !== undefined) row.notify_questions = patch.notifyQuestions;
   return row;
 }

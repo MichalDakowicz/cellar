@@ -21,6 +21,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   state: 'open',
   archived: false,
   createdAt: '2026-09-13T10:00:00.000Z',
+  agent: null,
   lines: [],
   ...over,
 });
@@ -119,7 +120,7 @@ describe('countLive', () => {
 
 describe('searchEntries', () => {
   it('finds appended lines, not just the first one', () => {
-    const grown = entry({ text: 'nothing here', lines: [{ id: 'l1', text: 'automerge', createdAt: '' }] });
+    const grown = entry({ text: 'nothing here', lines: [{ id: 'l1', text: 'automerge', createdAt: '', source: 'user' }] });
     expect(searchEntries([grown], 'AUTOMERGE')).toHaveLength(1);
   });
 

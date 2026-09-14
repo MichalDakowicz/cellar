@@ -11,6 +11,7 @@ const row = (over: Partial<CellarSettingsRow> = {}): CellarSettingsRow => ({
   remember_last: true,
   default_kind: 'idea',
   default_view: 'grouped',
+  notify_questions: true,
   ...over,
 });
 

@@ -6,6 +6,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useInboxScreen } from '@/features/cellar/useInboxScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
@@ -20,6 +21,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
  */
 export default function InboxScreen() {
   const inbox = useInboxScreen();
+  const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
   const gutter = useGutter();
@@ -37,8 +39,10 @@ export default function InboxScreen() {
             items={inbox.items}
             variant="inbox"
             showCode={inbox.showCodes}
+            whereFor={inbox.whereFor}
             onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
             onFile={(entry) => fileUnder?.(entry.id)}
+            onCopy={copyPrompt}
             header={
               <View>
                 <ScreenTop />
@@ -51,7 +55,8 @@ export default function InboxScreen() {
                     </View>
                   </View>
                   <Text className="mt-2 text-sm text-muted-foreground">
-                    everything you dumped without picking a project. file it or leave it — {inbox.sortLabel}.
+                    everything you dumped without picking a project, and anything an agent stopped to ask you about
+                    — {inbox.sortLabel}.
                   </Text>
                 </View>
               </View>

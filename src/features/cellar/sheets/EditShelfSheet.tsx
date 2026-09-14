@@ -38,7 +38,8 @@ export function EditShelfSheet({
   const setStatsShelf = useCellarPrefs((state) => state.setStatsShelf);
 
   const shelf = shelves.find((candidate) => candidate.id === shelfId) ?? null;
-  const { name, setName, confirming, setConfirming } = useSheetDraft(open, shelfId, shelf?.name ?? '');
+  const { values, set, confirming, setConfirming } = useSheetDraft(open, shelfId, { name: shelf?.name ?? '' });
+  const name = values.name;
 
   if (!shelf) return null;
 
@@ -80,7 +81,7 @@ export function EditShelfSheet({
           <Field
             placeholder="shelf name"
             value={name}
-            onChangeText={setName}
+            onChangeText={(next) => set({ name: next })}
             onSubmitEditing={save}
             error={nameErrorText(error, 'shelf')}
           />

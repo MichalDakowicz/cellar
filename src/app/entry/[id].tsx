@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Plus, Trash } from 'lucide-react-native';
+import { Copy, Plus, Trash } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
+import { AgentQuestion } from '@/components/cellar/AgentQuestion';
+import { AgentThread } from '@/components/cellar/AgentThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
@@ -14,6 +16,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { EmptyState } from '@/components/ui/states';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, webFocusRing, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
@@ -31,6 +34,7 @@ import { COLORS } from '@/theme/colors';
 export default function EntryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const entry = useEntryScreen(id);
+  const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
   const navBarSpace = useNavBarSpace();
@@ -73,11 +77,26 @@ export default function EntryScreen() {
               <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />
               <Text className="text-xs font-semibold text-primary">{entry.entry.kind}</Text>
               <Text className="text-xs text-muted-foreground">· {entry.projectName}</Text>
+              {!!entry.agentName && <Text className="text-xs text-muted-foreground">· {entry.agentName}</Text>}
             </View>
             <Text className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground">
               {entry.entry.text}
             </Text>
-            <Text className="mt-2.5 text-xs text-muted-foreground">{entry.stamp}</Text>
+            <View className="mt-2.5 flex-row items-center gap-3">
+              <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="copy a prompt for an agent"
+                hitSlop={8}
+                onPress={() => entry.entry && copyPrompt(entry.entry)}
+                className="flex-row items-center gap-1.5 active:opacity-60"
+              >
+                <Copy size={12} color={COLORS.muted} strokeWidth={2} />
+                <Text className="text-xs text-muted-foreground">copy a prompt</Text>
+              </Pressable>
+            </View>
+
+            {entry.question && <AgentQuestion question={entry.question} agent={entry.agentName} />}
 
             {entry.thread.length > 0 && (
               <View className="mt-4">
@@ -115,6 +134,8 @@ export default function EntryScreen() {
                 <Plus size={18} color={COLORS.foreground} strokeWidth={2} />
               </Pressable>
             </View>
+
+            <AgentThread lines={entry.agentLines} agent={entry.agentName} />
 
             <View className="mb-2 mt-7">
               <Overline>state</Overline>
@@ -176,6 +197,7 @@ export default function EntryScreen() {
                     entry={sibling}
                     variant="hit"
                     onPress={() => router.replace(`/entry/${sibling.id}`)}
+                    onCopy={copyPrompt}
                   />
                 ))}
               </View>

@@ -6,6 +6,7 @@ import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useSheetDraft } from '@/features/cellar/sheets/useSheetDraft';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { checkName, deleteProjectCost, nameErrorText } from '@/lib/containers';
+import { normalizeRepoPath, normalizeRepoUrl } from '@/lib/repoLink';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 
 /**
@@ -26,12 +27,17 @@ export function EditProjectSheet({
   onClose: () => void;
 }) {
   const { shelves, projects, entries } = useCellar();
-  const { editProject, relocateProject, removeProject } = useCellarWrites();
+  const { editProject, linkProject, relocateProject, removeProject } = useCellarWrites();
   const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
   const setLastProject = useCellarPrefs((state) => state.setLastProject);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
-  const { name, setName, confirming, setConfirming } = useSheetDraft(open, projectId, project?.name ?? '');
+  const { values, set, confirming, setConfirming } = useSheetDraft(open, projectId, {
+    name: project?.name ?? '',
+    repoPath: project?.repoPath ?? '',
+    repoUrl: project?.repoUrl ?? '',
+  });
+  const name = values.name;
 
   if (!project) return null;
 
@@ -44,6 +50,15 @@ export function EditProjectSheet({
   const save = () => {
     if (error) return;
     if (name.trim() !== project.name) editProject.mutate({ id: project.id, name: name.trim() });
+
+    // Normalised on the way in, never on the way out: the agent matches on
+    // this column and a trailing slash or a pasted pair of quotes is the
+    // difference between resolving the project and asking which one it is.
+    const repoPath = normalizeRepoPath(values.repoPath);
+    const repoUrl = normalizeRepoUrl(values.repoUrl);
+    if (repoPath !== project.repoPath || repoUrl !== project.repoUrl) {
+      linkProject.mutate({ id: project.id, repoPath, repoUrl });
+    }
     onClose();
   };
 
@@ -70,10 +85,34 @@ export function EditProjectSheet({
           <Field
             placeholder="working name"
             value={name}
-            onChangeText={setName}
+            onChangeText={(next) => set({ name: next })}
             onSubmitEditing={save}
             error={nameErrorText(error, 'project')}
           />
+        </View>
+
+        <View className="mt-5 gap-2">
+          <Overline>where it lives</Overline>
+          <Field
+            placeholder="C:\ping\cellar"
+            value={values.repoPath}
+            onChangeText={(next) => set({ repoPath: next })}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Field
+            placeholder="github.com/you/cellar"
+            value={values.repoUrl}
+            onChangeText={(next) => set({ repoUrl: next })}
+            onSubmitEditing={save}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+          />
+          <Text className="text-xs text-muted-foreground">
+            the folder is what an agent matches its working directory against, so it knows which project it is in
+            without being told. the link is just for opening.
+          </Text>
         </View>
 
         {shelves.length > 1 && (

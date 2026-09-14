@@ -52,6 +52,23 @@ export async function signUpWithEmail(email: string, password: string) {
   if (error) throw new Error(friendly(error.message));
 }
 
+/**
+ * Gives the signed-in account a password.
+ *
+ * An account created with Google has none, which is fine everywhere except at a
+ * command line: the MCP server (`mcp/`) has no browser to run an OAuth
+ * handshake through, and the flows that avoid one — a localhost callback, an
+ * emailed code — each depend on something that is not this app's to guarantee.
+ * Setting a password here works because this session is already authenticated,
+ * and it turns signing an agent in into the ordinary thing.
+ *
+ * Google sign-in keeps working afterwards. This adds a way in; it removes none.
+ */
+export async function setPassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(friendly(error.message));
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);

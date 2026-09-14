@@ -4,11 +4,13 @@ import { Pressable, Text, View } from 'react-native';
 import { EntryList } from '@/components/cellar/EntryList';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
+import { RepoLink } from '@/components/cellar/RepoLink';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
@@ -30,6 +32,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
 export default function ProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const project = useProjectScreen(id);
+  const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
@@ -45,6 +48,7 @@ export default function ProjectScreen() {
       items={project.items}
       showCode={project.showCodes}
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+      onCopy={copyPrompt}
       header={isDesktop ? undefined : <PhoneHeader project={project} gutter={gutter} onFilter={() => openFilter?.()} />}
       empty={
         project.emptyKind === 'filtered'
@@ -85,6 +89,9 @@ export default function ProjectScreen() {
                   filtered={project.filtered}
                   large
                 />
+                {project.repo && (
+                  <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
+                )}
               </View>
 
               <View className="flex-1 flex-row">
@@ -138,6 +145,7 @@ function PhoneHeader({
           filtered={project.filtered}
           onFilter={onFilter}
         />
+        {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
       </View>
 
       {project.archivedCount > 0 && (

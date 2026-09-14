@@ -23,6 +23,7 @@ type EntryListProps = {
   whereFor?: (entry: Entry) => string | undefined;
   onPress: (entry: Entry) => void;
   onFile?: (entry: Entry) => void;
+  onCopy?: (entry: Entry) => void;
   header?: ReactElement;
   empty?: { title: string; body: string; action?: { label: string; onPress: () => void } };
 };
@@ -43,6 +44,7 @@ export function EntryList({
   whereFor,
   onPress,
   onFile,
+  onCopy,
   header,
   empty,
 }: EntryListProps) {
@@ -74,6 +76,7 @@ export function EntryList({
               where={whereFor?.(item.entry)}
               onPress={onPress}
               onFile={onFile}
+              onCopy={onCopy}
             />
           </View>
         )

@@ -9,6 +9,9 @@ import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
+import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
+import { AgentAccess } from '@/features/settings/AgentAccess';
+import { AgentTokens } from '@/features/settings/AgentTokens';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
@@ -29,6 +32,7 @@ import { useTheme } from '@/theme/ThemeProvider';
  */
 export default function Settings() {
   const { settings, updateSettings } = useCellarSettings();
+  const notifications = useQuestionNotices();
   const { theme, setTheme } = useTheme();
   const setRaw = useCellarPrefs((state) => state.setRaw);
   const setDraftKind = useCellarPrefs((state) => state.setDraftKind);
@@ -79,6 +83,12 @@ export default function Settings() {
               value={settings.rememberLast}
               onChange={(value) => void updateSettings({ rememberLast: value })}
             />
+            <SwitchRow
+              label="tell me when an agent asks"
+              sub={notifications.sub}
+              value={settings.notifyQuestions && notifications.granted !== false}
+              onChange={(value) => void notifications.set(value)}
+            />
           </View>
 
           <View className={`gap-2 pt-7 ${gutter}`}>
@@ -127,6 +137,10 @@ export default function Settings() {
               shared with radar, lidar, sonar and pulsar — picking light here picks light there.
             </Text>
           </View>
+
+          <AgentAccess gutter={gutter} />
+
+          <AgentTokens gutter={gutter} />
 
           <View className={`pt-7 ${gutter}`}>
             <Overline>about</Overline>

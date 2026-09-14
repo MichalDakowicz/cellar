@@ -6,6 +6,7 @@ import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { applyFilter, countLive, groupByDay, groupByKind, hasFilter, tallyKinds } from '@/lib/entryGroups';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
+import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs, useEntryFilter } from '@/store/cellarPrefs';
 import type { Entry } from '@/types/cellar';
@@ -78,6 +79,10 @@ export function useProjectScreen(projectId: string | undefined) {
     /** The tile's two letters, so the detail page wears the same mark as the grid. */
     initials: (project?.name ?? '').trim().slice(0, 2).toLowerCase() || '··',
     meta,
+    /** Where it lives, when it has been linked. Null is the normal case. */
+    repo: project && (project.repoPath || project.repoUrl)
+      ? { label: repoLabel(project) ?? '', url: project.repoUrl, path: project.repoPath }
+      : null,
     stateCounts,
     kindBars,
     entryCount: live.length,
