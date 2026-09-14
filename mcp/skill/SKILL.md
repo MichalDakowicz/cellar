@@ -100,5 +100,6 @@ Send the sentence worth reading in six months. One line per real finding.
 - re-claim something `blocked` — it is waiting on the user, not on you
 - touch an `archived` entry; it was put away on purpose
 - mark `done` what you did not finish
-- ask the user for their Supabase password — if a tool says the server is not signed in,
-  tell them to run `npm run login` in `cellar/mcp`
+- ask the user for their password — if a tool says the server is not signed in, tell them
+  to run `npm run login` in `cellar/mcp`. If they say the account has no password because
+  it was made with Google, point them at Cellar's settings → *password for agent tools*
