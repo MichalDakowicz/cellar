@@ -16,7 +16,7 @@ import {
   resolveProject,
   setEntryState,
 } from '../cellar.ts';
-import { guard, text, withCellar } from '../context.ts';
+import { guard, text, withCellar, type CtxProvider } from '../context.ts';
 import { entryBrief, shortId } from '../format.ts';
 
 /**
@@ -34,7 +34,7 @@ import { entryBrief, shortId } from '../format.ts';
  * appended line.
  */
 
-export function registerWriteTools(server: McpServer): void {
+export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void {
   server.registerTool(
     'cellar_claim_entry',
     {
@@ -47,7 +47,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
 
         if (!canClaim(target)) {
@@ -93,7 +93,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry, text: body }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, body);
         return text(`Added to ${shortId(target.id)}:\n> ${written}`);
@@ -117,7 +117,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry, question }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, question);
         await setEntryState(ctx.client, target.id, 'blocked', ctx.agent);
@@ -145,7 +145,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry, outcome, note }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, note);
         // The name comes off with the claim: nobody is on it any more.
@@ -169,7 +169,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry, note }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         if (note?.trim()) await addAgentLine(ctx.client, ctx.userId, target.id, note);
         await setEntryState(ctx.client, target.id, 'open', null);
@@ -197,7 +197,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ text: body, kind, project }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = project?.trim() ? resolveProject(project, cellar.projects) : null;
         const created = await createEntry(ctx.client, ctx.userId, {
           text: body,
@@ -225,7 +225,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ entry, reason }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, reason);
         await archiveEntry(ctx.client, target.id);
@@ -250,7 +250,7 @@ export function registerWriteTools(server: McpServer): void {
     },
     async ({ project, repo_path, repo_url }) =>
       guard(async () => {
-        const { ctx, cellar } = await withCellar();
+        const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveProject(project, cellar.projects);
         const linked = await linkRepo(ctx.client, target.id, {
           repoPath: normalizeRepoPath(repo_path) ?? target.repoPath,

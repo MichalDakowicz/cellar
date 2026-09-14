@@ -7,7 +7,7 @@ import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
-import { guard, text, withCellar } from '../context.ts';
+import { guard, text, withCellar, type CtxProvider } from '../context.ts';
 import { entryBrief, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
 
 /**
@@ -80,7 +80,7 @@ function orientBody(cellar: Cellar, cwd: string): string {
   return out.join('\n');
 }
 
-export function registerReadTools(server: McpServer): void {
+export function registerReadTools(server: McpServer, getCtx: CtxProvider): void {
   server.registerTool(
     'cellar_orient',
     {
@@ -95,13 +95,23 @@ export function registerReadTools(server: McpServer): void {
         cwd: z
           .string()
           .optional()
-          .describe('Absolute path of the directory you are working in. Defaults to the server process cwd.'),
+          .describe(
+            'Absolute path of the directory you are working in. A hosted server is not standing in your repo and ' +
+              'cannot guess it, so pass it; a server running on your own machine falls back to its own.',
+          ),
       },
     },
     async ({ cwd }) =>
       guard(async () => {
-        const { cellar } = await withCellar();
-        return text(orientBody(cellar, cwd?.trim() || process.cwd()));
+        const { ctx, cellar } = await withCellar(getCtx);
+        const where = cwd?.trim() || ctx.cwd;
+        if (!where) {
+          return text(
+            'Pass cwd. This server is hosted, so it has no working directory of its own — send the absolute path ' +
+              'of the directory you are working in.',
+          );
+        }
+        return text(orientBody(cellar, where));
       }),
   );
 
@@ -118,7 +128,7 @@ export function registerReadTools(server: McpServer): void {
     },
     async ({ shelf }) =>
       guard(async () => {
-        const { cellar } = await withCellar();
+        const { cellar } = await withCellar(getCtx);
         const wanted = shelf?.trim().toLowerCase();
         const shelves = wanted
           ? cellar.shelves.filter((candidate) => candidate.name.toLowerCase().includes(wanted))
@@ -158,7 +168,7 @@ export function registerReadTools(server: McpServer): void {
     },
     async ({ project, kinds, states, search, archived, limit }) =>
       guard(async () => {
-        const { cellar } = await withCellar();
+        const { cellar } = await withCellar(getCtx);
         let rows: Entry[] = cellar.entries;
 
         const where = project?.trim().toLowerCase();
@@ -204,7 +214,7 @@ export function registerReadTools(server: McpServer): void {
     },
     async ({ entry }) =>
       guard(async () => {
-        const { cellar } = await withCellar();
+        const { cellar } = await withCellar(getCtx);
         return text(entryBrief(resolveEntry(entry, cellar.entries), cellar));
       }),
   );

@@ -1,32 +1,31 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { agentName } from './config.ts';
 import { loadCellar, type Cellar } from './cellar.ts';
-import { signedIn } from './client.ts';
 
 /**
- * What every tool needs, worked out once.
+ * What every tool needs, and the one thing that is not the same in the two
+ * places this server runs.
  *
- * The sign-in is deliberately lazy. A server that threw on startup because
- * nobody had logged in yet would show up in the client as a broken MCP server
- * with no tools and no explanation; this way the tools are all there and the
- * first call says exactly what to run.
+ * On your machine it is one signed-in client for the life of the process, read
+ * from the session file, standing in a directory. Hosted it is a fresh client
+ * per request, built from the token in the header, with no session file and no
+ * working directory to speak of. So the tools are handed a provider rather than
+ * calling a module singleton: everything transport-shaped stays at the edges,
+ * and a tool never learns which of the two it is running in.
  */
 
-export type Ctx = { client: SupabaseClient; userId: string; agent: string };
+export type Ctx = {
+  client: SupabaseClient;
+  userId: string;
+  agent: string;
+  /** Where the server itself is standing, when that means anything. Null hosted. */
+  cwd: string | null;
+};
 
-let pending: Promise<{ client: SupabaseClient; userId: string }> | null = null;
+export type CtxProvider = () => Promise<Ctx>;
 
-export async function context(): Promise<Ctx> {
-  // Retried rather than cached on failure: the fix is to run the login command,
-  // and the next tool call after that should just work.
-  if (!pending) pending = signedIn().catch((error) => ((pending = null), Promise.reject(error)));
-  const { client, userId } = await pending;
-  return { client, userId, agent: agentName() };
-}
-
-export async function withCellar(): Promise<{ ctx: Ctx; cellar: Cellar }> {
-  const ctx = await context();
+export async function withCellar(getCtx: CtxProvider): Promise<{ ctx: Ctx; cellar: Cellar }> {
+  const ctx = await getCtx();
   return { ctx, cellar: await loadCellar(ctx.client) };
 }
 
