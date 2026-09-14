@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Served from hosting and piped into sh — a CRLF checkout on Windows reaches
+# mac and linux verbatim and dies on line 2 with `$'\r': command not found`
+*.sh text eol=lf
