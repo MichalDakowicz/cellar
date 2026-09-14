@@ -306,3 +306,16 @@ alter table public.cellar_entry_lines
 -- Cleared when the entry settles.
 alter table public.cellar_entries
   add column if not exists agent text;
+
+-- 2026-09-14 — whether a blocked question raises a banner on the phone.
+--
+-- Cellar's own column, so the switch follows the account rather than the
+-- handset. Default on: the only thing it ever fires for is an agent that
+-- stopped and asked, which is by definition something waiting on you — a
+-- notification you would have wanted is not noise.
+--
+-- Delivery is local (expo-notifications on a background wake), the way Pulsar's
+-- reminders are. There is no push token, no device_tokens row and nothing of
+-- Radar's involved; see docs/agent-notifications.md.
+alter table public.cellar_settings
+  add column if not exists notify_questions boolean not null default true;

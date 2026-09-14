@@ -17,7 +17,19 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  */
 
 export const CALLBACK_PORT = 54545;
-export const CALLBACK_URL = `http://localhost:${CALLBACK_PORT}/callback`;
+
+/**
+ * `127.0.0.1`, never `localhost`.
+ *
+ * On Windows `localhost` resolves to `::1` first, so a server bound to
+ * `127.0.0.1` never sees the redirect and the browser hangs on a blank tab with
+ * the sign-in already completed — the confusing half of that being that Google
+ * and Supabase both did their jobs. Binding `::` instead would fix it by
+ * listening on every interface, which is not what a five-minute local auth
+ * handshake should be doing. The literal address has no such ambiguity.
+ */
+export const CALLBACK_HOST = '127.0.0.1';
+export const CALLBACK_URL = `http://${CALLBACK_HOST}:${CALLBACK_PORT}/callback`;
 
 /** Opens a URL in whatever the OS considers the browser. */
 function openInBrowser(url: string): void {
@@ -79,7 +91,7 @@ function awaitCode(timeoutMs: number): Promise<string> {
       );
     });
 
-    server.listen(CALLBACK_PORT, '127.0.0.1');
+    server.listen(CALLBACK_PORT, CALLBACK_HOST);
   });
 }
 

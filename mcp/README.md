@@ -23,11 +23,14 @@ npm run login          # the same account the app signs into
 `login` offers three ways in, because the shared account may have been created with
 Google and never given a password:
 
-1. **Google, in a browser.** It stands up a one-request server on `localhost:54545`, sends
+1. **Google, in a browser.** It stands up a one-request server on `127.0.0.1:54545`, sends
    you to Google, and takes the code out of the redirect — the same PKCE flow the app runs
    through `expo-web-browser`, with a different letterbox. If Supabase rejects the redirect,
-   add `http://localhost:54545/callback` once under *Authentication → URL Configuration →
+   add `http://127.0.0.1:54545/callback` once under *Authentication → URL Configuration →
    Redirect URLs*.
+
+   The address is the literal one on purpose: on Windows `localhost` resolves to `::1`
+   first, so the browser would hang on a blank tab *after* a successful sign-in.
 2. **A code emailed to you.** No password, no dashboard setting.
 3. **Email and password.**
 
