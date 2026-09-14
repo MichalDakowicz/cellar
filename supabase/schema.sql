@@ -296,10 +296,13 @@ alter table public.cellar_projects
 alter table public.cellar_entry_lines
   add column if not exists source text not null default 'user';
 
--- 2026-09-14 — which agent has an entry, if one does.
+-- 2026-09-14 — which agent put an entry here or has it, if one did.
 --
 -- Claiming is `state = 'doing'` and nothing else; this column only names who,
 -- so the app can say "claude is on this" instead of leaving you to guess why a
--- thought you never touched went amber. Cleared when the entry settles.
+-- thought you never touched went amber. It is also stamped on an entry an agent
+-- dropped itself — a follow-up it found while working — which lands open for
+-- you to triage rather than as work it may hand straight back to itself.
+-- Cleared when the entry settles.
 alter table public.cellar_entries
   add column if not exists agent text;

@@ -22,23 +22,24 @@ npm run login          # the same account the app signs into
 
 Then register it with whatever runs agents. Claude Code:
 
-```sh
-claude mcp add cellar -- npx tsx C:/ping/cellar/mcp/src/server.ts
-```
-
-Or in `.mcp.json` / `~/.claude.json`:
-
 ```json
 {
     "mcpServers": {
         "cellar": {
-            "command": "npx",
-            "args": ["tsx", "C:/ping/cellar/mcp/src/server.ts"],
+            "command": "node",
+            "args": ["--import", "tsx", "C:/ping/cellar/mcp/src/server.ts"],
+            "cwd": "C:/ping/cellar/mcp",
             "env": { "CELLAR_AGENT": "claude" }
         }
     }
 }
 ```
+
+The `cwd` is load-bearing: it is how node finds the `tsx` loader in this package's own
+`node_modules`. Two shapes that look equivalent and are not — `npx tsx …` re-downloads tsx
+when it is run from another repo's directory, and `npm run serve` prints its own banner to
+**stdout**, which is the protocol stream, so the client drops the server with no useful
+error. Anything the server has to say goes to stderr for the same reason.
 
 Register it in **every repo you dump thoughts about**, not just in Cellar's own — the whole
 point is that the agent working on Radar can read the Radar thoughts.

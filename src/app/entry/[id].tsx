@@ -75,6 +75,7 @@ export default function EntryScreen() {
               <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />
               <Text className="text-xs font-semibold text-primary">{entry.entry.kind}</Text>
               <Text className="text-xs text-muted-foreground">· {entry.projectName}</Text>
+              {!!entry.agentName && <Text className="text-xs text-muted-foreground">· {entry.agentName}</Text>}
             </View>
             <Text className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground">
               {entry.entry.text}
