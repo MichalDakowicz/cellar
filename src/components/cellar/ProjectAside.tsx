@@ -16,9 +16,6 @@ export type KindBar = { kind: Kind; count: number; pct: number };
 type ProjectAsideProps = {
   stateCounts: StateCount[];
   kindBars: KindBar[];
-  archivedCount: number;
-  showArchived: boolean;
-  onToggleArchived: () => void;
   onEdit: () => void;
 };
 
@@ -33,14 +30,7 @@ type ProjectAsideProps = {
  * of the window sits empty next to it. The funnel is still there on phone; this
  * is the same store, so the two can never hold different filters.
  */
-export function ProjectAside({
-  stateCounts,
-  kindBars,
-  archivedCount,
-  showArchived,
-  onToggleArchived,
-  onEdit,
-}: ProjectAsideProps) {
+export function ProjectAside({ stateCounts, kindBars, onEdit }: ProjectAsideProps) {
   const filter = useEntryFilter((state) => state.filter);
   const setFilter = useEntryFilter((state) => state.setFilter);
   const toggleKind = useEntryFilter((state) => state.toggleKind);
@@ -107,20 +97,6 @@ export function ProjectAside({
           onToggle={(value) => setFilter({ ...filter, state: value === 'any' ? null : (value as EntryState) })}
         />
       </View>
-
-      {archivedCount > 0 && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${showArchived ? 'hide' : 'show'} archived`}
-          accessibilityState={{ selected: showArchived }}
-          onPress={onToggleArchived}
-          className="mt-4 self-start rounded-full bg-secondary px-3 py-1.5 active:opacity-80"
-        >
-          <Text className="text-xs font-semibold text-muted-foreground">
-            {showArchived ? 'hide' : 'show'} {archivedCount} archived
-          </Text>
-        </Pressable>
-      )}
 
       <Pressable
         accessibilityRole="button"

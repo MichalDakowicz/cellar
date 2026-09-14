@@ -25,13 +25,24 @@ export type KindMeta = {
   code: string;
 };
 
+/**
+ * One order, every surface: the capture chips, the entry, the filter, the
+ * default in settings, the grouped sections and the stats tally all read this
+ * array, so a kind sits in the same place wherever it is offered.
+ *
+ * Work on a thing that exists comes before work on a thing that does not.
+ * Glitch and removal are about the app as it ships and are the two that go
+ * stale if they sit — an idea keeps. Ideas are also the bulk of any cellar, so
+ * a list ordered idea-first buries the two kinds you want to see.
+ *
+ * "addition" used to sit between idea and removal. It was the same act as
+ * idea — a thing you want that is not there yet — and two chips for one
+ * thought is a decision you have to make every time you dump something.
+ */
 export const KINDS: KindMeta[] = [
-  // "addition" used to sit between idea and removal. It was the same act as
-  // idea — a thing you want that is not there yet — and two chips for one
-  // thought is a decision you have to make every time you dump something.
-  { value: 'idea', label: 'idea', code: 'idea' },
-  { value: 'removal', label: 'removal', code: 'rm' },
   { value: 'glitch', label: 'glitch', code: 'bug' },
+  { value: 'removal', label: 'removal', code: 'rm' },
+  { value: 'idea', label: 'idea', code: 'idea' },
   { value: 'question', label: 'question', code: 'q' },
   { value: 'research', label: 'research', code: 'res' },
   { value: 'copy', label: 'copy', code: 'copy' },

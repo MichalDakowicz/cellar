@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
@@ -50,20 +50,7 @@ export default function ProjectScreen() {
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
       onCopy={copyPrompt}
       header={isDesktop ? undefined : <PhoneHeader project={project} gutter={gutter} onFilter={() => openFilter?.()} />}
-      empty={
-        project.emptyKind === 'filtered'
-          ? {
-              title: 'nothing matches',
-              body: 'loosen a kind or clear the state to see the rest of this project.',
-              action: isDesktop ? undefined : { label: 'open the filter', onPress: () => openFilter?.() },
-            }
-          : {
-              title: 'nothing in here yet',
-              body: isDesktop
-                ? 'press n and pick this project on the capture screen.'
-                : 'tap + in the nav bar and pick this project on the capture screen.',
-            }
-      }
+      empty={emptyFor(project, isDesktop, () => openFilter?.())}
     />
   );
 
@@ -100,9 +87,6 @@ export default function ProjectScreen() {
                   <ProjectAside
                     stateCounts={project.stateCounts}
                     kindBars={project.kindBars}
-                    archivedCount={project.archivedCount}
-                    showArchived={project.showArchived}
-                    onToggleArchived={project.toggleArchived}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />
                 </View>
@@ -147,19 +131,31 @@ function PhoneHeader({
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
       </View>
-
-      {project.archivedCount > 0 && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${project.showArchived ? 'hide' : 'show'} archived`}
-          onPress={project.toggleArchived}
-          className={`pb-1 pt-2 active:opacity-80 ${gutter}`}
-        >
-          <Text className="text-xs font-semibold text-muted-foreground">
-            {project.showArchived ? 'hide' : 'show'} {project.archivedCount} archived
-          </Text>
-        </Pressable>
-      )}
     </View>
   );
+}
+
+/**
+ * Nothing matches, versus nothing here yet — two different empties, with two
+ * different ways out (PING.md §9.9).
+ */
+function emptyFor(
+  project: ReturnType<typeof useProjectScreen>,
+  isDesktop: boolean,
+  onFilter: () => void,
+): { title: string; body: string; action?: { label: string; onPress: () => void } } {
+  if (project.emptyKind === 'filtered') {
+    return {
+      title: 'nothing matches',
+      body: 'loosen a kind or clear the state to see the rest of this project.',
+      action: isDesktop ? undefined : { label: 'open the filter', onPress: onFilter },
+    };
+  }
+
+  return {
+    title: 'nothing in here yet',
+    body: isDesktop
+      ? 'press n and pick this project on the capture screen.'
+      : 'tap + in the nav bar and pick this project on the capture screen.',
+  };
 }

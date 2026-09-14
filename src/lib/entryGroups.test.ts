@@ -4,13 +4,16 @@ import {
   filterSummary,
   groupByDay,
   groupByKind,
+  groupByStateAndKind,
   hasFilter,
   NO_FILTER,
   searchEntries,
   tallyKinds,
+  tallyStates,
 } from '@/lib/entryGroups';
+import { ENTRY_STATES } from '@/lib/entryState';
 import { KINDS } from '@/lib/kinds';
-import type { Entry, EntryState, Kind } from '@/types/cellar';
+import type { Entry, Kind } from '@/types/cellar';
 
 let seq = 0;
 const entry = (over: Partial<Entry> = {}): Entry => ({
@@ -30,10 +33,9 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
 const at = (iso: string) => entry({ createdAt: iso });
 
 describe('applyFilter', () => {
-  it('hides archived entries until they are asked for', () => {
+  it('leaves the archive alone — the archive is a band, not a narrowing', () => {
     const entries = [entry(), entry({ archived: true })];
-    expect(applyFilter(entries, NO_FILTER)).toHaveLength(1);
-    expect(applyFilter(entries, { ...NO_FILTER, showArchived: true })).toHaveLength(2);
+    expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
   });
 
   it('treats several kinds as any-of', () => {
@@ -44,13 +46,13 @@ describe('applyFilter', () => {
 
   it('narrows to one state, and null means any', () => {
     const entries = [entry({ state: 'open' }), entry({ state: 'done' })];
-    const state: EntryState = 'done';
-    expect(applyFilter(entries, { ...NO_FILTER, state })).toHaveLength(1);
+    expect(applyFilter(entries, { ...NO_FILTER, state: 'done' })).toHaveLength(1);
     expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
   });
 
-  it('does not count showArchived as a filter — it is a disclosure, not a narrowing', () => {
-    expect(hasFilter({ ...NO_FILTER, showArchived: true })).toBe(false);
+  it('is on once a kind or a state is picked', () => {
+    expect(hasFilter(NO_FILTER)).toBe(false);
+    expect(hasFilter({ ...NO_FILTER, kinds: ['glitch'] })).toBe(true);
     expect(hasFilter({ ...NO_FILTER, state: 'doing' })).toBe(true);
   });
 });
@@ -61,9 +63,34 @@ describe('filterSummary', () => {
   });
 
   it('joins the kinds and appends the state', () => {
-    expect(filterSummary({ kinds: ['glitch', 'question'], state: 'doing', showArchived: false })).toBe(
-      'glitch · question · doing',
-    );
+    expect(filterSummary({ kinds: ['glitch', 'question'], state: 'doing' })).toBe('glitch · question · doing');
+  });
+});
+
+describe('groupByStateAndKind', () => {
+  it('bands by state, and keeps the kind cut inside each band', () => {
+    const groups = groupByStateAndKind([
+      entry({ state: 'open', kind: 'idea' }),
+      entry({ state: 'open', kind: 'glitch' }),
+      entry({ state: 'done', kind: 'idea' }),
+    ]);
+    expect(groups.map((g) => g.band)).toEqual(['open', 'done']);
+    expect(groups[0].kinds.map((k) => k.kind)).toEqual(['glitch', 'idea']);
+    expect(groups[0].count).toBe(2);
+  });
+
+  it('puts blocked at the top and the archive at the foot, whatever state it was in', () => {
+    const groups = groupByStateAndKind([
+      entry({ state: 'done', archived: true }),
+      entry({ state: 'open' }),
+      entry({ state: 'blocked' }),
+    ]);
+    expect(groups.map((g) => g.band)).toEqual(['blocked', 'open', 'archived']);
+  });
+
+  it('drops the bands with nothing in them', () => {
+    expect(groupByStateAndKind([entry({ state: 'doing' })]).map((g) => g.band)).toEqual(['doing']);
+    expect(groupByStateAndKind([])).toEqual([]);
   });
 });
 
@@ -103,6 +130,30 @@ describe('tallyKinds', () => {
   it('keeps kinds at zero — a kind you never dump is information', () => {
     expect(tallyKinds([entry({ kind: 'idea' })])).toHaveLength(KINDS.length);
     expect(tallyKinds([entry({ kind: 'idea' })]).find((t) => t.kind === 'copy')?.count).toBe(0);
+  });
+});
+
+describe('tallyStates', () => {
+  it('keeps every state, in the order the spread line draws them', () => {
+    const tallies = tallyStates([entry({ state: 'open' })]);
+    expect(tallies.map((t) => t.state)).toEqual(ENTRY_STATES.map((s) => s.value));
+    expect(tallies.find((t) => t.state === 'blocked')?.count).toBe(0);
+  });
+
+  it('reads pct as share of the whole, not against the biggest state', () => {
+    const entries = [
+      entry({ state: 'open' }),
+      entry({ state: 'open' }),
+      entry({ state: 'open' }),
+      entry({ state: 'done' }),
+    ];
+    const tallies = tallyStates(entries);
+    expect(tallies.find((t) => t.state === 'open')).toMatchObject({ count: 3, pct: 75 });
+    expect(tallies.find((t) => t.state === 'done')).toMatchObject({ count: 1, pct: 25 });
+  });
+
+  it('is all zeroes on an empty cellar rather than NaN', () => {
+    expect(tallyStates([]).every((t) => t.count === 0 && t.pct === 0)).toBe(true);
   });
 });
 
