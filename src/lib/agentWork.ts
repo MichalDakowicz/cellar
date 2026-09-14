@@ -14,6 +14,9 @@ import type { Entry, EntryLine, Kind } from '@/types/cellar';
  *
  *   open → claim → doing → work → done | dropped
  *                       ↘ ask → blocked → (you answer) → open
+ *
+ * Where the asking happens depends on how much work is on the table, and that
+ * is the one rule an agent has to get right — see `ASK_WHERE`.
  */
 
 /** Only an untouched, unarchived thought can be picked up. */
@@ -146,6 +149,30 @@ export function kindWork(kind: Kind): KindWork {
 /** The sentence that goes in the brief when a kind must not be guessed at. */
 export function askRule(kind: Kind): string {
   return kindWork(kind).ask === 'always'
-    ? 'ask before you act. put the question on the entry with cellar_ask and stop — a blocked entry waiting on an answer is the right result here, not a half-built guess'
-    : 'if the entry is ambiguous enough that two readings would produce different work, ask with cellar_ask instead of picking one';
+    ? 'ask before you act — a question waiting on an answer is the right result here, not a half-built guess'
+    : 'if the entry is ambiguous enough that two readings would produce different work, ask instead of picking one';
 }
+
+/**
+ * Where to ask, which is not the same question as whether to.
+ *
+ * One task in front of you means the user is sitting there: asking in the chat
+ * costs them a sentence and costs you nothing, and routing it through the
+ * cellar would stall the only thing they asked for behind a notification.
+ *
+ * Several tasks means they have gone away. Then the question goes on the entry,
+ * which blocks that one thought and *only* that one — everything else on the
+ * list is still work you can do, and by the time it is done the answer may
+ * already be there. What must not happen is holding the question in your head
+ * until the end: a session that dies mid-batch takes it with it, and nothing
+ * ever reached their inbox to say something was waiting.
+ *
+ * Handed over verbatim on every claim, because this is exactly the decision a
+ * model gets wrong in the direction of interrupting.
+ */
+export const ASK_WHERE = [
+  'one task in this session: ask in the chat. the user is right there, and a blocked entry would stall the only thing they asked for',
+  'several tasks: cellar_ask on the entry, then move to the next one — ask as soon as you know, never at the end, or a session that dies takes the question with it',
+  'before you finish: re-read the entries you asked about. an answer that arrived is yours to pick back up',
+  'still unanswered when the work runs out: ask that same question in the chat, then write the answer back with cellar_answer_question so the entry keeps the pair',
+].join('\n           ');

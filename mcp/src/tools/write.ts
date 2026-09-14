@@ -2,18 +2,22 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { canClaim, LINE_VOICE } from '@/lib/agentWork';
+import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { normalizeRepoPath, normalizeRepoUrl, repoLabel } from '@/lib/repoLink';
 import type { Kind } from '@/types/cellar';
 
 import {
   addAgentLine,
+  answerQuestion,
   archiveEntry,
+  askQuestion,
   claimEntry,
   createEntry,
   linkRepo,
   resolveEntry,
   resolveProject,
+  resolveQuestion,
   setEntryState,
 } from '../cellar.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
@@ -23,7 +27,7 @@ import { entryBrief, shortId } from '../format.ts';
  * The writes, and the shape of the loop they make:
  *
  *   claim → work → append lines → finish (done | dropped)
- *                              ↘ ask → blocked, and stop
+ *                              ↘ ask → blocked, and move to the next thing
  *
  * Three things are deliberately missing. There is no delete — nothing in this
  * app is destroyed to get it out of the way, so the strongest thing here is
@@ -72,7 +76,8 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
             entryBrief(claim.entry, cellar),
             '',
             'When you are done: cellar_finish_entry. If you cannot answer something from the',
-            'repo: cellar_ask, which stops the work and puts the question in front of the user.',
+            'repo, ask — in the chat when this session has one task, with cellar_ask when it',
+            'has several, and read "ask where" above before choosing.',
           ].join('\n'),
         );
       }),
@@ -103,27 +108,111 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
   server.registerTool(
     'cellar_ask',
     {
-      title: 'Ask the user about an entry, and stop',
+      title: 'Ask the user about an entry, then move on',
       description:
         'Put a question on the entry and block it. THIS IS A CORRECT OUTCOME, not a failure — for an idea or a ' +
         'removal it is usually the right one. A dumped thought is one line and the decisions behind it were never ' +
         'written down, so anything with two plausible readings that lead to different work is a question, not a ' +
-        'guess. The entry goes to blocked, shows up in the user\'s inbox, and nothing else should be done on it ' +
-        'until they answer. Ask one concrete question naming the options you are choosing between.',
+        'guess.\n\n' +
+        'WHERE TO ASK. If this session has one task, do not use this tool — ask in the chat, because the user is ' +
+        'right there and blocking the only thing they asked for helps nobody. Use this when they have handed you ' +
+        'several: it blocks this one thought and leaves the rest of the list workable, and the answer may well be ' +
+        'there by the time you come back to it.\n\n' +
+        'WHEN TO ASK. The moment you know, never at the end of the session. The question is worth nothing until it ' +
+        'is in their inbox, and a session that ends before you write it takes it with it.\n\n' +
+        'Ask one concrete question, and pass `options` whenever you are choosing between named alternatives — the ' +
+        'user answers those with a single tap. Before you finish, read the entries you asked about again: if the ' +
+        'answer is still missing, ask the same question in the chat and record it with cellar_answer_question.',
       inputSchema: {
         entry: z.string().describe('Entry id, or the short id from a listing.'),
-        question: z.string().describe('One line. Name the options rather than asking an open question.'),
+        question: z
+          .string()
+          .describe('One line. Name what you are choosing between rather than asking an open question.'),
+        options: z
+          .array(z.string())
+          .max(MAX_OPTIONS)
+          .optional()
+          .describe(
+            `The alternatives, one line each, at most ${MAX_OPTIONS}. Rendered as a/b/c/d tap targets in the app, ` +
+              'so prefer them to asking the user to type. Omit only when the answer cannot be a choice.',
+          ),
       },
     },
-    async ({ entry, question }) =>
+    async ({ entry, question, options }) =>
       guard(async () => {
         const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
-        const written = await addAgentLine(ctx.client, ctx.userId, target.id, question);
-        await setEntryState(ctx.client, target.id, 'blocked', ctx.agent);
+        const asked = await askQuestion(ctx.client, ctx.userId, target.id, {
+          question,
+          options: options ?? [],
+          agent: ctx.agent,
+        });
+
         return text(
-          `${shortId(target.id)} is blocked, waiting on the user:\n> ${written}\n\n` +
-            'It is in their inbox now. Do not keep working this entry — move to another one or stop.',
+          [
+            `${shortId(target.id)} is blocked, waiting on the user:`,
+            `  ? ${shortId(asked.id)} ${asked.question}`,
+            ...asked.options.map((option, index) => `      ${optionLabel(index)}) ${option}`),
+            '',
+            'It is in their inbox now. Move to the next task — do not keep working this entry, and do not sit',
+            'waiting on it. Before you finish the session, read this entry again: if the answer arrived it is',
+            'yours to pick back up, and if it did not, ask the same question in the chat and record what they',
+            'say with cellar_answer_question.',
+          ].join('\n'),
+        );
+      }),
+  );
+
+  server.registerTool(
+    'cellar_answer_question',
+    {
+      title: 'Record an answer the user gave in the chat',
+      description:
+        'The other half of cellar_ask. You asked on the entry, the work ran out before an answer arrived, so you ' +
+        'asked the same question in the chat — this writes what they said back onto the question, so the entry ' +
+        'keeps the pair and the decision does not live only in a conversation that is gone.\n\n' +
+        'It unblocks the entry when this was the last question outstanding, which leaves it open for you to claim ' +
+        'again. Only ever record what the user actually said: an answer you reasoned out yourself is a guess with ' +
+        'their name on it.',
+      inputSchema: {
+        entry: z.string().describe('Entry id, or the short id from a listing.'),
+        question: z
+          .string()
+          .optional()
+          .describe('Question id, from the entry brief. Omit when only one question is outstanding.'),
+        answer: z.string().describe('One line: what the user chose, in their words.'),
+      },
+    },
+    async ({ entry, question, answer }) =>
+      guard(async () => {
+        const { ctx, cellar } = await withCellar(getCtx);
+        const target = resolveEntry(entry, cellar.entries);
+        const pending = pendingQuestions(target.questions);
+
+        // Naming the question is optional while only one is waiting, which is
+        // the common case — and refused rather than guessed when it is not.
+        const chosen = question?.trim()
+          ? resolveQuestion(question, target.questions)
+          : pending.length === 1
+            ? pending[0]
+            : null;
+
+        if (!chosen) {
+          throw new Error(
+            pending.length === 0
+              ? `${shortId(target.id)} has no question waiting on an answer.`
+              : `${shortId(target.id)} has ${pending.length} questions waiting. Pass the one you mean: ` +
+                pending.map((one) => shortId(one.id)).join(', '),
+          );
+        }
+
+        const written = await answerQuestion(ctx.client, target, chosen.id, answer);
+        const left = pending.filter((one) => one.id !== chosen.id).length;
+        return text(
+          `Recorded on ${shortId(target.id)}:\n  ? ${written.question}\n  = ${written.answer}\n\n` +
+            (left > 0
+              ? `${left} more still waiting, so the entry stays blocked.`
+              : 'That was the last one, so the entry is open again — claim it to carry on.'),
         );
       }),
   );

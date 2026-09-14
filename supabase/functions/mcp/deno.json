@@ -4,6 +4,7 @@
     "@/lib/agentPrompt": "../../../src/lib/agentPrompt.ts",
     "@/lib/agentWork": "../../../src/lib/agentWork.ts",
     "@/lib/dump": "../../../src/lib/dump.ts",
+    "@/lib/entryQuestions": "../../../src/lib/entryQuestions.ts",
     "@/lib/entryState": "../../../src/lib/entryState.ts",
     "@/lib/kinds": "../../../src/lib/kinds.ts",
     "@/lib/relTime": "../../../src/lib/relTime.ts",
