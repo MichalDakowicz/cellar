@@ -2,6 +2,10 @@
 
 ## 1.3.0 — Unreleased
 
+### Changed
+
+- Web: the scrollbar matches the app instead of the browser default
+
 ## 1.2.0 — 2026-09-14
 
 ### Added
