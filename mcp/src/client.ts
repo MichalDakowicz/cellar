@@ -57,12 +57,37 @@ export function createCellarClient(): SupabaseClient {
   });
 }
 
+/**
+ * A client for the login command only.
+ *
+ * PKCE needs somewhere to keep the code verifier between starting the flow and
+ * exchanging the code for a session. That is one process and a few seconds, so
+ * a Map is the right storage — and it means the verifier never touches disk.
+ */
+export function createAuthClient(): SupabaseClient {
+  const { url, anonKey } = loadConfig();
+  const memory = new Map<string, string>();
+  return createClient(url, anonKey, {
+    auth: {
+      flowType: 'pkce',
+      persistSession: true,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: {
+        getItem: (key) => memory.get(key) ?? null,
+        setItem: (key, value) => void memory.set(key, value),
+        removeItem: (key) => void memory.delete(key),
+      },
+    },
+  });
+}
+
 export class NotSignedIn extends Error {
   constructor() {
     super(
-      'This Cellar MCP server is not signed in. Run `npm run login` in cellar/mcp ' +
-        '(it asks for the email and password of the account the app uses) and then retry. ' +
-        'Do not ask the user for their password — the login command reads it directly.',
+      'This Cellar MCP server is not signed in. Run `npm run login` in cellar/mcp and retry. ' +
+        'It offers Google in a browser, an emailed code, or a password — the same account the app uses. ' +
+        'Never ask the user for their password yourself; the login command handles it.',
     );
     this.name = 'NotSignedIn';
   }

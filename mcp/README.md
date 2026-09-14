@@ -20,6 +20,20 @@ npm install
 npm run login          # the same account the app signs into
 ```
 
+`login` offers three ways in, because the shared account may have been created with
+Google and never given a password:
+
+1. **Google, in a browser.** It stands up a one-request server on `localhost:54545`, sends
+   you to Google, and takes the code out of the redirect — the same PKCE flow the app runs
+   through `expo-web-browser`, with a different letterbox. If Supabase rejects the redirect,
+   add `http://localhost:54545/callback` once under *Authentication → URL Configuration →
+   Redirect URLs*.
+2. **A code emailed to you.** No password, no dashboard setting.
+3. **Email and password.**
+
+`npm run login -- --google` / `--code` / `--password` skips the menu, and setting
+`CELLAR_EMAIL` + `CELLAR_PASSWORD` runs it without a prompt.
+
 Then register it with whatever runs agents. Claude Code:
 
 ```json
@@ -57,6 +71,7 @@ working directory and nobody is ever asked "which project is this?" again.
 | `CELLAR_SUPABASE_ANON_KEY`  | `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `../.env` | ditto                                 |
 | `CELLAR_AGENT`              | `claude`                         | What the agent is called on the entries it touches |
 | `CELLAR_EMAIL` / `CELLAR_PASSWORD` | —                         | Non-interactive `npm run login`                    |
+| `CELLAR_EMAIL` alone        | —                                | Skips the email prompt on the emailed-code flow     |
 
 It reads the app's own `.env` by default, so there is no second copy of the credentials to
 keep in step.
