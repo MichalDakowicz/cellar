@@ -92,7 +92,7 @@ create table if not exists public.cellar_entries (
   text       text not null,
   -- idea | removal | glitch | question | research | copy | design
   kind       text not null default 'idea',
-  -- open | doing | done | dropped
+  -- open | doing | blocked | done | dropped
   state      text not null default 'open',
   -- Out of the project and out of the inbox, still in search, one tap back.
   archived   boolean not null default false,
@@ -127,7 +127,42 @@ create table if not exists public.cellar_entry_lines (
 create index if not exists cellar_entry_lines_entry_idx on public.cellar_entry_lines (entry_id, created_at);
 
 -- ----------------------------------------------------------------------------
--- 5. Cellar's own settings
+-- 5. Questions — what an agent stopped to ask, and what you answered
+--
+-- Its own table rather than a flagged line, because a question is not a line:
+-- it carries the options it offered, the answer that came back, and whether it
+-- was answered or waved off. Kept after answering — the pairs are the record of
+-- why a thought was built the way it was, which is the part that was never
+-- written down.
+--
+-- An entry is `blocked` while any of its questions is neither answered nor
+-- dismissed, and goes back to `open` when the last one settles.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_entry_questions (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  entry_id     uuid not null references public.cellar_entries(id) on delete cascade,
+  question     text not null,
+  -- The choices offered, as a json array of strings. Empty means free text
+  -- only. Rendered a/b/c/d in the app; the answer is still stored as its text,
+  -- so reading a question back never needs the options to interpret it.
+  options      jsonb not null default '[]'::jsonb,
+  answer       text,
+  answered_at  timestamptz,
+  -- 'app' when you answered it here, 'chat' when the agent gave up waiting and
+  -- asked you directly, then wrote the answer back.
+  answered_via text,
+  dismissed_at timestamptz,
+  -- Who asked. Null for a question with no agent name on it.
+  agent        text,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists cellar_entry_questions_entry_idx
+  on public.cellar_entry_questions (entry_id, created_at);
+
+-- ----------------------------------------------------------------------------
+-- 6. Cellar's own settings
 --
 -- Cellar-only preferences. The two shared columns it is allowed to write —
 -- user_settings.theme and user_settings.friends_visibility — stay in Radar's
@@ -148,7 +183,7 @@ create table if not exists public.cellar_settings (
 );
 
 -- ----------------------------------------------------------------------------
--- 6. Agent tokens — how an agent that is not on your machine proves it is you
+-- 7. Agent tokens — how an agent that is not on your machine proves it is you
 --
 -- The MCP server used to be the only way in, and it ran on your laptop with
 -- your refresh token sitting in ~/.cellar-mcp. Hosted, there is no such file:
@@ -195,6 +230,7 @@ alter table public.cellar_shelves      enable row level security;
 alter table public.cellar_projects     enable row level security;
 alter table public.cellar_entries      enable row level security;
 alter table public.cellar_entry_lines  enable row level security;
+alter table public.cellar_entry_questions enable row level security;
 alter table public.cellar_settings     enable row level security;
 alter table public.cellar_agent_tokens enable row level security;
 
@@ -217,6 +253,12 @@ create policy cellar_entries_owner_all on public.cellar_entries for all
 -- re-answer a question the entry's own policy has already answered.
 drop policy if exists cellar_entry_lines_owner_all on public.cellar_entry_lines;
 create policy cellar_entry_lines_owner_all on public.cellar_entry_lines for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Same shape, same reason: keyed to user_id, not joined back to the entry.
+drop policy if exists cellar_entry_questions_owner_all on public.cellar_entry_questions;
+create policy cellar_entry_questions_owner_all on public.cellar_entry_questions for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 

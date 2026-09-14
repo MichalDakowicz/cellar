@@ -12,7 +12,7 @@ woken on a schedule the way Radar's metadata sweep is.
 ```
 agent calls cellar_ask
       ↓
-entry.state = 'blocked', question appended as a line
+question row written, entry.state = 'blocked'
       ↓
   ┌── app in the foreground ──────── useCellar already has it ──┐
   │                                                              ├─▶ notifyBlockedQuestions
@@ -21,6 +21,7 @@ entry.state = 'blocked', question appended as a line
 
 | File                               | Does                                                          |
 | ---------------------------------- | ------------------------------------------------------------- |
+| `lib/entryQuestions.ts`            | **Pure.** What a question is, and when it is settled            |
 | `lib/questionNotices.ts`           | **Pure.** Which questions still owe a banner. The tested part  |
 | `lib/questionNotifier.ts`          | Presents them, remembers what it has shown (MMKV, per device)  |
 | `lib/blockedWatchTask.ts`          | The headless wake: its own small query, then the notifier      |
@@ -28,11 +29,22 @@ entry.state = 'blocked', question appended as a line
 | `features/notifications/QuestionSync.tsx` | Mounted in the root layout: channels, registration, foreground check, taps |
 | `cellar_settings.notify_questions` | The switch, on the account rather than the handset             |
 
-A notice is identified by the entry **and the line that asked**, not by the entry. Re-asking
-with a new question notifies again; re-blocking with nothing added stays quiet. That
-distinction is the whole of `questionNotices.test.ts`, because the failure worth preventing
-is not a missing banner — it is the same question arriving on every wake, which is how an
-app gets its notifications switched off for good.
+A notice is identified by the entry **and the newest question outstanding on it**, not by the
+entry. Asking something new on an already-blocked thought notifies again; re-blocking with
+nothing added stays quiet.
+
+One banner per entry even when several questions are waiting — two truncated questions in a
+notification body read as one incoherent sentence, so the body becomes a count. All of them
+are then remembered as shown, not just the newest: a banner that said "2 questions waiting on
+you" has told you about both, and answering one must not make the other look like something
+new to announce.
+
+That distinction is the whole of `questionNotices.test.ts`, because the failure worth
+preventing is not a missing banner — it is the same question arriving on every wake, which is
+how an app gets its notifications switched off for good.
+
+Entries blocked before questions were rows fall back to the last line an agent appended,
+which is what asking used to mean. Without that they would go quiet forever.
 
 ## The trade
 

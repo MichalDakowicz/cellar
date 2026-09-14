@@ -1,9 +1,10 @@
 import { shortEntryId } from '@/lib/agentPrompt';
-import { askRule, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
+import { askRule, ASK_WHERE, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
+import { optionLabel, pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
-import type { Entry, Project } from '@/types/cellar';
+import type { Entry, EntryQuestion, Project } from '@/types/cellar';
 
 import type { Cellar } from './cellar.ts';
 
@@ -102,9 +103,47 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
     out.push(...agent.map((line) => `  > ${line.text}  (${longRel(line.createdAt, now)})`));
   }
 
-  out.push('', `asking     ${askRule(entry.kind)}`, `line voice ${LINE_VOICE}`);
+  out.push(...questionBlocks(entry.questions, now));
+
+  out.push('', `asking     ${askRule(entry.kind)}`, `ask where  ${ASK_WHERE}`, `line voice ${LINE_VOICE}`);
 
   return out.join('\n');
+}
+
+/**
+ * The questions on an entry, in the two readings that matter to an agent: what
+ * is still owed an answer, and what has already been decided.
+ *
+ * The settled half is the point of keeping them. An agent picking a thought
+ * back up needs the answer far more than it needs the question, and without it
+ * it would re-ask something the user settled a week ago.
+ */
+function questionBlocks(questions: EntryQuestion[], now: number): string[] {
+  const out: string[] = [];
+  const pending = pendingQuestions(questions);
+  const settled = settledQuestions(questions);
+
+  if (pending.length > 0) {
+    out.push('', 'still waiting on an answer — do not act on these:');
+    for (const question of pending) {
+      out.push(`  ? ${shortId(question.id)} ${question.question}  (${longRel(question.createdAt, now)})`);
+      question.options.forEach((option, index) => out.push(`      ${optionLabel(index)}) ${option}`));
+    }
+  }
+
+  if (settled.length > 0) {
+    out.push('', 'asked and settled — build to these, do not ask again:');
+    for (const question of settled) {
+      out.push(`  ? ${question.question}`);
+      out.push(
+        questionStatus(question) === 'dismissed'
+          ? `  = waved off${question.answer ? ` (was: ${question.answer})` : ' — they chose not to answer, so use your judgement'}`
+          : `  = ${question.answer ?? '(no answer recorded)'}`,
+      );
+    }
+  }
+
+  return out;
 }
 
 /** The column legend, printed once at the top of a listing. */

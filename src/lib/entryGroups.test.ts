@@ -23,6 +23,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   createdAt: '2026-09-13T10:00:00.000Z',
   agent: null,
   lines: [],
+  questions: [],
   ...over,
 });
 

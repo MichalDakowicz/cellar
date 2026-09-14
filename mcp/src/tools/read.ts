@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { inProgress, waitingOnYou } from '@/lib/agentWork';
+import { readyToResume } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
@@ -55,11 +56,24 @@ function orientBody(cellar: Cellar, cwd: string): string {
   const open = live.filter((entry) => entry.state === 'open');
   const blocked = waitingOnYou(live);
   const doing = inProgress(live);
+  const answered = readyToResume(live);
 
   out.push(
     '',
-    `${open.length} open · ${doing.length} being worked · ${blocked.length} blocked on an answer`,
+    `${open.length} open · ${doing.length} being worked · ${blocked.length} blocked on an answer` +
+      (answered.length > 0 ? ` · ${answered.length} answered and waiting to be picked back up` : ''),
   );
+
+  // Above the open list on purpose: a thought someone already asked about and
+  // got an answer to is further along than anything untouched, and the whole
+  // point of asking and moving on is that the answer gets used.
+  if (answered.length > 0) {
+    out.push(
+      '',
+      'answered since it was asked — start here, the decision is on the entry:',
+      entryTable(answered.slice(0, LIMIT), cellar.projects),
+    );
+  }
 
   if (open.length > 0) {
     out.push('', `open, newest first (${ROW_LEGEND}):`, entryTable(open.slice(0, LIMIT), cellar.projects));

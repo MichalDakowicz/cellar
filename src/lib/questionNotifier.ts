@@ -78,6 +78,6 @@ export async function notifyBlockedQuestions(entries: Entry[], projects: Project
 
   // Written even when nothing was owed: this is also what forgets the keys of
   // questions that have since been answered.
-  writeSeen(nextSeen(entries, seen, owed.map((notice) => notice.key)));
+  writeSeen(nextSeen(entries, seen, owed.flatMap((notice) => notice.covers)));
   return owed.length;
 }
