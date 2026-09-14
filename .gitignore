@@ -40,3 +40,6 @@ ios
 
 plan.md
 feature_ideas.md
+
+# Supabase CLI scratch — the linked project ref, written on deploy
+supabase/.temp/

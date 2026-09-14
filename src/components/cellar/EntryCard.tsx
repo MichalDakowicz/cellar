@@ -1,10 +1,13 @@
+import { Copy } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { StateBadge } from '@/components/cellar/StateBadge';
+import { KIND_GUTTER, KindGlyph, kindLabel, TEXT_LINE } from '@/components/media/Glyphs';
+import { useHover, webTransition } from '@/hooks/useResponsive';
 import { stateMeta } from '@/lib/entryState';
-import { KIND_CODE_WIDTH, kindMeta } from '@/lib/kinds';
 import { shortRel } from '@/lib/relTime';
+import { COLORS } from '@/theme/colors';
 import type { Entry } from '@/types/cellar';
 
 export type EntryVariant = 'line' | 'inbox' | 'hit';
@@ -12,13 +15,15 @@ export type EntryVariant = 'line' | 'inbox' | 'hit';
 type EntryCardProps = {
   entry: Entry;
   variant?: EntryVariant;
-  /** The mono kind code in the left gutter. Off is a real setting, not a size. */
+  /** The kind glyph in the left gutter. Off is a real setting, not a size. */
   showCode?: boolean;
   /** Where it lives, for a list that spans projects — the inbox and search. */
   where?: string;
   onPress: (entry: Entry) => void;
   /** Presence of a handler is what shows the file affordance. */
   onFile?: (entry: Entry) => void;
+  /** Copies the line that starts this thought in an agent. Same rule. */
+  onCopy?: (entry: Entry) => void;
 };
 
 /**
@@ -28,7 +33,7 @@ type EntryCardProps = {
  *
  * It is a *line*, not a tile: this app has no artwork, and a wall of thoughts
  * only stays readable if the text starts at the same x on every row. That is
- * what the fixed-width mono gutter buys — the codes are alignment first and
+ * what the fixed-width glyph gutter buys — the kind is alignment first and
  * information second.
  *
  * Memoized: it renders in every virtualized cell, and without this a filter
@@ -41,27 +46,48 @@ export const EntryCard = memo(function EntryCard({
   where,
   onPress,
   onFile,
+  onCopy,
 }: EntryCardProps) {
-  const kind = kindMeta(entry.kind);
   const settled = stateMeta(entry.state).settled;
   const grown = entry.lines.length;
+  const { hovered, bind } = useHover();
 
   return (
-    <View className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}>
+    <View
+      className={variant === 'inbox' ? 'flex-row items-start gap-3 rounded-xl bg-neutral-900 p-3' : 'flex-row'}
+      // A row is a click target on web and looks like plain text until the
+      // ground moves under the mouse (PING.md §4.5). The inbox row already has
+      // a ground, so it lifts; a bare line grows one.
+      style={[
+        webTransition('background-color'),
+        hovered ? { backgroundColor: COLORS.rowHover, borderRadius: 12 } : null,
+      ]}
+    >
       {showCode && (
-        <Text
-          className="pt-0.5 font-mono text-[11px] text-muted-foreground"
-          style={{ width: KIND_CODE_WIDTH * 7.5 }}
-          numberOfLines={1}
+        // Centred in the gutter on both axes, and the box is exactly one line
+        // of `text-sm` tall (14px over a 20px line box) so the glyph sits on the
+        // first line of a thought that wraps to three — not floated above it by
+        // a guessed top padding.
+        <View
+          accessibilityLabel={kindLabel(entry.kind)}
+          style={{
+            width: KIND_GUTTER,
+            height: TEXT_LINE,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          {kind.code}
-        </Text>
+          <KindGlyph kind={entry.kind} />
+        </View>
       )}
 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={entry.text}
         onPress={() => onPress(entry)}
+        // Hover binds to the Pressable, never to the View around it —
+        // react-native-web only implements onHoverIn/Out on Pressable.
+        {...bind}
         className={[
           'min-w-0 flex-1 flex-row items-start gap-2.5 rounded-lg active:opacity-80',
           variant === 'inbox' ? '' : 'px-2 py-2.5',
@@ -83,6 +109,22 @@ export const EntryCard = memo(function EntryCard({
           </Text>
         )}
       </Pressable>
+
+      {onCopy && (
+        // Muted and small, never the accent: it is on every row, and an accent
+        // repeated down a list stops marking anything (PING.md §1.2). It sits
+        // outside the text Pressable so a tap here cannot open the entry.
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`copy a prompt for ${entry.text}`}
+          hitSlop={10}
+          onPress={() => onCopy(entry)}
+          className="items-center justify-center self-start rounded-md px-1.5 active:opacity-60"
+          style={{ height: TEXT_LINE + 20 }}
+        >
+          <Copy size={13} color={COLORS.muted} strokeWidth={2} />
+        </Pressable>
+      )}
 
       {onFile && (
         <Pressable

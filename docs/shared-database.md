@@ -36,7 +36,7 @@ all (see below), so a privacy switch here would be a control with nothing behind
 
 ## What Cellar owns
 
-Five tables, all namespaced, all with RLS keyed to `auth.uid()`:
+Six tables, all namespaced, all with RLS keyed to `auth.uid()`:
 
 | Table | Holds |
 | --- | --- |
@@ -45,6 +45,7 @@ Five tables, all namespaced, all with RLS keyed to `auth.uid()`:
 | `cellar_entries` | one line, caught. `project_id is null` **is** the inbox |
 | `cellar_entry_lines` | the lines appended to an entry afterwards |
 | `cellar_settings` | Cellar-only preferences (gutter codes, raw default, default kind and view) |
+| `cellar_agent_tokens` | hashed tokens a hosted agent presents instead of signing in |
 
 ## Cellar is private, and that is a design decision
 

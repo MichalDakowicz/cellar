@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
-import { KINDS } from '@/lib/kinds';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -69,6 +68,20 @@ export function useDumpScreen() {
     [raw, submit],
   );
 
+  // The desktop column beside the field. The last few thoughts in the cellar,
+  // whichever project they landed in — the point is that a wide window can show
+  // you what you have been catching while you catch the next one, which is the
+  // one thing a phone has no room for.
+  const recent = useMemo(
+    () =>
+      entries
+        .filter((entry) => !entry.archived)
+        .slice()
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 12),
+    [entries],
+  );
+
   const justDropped = useMemo(
     () => justIds.map((id) => entries.find((entry) => entry.id === id)).filter((entry): entry is Entry => !!entry),
     [justIds, entries],
@@ -94,7 +107,6 @@ export function useDumpScreen() {
     onReturn,
     kind,
     setKind: (next: Kind) => setKind(next),
-    kindOptions: KINDS.map((meta) => ({ value: meta.value, label: meta.label })),
     projectId,
     setProject: setLastProject,
     projectOptions: [
@@ -102,6 +114,7 @@ export function useDumpScreen() {
       ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
     ],
     justDropped,
+    recent,
     showCodes: settings.showCodes,
   };
 }

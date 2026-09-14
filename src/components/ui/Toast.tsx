@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 
 import { NAV_ISLAND_GAP, NAV_ISLAND_HEIGHT } from '@/hooks/useNavBarSpace';
+import { MAX_W, useIsDesktop } from '@/hooks/useResponsive';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DURATION_MS = 3600;
@@ -25,6 +26,7 @@ const ToastContext = createContext<ToastContextValue>({ say: () => {} });
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
+  const isDesktop = useIsDesktop();
   const [toast, setToast] = useState<{ message: string; action?: ToastAction } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -53,9 +55,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             left: 16,
             right: 16,
             bottom: insets.bottom + NAV_ISLAND_HEIGHT + NAV_ISLAND_GAP * 3,
+            // A toast the width of a 27" monitor reads as a page banner, not as
+            // a thing that just happened above the nav islands.
+            alignItems: isDesktop ? 'center' : undefined,
           }}
         >
-          <View className="flex-row items-center gap-3 rounded-lg border border-border bg-popover px-3.5 py-3">
+          <View
+            className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-popover px-3.5 py-3"
+            style={isDesktop ? { maxWidth: MAX_W.form } : undefined}
+          >
             <Text className="min-w-0 flex-1 text-sm font-semibold text-foreground" numberOfLines={2}>
               {toast.message}
             </Text>

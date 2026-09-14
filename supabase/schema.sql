@@ -82,7 +82,7 @@ create index if not exists cellar_projects_user_idx  on public.cellar_projects (
 -- get it out of the way.
 --
 -- `kind` and `state` are text, and the stored value is the display string
--- (PING.md §2.3). Not enums: adding a ninth kind should not need a migration,
+-- (PING.md §2.3). Not enums: adding an eighth kind should not need a migration,
 -- and a mapping table back to display text is a second source of truth.
 -- ----------------------------------------------------------------------------
 create table if not exists public.cellar_entries (
@@ -90,7 +90,7 @@ create table if not exists public.cellar_entries (
   user_id    uuid not null references auth.users(id) on delete cascade,
   project_id uuid references public.cellar_projects(id) on delete set null,
   text       text not null,
-  -- idea | addition | removal | glitch | question | research | copy | design
+  -- idea | removal | glitch | question | research | copy | design
   kind       text not null default 'idea',
   -- open | doing | done | dropped
   state      text not null default 'open',
@@ -147,6 +147,43 @@ create table if not exists public.cellar_settings (
   updated_at    timestamptz not null default now()
 );
 
+-- ----------------------------------------------------------------------------
+-- 6. Agent tokens — how an agent that is not on your machine proves it is you
+--
+-- The MCP server used to be the only way in, and it ran on your laptop with
+-- your refresh token sitting in ~/.cellar-mcp. Hosted, there is no such file:
+-- the agent sends a token in a header and something has to turn that into "this
+-- is the owner" without ever holding a service key.
+--
+-- Only the hash is kept. A row here is worth nothing to whoever reads it — it
+-- cannot be turned back into a token, so a leaked backup is not a leaked
+-- cellar. The plaintext is returned exactly once, by cellar_create_agent_token,
+-- and losing it means minting another rather than recovering that one.
+--
+-- Revoking is a timestamp and not a delete, for the same reason nothing else in
+-- this app is deleted: "which machine was that, and when did I turn it off" is
+-- a question you will ask, and a missing row cannot answer it.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_agent_tokens (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  -- What it is for, in your words: "laptop", "work desktop". Shown in settings.
+  name         text not null,
+  -- sha256 of the token, hex. Unique, so resolving one is a single index hit.
+  token_hash   text not null unique,
+  created_at   timestamptz not null default now(),
+  -- Stamped on every resolve, so a token you no longer recognise can be told
+  -- apart from one that has simply never been used.
+  last_used_at timestamptz,
+  -- Null means it does not expire, which is right for your own machine. A
+  -- token for a machine you are borrowing should not be.
+  expires_at   timestamptz,
+  revoked_at   timestamptz
+);
+
+create index if not exists cellar_agent_tokens_user_idx
+  on public.cellar_agent_tokens (user_id, created_at desc);
+
 -- ============================================================================
 -- Row level security
 --
@@ -154,11 +191,12 @@ create table if not exists public.cellar_settings (
 -- is re-runnable; the pair runs inside the SQL Editor's single transaction, so
 -- there is no window where a table sits unprotected.
 -- ============================================================================
-alter table public.cellar_shelves     enable row level security;
-alter table public.cellar_projects    enable row level security;
-alter table public.cellar_entries     enable row level security;
-alter table public.cellar_entry_lines enable row level security;
-alter table public.cellar_settings    enable row level security;
+alter table public.cellar_shelves      enable row level security;
+alter table public.cellar_projects     enable row level security;
+alter table public.cellar_entries      enable row level security;
+alter table public.cellar_entry_lines  enable row level security;
+alter table public.cellar_settings     enable row level security;
+alter table public.cellar_agent_tokens enable row level security;
 
 drop policy if exists cellar_shelves_owner_all on public.cellar_shelves;
 create policy cellar_shelves_owner_all on public.cellar_shelves for all
@@ -184,6 +222,15 @@ create policy cellar_entry_lines_owner_all on public.cellar_entry_lines for all
 
 drop policy if exists cellar_settings_owner_all on public.cellar_settings;
 create policy cellar_settings_owner_all on public.cellar_settings for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- The token is not in this table, only its hash, so an owner reading its own
+-- rows gives nothing away. Everything an unauthenticated caller needs comes
+-- from cellar_resolve_agent_token instead — the one security definer function
+-- in this file, and it answers with a user id and nothing else.
+drop policy if exists cellar_agent_tokens_owner_all on public.cellar_agent_tokens;
+create policy cellar_agent_tokens_owner_all on public.cellar_agent_tokens for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -234,6 +281,90 @@ end;
 $$;
 
 -- ============================================================================
+-- Agent tokens — mint one, and resolve one
+--
+-- Two functions, and the split between them is the whole security argument.
+--
+-- Minting runs as you: security invoker, so the insert is checked by the same
+-- policy as every other write in this file. Resolving cannot run as you —
+-- whoever is asking has not proved who they are yet, which is the thing they
+-- are asking about — so it is the one security definer function here, and it is
+-- kept as narrow as a function can be. It takes a hash. It returns a user id.
+-- It cannot be made to say anything else about the row it found, or whether a
+-- row was found at all beyond that.
+-- ============================================================================
+
+-- The token is generated in the database rather than in the app, so the
+-- plaintext exists in exactly two places: this function's return value and the
+-- clipboard you paste it from. Two uuids is 256 bits of the same randomness the
+-- ids in this file already trust, and it needs no extension to produce.
+create or replace function public.cellar_create_agent_token(p_name text)
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_token text;
+begin
+  if auth.uid() is null then
+    raise exception 'Not signed in.';
+  end if;
+
+  v_token := 'clr_'
+    || replace(gen_random_uuid()::text, '-', '')
+    || replace(gen_random_uuid()::text, '-', '');
+
+  insert into public.cellar_agent_tokens (user_id, name, token_hash)
+  values (
+    auth.uid(),
+    coalesce(nullif(btrim(p_name), ''), 'agent'),
+    encode(sha256(convert_to(v_token, 'UTF8')), 'hex')
+  );
+
+  return v_token;
+end;
+$$;
+
+revoke all on function public.cellar_create_agent_token(text) from public;
+grant execute on function public.cellar_create_agent_token(text) to authenticated;
+
+-- Hashed by the caller, never sent in the clear: the database is handed the
+-- sha256 and compares that, so the token itself never reaches a query log.
+create or replace function public.cellar_resolve_agent_token(p_hash text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_id   uuid;
+  v_user uuid;
+begin
+  select id, user_id into v_id, v_user
+    from public.cellar_agent_tokens
+   where token_hash = p_hash
+     and revoked_at is null
+     and (expires_at is null or expires_at > now());
+
+  if v_id is null then
+    return null;
+  end if;
+
+  update public.cellar_agent_tokens
+     set last_used_at = now()
+   where id = v_id;
+
+  return v_user;
+end;
+$$;
+
+-- Callable by an unauthenticated role on purpose: that is exactly the state the
+-- caller is in when it asks. Nothing else in this file is.
+revoke all on function public.cellar_resolve_agent_token(text) from public;
+grant execute on function public.cellar_resolve_agent_token(text) to anon, authenticated;
+
+-- ============================================================================
 -- Realtime
 --
 -- The cellar is one account across a phone and a browser, and the thing you
@@ -259,4 +390,63 @@ end $$;
 -- Everything above is skipped on a live database — `create table if not exists`
 -- does not reconcile columns. A new column goes here, and only here.
 -- ============================================================================
--- (none yet)
+
+-- 2026-09-13 — "addition" folded into "idea".
+--
+-- The two named the same act: a thing you want that is not there yet. Two chips
+-- for one thought is a decision you have to make on every drop, and the answer
+-- never mattered. `kind` is free text, so an un-migrated row would keep reading
+-- back as 'addition' and normalizeEntry would show it as 'idea' without ever
+-- fixing it. Idempotent: a second run matches nothing.
+update public.cellar_entries set kind = 'idea' where kind = 'addition';
+update public.cellar_settings set default_kind = 'idea' where default_kind = 'addition';
+
+-- 2026-09-14 — where a project actually lives, so an agent can find it.
+--
+-- `repo_path` is the local checkout and it is the one that does work: an agent
+-- running in C:\ping\cellar\src\lib resolves the project by longest-prefix match
+-- on this column and needs nothing asked of the user. `repo_url` is the remote,
+-- and exists only so the app has something to open — never match on it, a URL
+-- tells you nothing about the directory the agent is standing in.
+--
+-- Both nullable. Most projects are a thought about something that has no repo
+-- yet, and requiring one would make the column a lie on the day it is added.
+alter table public.cellar_projects
+  add column if not exists repo_path text,
+  add column if not exists repo_url  text;
+
+-- 2026-09-14 — who wrote a line.
+--
+-- An entry grows by appended lines, and once something other than the user can
+-- append, a wall of one-liners with no attribution is the app's core value
+-- destroyed: you cannot tell what you thought from what was reported back. The
+-- stored value is the display word, like `kind` and `state` — 'user' | 'agent'.
+--
+-- Defaulted to 'user' and not null, so every line that already exists is
+-- correctly yours without a backfill.
+alter table public.cellar_entry_lines
+  add column if not exists source text not null default 'user';
+
+-- 2026-09-14 — which agent put an entry here or has it, if one did.
+--
+-- Claiming is `state = 'doing'` and nothing else; this column only names who,
+-- so the app can say "claude is on this" instead of leaving you to guess why a
+-- thought you never touched went amber. It is also stamped on an entry an agent
+-- dropped itself — a follow-up it found while working — which lands open for
+-- you to triage rather than as work it may hand straight back to itself.
+-- Cleared when the entry settles.
+alter table public.cellar_entries
+  add column if not exists agent text;
+
+-- 2026-09-14 — whether a blocked question raises a banner on the phone.
+--
+-- Cellar's own column, so the switch follows the account rather than the
+-- handset. Default on: the only thing it ever fires for is an agent that
+-- stopped and asked, which is by definition something waiting on you — a
+-- notification you would have wanted is not noise.
+--
+-- Delivery is local (expo-notifications on a background wake), the way Pulsar's
+-- reminders are. There is no push token, no device_tokens row and nothing of
+-- Radar's involved; see docs/agent-notifications.md.
+alter table public.cellar_settings
+  add column if not exists notify_questions boolean not null default true;

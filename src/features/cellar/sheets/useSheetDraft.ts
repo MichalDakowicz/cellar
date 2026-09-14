@@ -1,0 +1,46 @@
+import { useState } from 'react';
+
+/**
+ * The draft an edit sheet holds while it is open.
+ *
+ * It re-seeds from the row every time the sheet opens on a different target, so
+ * a rename you abandoned last time does not come back as this time's draft —
+ * but it does that by *deriving* during render against a session key, not by
+ * writing state from an effect. Setting state synchronously in an effect
+ * triggers a cascading render, and on a sheet that is a visible flash of the
+ * old name before the new one.
+ *
+ * It holds a whole field set rather than one name because a project's sheet
+ * edits three things at once, and three independently seeded `useState`s go out
+ * of step the moment one of them re-seeds and the others do not.
+ */
+export type SheetDraft<T extends Record<string, string>> = {
+  values: T;
+  set: (patch: Partial<T>) => void;
+  /** The delete confirmation is a second sheet; this is which one is showing. */
+  confirming: boolean;
+  setConfirming: (confirming: boolean) => void;
+};
+
+export function useSheetDraft<T extends Record<string, string>>(
+  open: boolean,
+  targetId: string | null,
+  initial: T,
+): SheetDraft<T> {
+  // Closed is its own key, so closing and reopening the same row re-seeds too.
+  const key = open ? (targetId ?? '') : '';
+  const [draft, setDraft] = useState<{ key: string; values: T; confirming: boolean }>({
+    key: ' ',
+    values: initial,
+    confirming: false,
+  });
+
+  const current = draft.key === key ? draft : { key, values: initial, confirming: false };
+
+  return {
+    values: current.values,
+    set: (patch) => setDraft({ ...current, values: { ...current.values, ...patch } }),
+    confirming: current.confirming,
+    setConfirming: (confirming) => setDraft({ ...current, confirming }),
+  };
+}

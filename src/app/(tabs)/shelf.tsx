@@ -4,11 +4,12 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ProjectGrid } from '@/components/cellar/ProjectGrid';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useShelfScreen } from '@/features/cellar/useShelfScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -25,15 +26,23 @@ export default function ShelfScreen() {
   const router = useRouter();
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
   const openNewProject = useCellarSheets((state) => state.newProject);
+  const openEditProject = useCellarSheets((state) => state.editProject);
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
+  const sidebar = useSidebarSpace();
+  const isDesktop = useIsDesktop();
 
   if (shelf.error) return <ErrorState message={readError(shelf.error)} onRetry={shelf.refetch} />;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}>
+    <ScrollView
+      className="flex-1 bg-background"
+      style={{ marginLeft: sidebar }}
+      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+    >
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.grid}>
-        <View className="px-4">
+        <View className={gutter}>
           <View className="flex-row items-baseline justify-between gap-3">
             <Pressable
               accessibilityRole="button"
@@ -46,9 +55,12 @@ export default function ShelfScreen() {
               </Text>
               <ChevronDown size={18} color={COLORS.muted} strokeWidth={2.2} />
             </Pressable>
-            <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-              {shelf.meta}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                {shelf.meta}
+              </Text>
+              <ScreenAction />
+            </View>
           </View>
 
           <Pressable
@@ -67,11 +79,19 @@ export default function ShelfScreen() {
             ) : shelf.tiles.length === 0 ? (
               <EmptyState
                 title="no projects on this shelf"
-                body="tap the folder on the left of the nav bar to start one, or switch shelves above."
+                body={
+                  isDesktop
+                    ? 'use new project in the sidebar to start one, or switch shelves at the top of it.'
+                    : 'tap the folder on the left of the nav bar to start one, or tap the shelf name to switch shelves.'
+                }
                 action={{ label: 'new project', onPress: () => openNewProject?.(null) }}
               />
             ) : (
-              <ProjectGrid projects={shelf.tiles} onPress={(id) => router.navigate(`/project/${id}`)} />
+              <ProjectGrid
+                projects={shelf.tiles}
+                onPress={(id) => router.navigate(`/project/${id}`)}
+                onEdit={(id) => openEditProject?.(id)}
+              />
             )}
           </View>
         </View>

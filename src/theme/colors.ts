@@ -85,6 +85,8 @@ export const COLORS = {
   mutedDeep: 'hsl(0 0% 45%)',
   danger: '#ef4444',
   dangerSoft: 'rgba(239,68,68,0.12)',
+  /** A row's ground under the mouse on web — never used on a touch build (§4.5). */
+  rowHover: 'hsl(0 0% 16%)',
   islandFill: 'rgba(22,22,22,0.72)',
   islandEdge: 'rgba(255,255,255,0.09)',
   islandPlate: 'rgba(255,255,255,0.12)',

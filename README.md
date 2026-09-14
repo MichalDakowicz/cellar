@@ -23,8 +23,8 @@ Three levels, and they are the whole idea: **shelf → project → entry.**
 - **Projects, read two ways** — grouped by kind, so "what are the open glitches" is one
   glance; or one stream cut into days, so "what was I thinking about on Tuesday" is one
   glance. Same entries, same filter, one toggle.
-- **Eight kinds** — idea, addition, removal, glitch, question, research, copy, design —
-  shown as a monochrome mono code in a left gutter rather than eight colours. The codes
+- **Seven kinds** — idea, removal, glitch, question, research, copy, design —
+  shown as a monochrome mono code in a left gutter rather than seven colours. The codes
   are alignment first and information second; that is what makes a wall of one-liners
   scan.
 - **An entry grows without being rewritten** — it stays one line forever, and coming back

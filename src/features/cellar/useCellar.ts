@@ -8,10 +8,15 @@ import {
   createShelf,
   deleteEntry,
   deleteProject,
+  deleteShelf,
   fetchEntries,
   fetchProjects,
   fetchShelves,
+  moveProject,
   patchEntry,
+  renameProject,
+  renameShelf,
+  setProjectRepo,
   type EntryPatch,
   type NewEntry,
 } from '@/features/cellar/cellarApi';
@@ -120,6 +125,22 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(PROJECTS),
   });
 
+  const editProject = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameProject(id, name),
+    onSuccess: () => invalidate(PROJECTS),
+  });
+
+  const linkProject = useMutation({
+    mutationFn: ({ id, ...repo }: { id: string; repoPath: string | null; repoUrl: string | null }) =>
+      setProjectRepo(id, repo),
+    onSuccess: () => invalidate(PROJECTS),
+  });
+
+  const relocateProject = useMutation({
+    mutationFn: ({ id, shelfId }: { id: string; shelfId: string }) => moveProject(id, shelfId),
+    onSuccess: () => invalidate(PROJECTS),
+  });
+
   const removeProject = useMutation({
     mutationFn: (id: string) => deleteProject(id),
     // Entries move to the inbox rather than going with the project, so the
@@ -127,7 +148,33 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(PROJECTS, ENTRIES),
   });
 
-  return { drop, update, remove, addLine, addShelf, addProject, removeProject };
+  const editShelf = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameShelf(id, name),
+    onSuccess: () => invalidate(SHELVES),
+  });
+
+  const removeShelf = useMutation({
+    mutationFn: (id: string) => deleteShelf(id),
+    // The projects cascade and their entries fall to the inbox, so all three
+    // lists are stale — invalidating only SHELVES leaves a shelf screen
+    // rendering projects that no longer exist.
+    onSuccess: () => invalidate(SHELVES, PROJECTS, ENTRIES),
+  });
+
+  return {
+    drop,
+    update,
+    remove,
+    addLine,
+    addShelf,
+    editShelf,
+    removeShelf,
+    addProject,
+    editProject,
+    linkProject,
+    relocateProject,
+    removeProject,
+  };
 }
 
 function requireUser(id: string | undefined): string {

@@ -108,8 +108,33 @@ type SheetHandles = {
   fileUnder: ((entryId: string) => void) | null;
   inboxSort: (() => void) | null;
   statsScope: (() => void) | null;
+  /** Rename, move or delete one project. */
+  editProject: ((projectId: string) => void) | null;
+  /** Rename or delete one shelf. */
+  editShelf: ((shelfId: string) => void) | null;
   register: (handles: Partial<Omit<SheetHandles, 'register'>>) => void;
 };
+
+/**
+ * A request to put the cursor in the capture field, rather than a handle that
+ * does it.
+ *
+ * The web `n` shortcut fires from any route, and on every route but the home
+ * one the capture screen is not mounted yet — a registered focus callback would
+ * be null at the moment the key is pressed, or worse, stale. So the shortcut
+ * navigates and leaves a flag, and the capture screen picks it up as it mounts.
+ */
+type CaptureFocusState = {
+  pending: boolean;
+  request: () => void;
+  clear: () => void;
+};
+
+export const useCaptureFocus = create<CaptureFocusState>((set) => ({
+  pending: false,
+  request: () => set({ pending: true }),
+  clear: () => set({ pending: false }),
+}));
 
 export const useCellarSheets = create<SheetHandles>((set) => ({
   filter: null,
@@ -118,5 +143,7 @@ export const useCellarSheets = create<SheetHandles>((set) => ({
   fileUnder: null,
   inboxSort: null,
   statsScope: null,
+  editProject: null,
+  editShelf: null,
   register: (handles) => set(handles),
 }));

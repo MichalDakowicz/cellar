@@ -3,11 +3,14 @@ import { type ReactElement } from 'react';
 import { Text, View } from 'react-native';
 
 import { EntryCard, type EntryVariant } from '@/components/cellar/EntryCard';
+import { KindGlyph } from '@/components/media/Glyphs';
 import { EmptyState } from '@/components/ui/states';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import type { Entry } from '@/types/cellar';
+import { useGutter } from '@/hooks/useResponsive';
+import type { Entry, Kind } from '@/types/cellar';
 
-export type EntrySection = { key: string; label: string; meta?: string };
+/** `kind` is set on a grouped-by-kind heading, and absent on a day heading. */
+export type EntrySection = { key: string; label: string; meta?: string; kind?: Kind };
 
 /** A section heading, or one entry. The list is flat so it virtualizes properly. */
 export type EntryListItem = { type: 'section'; section: EntrySection } | { type: 'entry'; entry: Entry };
@@ -20,6 +23,7 @@ type EntryListProps = {
   whereFor?: (entry: Entry) => string | undefined;
   onPress: (entry: Entry) => void;
   onFile?: (entry: Entry) => void;
+  onCopy?: (entry: Entry) => void;
   header?: ReactElement;
   empty?: { title: string; body: string; action?: { label: string; onPress: () => void } };
 };
@@ -40,10 +44,12 @@ export function EntryList({
   whereFor,
   onPress,
   onFile,
+  onCopy,
   header,
   empty,
 }: EntryListProps) {
   const navBarSpace = useNavBarSpace();
+  const gutter = useGutter();
 
   return (
     <FlashList
@@ -62,7 +68,7 @@ export function EntryList({
         item.type === 'section' ? (
           <SectionRow section={item.section} />
         ) : (
-          <View className={variant === 'inbox' ? 'px-4 pb-2' : 'px-4'}>
+          <View className={variant === 'inbox' ? `pb-2 ${gutter}` : gutter}>
             <EntryCard
               entry={item.entry}
               variant={variant}
@@ -70,6 +76,7 @@ export function EntryList({
               where={whereFor?.(item.entry)}
               onPress={onPress}
               onFile={onFile}
+              onCopy={onCopy}
             />
           </View>
         )
@@ -79,11 +86,16 @@ export function EntryList({
 }
 
 function SectionRow({ section }: { section: EntrySection }) {
+  const gutter = useGutter();
+
   return (
-    <View className="flex-row items-baseline justify-between gap-3 px-4 pb-1.5 pt-6">
-      <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
-        {section.label}
-      </Text>
+    <View className={`flex-row items-center justify-between gap-3 pb-1.5 pt-6 ${gutter}`}>
+      <View className="min-w-0 flex-1 flex-row items-center gap-2">
+        {section.kind && <KindGlyph kind={section.kind} size={13} />}
+        <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
+          {section.label}
+        </Text>
+      </View>
       {!!section.meta && <Text className="text-[11px] font-semibold text-muted-foreground">{section.meta}</Text>}
     </View>
   );

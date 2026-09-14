@@ -1,65 +1,32 @@
-import { isEntryState } from '@/lib/entryState';
-import { isKind } from '@/lib/kinds';
+import {
+  AGENT_TOKEN_COLUMNS,
+  ENTRY_COLUMNS,
+  LINE_COLUMNS,
+  normalizeAgentToken,
+  normalizeEntry,
+  normalizeLine,
+  normalizeProject,
+  normalizeShelf,
+  PROJECT_COLUMNS,
+  SHELF_COLUMNS,
+  type AgentTokenRow,
+  type EntryRow,
+  type LineRow,
+  type ProjectRow,
+  type ShelfRow,
+} from '@/lib/rows';
 import { supabase } from '@/lib/supabase';
-import type { Entry, EntryLine, Kind, Project, Shelf } from '@/types/cellar';
+import type { AgentToken, Entry, EntryLine, Kind, LineSource, Project, Shelf } from '@/types/cellar';
 
 /**
- * The single read boundary. Every `cellar_*` row enters the app through a
- * `normalize*` here and nothing downstream ever branches on a raw column name
- * or a legacy shape (PING.md §13).
+ * Every query the app makes, and nothing else.
+ *
+ * The row shapes and their normalizers live in `lib/rows.ts` — the MCP server
+ * reads the same tables and has to produce the same objects, and it cannot
+ * import this file because this file holds the client.
  *
  * No React import — this is the transport, not a hook.
  */
-
-type ShelfRow = { id: string; name: string; position: number; created_at: string };
-type ProjectRow = { id: string; shelf_id: string; name: string; position: number; created_at: string };
-type LineRow = { id: string; text: string; created_at: string };
-type EntryRow = {
-  id: string;
-  project_id: string | null;
-  text: string;
-  kind: string;
-  state: string;
-  archived: boolean;
-  created_at: string;
-  cellar_entry_lines: LineRow[] | null;
-};
-
-export function normalizeShelf(row: ShelfRow): Shelf {
-  return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
-}
-
-export function normalizeProject(row: ProjectRow): Project {
-  return {
-    id: row.id,
-    shelfId: row.shelf_id,
-    name: row.name,
-    position: row.position,
-    createdAt: row.created_at,
-  };
-}
-
-function normalizeLine(row: LineRow): EntryLine {
-  return { id: row.id, text: row.text, createdAt: row.created_at };
-}
-
-export function normalizeEntry(row: EntryRow): Entry {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    text: row.text,
-    // A kind or state the app does not know falls back rather than rendering as
-    // a blank chip. Both columns are text so a future value can land here
-    // before this build knows the word for it.
-    kind: isKind(row.kind) ? row.kind : 'idea',
-    state: isEntryState(row.state) ? row.state : 'open',
-    archived: row.archived,
-    createdAt: row.created_at,
-    lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
-  };
-}
-
-const ENTRY_COLUMNS = 'id, project_id, text, kind, state, archived, created_at, cellar_entry_lines(id, text, created_at)';
 
 export async function fetchShelves(): Promise<Shelf[]> {
   // Seeds "apps" and "side projects" on a brand new cellar. Called on the read
@@ -70,7 +37,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 
   const { data, error } = await supabase
     .from('cellar_shelves')
-    .select('id, name, position, created_at')
+    .select(SHELF_COLUMNS)
     .order('position')
     .order('created_at');
   if (error) throw error;
@@ -80,7 +47,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 export async function fetchProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('cellar_projects')
-    .select('id, shelf_id, name, position, created_at')
+    .select(PROJECT_COLUMNS)
     .order('position')
     .order('created_at');
   if (error) throw error;
@@ -109,7 +76,7 @@ export async function createShelf(userId: string, name: string, position: number
   const { data, error } = await supabase
     .from('cellar_shelves')
     .insert({ user_id: userId, name, position })
-    .select('id, name, position, created_at')
+    .select(SHELF_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeShelf(data as ShelfRow);
@@ -124,10 +91,52 @@ export async function createProject(
   const { data, error } = await supabase
     .from('cellar_projects')
     .insert({ user_id: userId, shelf_id: shelfId, name, position })
-    .select('id, shelf_id, name, position, created_at')
+    .select(PROJECT_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeProject(data as ProjectRow);
+}
+
+export async function renameShelf(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from('cellar_shelves').update({ name }).eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Projects cascade with the shelf, and their entries then fall to the inbox
+ * through `project_id`'s own `on delete set null` — Postgres chains the two, so
+ * one delete here loses a container and nothing that was in it.
+ */
+export async function deleteShelf(id: string): Promise<void> {
+  const { error } = await supabase.from('cellar_shelves').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function renameProject(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ name }).eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Where the project lives. Both halves are set together because the edit sheet
+ * holds them as one form, and a partial write would let a cleared field come
+ * back on the next save.
+ */
+export async function setProjectRepo(
+  id: string,
+  repo: { repoPath: string | null; repoUrl: string | null },
+): Promise<void> {
+  const { error } = await supabase
+    .from('cellar_projects')
+    .update({ repo_path: repo.repoPath, repo_url: repo.repoUrl })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+/** Moves a project to another shelf. The entries do not move — they are the project's. */
+export async function moveProject(id: string, shelfId: string): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ shelf_id: shelfId }).eq('id', id);
+  if (error) throw error;
 }
 
 export async function deleteProject(id: string): Promise<void> {
@@ -149,7 +158,7 @@ export async function createEntries(userId: string, entries: NewEntry[]): Promis
   return (data as EntryRow[]).map(normalizeEntry);
 }
 
-export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'archived' | 'projectId'>>;
+export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'archived' | 'projectId' | 'agent'>>;
 
 export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
   const row: Record<string, unknown> = {};
@@ -157,6 +166,7 @@ export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
   if (patch.state !== undefined) row.state = patch.state;
   if (patch.archived !== undefined) row.archived = patch.archived;
   if (patch.projectId !== undefined) row.project_id = patch.projectId;
+  if (patch.agent !== undefined) row.agent = patch.agent;
   const { error } = await supabase.from('cellar_entries').update(row).eq('id', id);
   if (error) throw error;
 }
@@ -166,12 +176,49 @@ export async function deleteEntry(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function appendLine(userId: string, entryId: string, text: string): Promise<EntryLine> {
+export async function appendLine(
+  userId: string,
+  entryId: string,
+  text: string,
+  source: LineSource = 'user',
+): Promise<EntryLine> {
   const { data, error } = await supabase
     .from('cellar_entry_lines')
-    .insert({ user_id: userId, entry_id: entryId, text })
-    .select('id, text, created_at')
+    .insert({ user_id: userId, entry_id: entryId, text, source })
+    .select(LINE_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeLine(data as LineRow);
+}
+
+/**
+ * Agent tokens.
+ *
+ * Minting is an RPC rather than an insert because the token is generated in the
+ * database: the plaintext is the function's return value and the row only ever
+ * holds its hash, so there is no moment where the app could write one down.
+ */
+export async function fetchAgentTokens(): Promise<AgentToken[]> {
+  const { data, error } = await supabase
+    .from('cellar_agent_tokens')
+    .select(AGENT_TOKEN_COLUMNS)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return ((data ?? []) as AgentTokenRow[]).map(normalizeAgentToken);
+}
+
+/** Returns the plaintext token. The only time it exists outside an agent's config. */
+export async function createAgentToken(name: string): Promise<string> {
+  const { data, error } = await supabase.rpc('cellar_create_agent_token', { p_name: name });
+  if (error) throw error;
+  return data as string;
+}
+
+/** Stamped, not deleted — the row is the record that the machine ever had access. */
+export async function revokeAgentToken(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('cellar_agent_tokens')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
 }

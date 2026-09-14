@@ -1,14 +1,15 @@
 import { Redirect, Tabs } from 'expo-router';
 
-import { NavIslands } from '@/components/layout/NavIslands';
+import { AppChrome } from '@/components/layout/AppChrome';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { CellarSheets } from '@/features/cellar/CellarSheets';
 
 /**
- * The tab shell. The bar is the nav islands on every viewport, phone and
- * desktop web alike — it is the app's only navigation chrome, and it drives
- * itself off the route rather than off this navigator so it can also render on
- * screens pushed out of the tabs.
+ * The tab shell. Navigation is the app's only chrome and it comes in two
+ * shapes — the floating islands on a phone, the sidebar on desktop web
+ * (components/layout/AppChrome) — both of which drive themselves off the route
+ * rather than off this navigator, so they can also render on screens pushed out
+ * of the tabs.
  *
  * `index` is the capture screen, not a shelf: the thing you open this app to do
  * is catch a thought before it goes.
@@ -21,7 +22,7 @@ export default function TabsLayout() {
   return (
     <>
       <Tabs
-        tabBar={() => <NavIslands />}
+        tabBar={() => <AppChrome />}
         // No scene animation: react-navigation cross-fades over the navigator's
         // own background, which flashes white on every swap. The movement that
         // makes a tab change feel smooth lives in the bar, where the marker

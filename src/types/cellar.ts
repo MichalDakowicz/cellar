@@ -12,9 +12,16 @@
  * array rather than a body field.
  */
 
-export type Kind = 'idea' | 'addition' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
+export type Kind = 'idea' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
 
-export type EntryState = 'open' | 'doing' | 'done' | 'dropped';
+/**
+ * `blocked` is the agent's only way to reach you: it appended a question it
+ * cannot answer from the repo and stopped. Everything else is yours to set.
+ */
+export type EntryState = 'open' | 'doing' | 'blocked' | 'done' | 'dropped';
+
+/** Who appended a line. The stored value is the word, like `kind` and `state`. */
+export type LineSource = 'user' | 'agent';
 
 export type Shelf = {
   id: string;
@@ -29,6 +36,14 @@ export type Project = {
   name: string;
   position: number;
   createdAt: string;
+  /**
+   * The local checkout. This is the one that does work — an agent resolves
+   * which project it is standing in by matching its working directory against
+   * it, so no one has to be asked.
+   */
+  repoPath: string | null;
+  /** The remote, for opening. Never matched against — a URL is not a directory. */
+  repoUrl: string | null;
 };
 
 /** One appended thought. Ordered oldest first, the way it was dumped. */
@@ -36,6 +51,7 @@ export type EntryLine = {
   id: string;
   text: string;
   createdAt: string;
+  source: LineSource;
 };
 
 export type Entry = {
@@ -51,6 +67,8 @@ export type Entry = {
    */
   archived: boolean;
   createdAt: string;
+  /** Who is on it, when an agent claimed it. Null the rest of the time. */
+  agent: string | null;
   lines: EntryLine[];
 };
 
@@ -61,4 +79,22 @@ export type Draft = {
   projectId: string | null;
   /** Many lines → many entries. Folded away behind one line until asked for. */
   raw: boolean;
+};
+
+/**
+ * A token a hosted agent presents instead of signing in.
+ *
+ * The token itself is not in here and never comes back from a read — the
+ * database keeps only its hash, and the plaintext exists exactly once, in the
+ * reply to minting it. `revokedAt` is a timestamp rather than a missing row
+ * because "which machine was that, and when did I turn it off" is a question
+ * you will ask.
+ */
+export type AgentToken = {
+  id: string;
+  name: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
 };

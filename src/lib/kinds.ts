@@ -1,12 +1,12 @@
 import type { Kind } from '@/types/cellar';
 
 /**
- * The eight kinds of thought this app catches, and the mono code each one wears
+ * The seven kinds of thought this app catches, and the mono code each one wears
  * in the gutter of a list.
  *
  * The codes are monochrome and they are the whole reason a wall of one-line
- * entries scans. Eight colours would be a legend you have to learn, and would
- * also spend the accent eight times over on a screen where it is supposed to
+ * entries scans. Seven colours would be a legend you have to learn, and would
+ * also spend the accent seven times over on a screen where it is supposed to
  * mark exactly one live thing (PING.md §1.2). A fixed-width column of `bug` /
  * `idea` / `dsgn` reads like a ledger instead.
  *
@@ -16,13 +16,20 @@ import type { Kind } from '@/types/cellar';
 export type KindMeta = {
   value: Kind;
   label: Kind;
-  /** Four characters at most, so the gutter is one column wide at every row. */
+  /**
+   * A short, stable id for the kind. The list gutter draws a glyph now
+   * (components/media/Glyphs), but this stays: it is what a grouped section
+   * keys on, and it is the value to log or export a kind as without shipping
+   * the display string into a file format.
+   */
   code: string;
 };
 
 export const KINDS: KindMeta[] = [
+  // "addition" used to sit between idea and removal. It was the same act as
+  // idea — a thing you want that is not there yet — and two chips for one
+  // thought is a decision you have to make every time you dump something.
   { value: 'idea', label: 'idea', code: 'idea' },
-  { value: 'addition', label: 'addition', code: 'add' },
   { value: 'removal', label: 'removal', code: 'rm' },
   { value: 'glitch', label: 'glitch', code: 'bug' },
   { value: 'question', label: 'question', code: 'q' },
@@ -43,6 +50,3 @@ export function kindMeta(value: string | null | undefined): KindMeta {
 export function isKind(value: unknown): value is Kind {
   return typeof value === 'string' && BY_VALUE.has(value as Kind);
 }
-
-/** The gutter's width in characters — the longest code, so nothing shifts. */
-export const KIND_CODE_WIDTH = KINDS.reduce((widest, kind) => Math.max(widest, kind.code.length), 0);
