@@ -12,7 +12,7 @@ import {
 } from '@/lib/entryGroups';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { KINDS } from '@/lib/kinds';
-import type { Entry, EntryState, Kind } from '@/types/cellar';
+import type { Entry, Kind } from '@/types/cellar';
 
 let seq = 0;
 const entry = (over: Partial<Entry> = {}): Entry => ({
@@ -32,28 +32,20 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
 const at = (iso: string) => entry({ createdAt: iso });
 
 describe('applyFilter', () => {
-  it('hides archived entries until they are asked for', () => {
+  it('leaves the archive to the tabs — a filter is kinds and nothing else', () => {
     const entries = [entry(), entry({ archived: true })];
-    expect(applyFilter(entries, NO_FILTER)).toHaveLength(1);
-    expect(applyFilter(entries, { ...NO_FILTER, showArchived: true })).toHaveLength(2);
+    expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
   });
 
   it('treats several kinds as any-of', () => {
     const entries = [entry({ kind: 'glitch' }), entry({ kind: 'idea' }), entry({ kind: 'copy' })];
     const kinds: Kind[] = ['glitch', 'copy'];
-    expect(applyFilter(entries, { ...NO_FILTER, kinds }).map((e) => e.kind)).toEqual(['glitch', 'copy']);
+    expect(applyFilter(entries, { kinds }).map((e) => e.kind)).toEqual(['glitch', 'copy']);
   });
 
-  it('narrows to one state, and null means any', () => {
-    const entries = [entry({ state: 'open' }), entry({ state: 'done' })];
-    const state: EntryState = 'done';
-    expect(applyFilter(entries, { ...NO_FILTER, state })).toHaveLength(1);
-    expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
-  });
-
-  it('does not count showArchived as a filter — it is a disclosure, not a narrowing', () => {
-    expect(hasFilter({ ...NO_FILTER, showArchived: true })).toBe(false);
-    expect(hasFilter({ ...NO_FILTER, state: 'doing' })).toBe(true);
+  it('is on only once a kind is picked', () => {
+    expect(hasFilter(NO_FILTER)).toBe(false);
+    expect(hasFilter({ kinds: ['glitch'] })).toBe(true);
   });
 });
 
@@ -62,10 +54,8 @@ describe('filterSummary', () => {
     expect(filterSummary(NO_FILTER)).toBe('any kind');
   });
 
-  it('joins the kinds and appends the state', () => {
-    expect(filterSummary({ kinds: ['glitch', 'question'], state: 'doing', showArchived: false })).toBe(
-      'glitch · question · doing',
-    );
+  it('joins the kinds', () => {
+    expect(filterSummary({ kinds: ['glitch', 'question'] })).toBe('glitch · question');
   });
 });
 

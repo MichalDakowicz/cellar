@@ -5,6 +5,7 @@ import { useCellar } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { applyFilter, countLive, groupByDay, groupByKind, hasFilter, tallyKinds } from '@/lib/entryGroups';
 import { ENTRY_STATES } from '@/lib/entryState';
+import { filterByTab, tabCounts } from '@/lib/entryTabs';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
@@ -26,7 +27,8 @@ export function useProjectScreen(projectId: string | undefined) {
   const view = useCellarPrefs((state) => state.view);
   const setView = useCellarPrefs((state) => state.setView);
   const filter = useEntryFilter((state) => state.filter);
-  const setFilter = useEntryFilter((state) => state.setFilter);
+  const tab = useEntryFilter((state) => state.tab);
+  const setTab = useEntryFilter((state) => state.setTab);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
 
@@ -57,9 +59,12 @@ export function useProjectScreen(projectId: string | undefined) {
     return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / top) * 100) }));
   }, [live]);
 
-  const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
+  // Tab first, then the kind filter — the tab is which list this is, the filter
+  // narrows the list you are on.
+  const inTab = useMemo(() => filterByTab(all, tab), [all, tab]);
+  const visible = useMemo(() => applyFilter(inTab, filter), [inTab, filter]);
   const items = useMemo(() => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)), [visible, view]);
-  const archivedCount = all.filter((entry) => entry.archived).length;
+  const tabs = useMemo(() => tabCounts(all), [all]);
 
   const filtered = hasFilter(filter);
   const meta = [
@@ -91,11 +96,22 @@ export function useProjectScreen(projectId: string | undefined) {
     items,
     showCodes: settings.showCodes,
     filtered,
-    archivedCount,
-    showArchived: filter.showArchived,
-    toggleArchived: () => setFilter({ ...filter, showArchived: !filter.showArchived }),
-    /** Nothing matches, versus nothing here yet — two different empties (PING.md §9.9). */
-    emptyKind: all.length === 0 ? ('nothing' as const) : visible.length === 0 ? ('filtered' as const) : null,
+    tab,
+    setTab,
+    tabs,
+    /**
+     * Three different empties (PING.md §9.9): the project is empty, this tab is
+     * empty, or the filter on this tab matches nothing. They read differently
+     * and they have different ways out.
+     */
+    emptyKind:
+      all.length === 0
+        ? ('nothing' as const)
+        : inTab.length === 0
+          ? ('tab' as const)
+          : visible.length === 0
+            ? ('filtered' as const)
+            : null,
   };
 }
 

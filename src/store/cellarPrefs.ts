@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { NO_FILTER, type EntryFilter } from '@/lib/entryGroups';
+import { DEFAULT_TAB, type EntryTab } from '@/lib/entryTabs';
 import { mmkvStorage } from '@/lib/mmkvStorage';
 import type { Kind } from '@/types/cellar';
 
@@ -74,13 +75,22 @@ export const useCellarPrefs = create<PrefsState>()(
 
 type FilterState = {
   filter: EntryFilter;
+  /**
+   * Which cut of a project you are reading. Not persisted, for the same reason
+   * the filter is not: opening the app on the archive tab, three days after you
+   * left it there, reads as the app having lost everything else.
+   */
+  tab: EntryTab;
   setFilter: (filter: EntryFilter) => void;
+  setTab: (tab: EntryTab) => void;
   toggleKind: (kind: Kind) => void;
   clear: () => void;
 };
 
 export const useEntryFilter = create<FilterState>((set) => ({
   filter: NO_FILTER,
+  tab: DEFAULT_TAB,
+  setTab: (tab) => set({ tab }),
   setFilter: (filter) => set({ filter }),
   toggleKind: (kind) =>
     set((state) => ({
@@ -91,6 +101,8 @@ export const useEntryFilter = create<FilterState>((set) => ({
           : [...state.filter.kinds, kind],
       },
     })),
+  // The tab is not part of the filter: clearing a narrowing must not move you
+  // to a different list.
   clear: () => set({ filter: NO_FILTER }),
 }));
 

@@ -11,35 +11,34 @@ import type { Entry, EntryState, Kind } from '@/types/cellar';
  * renderer.
  */
 
+/**
+ * What is left to narrow by once the tab has chosen the state.
+ *
+ * State and the archive used to live here too. They are the tabs now
+ * (`lib/entryTabs`), and a field with two controls is a field that ends up
+ * holding two different answers — so this is kinds, and only kinds.
+ */
 export type EntryFilter = {
   kinds: Kind[];
-  /** `null` means any state. */
-  state: EntryState | null;
-  /** Archived entries are out of every list until this is on. */
-  showArchived: boolean;
 };
 
-export const NO_FILTER: EntryFilter = { kinds: [], state: null, showArchived: false };
+export const NO_FILTER: EntryFilter = { kinds: [] };
 
 export function hasFilter(filter: EntryFilter): boolean {
-  return filter.kinds.length > 0 || filter.state !== null;
+  return filter.kinds.length > 0;
 }
 
 export function matches(entry: Entry, filter: EntryFilter): boolean {
-  if (entry.archived && !filter.showArchived) return false;
-  if (filter.kinds.length > 0 && !filter.kinds.includes(entry.kind)) return false;
-  if (filter.state !== null && entry.state !== filter.state) return false;
-  return true;
+  return filter.kinds.length === 0 || filter.kinds.includes(entry.kind);
 }
 
 export function applyFilter(entries: Entry[], filter: EntryFilter): Entry[] {
   return entries.filter((entry) => matches(entry, filter));
 }
 
-/** "any kind" / "glitch · question · doing". What the left island's dot is about. */
+/** "any kind" / "glitch · question". What the left island's dot is about. */
 export function filterSummary(filter: EntryFilter): string {
-  const kinds = filter.kinds.length > 0 ? filter.kinds.join(' · ') : 'any kind';
-  return filter.state ? `${kinds} · ${filter.state}` : kinds;
+  return filter.kinds.length > 0 ? filter.kinds.join(' · ') : 'any kind';
 }
 
 export type KindGroup = { kind: Kind; code: string; entries: Entry[] };
