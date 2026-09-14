@@ -72,6 +72,71 @@ checkout path, in the app under a project → edit → *where it lives*, or by l
 do it with `cellar_link_repo`. After that `cellar_orient` resolves the project from the
 working directory and nobody is ever asked "which project is this?" again.
 
+## Hosted, instead
+
+The setup above puts a node process on your machine. The other way is to put the same
+server on Supabase and give the agent a URL, which is what you want when the agent is not
+running where your session file is — a cloud session, a second machine, a phone.
+
+It is the *same tools from the same files*: `supabase/functions/mcp` is a transport and a
+door, and `mcp/src/mcpServer.ts` defines what is behind it. Nothing is registered twice.
+
+**One-time, in the app:** settings → *agent access* → name the machine → **mint a token**.
+The token is shown once, because only its sha256 is stored and the database cannot produce
+it again. *Copy the config* puts the whole block on your clipboard:
+
+```json
+{
+    "mcpServers": {
+        "cellar": {
+            "type": "http",
+            "url": "https://<project>.supabase.co/functions/v1/mcp",
+            "headers": {
+                "Authorization": "Bearer clr_…",
+                "x-cellar-agent": "claude"
+            }
+        }
+    }
+}
+```
+
+`x-cellar-agent` is what your name looks like on an entry you claim. Set it per machine
+when two of them work the same cellar — a list that says "claude" twice cannot tell you
+who has what.
+
+Revoking is in the same screen and takes effect on the next call: the token is resolved
+per request and nothing is cached between them.
+
+**Deploying it**, which is a thing you do once and after changing the function:
+
+```sh
+npx supabase link --project-ref <ref>
+npx supabase secrets set CELLAR_JWT_SECRET=<the project's JWT secret>
+npx supabase functions deploy mcp
+```
+
+`verify_jwt = false` is set for this function in `supabase/config.toml`, and that is not a
+hole — the header carries a cellar token rather than a Supabase JWT, so the platform's own
+check would reject every request before the function ran. The check it replaces is
+stricter: the platform's asks whether a JWT is valid, `auth.ts` asks whether this is one of
+*your* tokens and whether you have revoked it.
+
+### What the hosted half is allowed to do
+
+The same as you and not one row more, and the reason is worth stating because a hosted
+endpoint is where that promise usually quietly breaks.
+
+There is no service role key in the function. What it has is the anon key, a token hash and
+`cellar_resolve_agent_token` — a security definer function narrow enough to be read in one
+sitting: it takes a hash and returns a user id. The function then mints a five-minute JWT
+for that user and every query after it is checked by the same RLS policies the app is
+checked by. A service key here would have handed a prompt-injected agent Radar's `profiles`
+and the shared `user_settings` as well; four other apps live in this database.
+
+**The token is a bearer credential.** Anyone holding it has your cellar, which is why it is
+shown once, stored as a hash, scoped to nothing else, and revocable from the phone in your
+pocket.
+
 ## Configuration
 
 | Variable                    | Default                          | For                                               |
@@ -81,6 +146,7 @@ working directory and nobody is ever asked "which project is this?" again.
 | `CELLAR_AGENT`              | `claude`                         | What the agent is called on the entries it touches |
 | `CELLAR_EMAIL` / `CELLAR_PASSWORD` | —                         | Non-interactive `npm run login`                    |
 | `CELLAR_EMAIL` alone        | —                                | Skips the email prompt on the emailed-code flow     |
+| `CELLAR_JWT_SECRET`         | —                                | **Hosted only**, set with `supabase secrets set` — signs the per-request user JWT |
 
 It reads the app's own `.env` by default, so there is no second copy of the credentials to
 keep in step.

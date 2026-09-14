@@ -41,6 +41,9 @@ Structure rules (they are why the siblings are maintainable):
   `node_modules` and its own `tsc`; `npm test` and `npm run lint` at the root do not see
   it. It imports `src/lib/*` directly, which is the reason those files must stay free of
   React, react-native and the Supabase client.
+- `supabase/functions/mcp` is the **same server over HTTP**, for an agent that is not on
+  this machine. It defines no tools of its own — it imports `mcp/src` — so a tool is
+  written once and both transports get it.
 
 The design language is `../design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —
@@ -192,6 +195,25 @@ is; a line that arrives unmarked reads as the user's, because before the column 
 always was. `blocked` is the one state the user never sets: it means an agent asked a
 question and stopped, and it is what puts the entry in the inbox's *waiting on you* section
 and on the tab badge.
+
+**The hosted MCP server mints a JWT, and the project signs with ES256.** `supabase/
+functions/mcp` turns an agent token into a short HS256 JWT signed with `CELLAR_JWT_SECRET`
+so that every query runs under the same RLS as the app. That works only while the legacy
+JWT secret is still a key this project accepts — the JWKS at `/auth/v1/.well-known/
+jwks.json` already serves an ES256 key, and the day the legacy secret is revoked in the
+dashboard every hosted tool call starts failing with a PostgREST 401 that says nothing
+about why. The local stdio server is unaffected: it carries a real session and never signs
+anything. If the legacy secret goes, the replacement is not a different signing key —
+nobody can sign ES256 but Supabase — it is moving the queries behind security definer
+functions keyed on the token hash.
+
+**The function and the local server share their tools, and only one of them is
+typechecked.** `mcp/` has its own `tsc`; `supabase/functions` is excluded from the root
+`tsconfig.json` and is checked by nothing but a deploy. A change to `mcp/src/tools/*` that
+compiles for the stdio server can still break the edge bundle — the import map in
+`supabase/functions/mcp/deno.json` lists every `@/lib` module by hand, because Deno has no
+tsconfig paths, and a new import from `src/lib` has to be added to it or the deploy fails
+on a module it cannot resolve.
 
 **The repo path is matched, the repo URL is not.** `cellar_projects.repo_path` is what
 `projectForPath` resolves a working directory against, and the matching is prefix-plus-
