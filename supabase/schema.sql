@@ -147,6 +147,43 @@ create table if not exists public.cellar_settings (
   updated_at    timestamptz not null default now()
 );
 
+-- ----------------------------------------------------------------------------
+-- 6. Agent tokens — how an agent that is not on your machine proves it is you
+--
+-- The MCP server used to be the only way in, and it ran on your laptop with
+-- your refresh token sitting in ~/.cellar-mcp. Hosted, there is no such file:
+-- the agent sends a token in a header and something has to turn that into "this
+-- is the owner" without ever holding a service key.
+--
+-- Only the hash is kept. A row here is worth nothing to whoever reads it — it
+-- cannot be turned back into a token, so a leaked backup is not a leaked
+-- cellar. The plaintext is returned exactly once, by cellar_create_agent_token,
+-- and losing it means minting another rather than recovering that one.
+--
+-- Revoking is a timestamp and not a delete, for the same reason nothing else in
+-- this app is deleted: "which machine was that, and when did I turn it off" is
+-- a question you will ask, and a missing row cannot answer it.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_agent_tokens (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  -- What it is for, in your words: "laptop", "work desktop". Shown in settings.
+  name         text not null,
+  -- sha256 of the token, hex. Unique, so resolving one is a single index hit.
+  token_hash   text not null unique,
+  created_at   timestamptz not null default now(),
+  -- Stamped on every resolve, so a token you no longer recognise can be told
+  -- apart from one that has simply never been used.
+  last_used_at timestamptz,
+  -- Null means it does not expire, which is right for your own machine. A
+  -- token for a machine you are borrowing should not be.
+  expires_at   timestamptz,
+  revoked_at   timestamptz
+);
+
+create index if not exists cellar_agent_tokens_user_idx
+  on public.cellar_agent_tokens (user_id, created_at desc);
+
 -- ============================================================================
 -- Row level security
 --
@@ -154,11 +191,12 @@ create table if not exists public.cellar_settings (
 -- is re-runnable; the pair runs inside the SQL Editor's single transaction, so
 -- there is no window where a table sits unprotected.
 -- ============================================================================
-alter table public.cellar_shelves     enable row level security;
-alter table public.cellar_projects    enable row level security;
-alter table public.cellar_entries     enable row level security;
-alter table public.cellar_entry_lines enable row level security;
-alter table public.cellar_settings    enable row level security;
+alter table public.cellar_shelves      enable row level security;
+alter table public.cellar_projects     enable row level security;
+alter table public.cellar_entries      enable row level security;
+alter table public.cellar_entry_lines  enable row level security;
+alter table public.cellar_settings     enable row level security;
+alter table public.cellar_agent_tokens enable row level security;
 
 drop policy if exists cellar_shelves_owner_all on public.cellar_shelves;
 create policy cellar_shelves_owner_all on public.cellar_shelves for all
@@ -184,6 +222,15 @@ create policy cellar_entry_lines_owner_all on public.cellar_entry_lines for all
 
 drop policy if exists cellar_settings_owner_all on public.cellar_settings;
 create policy cellar_settings_owner_all on public.cellar_settings for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- The token is not in this table, only its hash, so an owner reading its own
+-- rows gives nothing away. Everything an unauthenticated caller needs comes
+-- from cellar_resolve_agent_token instead — the one security definer function
+-- in this file, and it answers with a user id and nothing else.
+drop policy if exists cellar_agent_tokens_owner_all on public.cellar_agent_tokens;
+create policy cellar_agent_tokens_owner_all on public.cellar_agent_tokens for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -232,6 +279,90 @@ begin
   values (auth.uid(), 'apps', 0), (auth.uid(), 'side projects', 1);
 end;
 $$;
+
+-- ============================================================================
+-- Agent tokens — mint one, and resolve one
+--
+-- Two functions, and the split between them is the whole security argument.
+--
+-- Minting runs as you: security invoker, so the insert is checked by the same
+-- policy as every other write in this file. Resolving cannot run as you —
+-- whoever is asking has not proved who they are yet, which is the thing they
+-- are asking about — so it is the one security definer function here, and it is
+-- kept as narrow as a function can be. It takes a hash. It returns a user id.
+-- It cannot be made to say anything else about the row it found, or whether a
+-- row was found at all beyond that.
+-- ============================================================================
+
+-- The token is generated in the database rather than in the app, so the
+-- plaintext exists in exactly two places: this function's return value and the
+-- clipboard you paste it from. Two uuids is 256 bits of the same randomness the
+-- ids in this file already trust, and it needs no extension to produce.
+create or replace function public.cellar_create_agent_token(p_name text)
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_token text;
+begin
+  if auth.uid() is null then
+    raise exception 'Not signed in.';
+  end if;
+
+  v_token := 'clr_'
+    || replace(gen_random_uuid()::text, '-', '')
+    || replace(gen_random_uuid()::text, '-', '');
+
+  insert into public.cellar_agent_tokens (user_id, name, token_hash)
+  values (
+    auth.uid(),
+    coalesce(nullif(btrim(p_name), ''), 'agent'),
+    encode(sha256(convert_to(v_token, 'UTF8')), 'hex')
+  );
+
+  return v_token;
+end;
+$$;
+
+revoke all on function public.cellar_create_agent_token(text) from public;
+grant execute on function public.cellar_create_agent_token(text) to authenticated;
+
+-- Hashed by the caller, never sent in the clear: the database is handed the
+-- sha256 and compares that, so the token itself never reaches a query log.
+create or replace function public.cellar_resolve_agent_token(p_hash text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_id   uuid;
+  v_user uuid;
+begin
+  select id, user_id into v_id, v_user
+    from public.cellar_agent_tokens
+   where token_hash = p_hash
+     and revoked_at is null
+     and (expires_at is null or expires_at > now());
+
+  if v_id is null then
+    return null;
+  end if;
+
+  update public.cellar_agent_tokens
+     set last_used_at = now()
+   where id = v_id;
+
+  return v_user;
+end;
+$$;
+
+-- Callable by an unauthenticated role on purpose: that is exactly the state the
+-- caller is in when it asks. Nothing else in this file is.
+revoke all on function public.cellar_resolve_agent_token(text) from public;
+grant execute on function public.cellar_resolve_agent_token(text) to anon, authenticated;
 
 -- ============================================================================
 -- Realtime
