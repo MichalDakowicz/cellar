@@ -6,6 +6,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useInboxScreen } from '@/features/cellar/useInboxScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
@@ -20,6 +21,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
  */
 export default function InboxScreen() {
   const inbox = useInboxScreen();
+  const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
   const gutter = useGutter();
@@ -40,6 +42,7 @@ export default function InboxScreen() {
             whereFor={inbox.whereFor}
             onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
             onFile={(entry) => fileUnder?.(entry.id)}
+            onCopy={copyPrompt}
             header={
               <View>
                 <ScreenTop />

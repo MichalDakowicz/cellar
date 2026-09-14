@@ -10,6 +10,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
+import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
@@ -31,6 +32,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
 export default function ProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const project = useProjectScreen(id);
+  const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
@@ -46,6 +48,7 @@ export default function ProjectScreen() {
       items={project.items}
       showCode={project.showCodes}
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+      onCopy={copyPrompt}
       header={isDesktop ? undefined : <PhoneHeader project={project} gutter={gutter} onFilter={() => openFilter?.()} />}
       empty={
         project.emptyKind === 'filtered'

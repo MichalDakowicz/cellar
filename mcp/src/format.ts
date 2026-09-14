@@ -1,3 +1,4 @@
+import { shortEntryId } from '@/lib/agentPrompt';
 import { askRule, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
@@ -19,11 +20,12 @@ import type { Cellar } from './cellar.ts';
  * back as the next argument.
  */
 
-export const SHORT_ID = 8;
-
-export function shortId(id: string): string {
-  return id.slice(0, SHORT_ID);
-}
+/**
+ * Re-exported rather than defined here. The app's copy button puts an id of
+ * exactly this width on the clipboard, and a server that printed or resolved a
+ * different one would make every copied line fail to match.
+ */
+export const shortId = shortEntryId;
 
 function pad(text: string, width: number): string {
   return text.length >= width ? text : text + ' '.repeat(width - text.length);
