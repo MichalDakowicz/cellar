@@ -80,3 +80,21 @@ export type Draft = {
   /** Many lines → many entries. Folded away behind one line until asked for. */
   raw: boolean;
 };
+
+/**
+ * A token a hosted agent presents instead of signing in.
+ *
+ * The token itself is not in here and never comes back from a read — the
+ * database keeps only its hash, and the plaintext exists exactly once, in the
+ * reply to minting it. `revokedAt` is a timestamp rather than a missing row
+ * because "which machine was that, and when did I turn it off" is a question
+ * you will ask.
+ */
+export type AgentToken = {
+  id: string;
+  name: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+};

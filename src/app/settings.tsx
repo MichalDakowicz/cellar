@@ -11,6 +11,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
 import { AgentAccess } from '@/features/settings/AgentAccess';
+import { AgentTokens } from '@/features/settings/AgentTokens';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
@@ -138,6 +139,8 @@ export default function Settings() {
           </View>
 
           <AgentAccess gutter={gutter} />
+
+          <AgentTokens gutter={gutter} />
 
           <View className={`pt-7 ${gutter}`}>
             <Overline>about</Overline>

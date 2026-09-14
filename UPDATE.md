@@ -18,6 +18,8 @@
 - Inbox: anything an agent stopped to ask about waits at the top, named with the project it came from
 - A banner on the phone when an agent stops to ask you something, with a switch in settings
 - Settings: set a password for the account, so the agent tools can sign in without a browser
+- Settings: mint a token so an agent can reach the cellar without a server on your machine
+- Settings: see when each agent token was last used, and revoke one in a tap
 - A copy button on every entry, for the one line that starts that thought in an agent
 - Projects: read one two ways — grouped by kind, or one stream cut into days
 - Projects: filter by kind and state from the funnel beside the view toggle

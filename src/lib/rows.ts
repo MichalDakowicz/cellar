@@ -1,6 +1,6 @@
 import { isEntryState } from '@/lib/entryState';
 import { isKind } from '@/lib/kinds';
-import type { Entry, EntryLine, Project, Shelf } from '@/types/cellar';
+import type { AgentToken, Entry, EntryLine, Project, Shelf } from '@/types/cellar';
 
 /**
  * The single read boundary: every `cellar_*` row becomes an app type here, and
@@ -89,5 +89,32 @@ export function normalizeEntry(row: EntryRow): Entry {
     createdAt: row.created_at,
     agent: row.agent,
     lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+  };
+}
+
+export type AgentTokenRow = {
+  id: string;
+  name: string;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+};
+
+/**
+ * `token_hash` is deliberately not on this list. Nothing in the app has a use
+ * for it, and a column you never select is a column that cannot end up in a
+ * log, a cache or a redux devtools panel.
+ */
+export const AGENT_TOKEN_COLUMNS = 'id, name, created_at, last_used_at, expires_at, revoked_at';
+
+export function normalizeAgentToken(row: AgentTokenRow): AgentToken {
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at,
+    lastUsedAt: row.last_used_at,
+    expiresAt: row.expires_at,
+    revokedAt: row.revoked_at,
   };
 }
