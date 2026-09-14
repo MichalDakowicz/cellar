@@ -2,9 +2,16 @@
     "mcpServers": {
         "cellar": {
             "command": "node",
-            "args": ["--import", "tsx", "C:/ping/cellar/mcp/src/server.ts"],
+            "args": [
+                "--import",
+                "file:///C:/ping/cellar/mcp/node_modules/tsx/dist/loader.mjs",
+                "C:/ping/cellar/mcp/src/server.ts"
+            ],
             "cwd": "C:/ping/cellar/mcp",
-            "env": { "CELLAR_AGENT": "claude" }
+            "env": {
+                "CELLAR_AGENT": "claude",
+                "TSX_TSCONFIG_PATH": "C:/ping/cellar/mcp/tsconfig.json"
+            }
         }
     }
 }
