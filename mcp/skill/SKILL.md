@@ -16,7 +16,7 @@ fact drives everything below.
 
 ```
 cellar_orient  →  claim  →  work  →  append lines  →  finish
-                                  ↘  ask  →  blocked, stop
+                                  ↘  ask  →  blocked  →  next thought
 ```
 
 1. **`cellar_orient`** with the absolute path you are working in. One call gives you the
@@ -48,8 +48,7 @@ copy. Picking something up is still `pick up cellar entry <id>`, which lands bac
 
 ## Ask instead of guessing
 
-`cellar_ask` puts a question on the entry and blocks it. **This is a correct outcome.** It
-appears in the user's inbox and nothing moves until they answer.
+**This is a correct outcome**, not a failure to finish.
 
 - **idea** and **removal** — ask essentially always. An idea is a direction, not a spec, and
   a removal destroys work. Name what it would mean concretely and what you would do, then
@@ -60,8 +59,33 @@ Ask **one concrete question, naming the options**. "which surface — the dump f
 filter sheet, or both?" is answerable in four words. "could you clarify what you meant?" is
 not, and it will sit there.
 
-A blocked entry with a sharp question is better than a confident wrong build. It is also
-better than a `done` the user later discovers was not.
+A question waiting on an answer is better than a confident wrong build. It is also better
+than a `done` the user later discovers was not.
+
+## Where to ask, which is a different question
+
+How much work is on the table decides it, and this is the part a model gets wrong in the
+direction of interrupting.
+
+**One task in this session → ask in the chat.** The user is sitting there. Routing the
+question through the cellar would stall the only thing they asked for behind a notification.
+
+**Several tasks → `cellar_ask` on the entry, then move to the next one.** It blocks that one
+thought and leaves the rest of the list workable. Then:
+
+1. **Ask the moment you know**, never at the end. The question is worth nothing until it is
+   in their inbox, and a session that dies before you write it takes the question with it.
+2. **Work everything that does not depend on the answer.** By the time the list is empty the
+   answer may already be there — `cellar_orient` lists what has been answered since, above
+   the open thoughts.
+3. **Before you finish, read the entries you asked about again.** An answer that arrived is
+   yours to pick back up: the entry is `open` again, so claim it and carry on.
+4. **Still unanswered and out of work → ask that same question in the chat**, then
+   `cellar_answer_question` with what they said. The entry keeps the pair, so the decision
+   does not live only in a conversation that is gone.
+
+Pass **`options`** whenever you are choosing between named alternatives. They render as
+a/b/c/d taps in the app, and a question answerable in one tap gets answered.
 
 ## What each kind is asking for
 
@@ -103,6 +127,10 @@ Send the sentence worth reading in six months. One line per real finding.
 - **`cellar_archive_entry`** — already true, fixed elsewhere, no longer applies. Reason
   required. **There is no delete**: nothing in this app is destroyed to get it out of the
   way.
+- **`cellar_answer_question`** — you asked on the entry, ran out of other work, asked again
+  in the chat. This writes what they said back onto the question and unblocks the entry if
+  it was the last one outstanding. Only ever what the user actually said — an answer you
+  reasoned out yourself is a guess with their name on it.
 - **`cellar_unclaim_entry`** — you ran out of room or the user moved on. Put it back.
 - **`cellar_link_repo`** — `cellar_orient` found no project for a repo that clearly has one.
   Linking it is the one change that stops the question recurring in every future session.
@@ -111,7 +139,11 @@ Send the sentence worth reading in six months. One line per real finding.
 ## Never
 
 - work a thought you have not claimed
-- re-claim something `blocked` — it is waiting on the user, not on you
+- re-claim something `blocked` — it is waiting on the user, not on you. Answering it in the
+  chat and recording that answer is what unblocks it; the entry goes back to `open` and you
+  claim it again from there
+- sit waiting on a question instead of moving to the next task
+- hold a question in your head until the end of the session
 - touch an `archived` entry; it was put away on purpose
 - mark `done` what you did not finish
 - ask the user for their password — if a tool says the server is not signed in, tell them

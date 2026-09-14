@@ -1,6 +1,7 @@
+import { normalizeOptions } from '@/lib/entryQuestions';
 import { isEntryState } from '@/lib/entryState';
 import { isKind } from '@/lib/kinds';
-import type { AgentToken, Entry, EntryLine, Project, Shelf } from '@/types/cellar';
+import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
 
 /**
  * The single read boundary: every `cellar_*` row becomes an app type here, and
@@ -30,6 +31,18 @@ export type ProjectRow = {
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
 
+export type QuestionRow = {
+  id: string;
+  question: string;
+  options: unknown;
+  answer: string | null;
+  answered_at: string | null;
+  answered_via: string | null;
+  dismissed_at: string | null;
+  agent: string | null;
+  created_at: string;
+};
+
 export type EntryRow = {
   id: string;
   project_id: string | null;
@@ -40,13 +53,20 @@ export type EntryRow = {
   created_at: string;
   agent: string | null;
   cellar_entry_lines: LineRow[] | null;
+  cellar_entry_questions: QuestionRow[] | null;
 };
 
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
 export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url';
+// `as const` on both, and the embed built as a template literal, so the select
+// string keeps its literal type: supabase-js resolves the row shape from it at
+// compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
+// the app infer `GenericStringError[]` instead.
+export const QUESTION_COLUMNS =
+  'id, question, options, answer, answered_at, answered_via, dismissed_at, agent, created_at' as const;
 export const ENTRY_COLUMNS =
-  'id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source)';
+  `id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS})` as const;
 
 export function normalizeShelf(row: ShelfRow): Shelf {
   return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
@@ -75,6 +95,26 @@ export function normalizeLine(row: LineRow): EntryLine {
   };
 }
 
+/**
+ * `options` arrives as whatever jsonb holds, so it goes through the same
+ * normalizer the writer uses rather than being trusted as `string[]` — a row
+ * written by hand in the dashboard is a perfectly ordinary way for this to be
+ * an object.
+ */
+export function normalizeQuestion(row: QuestionRow): EntryQuestion {
+  return {
+    id: row.id,
+    question: row.question,
+    options: normalizeOptions(row.options),
+    answer: row.answer,
+    answeredAt: row.answered_at,
+    answeredVia: row.answered_via === 'chat' ? 'chat' : row.answered_via ? 'app' : null,
+    dismissedAt: row.dismissed_at,
+    agent: row.agent,
+    createdAt: row.created_at,
+  };
+}
+
 export function normalizeEntry(row: EntryRow): Entry {
   return {
     id: row.id,
@@ -89,6 +129,9 @@ export function normalizeEntry(row: EntryRow): Entry {
     createdAt: row.created_at,
     agent: row.agent,
     lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    questions: (row.cellar_entry_questions ?? [])
+      .map(normalizeQuestion)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }
 

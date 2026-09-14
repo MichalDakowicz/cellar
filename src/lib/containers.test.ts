@@ -29,6 +29,7 @@ const entry = (projectId: string | null): Entry => ({
   archived: false,
   createdAt: '',
   lines: [],
+  questions: [],
 });
 
 describe('checkName', () => {

@@ -9,8 +9,13 @@ thin to act on — ask you about.
 ```
 open ──claim──▶ doing ──finish──▶ done | dropped
                   │
-                  └──ask──▶ blocked ──(you answer)──▶ open
+                  └──ask──▶ blocked ──(you answer)──▶ open ──▶ claim again
 ```
+
+A question is a row of its own, not a line: it carries the options it offered and the answer
+that settled it, and it stays on the entry after being answered. Asking blocks that one
+thought and nothing else, so an agent with a list of work asks and carries on rather than
+stopping.
 
 ## Setup, once
 
@@ -235,7 +240,7 @@ Reads:
 | `cellar_orient`        | **Start here.** cwd → project, shelf, repo, and everything open/claimed/blocked in it |
 | `cellar_list_projects` | Every project, its counts and its checkout                                          |
 | `cellar_list_entries`  | Filter by project, kind, state, text                                                |
-| `cellar_get_entry`     | One thought in full: both halves of its thread, its repo, its brief                 |
+| `cellar_get_entry`     | One thought in full: both halves of its thread, its questions, its repo, its brief   |
 
 Writes:
 
@@ -243,7 +248,8 @@ Writes:
 | ---------------------- | --------------------------------------------------------------------------- |
 | `cellar_claim_entry`   | `open → doing`, atomic, returns the brief                                    |
 | `cellar_append_line`   | One line of findings, `source = agent`                                       |
-| `cellar_ask`           | Question + `→ blocked`. **An outcome, not a failure**                        |
+| `cellar_ask`           | Question (+ a/b/c/d options) + `→ blocked`. **An outcome, not a failure**    |
+| `cellar_answer_question` | Record an answer the user gave in the chat; unblocks when it was the last  |
 | `cellar_finish_entry`  | `→ done \| dropped` with a note                                              |
 | `cellar_unclaim_entry` | `→ open`, unchanged                                                          |
 | `cellar_create_entry`  | Drop a follow-up thought found while working                                 |
@@ -277,6 +283,14 @@ dump field runs and caps the length. An entry stays one line forever and grows b
 lines; an agent that writes a paragraph would break the one property that makes a wall of
 one-liners readable.
 
+**Where to ask depends on how much work is on the table.** One task in the session means the
+user is sitting there, so the question belongs in the chat — blocking the only thing they
+asked for helps nobody. Several tasks means they have gone away, and then the question goes
+on the entry the moment it is known: it blocks that one thought, the rest of the list stays
+workable, and the answer is often there by the time the agent comes back. Holding the
+question until the end of the session is the failure worth naming, because a session that
+dies takes the question with it and nothing ever reached the inbox.
+
 **The voice rules travel with the brief.** Every claim returns them, because the failure
 mode is real: "I've successfully implemented the requested changes" sitting directly under
 "nav island jumps on keyboard open" makes the list unreadable.
@@ -289,6 +303,8 @@ The server imports from `../src/lib` rather than keeping its own copy:
 - `lib/agentWork.ts` — the loop, the kind briefs, the ask rules, the line voice, `splitThread`.
 - `lib/repoLink.ts` — cwd → project matching. The app and the agent must agree on this or
   work gets filed under the wrong project.
+- `lib/entryQuestions.ts` — what a question is, when it stops holding an entry up. The app
+  and the server both decide "is this the last one" and they must not disagree.
 - `lib/kinds.ts`, `lib/entryState.ts`, `lib/relTime.ts`, `lib/dump.ts`.
 
 That is why those files are free of React and of the Supabase client: `lib/` is importable

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 
 import {
+  answerQuestion,
   appendLine,
   createEntries,
   createProject,
@@ -9,6 +10,7 @@ import {
   deleteEntry,
   deleteProject,
   deleteShelf,
+  dismissQuestion,
   fetchEntries,
   fetchProjects,
   fetchShelves,
@@ -21,6 +23,7 @@ import {
   type NewEntry,
 } from '@/features/cellar/cellarApi';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { unblocksEntry } from '@/lib/entryQuestions';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 import type { Entry, Project, Shelf } from '@/types/cellar';
 
@@ -113,6 +116,39 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(ENTRIES),
   });
 
+  // Settling the last outstanding question lifts `blocked` on its own — the
+  // whole point of the state is "something is waiting on you", and leaving a
+  // red badge on an entry you have just answered is the app lying about it.
+  //
+  // Only from `blocked`, though: if the thought has since been marked done or
+  // dropped, that decision outranks an answer and must not be undone. The
+  // agent's name comes off with it, the same way setting the state by hand
+  // does, so the entry reads as claimable again.
+  const settle = useCallback(
+    async (entry: Entry, questionId: string) => {
+      if (entry.state !== 'blocked') return;
+      if (!unblocksEntry(entry.questions, questionId)) return;
+      await patchEntry(entry.id, { state: 'open', agent: null });
+    },
+    [],
+  );
+
+  const answer = useMutation({
+    mutationFn: async ({ entry, questionId, text }: { entry: Entry; questionId: string; text: string }) => {
+      await answerQuestion(questionId, text);
+      await settle(entry, questionId);
+    },
+    onSuccess: () => invalidate(ENTRIES),
+  });
+
+  const dismiss = useMutation({
+    mutationFn: async ({ entry, questionId }: { entry: Entry; questionId: string }) => {
+      await dismissQuestion(questionId);
+      await settle(entry, questionId);
+    },
+    onSuccess: () => invalidate(ENTRIES),
+  });
+
   const addShelf = useMutation({
     mutationFn: ({ name, position }: { name: string; position: number }) =>
       createShelf(requireUser(user?.id), name, position),
@@ -166,6 +202,8 @@ export function useCellarWrites() {
     update,
     remove,
     addLine,
+    answer,
+    dismiss,
     addShelf,
     editShelf,
     removeShelf,

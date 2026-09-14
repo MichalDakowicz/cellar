@@ -70,9 +70,19 @@ export function useEntryScreen(entryId: string | undefined) {
     stamp: entry ? dropStamp(entry.createdAt) : '',
     thread: yours,
     agentLines: agent,
-    /** Named when an agent has it. The blocked question is its last line. */
+    /** Named when an agent has it. */
     agentName: entry?.agent ?? null,
-    question: entry?.state === 'blocked' ? (agent[agent.length - 1]?.text ?? null) : null,
+    /**
+     * The pre-questions-table reading: an entry blocked before questions were
+     * rows asked by appending a line and stopping, so its question is the last
+     * thing the agent said. Only used when the entry has no question rows at
+     * all — otherwise the section below is the whole truth and this would show
+     * a report line as if it were being asked.
+     */
+    legacyQuestion:
+      entry?.state === 'blocked' && (entry?.questions.length ?? 0) === 0
+        ? (agent[agent.length - 1]?.text ?? null)
+        : null,
     line,
     setLine,
     appendLine,

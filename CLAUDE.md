@@ -202,9 +202,19 @@ have to reproduce.
 `'agent'` and the two are rendered as separate sections on the entry, never interleaved —
 `splitThread` in `src/lib/agentWork.ts`. Anything that appends a line has to say which it
 is; a line that arrives unmarked reads as the user's, because before the column existed it
-always was. `blocked` is the one state the user never sets: it means an agent asked a
-question and stopped, and it is what puts the entry in the inbox's *waiting on you* section
-and on the tab badge.
+always was. `blocked` is the one state the user never sets: it means at least one question
+on the entry is unanswered, and it is what puts the entry in the inbox's *waiting on you*
+section and on the tab badge.
+
+**`blocked` is derived, and nothing enforces it.** `cellar_entry_questions` is the record;
+the state is a cache of "does this entry have a pending question", set by whoever writes.
+Three places compute it and all three go through `unblocksEntry` in
+`src/lib/entryQuestions.ts` — `askQuestion` in `mcp/src/cellar.ts` blocks, `answerQuestion`
+there unblocks, and `useCellarWrites` in the app unblocks. There is no trigger and no
+constraint, so a fourth writer that forgets leaves a red badge on an answered thought or,
+worse, a silently unanswered question on an open one. The app-side unblock is also
+conditional on the entry still being `blocked`: a late answer must not drag a thought the
+user has since marked done back to open.
 
 **The hosted MCP server mints a JWT, and the project signs with ES256.** `supabase/
 functions/mcp` turns an agent token into a short HS256 JWT signed with `CELLAR_JWT_SECRET`
