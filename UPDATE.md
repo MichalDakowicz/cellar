@@ -5,6 +5,7 @@
 ### Changed
 
 - Web: the scrollbar matches the app instead of the browser default
+- Kind chips lead with glitch and removal, then idea, everywhere a kind is offered
 
 ## 1.2.0 — 2026-09-14
 
