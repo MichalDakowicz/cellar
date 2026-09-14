@@ -1,6 +1,6 @@
 import { askRule, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
 import { kindMeta } from '@/lib/kinds';
-import { shortRel } from '@/lib/relTime';
+import { longRel, shortRel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import type { Entry, Project } from '@/types/cellar';
 
@@ -83,7 +83,7 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
     `thought  ${entry.text}`,
     `kind     ${entry.kind} — ${work.brief}`,
     `state    ${entry.state}${entry.agent ? ` (${entry.agent})` : ''}${entry.archived ? ' · archived' : ''}`,
-    `dumped   ${shortRel(entry.createdAt, now)} ago`,
+    `dumped   ${longRel(entry.createdAt, now)}`,
     `project  ${project?.name ?? 'inbox — no project, so no repo to work in'}`,
   ];
 
@@ -92,12 +92,12 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
 
   if (yours.length > 0) {
     out.push('', 'what they added since:');
-    out.push(...yours.map((line) => `  + ${line.text}  (${shortRel(line.createdAt, now)} ago)`));
+    out.push(...yours.map((line) => `  + ${line.text}  (${longRel(line.createdAt, now)})`));
   }
 
   if (agent.length > 0) {
     out.push('', 'already reported back:');
-    out.push(...agent.map((line) => `  > ${line.text}  (${shortRel(line.createdAt, now)} ago)`));
+    out.push(...agent.map((line) => `  > ${line.text}  (${longRel(line.createdAt, now)})`));
   }
 
   out.push('', `asking     ${askRule(entry.kind)}`, `line voice ${LINE_VOICE}`);
