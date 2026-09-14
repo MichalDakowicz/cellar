@@ -43,7 +43,7 @@ export default function Settings() {
   const sidebar = useSidebarSpace();
   const [signingOut, setSigningOut] = useState(false);
 
-  const version = Constants.expoConfig?.version ?? '0.1.0';
+  const version = Constants.expoConfig?.version ?? '1.0.0';
 
   return (
     <View className="flex-1 bg-background">
