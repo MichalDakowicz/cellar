@@ -15,13 +15,28 @@
 export type Kind = 'idea' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
 
 /**
- * `blocked` is the agent's only way to reach you: it appended a question it
- * cannot answer from the repo and stopped. Everything else is yours to set.
+ * `blocked` is the agent's only way to reach you: it asked something it cannot
+ * answer from the repo and moved on to its other work. It lifts on its own when
+ * the last of the entry's questions is answered or dismissed. Everything else
+ * is yours to set.
  */
 export type EntryState = 'open' | 'doing' | 'blocked' | 'done' | 'dropped';
 
 /** Who appended a line. The stored value is the word, like `kind` and `state`. */
 export type LineSource = 'user' | 'agent';
+
+/**
+ * Where an answer came from.
+ *
+ * `chat` means the agent ran out of other work, the question was still
+ * unanswered, so it asked in the conversation instead and wrote the answer back
+ * here. Worth keeping apart from `app`: it is the difference between a decision
+ * you made in your own time and one you made because something was waiting.
+ */
+export type AnsweredVia = 'app' | 'chat';
+
+/** Unanswered, answered, or waved off. Derived, never stored — see `lib/entryQuestions`. */
+export type QuestionStatus = 'unanswered' | 'answered' | 'dismissed';
 
 export type Shelf = {
   id: string;
@@ -54,6 +69,29 @@ export type EntryLine = {
   source: LineSource;
 };
 
+/**
+ * One thing an agent stopped to ask, and what came back.
+ *
+ * Not a line. A line is the thought growing; this is a fork in it — it carries
+ * the options that were offered and the answer that settled it, and it stays
+ * after being answered because the pair is the only record of why the thought
+ * was built the way it was.
+ */
+export type EntryQuestion = {
+  id: string;
+  question: string;
+  /** The choices offered, in order. Empty means free text only. */
+  options: string[];
+  answer: string | null;
+  answeredAt: string | null;
+  answeredVia: AnsweredVia | null;
+  /** Waved off rather than answered. Stops holding the entry blocked either way. */
+  dismissedAt: string | null;
+  /** Who asked. */
+  agent: string | null;
+  createdAt: string;
+};
+
 export type Entry = {
   id: string;
   /** `null` is the inbox — dumped without picking a project, on purpose. */
@@ -70,6 +108,8 @@ export type Entry = {
   /** Who is on it, when an agent claimed it. Null the rest of the time. */
   agent: string | null;
   lines: EntryLine[];
+  /** Oldest first. `blocked` means at least one of these is still unanswered. */
+  questions: EntryQuestion[];
 };
 
 /** What the capture screen holds before it becomes entries. */

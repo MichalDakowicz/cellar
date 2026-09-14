@@ -6,17 +6,30 @@ import {
   normalizeEntry,
   normalizeLine,
   normalizeProject,
+  normalizeQuestion,
   normalizeShelf,
   PROJECT_COLUMNS,
+  QUESTION_COLUMNS,
   SHELF_COLUMNS,
   type AgentTokenRow,
   type EntryRow,
   type LineRow,
   type ProjectRow,
+  type QuestionRow,
   type ShelfRow,
 } from '@/lib/rows';
 import { supabase } from '@/lib/supabase';
-import type { AgentToken, Entry, EntryLine, Kind, LineSource, Project, Shelf } from '@/types/cellar';
+import type {
+  AgentToken,
+  AnsweredVia,
+  Entry,
+  EntryLine,
+  EntryQuestion,
+  Kind,
+  LineSource,
+  Project,
+  Shelf,
+} from '@/types/cellar';
 
 /**
  * Every query the app makes, and nothing else.
@@ -189,6 +202,40 @@ export async function appendLine(
     .single();
   if (error) throw error;
   return normalizeLine(data as LineRow);
+}
+
+/**
+ * Answering a question an agent asked.
+ *
+ * The stamp is set here rather than by a default, because the same row is
+ * written a second time when you change your mind — and `answered_at` is what
+ * the status is read from, so it has to move with the answer.
+ */
+export async function answerQuestion(
+  id: string,
+  answer: string,
+  via: AnsweredVia = 'app',
+): Promise<EntryQuestion> {
+  const { data, error } = await supabase
+    .from('cellar_entry_questions')
+    .update({ answer, answered_at: new Date().toISOString(), answered_via: via })
+    .eq('id', id)
+    .select(QUESTION_COLUMNS)
+    .single();
+  if (error) throw error;
+  return normalizeQuestion(data as QuestionRow);
+}
+
+/**
+ * Waved off. The question stays — it is still the record that something was
+ * asked, and what you did about it was nothing.
+ */
+export async function dismissQuestion(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('cellar_entry_questions')
+    .update({ dismissed_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
 }
 
 /**

@@ -2,6 +2,18 @@
 
 ## 1.1.0 — Unreleased
 
+### Added
+
+- Entry: questions an agent asked live in their own section, tagged answered or unanswered
+- Entry: answer a question by tapping one of its options, or type your own answer
+- Entry: wave a question off if you would rather not answer it, and it stops holding the thought up
+- Entry: answered questions stay on the entry, so why it went the way it did is still there
+- Entry: answering the last question takes the thought off blocked on its own
+
+### Changed
+
+- An agent with several tasks now asks here and carries on, instead of stopping on the first question
+
 ## 1.0.0 — 2026-09-14
 
 ### Added

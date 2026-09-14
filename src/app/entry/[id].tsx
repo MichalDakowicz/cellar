@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AgentQuestion } from '@/components/cellar/AgentQuestion';
 import { AgentThread } from '@/components/cellar/AgentThread';
+import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
@@ -17,6 +18,7 @@ import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { EmptyState } from '@/components/ui/states';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
+import { useEntryQuestions } from '@/features/cellar/useEntryQuestions';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, webFocusRing, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
@@ -34,6 +36,7 @@ import { COLORS } from '@/theme/colors';
 export default function EntryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const entry = useEntryScreen(id);
+  const questions = useEntryQuestions(entry.entry);
   const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
@@ -96,7 +99,16 @@ export default function EntryScreen() {
               </Pressable>
             </View>
 
-            {entry.question && <AgentQuestion question={entry.question} agent={entry.agentName} />}
+            {entry.legacyQuestion && <AgentQuestion question={entry.legacyQuestion} agent={entry.agentName} />}
+
+            <QuestionThread
+              pending={questions.pending}
+              settled={questions.settled}
+              onDraft={questions.setDraft}
+              onPick={questions.pick}
+              onSubmit={questions.submit}
+              onDismiss={(view) => questions.askDismiss(view.question)}
+            />
 
             {entry.thread.length > 0 && (
               <View className="mt-4">
@@ -205,6 +217,16 @@ export default function EntryScreen() {
           )}
         </ContentShell>
       </ScrollView>
+
+      <SheetDialog
+        open={questions.confirming !== null}
+        title="wave this question off"
+        body="it stays on the entry with the rest, marked as waved off, and stops holding the thought up. nothing is lost — you can still answer it in the chat."
+        confirmLabel="wave it off"
+        dismissLabel="keep waiting"
+        onConfirm={questions.confirmDismiss}
+        onDismiss={questions.cancelDismiss}
+      />
 
       <SheetDialog
         open={confirmDelete}
