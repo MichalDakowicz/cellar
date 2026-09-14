@@ -57,7 +57,7 @@
     "start": "expo start",
     "android": "expo run:android",
     "web": "expo start --web",
-    "build:web": "expo export -p web --output-dir dist --clear",
+    "build:web": "node ./scripts/sync-skill.mjs && expo export -p web --output-dir dist --clear",
     "deploy:web": "npm run build:web && firebase deploy --only hosting",
     "lint": "expo lint",
     "icons": "node ./scripts/generate-icons.mjs",

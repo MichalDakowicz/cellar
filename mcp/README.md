@@ -155,9 +155,29 @@ put your name on something would make the list lie about who is working what —
 thought stays one line, `pick up cellar entry <id>`, which is what the app's copy button
 puts on your clipboard.
 
-Install both **user-wide, not per repo**. The server is registered in every repo you dump
-thoughts about, so a copy under one project's `.claude/` would leave the commands missing
-everywhere the cellar is actually read:
+### Installing it
+
+From the server, on a machine that has never cloned this repo — settings → *agent access*
+has the same two lines on a copy button, next to the token:
+
+```powershell
+irm https://cellar-stash.web.app/skill/install.ps1 | iex
+```
+
+```sh
+curl -fsSL https://cellar-stash.web.app/skill/install.sh | sh
+```
+
+Both write two places and nothing else: `~/.claude/skills/cellar/SKILL.md` and one file per
+command in `~/.claude/commands`. **User-wide, not per repo** — the server is registered in
+every repo you dump thoughts about, so a copy under one project's `.claude/` would leave the
+commands missing everywhere the cellar is actually read.
+
+They fetch `commands.txt` rather than carrying the list, so a new file in `skill/commands/`
+reaches every machine on the next web deploy without either installer changing. Point them
+somewhere else with `CELLAR_SKILL_URL` — a preview channel, or a local server while editing.
+
+From a checkout, when you are changing the files themselves, the same copy by hand:
 
 ```sh
 mkdir -p ~/.claude/skills/cellar ~/.claude/commands
@@ -165,8 +185,18 @@ cp mcp/skill/SKILL.md      ~/.claude/skills/cellar/
 cp mcp/skill/commands/*.md ~/.claude/commands/
 ```
 
-Copies, so re-copy after changing either side — the files here are the source and the ones
-under `~/.claude` are the install.
+### How it reaches the server
+
+`scripts/sync-skill.mjs` copies `mcp/skill/` into `public/skill/` and writes `commands.txt`;
+`npm run build:web` runs it before the export, so `npm run deploy:web` publishes the skill
+along with the app. `public/` is generated and gitignored — `mcp/skill/` is the only copy
+that is edited, because two copies of a working agreement drift and the one that drifts is
+always the one nobody is reading.
+
+It is a URL you pipe into a shell, which is the usual bargain: the files are served over
+HTTPS from hosting you deploy, and both installers are short enough to read before running
+one. Nothing in them is authenticated because nothing in them is secret — the skill is
+instructions, and the token that reaches your cellar is minted separately.
 
 ## Configuration
 
@@ -178,6 +208,7 @@ under `~/.claude` are the install.
 | `CELLAR_EMAIL` / `CELLAR_PASSWORD` | —                         | Non-interactive `npm run login`                    |
 | `CELLAR_EMAIL` alone        | —                                | Skips the email prompt on the emailed-code flow     |
 | `CELLAR_JWT_SECRET`         | —                                | **Hosted only**, set with `supabase secrets set` — signs the per-request user JWT |
+| `CELLAR_SKILL_URL`          | `https://cellar-stash.web.app/skill` | Where the installers fetch the skill from            |
 
 It reads the app's own `.env` by default, so there is no second copy of the credentials to
 keep in step.

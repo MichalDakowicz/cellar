@@ -5,6 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Field, Overline } from '@/components/ui/controls';
 import { useToast } from '@/components/ui/Toast';
 import { AgentTokenRow } from '@/features/settings/AgentTokenRow';
+import { SkillInstall } from '@/features/settings/SkillInstall';
 import { useAgentTokens } from '@/hooks/useAgentTokens';
 import { mcpConfig } from '@/lib/agentConfig';
 import { readError } from '@/lib/utils';
@@ -111,6 +112,8 @@ export function AgentTokens({ gutter }: { gutter: string }) {
           ))}
         </View>
       )}
+
+      <SkillInstall />
     </View>
   );
 }
