@@ -3,9 +3,15 @@ import { useMemo } from 'react';
 import type { EntryListItem } from '@/components/cellar/EntryList';
 import { useCellar } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
-import { applyFilter, countLive, groupByDay, groupByKind, hasFilter, tallyKinds } from '@/lib/entryGroups';
-import { ENTRY_STATES } from '@/lib/entryState';
-import { filterByTab, tabCounts } from '@/lib/entryTabs';
+import {
+  applyFilter,
+  countLive,
+  groupByDay,
+  groupByStateAndKind,
+  hasFilter,
+  tallyKinds,
+} from '@/lib/entryGroups';
+import { ENTRY_STATES, stateMeta } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
@@ -27,8 +33,6 @@ export function useProjectScreen(projectId: string | undefined) {
   const view = useCellarPrefs((state) => state.view);
   const setView = useCellarPrefs((state) => state.setView);
   const filter = useEntryFilter((state) => state.filter);
-  const tab = useEntryFilter((state) => state.tab);
-  const setTab = useEntryFilter((state) => state.setTab);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
 
@@ -59,12 +63,8 @@ export function useProjectScreen(projectId: string | undefined) {
     return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / top) * 100) }));
   }, [live]);
 
-  // Tab first, then the kind filter — the tab is which list this is, the filter
-  // narrows the list you are on.
-  const inTab = useMemo(() => filterByTab(all, tab), [all, tab]);
-  const visible = useMemo(() => applyFilter(inTab, filter), [inTab, filter]);
+  const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
   const items = useMemo(() => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)), [visible, view]);
-  const tabs = useMemo(() => tabCounts(all), [all]);
 
   const filtered = hasFilter(filter);
   const meta = [
@@ -96,32 +96,44 @@ export function useProjectScreen(projectId: string | undefined) {
     items,
     showCodes: settings.showCodes,
     filtered,
-    tab,
-    setTab,
-    tabs,
-    /**
-     * Three different empties (PING.md §9.9): the project is empty, this tab is
-     * empty, or the filter on this tab matches nothing. They read differently
-     * and they have different ways out.
-     */
-    emptyKind:
-      all.length === 0
-        ? ('nothing' as const)
-        : inTab.length === 0
-          ? ('tab' as const)
-          : visible.length === 0
-            ? ('filtered' as const)
-            : null,
+    /** Nothing matches, versus nothing here yet — two different empties (PING.md §9.9). */
+    emptyKind: all.length === 0 ? ('nothing' as const) : visible.length === 0 ? ('filtered' as const) : null,
   };
 }
 
+/**
+ * State, then kind inside it, then the rows — flattened, because the list is
+ * one FlashList and a list inside a list never re-measures (EntryList).
+ *
+ * The keys are prefixed with the band: the same kind appears under several
+ * states, and two sections keyed `glitch` collapse into one row.
+ */
 function groupedItems(entries: Entry[]): EntryListItem[] {
-  return groupByKind(entries).flatMap((group) => [
+  return groupByStateAndKind(entries).flatMap((band) => [
     {
       type: 'section' as const,
-      section: { key: group.kind, label: group.kind, meta: String(group.entries.length), kind: group.kind },
+      section: {
+        key: `b:${band.band}`,
+        label: band.band,
+        meta: String(band.count),
+        band: {
+          color: band.band === 'archived' ? stateMeta('dropped').color : stateMeta(band.band).color,
+          dim: band.band === 'archived' || band.band === 'dropped',
+        },
+      },
     },
-    ...group.entries.map((entry) => ({ type: 'entry' as const, entry })),
+    ...band.kinds.flatMap((group) => [
+      {
+        type: 'section' as const,
+        section: {
+          key: `${band.band}:${group.kind}`,
+          label: group.kind,
+          meta: String(group.entries.length),
+          kind: group.kind,
+        },
+      },
+      ...group.entries.map((entry) => ({ type: 'entry' as const, entry })),
+    ]),
   ]);
 }
 

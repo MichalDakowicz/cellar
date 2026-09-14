@@ -4,6 +4,7 @@ import {
   filterSummary,
   groupByDay,
   groupByKind,
+  groupByStateAndKind,
   hasFilter,
   NO_FILTER,
   searchEntries,
@@ -32,7 +33,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
 const at = (iso: string) => entry({ createdAt: iso });
 
 describe('applyFilter', () => {
-  it('leaves the archive to the tabs — a filter is kinds and nothing else', () => {
+  it('leaves the archive alone — the archive is a band, not a narrowing', () => {
     const entries = [entry(), entry({ archived: true })];
     expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
   });
@@ -40,12 +41,19 @@ describe('applyFilter', () => {
   it('treats several kinds as any-of', () => {
     const entries = [entry({ kind: 'glitch' }), entry({ kind: 'idea' }), entry({ kind: 'copy' })];
     const kinds: Kind[] = ['glitch', 'copy'];
-    expect(applyFilter(entries, { kinds }).map((e) => e.kind)).toEqual(['glitch', 'copy']);
+    expect(applyFilter(entries, { ...NO_FILTER, kinds }).map((e) => e.kind)).toEqual(['glitch', 'copy']);
   });
 
-  it('is on only once a kind is picked', () => {
+  it('narrows to one state, and null means any', () => {
+    const entries = [entry({ state: 'open' }), entry({ state: 'done' })];
+    expect(applyFilter(entries, { ...NO_FILTER, state: 'done' })).toHaveLength(1);
+    expect(applyFilter(entries, NO_FILTER)).toHaveLength(2);
+  });
+
+  it('is on once a kind or a state is picked', () => {
     expect(hasFilter(NO_FILTER)).toBe(false);
-    expect(hasFilter({ kinds: ['glitch'] })).toBe(true);
+    expect(hasFilter({ ...NO_FILTER, kinds: ['glitch'] })).toBe(true);
+    expect(hasFilter({ ...NO_FILTER, state: 'doing' })).toBe(true);
   });
 });
 
@@ -54,8 +62,35 @@ describe('filterSummary', () => {
     expect(filterSummary(NO_FILTER)).toBe('any kind');
   });
 
-  it('joins the kinds', () => {
-    expect(filterSummary({ kinds: ['glitch', 'question'] })).toBe('glitch · question');
+  it('joins the kinds and appends the state', () => {
+    expect(filterSummary({ kinds: ['glitch', 'question'], state: 'doing' })).toBe('glitch · question · doing');
+  });
+});
+
+describe('groupByStateAndKind', () => {
+  it('bands by state, and keeps the kind cut inside each band', () => {
+    const groups = groupByStateAndKind([
+      entry({ state: 'open', kind: 'idea' }),
+      entry({ state: 'open', kind: 'glitch' }),
+      entry({ state: 'done', kind: 'idea' }),
+    ]);
+    expect(groups.map((g) => g.band)).toEqual(['open', 'done']);
+    expect(groups[0].kinds.map((k) => k.kind)).toEqual(['glitch', 'idea']);
+    expect(groups[0].count).toBe(2);
+  });
+
+  it('puts blocked at the top and the archive at the foot, whatever state it was in', () => {
+    const groups = groupByStateAndKind([
+      entry({ state: 'done', archived: true }),
+      entry({ state: 'open' }),
+      entry({ state: 'blocked' }),
+    ]);
+    expect(groups.map((g) => g.band)).toEqual(['blocked', 'open', 'archived']);
+  });
+
+  it('drops the bands with nothing in them', () => {
+    expect(groupByStateAndKind([entry({ state: 'doing' })]).map((g) => g.band)).toEqual(['doing']);
+    expect(groupByStateAndKind([])).toEqual([]);
   });
 });
 

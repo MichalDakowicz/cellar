@@ -5,6 +5,7 @@ import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { Overline } from '@/components/ui/controls';
+import { ENTRY_STATES } from '@/lib/entryState';
 import { useEntryFilter } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 import type { EntryState, Kind } from '@/types/cellar';
@@ -31,9 +32,10 @@ type ProjectAsideProps = {
  */
 export function ProjectAside({ stateCounts, kindBars, onEdit }: ProjectAsideProps) {
   const filter = useEntryFilter((state) => state.filter);
+  const setFilter = useEntryFilter((state) => state.setFilter);
   const toggleKind = useEntryFilter((state) => state.toggleKind);
   const clear = useEntryFilter((state) => state.clear);
-  const narrowed = filter.kinds.length > 0;
+  const narrowed = filter.kinds.length > 0 || filter.state !== null;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -84,6 +86,15 @@ export function ProjectAside({ stateCounts, kindBars, onEdit }: ProjectAsideProp
           options={kindChips(filter.kinds)}
           selected={filter.kinds}
           onToggle={(kind: Kind) => toggleKind(kind)}
+        />
+        <ChipWrap
+          label="state"
+          options={[
+            { value: 'any' as const, label: 'any state' },
+            ...ENTRY_STATES.map((state) => ({ value: state.value, label: state.label })),
+          ]}
+          selected={filter.state ?? 'any'}
+          onToggle={(value) => setFilter({ ...filter, state: value === 'any' ? null : (value as EntryState) })}
         />
       </View>
 

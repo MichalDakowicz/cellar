@@ -5,17 +5,16 @@
 ### Added
 
 - Stats: a spread line for where the cellar stands, open to dropped, with each state's share
-- Project: tabs for blocked, open, doing, done, dropped and archived, each showing what is behind it
+- Project: the grouped view bands by state first — blocked, doing, open, done, dropped, then archived — with the kinds inside each
 
 ### Changed
 
 - Web: the scrollbar matches the app instead of the browser default
 - Kind chips lead with glitch and removal, then idea, everywhere a kind is offered
-- Project: the filter narrows the tab you are on by kind — state is the tabs now
 
 ### Removed
 
-- Project: the show archived toggle, replaced by an archived tab that is always there
+- Project: the show archived toggle — the archive is always the last band of the list
 
 ## 1.2.0 — 2026-09-14
 

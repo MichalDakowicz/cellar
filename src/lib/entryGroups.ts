@@ -12,33 +12,38 @@ import type { Entry, EntryState, Kind } from '@/types/cellar';
  */
 
 /**
- * What is left to narrow by once the tab has chosen the state.
+ * What narrows a project's list.
  *
- * State and the archive used to live here too. They are the tabs now
- * (`lib/entryTabs`), and a field with two controls is a field that ends up
- * holding two different answers — so this is kinds, and only kinds.
+ * `showArchived` used to live here. The archive is a band at the foot of the
+ * list now — always there, never behind a toggle — so there is nothing left to
+ * disclose.
  */
 export type EntryFilter = {
   kinds: Kind[];
+  /** `null` means any state. */
+  state: EntryState | null;
 };
 
-export const NO_FILTER: EntryFilter = { kinds: [] };
+export const NO_FILTER: EntryFilter = { kinds: [], state: null };
 
 export function hasFilter(filter: EntryFilter): boolean {
-  return filter.kinds.length > 0;
+  return filter.kinds.length > 0 || filter.state !== null;
 }
 
 export function matches(entry: Entry, filter: EntryFilter): boolean {
-  return filter.kinds.length === 0 || filter.kinds.includes(entry.kind);
+  if (filter.kinds.length > 0 && !filter.kinds.includes(entry.kind)) return false;
+  if (filter.state !== null && entry.state !== filter.state) return false;
+  return true;
 }
 
 export function applyFilter(entries: Entry[], filter: EntryFilter): Entry[] {
   return entries.filter((entry) => matches(entry, filter));
 }
 
-/** "any kind" / "glitch · question". What the left island's dot is about. */
+/** "any kind" / "glitch · question · doing". What the left island's dot is about. */
 export function filterSummary(filter: EntryFilter): string {
-  return filter.kinds.length > 0 ? filter.kinds.join(' · ') : 'any kind';
+  const kinds = filter.kinds.length > 0 ? filter.kinds.join(' · ') : 'any kind';
+  return filter.state ? `${kinds} · ${filter.state}` : kinds;
 }
 
 export type KindGroup = { kind: Kind; code: string; entries: Entry[] };
@@ -54,6 +59,45 @@ export function groupByKind(entries: Entry[]): KindGroup[] {
     code: meta.code,
     entries: entries.filter((entry) => entry.kind === meta.value),
   })).filter((group) => group.entries.length > 0);
+}
+
+/** A state, or the archive — the outer band of the grouped reading. */
+export type Band = EntryState | 'archived';
+
+/**
+ * Bands, top to bottom.
+ *
+ * Blocked leads because it is the one state the user never set: it is waiting
+ * on them. Doing next — the thought in flight is the one the page is for — then
+ * open, which is most of a cellar and would otherwise bury both. Done and
+ * dropped settle to the foot, and archived sits under them, always rendered
+ * rather than behind a toggle you have to remember to switch back off.
+ */
+export const BANDS: Band[] = ['blocked', 'doing', 'open', 'done', 'dropped', 'archived'];
+
+export function bandOf(entry: Entry): Band {
+  return entry.archived ? 'archived' : entry.state;
+}
+
+export type BandGroup = { band: Band; count: number; kinds: KindGroup[] };
+
+/**
+ * The grouped reading: state, then kind inside it, then the rows.
+ *
+ * Two levels rather than one because the flat kind grouping put a thought you
+ * finished in March directly above one you have not started — same heading,
+ * same weight, and the settled ones win on volume. Banding by state first puts
+ * the work at the top and the history at the bottom without hiding either, and
+ * the kind cut survives inside each band, which is what made the grouped view
+ * worth reading in the first place.
+ *
+ * Empty bands drop out, the same way empty kinds already do.
+ */
+export function groupByStateAndKind(entries: Entry[]): BandGroup[] {
+  return BANDS.map((band) => {
+    const mine = entries.filter((entry) => bandOf(entry) === band);
+    return { band, count: mine.length, kinds: groupByKind(mine) };
+  }).filter((group) => group.count > 0);
 }
 
 export type DayGroup = { key: string; entries: Entry[] };

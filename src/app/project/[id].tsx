@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
-import { EntryTabs } from '@/components/cellar/EntryTabs';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { RepoLink } from '@/components/cellar/RepoLink';
@@ -83,12 +82,7 @@ export default function ProjectScreen() {
               </View>
 
               <View className="flex-1 flex-row">
-                <View className="min-w-0 flex-1">
-                  <View className={`pb-3 ${gutter}`}>
-                    <EntryTabs counts={project.tabs} tab={project.tab} onTab={project.setTab} />
-                  </View>
-                  {list}
-                </View>
+                <View className="min-w-0 flex-1">{list}</View>
                 <View className={`w-[300px] border-l border-border/60 pl-6 pr-8 pt-1`}>
                   <ProjectAside
                     stateCounts={project.stateCounts}
@@ -137,20 +131,13 @@ function PhoneHeader({
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
       </View>
-
-      <View className="pb-2 pt-1">
-        <EntryTabs counts={project.tabs} tab={project.tab} onTab={project.setTab} gutter={gutter} />
-      </View>
-
     </View>
   );
 }
 
 /**
- * Three ways a project's list comes up empty, and each one has a different way
- * out: the project has nothing in it, the tab has nothing in it, or the kind
- * filter on this tab matches nothing (PING.md §9.9). Telling them apart is the
- * difference between "dump something" and "you are standing on the wrong tab".
+ * Nothing matches, versus nothing here yet — two different empties, with two
+ * different ways out (PING.md §9.9).
  */
 function emptyFor(
   project: ReturnType<typeof useProjectScreen>,
@@ -160,18 +147,8 @@ function emptyFor(
   if (project.emptyKind === 'filtered') {
     return {
       title: 'nothing matches',
-      body: `loosen a kind to see the rest of ${project.tab}.`,
+      body: 'loosen a kind or clear the state to see the rest of this project.',
       action: isDesktop ? undefined : { label: 'open the filter', onPress: onFilter },
-    };
-  }
-
-  if (project.emptyKind === 'tab') {
-    const elsewhere = project.tabs.filter((row) => row.count > 0 && row.tab !== project.tab);
-    return {
-      title: `nothing ${project.tab}`,
-      body: elsewhere.length > 0
-        ? `it is all under ${elsewhere.map((row) => `${row.label} ${row.count}`).join(' · ')}.`
-        : 'this project is empty on every tab.',
     };
   }
 

@@ -9,8 +9,18 @@ import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { useGutter } from '@/hooks/useResponsive';
 import type { Entry, Kind } from '@/types/cellar';
 
-/** `kind` is set on a grouped-by-kind heading, and absent on a day heading. */
-export type EntrySection = { key: string; label: string; meta?: string; kind?: Kind };
+/**
+ * `kind` is set on a grouped-by-kind heading, and absent on a day heading.
+ * `band` marks the outer heading of the grouped reading — a state, or the
+ * archive — and carries the colour its rows are badged with so the two agree.
+ */
+export type EntrySection = {
+  key: string;
+  label: string;
+  meta?: string;
+  kind?: Kind;
+  band?: { color: string; dim?: boolean };
+};
 
 /** A section heading, or one entry. The list is flat so it virtualizes properly. */
 export type EntryListItem = { type: 'section'; section: EntrySection } | { type: 'entry'; entry: Entry };
@@ -85,11 +95,35 @@ export function EntryList({
   );
 }
 
+/**
+ * One heading, at one of two weights. A band rules off with a hairline and
+ * wears the state's own dot; a kind heading inside it stays the quiet line it
+ * has always been, so the two levels never read as the same level.
+ */
 function SectionRow({ section }: { section: EntrySection }) {
   const gutter = useGutter();
 
+  if (section.band) {
+    return (
+      <View className={`border-t border-border/60 pb-1 pt-7 ${gutter}`}>
+        <View className="flex-row items-center justify-between gap-3">
+          <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+            <View
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: section.band.color, opacity: section.band.dim ? 0.5 : 1 }}
+            />
+            <Text className="text-sm font-bold tracking-tight text-foreground" numberOfLines={1}>
+              {section.label}
+            </Text>
+          </View>
+          {!!section.meta && <Text className="text-xs font-semibold text-muted-foreground">{section.meta}</Text>}
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View className={`flex-row items-center justify-between gap-3 pb-1.5 pt-6 ${gutter}`}>
+    <View className={`flex-row items-center justify-between gap-3 pb-1.5 pt-4 ${gutter}`}>
       <View className="min-w-0 flex-1 flex-row items-center gap-2">
         {section.kind && <KindGlyph kind={section.kind} size={13} />}
         <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
