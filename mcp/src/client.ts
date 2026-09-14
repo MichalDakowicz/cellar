@@ -85,9 +85,10 @@ export function createAuthClient(): SupabaseClient {
 export class NotSignedIn extends Error {
   constructor() {
     super(
-      'This Cellar MCP server is not signed in. Run `npm run login` in cellar/mcp and retry. ' +
-        'It offers Google in a browser, an emailed code, or a password — the same account the app uses. ' +
-        'Never ask the user for their password yourself; the login command handles it.',
+      'This Cellar MCP server is not signed in. Run `npm run login` in cellar/mcp and retry — ' +
+        'it takes the email and password of the account the app uses. If that account was created with ' +
+        'Google it has no password yet; the app settings screen has a "password for agent tools" block ' +
+        'that sets one. Never ask the user for their password yourself; the login command reads it directly.',
     );
     this.name = 'NotSignedIn';
   }

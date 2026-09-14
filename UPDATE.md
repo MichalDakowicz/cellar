@@ -16,6 +16,8 @@
 - Entries: an agent can pick one up, and what it reports back sits in its own section under yours
 - Entries: blocked is a new state — an agent asked something and nothing moves until you answer
 - Inbox: anything an agent stopped to ask about waits at the top, named with the project it came from
+- A banner on the phone when an agent stops to ask you something, with a switch in settings
+- Settings: set a password for the account, so the agent tools can sign in without a browser
 - Projects: read one two ways — grouped by kind, or one stream cut into days
 - Projects: filter by kind and state from the funnel beside the view toggle
 - Seven kinds, not eight — addition was the same thought as idea, so it is gone

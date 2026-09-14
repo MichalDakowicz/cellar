@@ -20,22 +20,28 @@ npm install
 npm run login          # the same account the app signs into
 ```
 
-`login` offers three ways in, because the shared account may have been created with
-Google and never given a password:
+**Email and password**, the ordinary way. It is the default because it is the only one of
+the three that depends on nothing outside this repo.
 
-1. **Google, in a browser.** It stands up a one-request server on `127.0.0.1:54545`, sends
-   you to Google, and takes the code out of the redirect — the same PKCE flow the app runs
-   through `expo-web-browser`, with a different letterbox. If Supabase rejects the redirect,
-   add `http://127.0.0.1:54545/callback` once under *Authentication → URL Configuration →
-   Redirect URLs*.
+The shared account may have been created with Google and so have no password at all. Set
+one from inside the app — **settings → password for agent tools**. That works because the
+app is already signed in, and Google sign-in keeps working afterwards; it adds a way in
+rather than replacing one.
 
-   The address is the literal one on purpose: on Windows `localhost` resolves to `::1`
-   first, so the browser would hang on a blank tab *after* a successful sign-in.
-2. **A code emailed to you.** No password, no dashboard setting.
-3. **Email and password.**
+Two fallbacks, both real and both with a dependency worth knowing about:
 
-`npm run login -- --google` / `--code` / `--password` skips the menu, and setting
-`CELLAR_EMAIL` + `CELLAR_PASSWORD` runs it without a prompt.
+- `npm run login -- --google` stands up a one-request server on `127.0.0.1:54545` and runs
+  the same PKCE flow the app runs through `expo-web-browser`. Needs the browser to complete
+  a redirect back to that loopback port, and `http://127.0.0.1:54545/callback` allow-listed
+  under *Authentication → URL Configuration → Redirect URLs*. The literal address is on
+  purpose: on Windows `localhost` resolves to `::1` first, so a server bound to `127.0.0.1`
+  never sees the redirect and the tab hangs *after* a successful sign-in.
+- `npm run login -- --code` has Supabase email you a code — or a link, depending on the
+  template; it takes either. Needs that mail to actually arrive, which on a project using
+  the built-in sender is rate-limited and not guaranteed.
+
+`--password` skips the menu, and `CELLAR_EMAIL` + `CELLAR_PASSWORD` run it with no prompt
+at all.
 
 Then register it with whatever runs agents. Claude Code:
 

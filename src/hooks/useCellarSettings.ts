@@ -19,7 +19,7 @@ function key(userId: string | undefined) {
 async function fetchCellarSettings(userId: string): Promise<CellarSettings> {
   const { data, error } = await supabase
     .from('cellar_settings')
-    .select('show_codes, raw_default, remember_last, default_kind, default_view')
+    .select('show_codes, raw_default, remember_last, default_kind, default_view, notify_questions')
     .eq('user_id', userId)
     .maybeSingle();
   if (error) throw error;

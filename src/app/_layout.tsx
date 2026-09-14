@@ -10,7 +10,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
+// Imported for its side effect: the background task has to be defined at
+// module scope so a headless launch can find it by name.
+import '@/lib/blockedWatchTask';
 import { queryClient } from '@/lib/queryClient';
 import { useCaptureFocus } from '@/store/cellarPrefs';
 import { ThemeProvider } from '@/theme/ThemeProvider';
@@ -72,6 +76,7 @@ export default function RootLayout() {
             <ThemeProvider>
               <ToastProvider>
                 <AuthGate>
+                  <QuestionSync />
                   <AppShell>
                     <Stack screenOptions={{ headerShown: false }} />
                   </AppShell>

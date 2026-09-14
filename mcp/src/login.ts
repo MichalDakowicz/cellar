@@ -14,9 +14,13 @@ import { CALLBACK_URL, signInWithGoogle } from './oauth.ts';
  *
  *   cd cellar/mcp && npm run login
  *
- * Three ways in, because the account is the one shared with Radar, Lidar, Sonar
- * and Pulsar, and it may well have been created with Google and never given a
- * password at all.
+ * Email and password is the default because it is the only one of the three
+ * that depends on nothing outside this repo: the OAuth flow needs a browser to
+ * complete a redirect to a loopback port, and the emailed code needs Supabase's
+ * mail to actually arrive. Both do work, and both have failed here.
+ *
+ * An account created with Google has no password — Cellar's own settings screen
+ * sets one, which it can do because the app is already signed in.
  */
 
 type Mode = 'google' | 'code' | 'password';
@@ -47,18 +51,21 @@ async function chooseMode(): Promise<Mode> {
   stdout.write(
     [
       '',
-      'How do you sign into Cellar?',
+      'Sign in to Cellar.',
       '',
-      '  1  Google, in a browser        (the usual one)',
-      '  2  A code emailed to me        (no password needed)',
-      '  3  Email and password',
+      '  1  Email and password          (the one that always works)',
+      '  2  Google, in a browser',
+      '  3  A code emailed to me',
+      '',
+      'No password on the account? It was made with Google, so it has none yet.',
+      'Open Cellar → settings → "password for agent tools", set one, then pick 1.',
       '',
     ].join('\n'),
   );
   const answer = (await ask('Pick 1, 2 or 3 [1]: ')) || '1';
-  if (answer.startsWith('2')) return 'code';
-  if (answer.startsWith('3')) return 'password';
-  return 'google';
+  if (answer.startsWith('2')) return 'google';
+  if (answer.startsWith('3')) return 'code';
+  return 'password';
 }
 
 async function run(mode: Mode): Promise<ReturnType<typeof createAuthClient>> {
@@ -99,7 +106,17 @@ async function run(mode: Mode): Promise<ReturnType<typeof createAuthClient>> {
   const email = process.env.CELLAR_EMAIL ?? (await ask('Email: '));
   const password = process.env.CELLAR_PASSWORD ?? (await ask('Password: ', true));
   const { error } = await client.auth.signInWithPassword({ email, password });
-  if (error) throw error;
+  if (error) {
+    // The single most likely failure, and the one whose stock message sends
+    // people looking for a typo that is not there.
+    if (/invalid login credentials/i.test(error.message)) {
+      throw new Error(
+        'That email and password did not match. If the account was created with Google it has no ' +
+          'password yet — open Cellar, go to settings → "password for agent tools", set one, and run this again.',
+      );
+    }
+    throw error;
+  }
   return client;
 }
 
