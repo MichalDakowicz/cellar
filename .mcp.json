@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "cellar": {
+            "command": "node",
+            "args": ["--import", "tsx", "C:/ping/cellar/mcp/src/server.ts"],
+            "cwd": "C:/ping/cellar/mcp",
+            "env": { "CELLAR_AGENT": "claude" }
+        }
+    }
+}
