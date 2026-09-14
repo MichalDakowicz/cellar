@@ -81,10 +81,18 @@ async function run(mode: Mode): Promise<ReturnType<typeof createAuthClient>> {
     const { error } = await client.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
     if (error) throw error;
 
-    stdout.write('\nCheck your email. It contains a six-digit code (and a link — you want the code).\n');
-    const token = await ask('Code: ');
-    const { error: verifyError } = await client.auth.verifyOtp({ email, token, type: 'email' });
-    if (verifyError) throw verifyError;
+    stdout.write(
+      [
+        '',
+        'Check your email.',
+        '',
+        'Supabase sends either a six-digit code or a sign-in link, depending on how the',
+        'email template is written — so either works here. Paste the code, or copy the',
+        'link address out of the email and paste the whole thing.',
+        '',
+      ].join('\n'),
+    );
+    await verifyEmail(client, email, await ask('Code or link: '));
     return client;
   }
 
@@ -93,6 +101,42 @@ async function run(mode: Mode): Promise<ReturnType<typeof createAuthClient>> {
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return client;
+}
+
+/**
+ * Accepts either half of what the email might contain.
+ *
+ * The default Supabase template is a link and nothing else, so a login that
+ * only took a six-digit code would be broken on a stock project — and the
+ * failure would look like "no code arrived" rather than "your template has no
+ * code in it", which is the sort of thing that costs an evening.
+ *
+ * A pasted link carries the same one-time token as a query parameter; it is
+ * spelled `token` on the older /verify links and `token_hash` on newer ones.
+ * Pulling it out and verifying it here is the same exchange the browser would
+ * have done, minus the redirect nobody wants.
+ */
+async function verifyEmail(client: ReturnType<typeof createAuthClient>, email: string, answer: string): Promise<void> {
+  const trimmed = answer.trim();
+  if (!trimmed) throw new Error('Nothing pasted.');
+
+  if (/^\d{6}$/.test(trimmed)) {
+    const { error } = await client.auth.verifyOtp({ email, token: trimmed, type: 'email' });
+    if (error) throw error;
+    return;
+  }
+
+  let hash: string | null = null;
+  try {
+    const url = new URL(trimmed);
+    hash = url.searchParams.get('token_hash') ?? url.searchParams.get('token');
+  } catch {
+    throw new Error('That is neither a six-digit code nor a link. Paste one of the two.');
+  }
+  if (!hash) throw new Error('That link has no sign-in token in it. Copy the whole address.');
+
+  const { error } = await client.auth.verifyOtp({ token_hash: hash, type: 'email' });
+  if (error) throw error;
 }
 
 function requestedMode(): Mode | null {
