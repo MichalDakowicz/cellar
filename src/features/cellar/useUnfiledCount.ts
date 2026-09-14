@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchEntries } from '@/features/cellar/cellarApi';
+import { waitingOnYou } from '@/lib/agentWork';
 
 /**
- * How many thoughts have no project yet — the number on the inbox destination.
+ * What the inbox destination has waiting on it — thoughts with no project yet,
+ * plus anything an agent stopped to ask about.
+ *
+ * It counts both because the inbox screen shows both, and a badge that counts
+ * only half of what the screen lists is how a user stops trusting the number.
  *
  * It reads the same query key as `useCellar()`, so the bar and the screens are
  * one cache and the badge can never disagree with the list it points at. The
@@ -12,5 +17,7 @@ import { fetchEntries } from '@/features/cellar/cellarApi';
  */
 export function useUnfiledCount(): number {
   const { data } = useQuery({ queryKey: ['cellar', 'entries'], queryFn: fetchEntries });
-  return (data ?? []).filter((entry) => entry.projectId === null && !entry.archived).length;
+  const entries = data ?? [];
+  const unfiled = entries.filter((entry) => entry.projectId === null && !entry.archived).length;
+  return unfiled + waitingOnYou(entries).length;
 }

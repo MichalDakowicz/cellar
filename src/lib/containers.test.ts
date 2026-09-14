@@ -14,6 +14,8 @@ const project = (id: string, shelfId: string): Project => ({
   name: id,
   position: 0,
   createdAt: '',
+  repoPath: null,
+  repoUrl: null,
 });
 
 let seq = 0;
@@ -23,6 +25,7 @@ const entry = (projectId: string | null): Entry => ({
   text: 't',
   kind: 'idea',
   state: 'open',
+  agent: null,
   archived: false,
   createdAt: '',
   lines: [],

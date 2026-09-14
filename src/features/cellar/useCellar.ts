@@ -16,6 +16,7 @@ import {
   patchEntry,
   renameProject,
   renameShelf,
+  setProjectRepo,
   type EntryPatch,
   type NewEntry,
 } from '@/features/cellar/cellarApi';
@@ -129,6 +130,12 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(PROJECTS),
   });
 
+  const linkProject = useMutation({
+    mutationFn: ({ id, ...repo }: { id: string; repoPath: string | null; repoUrl: string | null }) =>
+      setProjectRepo(id, repo),
+    onSuccess: () => invalidate(PROJECTS),
+  });
+
   const relocateProject = useMutation({
     mutationFn: ({ id, shelfId }: { id: string; shelfId: string }) => moveProject(id, shelfId),
     onSuccess: () => invalidate(PROJECTS),
@@ -164,6 +171,7 @@ export function useCellarWrites() {
     removeShelf,
     addProject,
     editProject,
+    linkProject,
     relocateProject,
     removeProject,
   };

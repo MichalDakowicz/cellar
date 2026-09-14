@@ -25,6 +25,11 @@ export type StateMeta = {
 export const ENTRY_STATES: StateMeta[] = [
   { value: 'open', label: 'open', color: 'hsl(0 0% 63.9%)', tint: 'rgba(163,163,163,0.16)', badged: false, settled: false },
   { value: 'doing', label: 'doing', color: '#f59e0b', tint: 'rgba(245,158,11,0.16)', badged: true, settled: false },
+  // The only state the user does not set. An agent that cannot answer a
+  // question from the repo leaves it here with the question appended, so this
+  // badge means one thing: it is waiting on you, and nothing moves until you
+  // answer. Red because it is the one state that is stalled.
+  { value: 'blocked', label: 'blocked', color: '#ef4444', tint: 'rgba(239,68,68,0.16)', badged: true, settled: false },
   { value: 'done', label: 'done', color: '#22c55e', tint: 'rgba(34,197,94,0.16)', badged: true, settled: true },
   { value: 'dropped', label: 'dropped', color: 'hsl(0 0% 63.9%)', tint: 'rgba(163,163,163,0.16)', badged: true, settled: true },
 ];
@@ -32,7 +37,7 @@ export const ENTRY_STATES: StateMeta[] = [
 export const DEFAULT_STATE: EntryState = 'open';
 
 /** Still work. What the shelf tile counts, and what the stats call open. */
-export const LIVE_STATES: EntryState[] = ['open', 'doing'];
+export const LIVE_STATES: EntryState[] = ['open', 'doing', 'blocked'];
 
 const BY_VALUE = new Map(ENTRY_STATES.map((state) => [state.value, state]));
 

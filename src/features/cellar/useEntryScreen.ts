@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
+import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { dropStamp, shortRel } from '@/lib/relTime';
 import type { Entry, EntryState, Kind } from '@/types/cellar';
@@ -56,17 +57,31 @@ export function useEntryScreen(entryId: string | undefined) {
     });
   }, [entry, remove, router]);
 
+  // Two readings, never interleaved: what you thought, and what came back
+  // against it. One chronological list is the wall of one-liners the `source`
+  // column exists to prevent.
+  const { yours, agent } = splitThread(
+    (entry?.lines ?? []).map((entryLine) => ({ ...entryLine, rel: shortRel(entryLine.createdAt) })),
+  );
+
   return {
     entry,
     projectName,
     stamp: entry ? dropStamp(entry.createdAt) : '',
-    thread: (entry?.lines ?? []).map((entryLine) => ({ ...entryLine, rel: shortRel(entryLine.createdAt) })),
+    thread: yours,
+    agentLines: agent,
+    /** Named when an agent has it. The blocked question is its last line. */
+    agentName: entry?.agent ?? null,
+    question: entry?.state === 'blocked' ? (agent[agent.length - 1]?.text ?? null) : null,
     line,
     setLine,
     appendLine,
     setKind: (kind: Kind) => patch({ kind }),
     stateOptions: ENTRY_STATES.map((meta) => ({ value: meta.value, label: meta.label })),
-    setState: (state: EntryState) => patch({ state }),
+    // Moving the state by hand takes the entry back: whatever an agent was
+    // doing with it, you have just decided otherwise, and leaving its name on
+    // the row would keep claiming it is being worked on.
+    setState: (state: EntryState) => patch({ state, agent: null }),
     archived: entry?.archived ?? false,
     archiveLabel: entry?.archived ? 'unarchive' : 'archive',
     toggleArchive: () => patch({ archived: !entry?.archived }),

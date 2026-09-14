@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { EntryList } from '@/components/cellar/EntryList';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
+import { RepoLink } from '@/components/cellar/RepoLink';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -85,6 +86,9 @@ export default function ProjectScreen() {
                   filtered={project.filtered}
                   large
                 />
+                {project.repo && (
+                  <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
+                )}
               </View>
 
               <View className="flex-1 flex-row">
@@ -138,6 +142,7 @@ function PhoneHeader({
           filtered={project.filtered}
           onFilter={onFilter}
         />
+        {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
       </View>
 
       {project.archivedCount > 0 && (

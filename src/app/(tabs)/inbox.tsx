@@ -37,6 +37,7 @@ export default function InboxScreen() {
             items={inbox.items}
             variant="inbox"
             showCode={inbox.showCodes}
+            whereFor={inbox.whereFor}
             onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
             onFile={(entry) => fileUnder?.(entry.id)}
             header={
@@ -51,7 +52,8 @@ export default function InboxScreen() {
                     </View>
                   </View>
                   <Text className="mt-2 text-sm text-muted-foreground">
-                    everything you dumped without picking a project. file it or leave it — {inbox.sortLabel}.
+                    everything you dumped without picking a project, and anything an agent stopped to ask you about
+                    — {inbox.sortLabel}.
                   </Text>
                 </View>
               </View>

@@ -1,7 +1,7 @@
 import { isEntryState } from '@/lib/entryState';
 import { isKind } from '@/lib/kinds';
 import { supabase } from '@/lib/supabase';
-import type { Entry, EntryLine, Kind, Project, Shelf } from '@/types/cellar';
+import type { Entry, EntryLine, Kind, LineSource, Project, Shelf } from '@/types/cellar';
 
 /**
  * The single read boundary. Every `cellar_*` row enters the app through a
@@ -12,8 +12,16 @@ import type { Entry, EntryLine, Kind, Project, Shelf } from '@/types/cellar';
  */
 
 type ShelfRow = { id: string; name: string; position: number; created_at: string };
-type ProjectRow = { id: string; shelf_id: string; name: string; position: number; created_at: string };
-type LineRow = { id: string; text: string; created_at: string };
+type ProjectRow = {
+  id: string;
+  shelf_id: string;
+  name: string;
+  position: number;
+  created_at: string;
+  repo_path: string | null;
+  repo_url: string | null;
+};
+type LineRow = { id: string; text: string; created_at: string; source: string | null };
 type EntryRow = {
   id: string;
   project_id: string | null;
@@ -22,6 +30,7 @@ type EntryRow = {
   state: string;
   archived: boolean;
   created_at: string;
+  agent: string | null;
   cellar_entry_lines: LineRow[] | null;
 };
 
@@ -36,11 +45,20 @@ export function normalizeProject(row: ProjectRow): Project {
     name: row.name,
     position: row.position,
     createdAt: row.created_at,
+    repoPath: row.repo_path,
+    repoUrl: row.repo_url,
   };
 }
 
 function normalizeLine(row: LineRow): EntryLine {
-  return { id: row.id, text: row.text, createdAt: row.created_at };
+  // A line written before the column existed is yours — there was nothing else
+  // that could have written it.
+  return {
+    id: row.id,
+    text: row.text,
+    createdAt: row.created_at,
+    source: row.source === 'agent' ? 'agent' : 'user',
+  };
 }
 
 export function normalizeEntry(row: EntryRow): Entry {
@@ -55,11 +73,15 @@ export function normalizeEntry(row: EntryRow): Entry {
     state: isEntryState(row.state) ? row.state : 'open',
     archived: row.archived,
     createdAt: row.created_at,
+    agent: row.agent,
     lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }
 
-const ENTRY_COLUMNS = 'id, project_id, text, kind, state, archived, created_at, cellar_entry_lines(id, text, created_at)';
+const ENTRY_COLUMNS =
+  'id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source)';
+
+const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url';
 
 export async function fetchShelves(): Promise<Shelf[]> {
   // Seeds "apps" and "side projects" on a brand new cellar. Called on the read
@@ -80,7 +102,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 export async function fetchProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('cellar_projects')
-    .select('id, shelf_id, name, position, created_at')
+    .select(PROJECT_COLUMNS)
     .order('position')
     .order('created_at');
   if (error) throw error;
@@ -124,7 +146,7 @@ export async function createProject(
   const { data, error } = await supabase
     .from('cellar_projects')
     .insert({ user_id: userId, shelf_id: shelfId, name, position })
-    .select('id, shelf_id, name, position, created_at')
+    .select(PROJECT_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeProject(data as ProjectRow);
@@ -147,6 +169,22 @@ export async function deleteShelf(id: string): Promise<void> {
 
 export async function renameProject(id: string, name: string): Promise<void> {
   const { error } = await supabase.from('cellar_projects').update({ name }).eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Where the project lives. Both halves are set together because the edit sheet
+ * holds them as one form, and a partial write would let a cleared field come
+ * back on the next save.
+ */
+export async function setProjectRepo(
+  id: string,
+  repo: { repoPath: string | null; repoUrl: string | null },
+): Promise<void> {
+  const { error } = await supabase
+    .from('cellar_projects')
+    .update({ repo_path: repo.repoPath, repo_url: repo.repoUrl })
+    .eq('id', id);
   if (error) throw error;
 }
 
@@ -175,7 +213,7 @@ export async function createEntries(userId: string, entries: NewEntry[]): Promis
   return (data as EntryRow[]).map(normalizeEntry);
 }
 
-export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'archived' | 'projectId'>>;
+export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'archived' | 'projectId' | 'agent'>>;
 
 export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
   const row: Record<string, unknown> = {};
@@ -183,6 +221,7 @@ export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
   if (patch.state !== undefined) row.state = patch.state;
   if (patch.archived !== undefined) row.archived = patch.archived;
   if (patch.projectId !== undefined) row.project_id = patch.projectId;
+  if (patch.agent !== undefined) row.agent = patch.agent;
   const { error } = await supabase.from('cellar_entries').update(row).eq('id', id);
   if (error) throw error;
 }
@@ -192,11 +231,16 @@ export async function deleteEntry(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function appendLine(userId: string, entryId: string, text: string): Promise<EntryLine> {
+export async function appendLine(
+  userId: string,
+  entryId: string,
+  text: string,
+  source: LineSource = 'user',
+): Promise<EntryLine> {
   const { data, error } = await supabase
     .from('cellar_entry_lines')
-    .insert({ user_id: userId, entry_id: entryId, text })
-    .select('id, text, created_at')
+    .insert({ user_id: userId, entry_id: entryId, text, source })
+    .select('id, text, created_at, source')
     .single();
   if (error) throw error;
   return normalizeLine(data as LineRow);

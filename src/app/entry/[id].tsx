@@ -3,6 +3,8 @@ import { Plus, Trash } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
+import { AgentQuestion } from '@/components/cellar/AgentQuestion';
+import { AgentThread } from '@/components/cellar/AgentThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
@@ -79,6 +81,8 @@ export default function EntryScreen() {
             </Text>
             <Text className="mt-2.5 text-xs text-muted-foreground">{entry.stamp}</Text>
 
+            {entry.question && <AgentQuestion question={entry.question} agent={entry.agentName} />}
+
             {entry.thread.length > 0 && (
               <View className="mt-4">
                 {entry.thread.map((line) => (
@@ -115,6 +119,8 @@ export default function EntryScreen() {
                 <Plus size={18} color={COLORS.foreground} strokeWidth={2} />
               </Pressable>
             </View>
+
+            <AgentThread lines={entry.agentLines} agent={entry.agentName} />
 
             <View className="mb-2 mt-7">
               <Overline>state</Overline>

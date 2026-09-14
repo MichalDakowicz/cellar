@@ -269,3 +269,37 @@ end $$;
 -- fixing it. Idempotent: a second run matches nothing.
 update public.cellar_entries set kind = 'idea' where kind = 'addition';
 update public.cellar_settings set default_kind = 'idea' where default_kind = 'addition';
+
+-- 2026-09-14 — where a project actually lives, so an agent can find it.
+--
+-- `repo_path` is the local checkout and it is the one that does work: an agent
+-- running in C:\ping\cellar\src\lib resolves the project by longest-prefix match
+-- on this column and needs nothing asked of the user. `repo_url` is the remote,
+-- and exists only so the app has something to open — never match on it, a URL
+-- tells you nothing about the directory the agent is standing in.
+--
+-- Both nullable. Most projects are a thought about something that has no repo
+-- yet, and requiring one would make the column a lie on the day it is added.
+alter table public.cellar_projects
+  add column if not exists repo_path text,
+  add column if not exists repo_url  text;
+
+-- 2026-09-14 — who wrote a line.
+--
+-- An entry grows by appended lines, and once something other than the user can
+-- append, a wall of one-liners with no attribution is the app's core value
+-- destroyed: you cannot tell what you thought from what was reported back. The
+-- stored value is the display word, like `kind` and `state` — 'user' | 'agent'.
+--
+-- Defaulted to 'user' and not null, so every line that already exists is
+-- correctly yours without a backfill.
+alter table public.cellar_entry_lines
+  add column if not exists source text not null default 'user';
+
+-- 2026-09-14 — which agent has an entry, if one does.
+--
+-- Claiming is `state = 'doing'` and nothing else; this column only names who,
+-- so the app can say "claude is on this" instead of leaving you to guess why a
+-- thought you never touched went amber. Cleared when the entry settles.
+alter table public.cellar_entries
+  add column if not exists agent text;
