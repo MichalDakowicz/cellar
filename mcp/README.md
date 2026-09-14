@@ -142,6 +142,67 @@ and the shared `user_settings` as well; four other apps live in this database.
 shown once, stored as a hash, scoped to nothing else, and revocable from the phone in your
 pocket.
 
+## The skill and the lookups
+
+The tools are only half of it. `skill/SKILL.md` is the working agreement an agent reads
+before it touches a thought — the loop, when to ask instead of guessing, what each kind is
+asking for, and the voice its lines have to be written in. `skill/commands/` holds three
+slash commands for the other case, when you only want to look:
+
+| command        | for                                                           |
+| -------------- | ------------------------------------------------------------- |
+| `/cellar-list` | what is open here, or in a named project, `all` or `inbox`     |
+| `/cellar-find` | search the thoughts and the lines under them, across projects  |
+| `/cellar-view` | one entry in full, by id prefix                                |
+
+They are read-only on purpose. Nothing here claims an entry, because a lookup that quietly
+put your name on something would make the list lie about who is working what — starting a
+thought stays one line, `pick up cellar entry <id>`, which is what the app's copy button
+puts on your clipboard.
+
+### Installing it
+
+From the server, on a machine that has never cloned this repo — settings → *agent access*
+has the same two lines on a copy button, next to the token:
+
+```powershell
+irm https://cellar-stash.web.app/skill/install.ps1 | iex
+```
+
+```sh
+curl -fsSL https://cellar-stash.web.app/skill/install.sh | sh
+```
+
+Both write two places and nothing else: `~/.claude/skills/cellar/SKILL.md` and one file per
+command in `~/.claude/commands`. **User-wide, not per repo** — the server is registered in
+every repo you dump thoughts about, so a copy under one project's `.claude/` would leave the
+commands missing everywhere the cellar is actually read.
+
+They fetch `commands.txt` rather than carrying the list, so a new file in `skill/commands/`
+reaches every machine on the next web deploy without either installer changing. Point them
+somewhere else with `CELLAR_SKILL_URL` — a preview channel, or a local server while editing.
+
+From a checkout, when you are changing the files themselves, the same copy by hand:
+
+```sh
+mkdir -p ~/.claude/skills/cellar ~/.claude/commands
+cp mcp/skill/SKILL.md      ~/.claude/skills/cellar/
+cp mcp/skill/commands/*.md ~/.claude/commands/
+```
+
+### How it reaches the server
+
+`scripts/sync-skill.mjs` copies `mcp/skill/` into `public/skill/` and writes `commands.txt`;
+`npm run build:web` runs it before the export, so `npm run deploy:web` publishes the skill
+along with the app. `public/` is generated and gitignored — `mcp/skill/` is the only copy
+that is edited, because two copies of a working agreement drift and the one that drifts is
+always the one nobody is reading.
+
+It is a URL you pipe into a shell, which is the usual bargain: the files are served over
+HTTPS from hosting you deploy, and both installers are short enough to read before running
+one. Nothing in them is authenticated because nothing in them is secret — the skill is
+instructions, and the token that reaches your cellar is minted separately.
+
 ## Configuration
 
 | Variable                    | Default                          | For                                               |
@@ -152,6 +213,7 @@ pocket.
 | `CELLAR_EMAIL` / `CELLAR_PASSWORD` | —                         | Non-interactive `npm run login`                    |
 | `CELLAR_EMAIL` alone        | —                                | Skips the email prompt on the emailed-code flow     |
 | `CELLAR_JWT_SECRET`         | —                                | **Hosted only**, set with `supabase secrets set` — signs the per-request user JWT |
+| `CELLAR_SKILL_URL`          | `https://cellar-stash.web.app/skill` | Where the installers fetch the skill from            |
 
 It reads the app's own `.env` by default, so there is no second copy of the credentials to
 keep in step.

@@ -2,6 +2,11 @@
 
 ## 1.2.0 — Unreleased
 
+### Added
+
+- Settings: copy a one-line install that puts the agent skill on the machine your agent runs on
+- Three lookup commands for an agent — what is open, a search across thoughts, one entry in full
+
 ## 1.1.0 — 2026-09-14
 
 ### Added

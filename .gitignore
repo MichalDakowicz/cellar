@@ -41,5 +41,8 @@ ios
 plan.md
 feature_ideas.md
 
+# Web static output — generated from mcp/skill by scripts/sync-skill.mjs
+public
+
 # Supabase CLI scratch — the linked project ref, written on deploy
 supabase/.temp/
