@@ -165,7 +165,7 @@ claiming it is running. Never `input keyevent`/`swipe` past a lock screen.
 Report the actual result — if the build fails or the install rejects, say so with the
 error; do not describe the change as shipped.
 
-**Three traps. Two fail quietly; the third lies about what is wrong.**
+**Four traps. Two fail quietly, one lies about what is wrong, and one leaves the tree broken.**
 
 **Build with a JDK 21, not the machine default.** On JDK 24+ the release build dies at
 `:react-native-screens:configureCMakeRelWithDebInfo` and two sibling tasks with
@@ -180,6 +180,16 @@ export JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"   # 21.0.8
 `android/` is gitignored prebuild output, so this cannot be fixed in the repo — it is a
 machine setting, and a fresh `expo prebuild` resets `android/gradle.properties` (bump
 `org.gradle.jvmargs` back to `-Xmx4096m -XX:MaxMetaspaceSize=1536m` after one).
+
+**`expo prebuild` deletes `android/` before it writes it, and Android Studio holds the old
+release output open.** If the IDE is running with this project loaded, the clear fails part
+way through on `android/app/build/intermediates/dex/release/mergeDexRelease/classes.dex`
+with `EBUSY: resource busy or locked` — and by then most of `android/` is already gone, so
+the folder has no `gradlew`, no `settings.gradle`, and nothing will build until a prebuild
+completes. Stopping the Gradle and Kotlin daemons does not help; the handle belongs to the
+IDE process itself. Close Android Studio, `rm -rf android`, and prebuild again. Nothing is
+lost either way — `android/` is gitignored output — but a half-cleared tree reads like a
+broken repo rather than a locked file.
 
 **The seed RPC is not optional.** A brand new cellar has no shelves, and the capture
 screen is the home route — so a user with no shelf row would land on a picker with nothing
