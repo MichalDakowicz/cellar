@@ -1,0 +1,23 @@
+{
+  "name": "cellar-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reads and works a Cellar over MCP, so an agent can pick up the thoughts you dumped about the repo it is standing in.",
+  "scripts": {
+    "login": "tsx src/login.ts",
+    "logout": "tsx src/login.ts --out",
+    "serve": "tsx src/server.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@supabase/supabase-js": "^2.110.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "tsx": "^4.20.6",
+    "typescript": "~6.0.3"
+  }
+}

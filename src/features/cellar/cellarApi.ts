@@ -1,87 +1,29 @@
-import { isEntryState } from '@/lib/entryState';
-import { isKind } from '@/lib/kinds';
+import {
+  ENTRY_COLUMNS,
+  LINE_COLUMNS,
+  normalizeEntry,
+  normalizeLine,
+  normalizeProject,
+  normalizeShelf,
+  PROJECT_COLUMNS,
+  SHELF_COLUMNS,
+  type EntryRow,
+  type LineRow,
+  type ProjectRow,
+  type ShelfRow,
+} from '@/lib/rows';
 import { supabase } from '@/lib/supabase';
 import type { Entry, EntryLine, Kind, LineSource, Project, Shelf } from '@/types/cellar';
 
 /**
- * The single read boundary. Every `cellar_*` row enters the app through a
- * `normalize*` here and nothing downstream ever branches on a raw column name
- * or a legacy shape (PING.md §13).
+ * Every query the app makes, and nothing else.
+ *
+ * The row shapes and their normalizers live in `lib/rows.ts` — the MCP server
+ * reads the same tables and has to produce the same objects, and it cannot
+ * import this file because this file holds the client.
  *
  * No React import — this is the transport, not a hook.
  */
-
-type ShelfRow = { id: string; name: string; position: number; created_at: string };
-type ProjectRow = {
-  id: string;
-  shelf_id: string;
-  name: string;
-  position: number;
-  created_at: string;
-  repo_path: string | null;
-  repo_url: string | null;
-};
-type LineRow = { id: string; text: string; created_at: string; source: string | null };
-type EntryRow = {
-  id: string;
-  project_id: string | null;
-  text: string;
-  kind: string;
-  state: string;
-  archived: boolean;
-  created_at: string;
-  agent: string | null;
-  cellar_entry_lines: LineRow[] | null;
-};
-
-export function normalizeShelf(row: ShelfRow): Shelf {
-  return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
-}
-
-export function normalizeProject(row: ProjectRow): Project {
-  return {
-    id: row.id,
-    shelfId: row.shelf_id,
-    name: row.name,
-    position: row.position,
-    createdAt: row.created_at,
-    repoPath: row.repo_path,
-    repoUrl: row.repo_url,
-  };
-}
-
-function normalizeLine(row: LineRow): EntryLine {
-  // A line written before the column existed is yours — there was nothing else
-  // that could have written it.
-  return {
-    id: row.id,
-    text: row.text,
-    createdAt: row.created_at,
-    source: row.source === 'agent' ? 'agent' : 'user',
-  };
-}
-
-export function normalizeEntry(row: EntryRow): Entry {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    text: row.text,
-    // A kind or state the app does not know falls back rather than rendering as
-    // a blank chip. Both columns are text so a future value can land here
-    // before this build knows the word for it.
-    kind: isKind(row.kind) ? row.kind : 'idea',
-    state: isEntryState(row.state) ? row.state : 'open',
-    archived: row.archived,
-    createdAt: row.created_at,
-    agent: row.agent,
-    lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
-  };
-}
-
-const ENTRY_COLUMNS =
-  'id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source)';
-
-const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url';
 
 export async function fetchShelves(): Promise<Shelf[]> {
   // Seeds "apps" and "side projects" on a brand new cellar. Called on the read
@@ -92,7 +34,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 
   const { data, error } = await supabase
     .from('cellar_shelves')
-    .select('id, name, position, created_at')
+    .select(SHELF_COLUMNS)
     .order('position')
     .order('created_at');
   if (error) throw error;
@@ -131,7 +73,7 @@ export async function createShelf(userId: string, name: string, position: number
   const { data, error } = await supabase
     .from('cellar_shelves')
     .insert({ user_id: userId, name, position })
-    .select('id, name, position, created_at')
+    .select(SHELF_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeShelf(data as ShelfRow);
@@ -240,7 +182,7 @@ export async function appendLine(
   const { data, error } = await supabase
     .from('cellar_entry_lines')
     .insert({ user_id: userId, entry_id: entryId, text, source })
-    .select('id, text, created_at, source')
+    .select(LINE_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeLine(data as LineRow);

@@ -12,6 +12,10 @@
 - Shelves: the layer above projects, so apps and minecraft mods are never one list
 - Shelves: rename or delete a shelf from the shelf picker
 - Projects: rename one, move it to another shelf, or delete it
+- Projects: give a project the folder it lives in and its remote, so an agent can find the code
+- Entries: an agent can pick one up, and what it reports back sits in its own section under yours
+- Entries: blocked is a new state — an agent asked something and nothing moves until you answer
+- Inbox: anything an agent stopped to ask about waits at the top, named with the project it came from
 - Projects: read one two ways — grouped by kind, or one stream cut into days
 - Projects: filter by kind and state from the funnel beside the view toggle
 - Seven kinds, not eight — addition was the same thought as idea, so it is gone

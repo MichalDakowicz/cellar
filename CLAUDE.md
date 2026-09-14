@@ -36,6 +36,11 @@ Structure rules (they are why the siblings are maintainable):
 - Every entry row anywhere in the app is `EntryCard`, and every list of them is
   `EntryList`. No screen renders a row of its own — this is the rule PING.md §13 calls
   hard, and it is the one that keeps a wall of one-line text readable.
+- `mcp/` is a **separate node package** inside this repo — the MCP server that hands the
+  cellar to agents (`mcp/README.md`). It has its own `package.json`, its own
+  `node_modules` and its own `tsc`; `npm test` and `npm run lint` at the root do not see
+  it. It imports `src/lib/*` directly, which is the reason those files must stay free of
+  React, react-native and the Supabase client.
 
 The design language is `../design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —
@@ -179,6 +184,22 @@ in it and no way to make one. `fetchShelves` calls `cellar_seed_shelves()` *befo
 select, every time. If you ever split that call out "because it only matters once", the
 first run breaks and every subsequent run looks fine, which is the worst possible bug to
 have to reproduce.
+
+**An agent writes to the same rows you do.** `cellar_entry_lines.source` is `'user'` or
+`'agent'` and the two are rendered as separate sections on the entry, never interleaved —
+`splitThread` in `src/lib/agentWork.ts`. Anything that appends a line has to say which it
+is; a line that arrives unmarked reads as the user's, because before the column existed it
+always was. `blocked` is the one state the user never sets: it means an agent asked a
+question and stopped, and it is what puts the entry in the inbox's *waiting on you* section
+and on the tab badge.
+
+**The repo path is matched, the repo URL is not.** `cellar_projects.repo_path` is what
+`projectForPath` resolves a working directory against, and the matching is prefix-plus-
+boundary on a case-folded, slash-normalised key — a plain `startsWith` files
+`C:\ping\cellar-old` under `C:\ping\cellar`, which silently puts an agent's work in the
+wrong project. `repo_url` exists only to be opened. If you change either side of that
+matching, change it in `src/lib/repoLink.ts` only: the app and the server share that file
+and they must not disagree about which project a directory belongs to.
 
 **`project_id is null` is the inbox — it is not a missing value.** Every query that means
 "filed somewhere" has to say `projectId !== null` explicitly, and every `on delete` on a

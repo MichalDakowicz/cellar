@@ -9,5 +9,5 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"],
-  "exclude": ["node_modules", "dist", "android", "ios"]
+  "exclude": ["node_modules", "dist", "android", "ios", "mcp"]
 }
