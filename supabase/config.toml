@@ -1,0 +1,10 @@
+# Only what deploying the function needs. Cellar's schema is applied by hand in
+# the SQL Editor (supabase/schema.sql), so there is no migrations directory and
+# nothing here drives the database.
+project_id = "cellar"
+
+[functions.mcp]
+# The Authorization header carries a cellar agent token, not a Supabase JWT, so
+# the platform's own check would reject every request before the function ran.
+# The function does its own, against cellar_agent_tokens.
+verify_jwt = false
