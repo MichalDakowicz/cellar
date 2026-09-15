@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cellar",
     "slug": "cellar",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cellar",
@@ -15,7 +15,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.michaldakowicz.cellar",
-      "versionCode": 6
+      "versionCode": 7
     },
     "web": {
       "output": "single",
