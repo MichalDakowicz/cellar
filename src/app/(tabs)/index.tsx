@@ -160,11 +160,15 @@ export default function DumpScreen() {
         )}
         </View>
 
-        {!isDesktop && dump.justDropped.length > 0 && (
+        {/* The phone's half of the desktop column. Same list, fewer rows: what
+            you have been catching, not a receipt for this sitting — a band that
+            is empty until you type is empty exactly when you want to know
+            whether you already dumped this. */}
+        {!isDesktop && dump.latest.length > 0 && (
           <View className={`mt-7 border-y border-border/50 py-4 ${gutter}`}>
-            <Overline>just dropped</Overline>
+            <Overline>lately</Overline>
             <View className="mt-1.5">
-              {dump.justDropped.map((entry) => (
+              {dump.latest.map((entry) => (
                 <EntryCard
                   key={entry.id}
                   entry={entry}

@@ -163,3 +163,23 @@ export function searchEntries(entries: Entry[], query: string): Entry[] {
       entry.lines.some((line) => line.text.toLowerCase().includes(needle)),
   );
 }
+
+/**
+ * The newest thoughts in the cellar, whichever project they landed in.
+ *
+ * What the capture screen shows beside — and under — the field. It is history,
+ * not a receipt: the band used to list only the ids dropped since the screen
+ * mounted, so it was empty every cold start, which is exactly when you most
+ * want to see what you already caught. Anything dropped just now is the newest
+ * thing there is, so it still lands at the top of this.
+ *
+ * Archived is excluded — a thought you filed away is not what you were last
+ * thinking about.
+ */
+export function recentEntries(entries: Entry[], limit: number): Entry[] {
+  return entries
+    .filter((entry) => !entry.archived)
+    .slice()
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit);
+}
