@@ -1,4 +1,5 @@
 import {
+  answeredForAgent,
   isSettled,
   MAX_OPTIONS,
   normalizeOptions,
@@ -11,7 +12,13 @@ import {
   unblocksEntry,
 } from '@/lib/entryQuestions';
 
-type Q = { id: string; question: string; answeredAt: string | null; dismissedAt: string | null };
+type Q = {
+  id: string;
+  question: string;
+  answeredAt: string | null;
+  dismissedAt: string | null;
+  agent?: string | null;
+};
 
 const q = (id: string, over: Partial<Q> = {}): Q => ({
   id,
@@ -121,5 +128,44 @@ describe('readyToResume', () => {
       entry('open', []),
     ];
     expect(readyToResume(list)).toEqual([]);
+  });
+});
+
+describe('answeredForAgent', () => {
+  const entry = (id: string, state: string, questions: Q[], archived = false) =>
+    ({ id, state, archived, questions }) as never;
+
+  it('returns only the questions this agent asked, and only the settled ones', () => {
+    const mine = q('1', { answeredAt: 'then', agent: 'claude' });
+    const list = [
+      entry('a', 'open', [mine, q('2', { answeredAt: 'then', agent: 'codex' }), q('3', { agent: 'claude' })]),
+    ];
+    expect(answeredForAgent(list, 'claude')).toEqual([{ entry: list[0], questions: [mine] }]);
+  });
+
+  it('counts a dismissed question — waving it off is a decision, not silence', () => {
+    const list = [entry('a', 'open', [q('1', { dismissedAt: 'then', agent: 'claude' })])];
+    expect(answeredForAgent(list, 'claude')).toHaveLength(1);
+  });
+
+  it('matches the name regardless of case or padding', () => {
+    const list = [entry('a', 'open', [q('1', { answeredAt: 'then', agent: ' Claude ' })])];
+    expect(answeredForAgent(list, 'claude')).toHaveLength(1);
+  });
+
+  it('skips anything that is not an open, unarchived thought', () => {
+    const answered = { answeredAt: 'then', agent: 'claude' };
+    const list = [
+      entry('a', 'blocked', [q('1', answered)]),
+      entry('b', 'done', [q('1', answered)]),
+      entry('c', 'doing', [q('1', answered)]),
+      entry('d', 'open', [q('1', answered)], true),
+    ];
+    expect(answeredForAgent(list, 'claude')).toEqual([]);
+  });
+
+  it('is empty for an agent with no name rather than matching every unstamped question', () => {
+    const list = [entry('a', 'open', [q('1', { answeredAt: 'then', agent: null })])];
+    expect(answeredForAgent(list, '  ')).toEqual([]);
   });
 });

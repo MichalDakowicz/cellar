@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { canClaim, LINE_VOICE } from '@/lib/agentWork';
-import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
+import { answeredForAgent, MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { normalizeRepoPath, normalizeRepoUrl, repoLabel } from '@/lib/repoLink';
 import type { Kind } from '@/types/cellar';
@@ -19,9 +19,10 @@ import {
   resolveProject,
   resolveQuestion,
   setEntryState,
+  type Cellar,
 } from '../cellar.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
-import { entryBrief, shortId } from '../format.ts';
+import { answeredTail, entryBrief, shortId } from '../format.ts';
 
 /**
  * The writes, and the shape of the loop they make:
@@ -37,6 +38,25 @@ import { entryBrief, shortId } from '../format.ts';
  * it was dumped as, forever, and everything an agent has to say about it is an
  * appended line.
  */
+
+/**
+ * Every write answers the question the agent forgot to ask: did anything come
+ * back?
+ *
+ * `cellar_check_answers` is the tool for it, and an agent that remembers to
+ * call it never sees this. Forgetting to look is the failure being fixed, so
+ * the answer is appended to the result of whatever the agent *did* call — it is
+ * reading that text anyway. The cellar snapshot predates the write, so the
+ * entry being acted on is left out: finishing a thought must not print a nudge
+ * to go and pick that same thought back up.
+ */
+function withAnswered(body: string, cellar: Cellar, agent: string, exceptId?: string): string {
+  const answered = answeredForAgent(
+    cellar.entries.filter((entry) => !entry.archived),
+    agent,
+  );
+  return body + answeredTail(answered, exceptId);
+}
 
 export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void {
   server.registerTool(
@@ -70,15 +90,20 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         }
 
         return text(
-          [
-            `Claimed as "${ctx.agent}". It is now doing, and the user sees your name on it.`,
-            '',
-            entryBrief(claim.entry, cellar),
-            '',
-            'When you are done: cellar_finish_entry. If you cannot answer something from the',
-            'repo, ask — in the chat when this session has one task, with cellar_ask when it',
-            'has several, and read "ask where" above before choosing.',
-          ].join('\n'),
+          withAnswered(
+            [
+              `Claimed as "${ctx.agent}". It is now doing, and the user sees your name on it.`,
+              '',
+              entryBrief(claim.entry, cellar),
+              '',
+              'When you are done: cellar_finish_entry. If you cannot answer something from the',
+              'repo, ask — in the chat when this session has one task, with cellar_ask when it',
+              'has several, and read "ask where" above before choosing.',
+            ].join('\n'),
+            cellar,
+            ctx.agent,
+            target.id,
+          ),
         );
       }),
   );
@@ -101,7 +126,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, body);
-        return text(`Added to ${shortId(target.id)}:\n> ${written}`);
+        return text(withAnswered(`Added to ${shortId(target.id)}:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );
 
@@ -121,8 +146,9 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         'WHEN TO ASK. The moment you know, never at the end of the session. The question is worth nothing until it ' +
         'is in their inbox, and a session that ends before you write it takes it with it.\n\n' +
         'Ask one concrete question, and pass `options` whenever you are choosing between named alternatives — the ' +
-        'user answers those with a single tap. Before you finish, read the entries you asked about again: if the ' +
-        'answer is still missing, ask the same question in the chat and record it with cellar_answer_question.',
+        'user answers those with a single tap. Nothing interrupts you when the answer lands, so call ' +
+        'cellar_check_answers as you finish each thought and again before you end the session: if the answer is ' +
+        'still missing then, ask the same question in the chat and record it with cellar_answer_question.',
       inputSchema: {
         entry: z.string().describe('Entry id, or the short id from a listing.'),
         question: z
@@ -149,16 +175,21 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         });
 
         return text(
-          [
-            `${shortId(target.id)} is blocked, waiting on the user:`,
-            `  ? ${shortId(asked.id)} ${asked.question}`,
-            ...asked.options.map((option, index) => `      ${optionLabel(index)}) ${option}`),
-            '',
-            'It is in their inbox now. Move to the next task — do not keep working this entry, and do not sit',
-            'waiting on it. Before you finish the session, read this entry again: if the answer arrived it is',
-            'yours to pick back up, and if it did not, ask the same question in the chat and record what they',
-            'say with cellar_answer_question.',
-          ].join('\n'),
+          withAnswered(
+            [
+              `${shortId(target.id)} is blocked, waiting on the user:`,
+              `  ? ${shortId(asked.id)} ${asked.question}`,
+              ...asked.options.map((option, index) => `      ${optionLabel(index)}) ${option}`),
+              '',
+              'It is in their inbox now. Move to the next task — do not keep working this entry, and do not sit',
+              'waiting on it. cellar_check_answers when you finish the next thought, and again before you end the',
+              'session: an answer that arrived is yours to pick back up. If it never does, ask the same question in',
+              'the chat and record what they say with cellar_answer_question.',
+            ].join('\n'),
+            cellar,
+            ctx.agent,
+            target.id,
+          ),
         );
       }),
   );
@@ -239,7 +270,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, note);
         // The name comes off with the claim: nobody is on it any more.
         await setEntryState(ctx.client, target.id, outcome, null);
-        return text(`${shortId(target.id)} is ${outcome}:\n> ${written}`);
+        return text(withAnswered(`${shortId(target.id)} is ${outcome}:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );
 
@@ -262,7 +293,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         const target = resolveEntry(entry, cellar.entries);
         if (note?.trim()) await addAgentLine(ctx.client, ctx.userId, target.id, note);
         await setEntryState(ctx.client, target.id, 'open', null);
-        return text(`${shortId(target.id)} is open again.`);
+        return text(withAnswered(`${shortId(target.id)} is open again.`, cellar, ctx.agent, target.id));
       }),
   );
 
@@ -318,7 +349,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, reason);
         await archiveEntry(ctx.client, target.id);
-        return text(`${shortId(target.id)} is archived:\n> ${written}`);
+        return text(withAnswered(`${shortId(target.id)} is archived:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );
 

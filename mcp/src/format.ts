@@ -148,3 +148,60 @@ function questionBlocks(questions: EntryQuestion[], now: number): string[] {
 
 /** The column legend, printed once at the top of a listing. */
 export const ROW_LEGEND = 'id / kind / state / age / project / thought';
+
+/**
+ * What came back while you were working.
+ *
+ * Printed with the answer rather than the question id, because the only useful
+ * next move is to claim the entry and build to the decision — an id you would
+ * have to look the answer up with is a round trip for nothing. A waved-off
+ * question says so in place of an answer: it is still a decision, and the thing
+ * it decides is that the judgement is yours.
+ */
+export function answeredBlock(
+  answered: { entry: Entry; questions: EntryQuestion[] }[],
+  projects: Project[],
+  now = Date.now(),
+): string {
+  if (answered.length === 0) {
+    return 'Nothing answered since you asked. Anything still blocked is waiting on the user — ask it in the chat instead if the work has run out.';
+  }
+
+  const out = [`${answered.length} answered since you asked — claim to carry on:`];
+  for (const { entry, questions } of answered) {
+    out.push('', entryRow(entry, projects, now));
+    for (const question of questions) {
+      out.push(`  ? ${question.question}`);
+      out.push(
+        questionStatus(question) === 'dismissed'
+          ? `  = waved off${question.answer ? ` (was: ${question.answer})` : ' — use your judgement'}`
+          : `  = ${question.answer ?? '(no answer recorded)'}`,
+      );
+    }
+  }
+  return out.join('\n');
+}
+
+/**
+ * The same thing as a two-line tail on somebody else's result.
+ *
+ * The tool exists, and an agent that remembers to call it does not need this —
+ * but forgetting to look is the entire failure this is here to stop, so the
+ * answer goes where the agent is already reading. One line per thought and no
+ * detail: enough to know something came back, not enough to derail the tool
+ * call it is hanging off.
+ */
+export function answeredTail(
+  answered: { entry: Entry; questions: EntryQuestion[] }[],
+  exceptId?: string,
+): string {
+  const rows = answered.filter(({ entry }) => entry.id !== exceptId);
+  if (rows.length === 0) return '';
+
+  return [
+    '',
+    '─ answered since you asked ─',
+    ...rows.map(({ entry, questions }) => `  ${shortId(entry.id)}  ${questions[0].answer ?? 'waved off'}`),
+    '  → cellar_check_answers for the rest, then claim to carry on',
+  ].join('\n');
+}
