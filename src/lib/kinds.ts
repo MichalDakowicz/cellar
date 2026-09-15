@@ -61,3 +61,21 @@ export function kindMeta(value: string | null | undefined): KindMeta {
 export function isKind(value: unknown): value is Kind {
   return typeof value === 'string' && BY_VALUE.has(value as Kind);
 }
+
+/**
+ * What a *tally* calls a kind.
+ *
+ * Everywhere else the stored value is the label (PING.md §2.3) and this returns
+ * it unchanged. A count is the one place that breaks down: "addition" was
+ * folded into "idea" because two chips for one thought is a decision you have
+ * to make every time you dump something — but a bar reading `idea` then
+ * undersells what is in the bucket, and the answer to "how much of this cellar
+ * is things that do not exist yet" is the whole point of reading the bar.
+ *
+ * Counting only, never a chip, a filter or a section heading: those set a kind,
+ * and a control that offers `idea/addition` reads as two values you can pick
+ * between, which is the fork this app removed on purpose.
+ */
+export function kindTallyLabel(kind: Kind): string {
+  return kind === 'idea' ? 'idea/addition' : kindMeta(kind).label;
+}

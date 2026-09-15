@@ -21,17 +21,27 @@ export function RepoLink({ label, url, path }: { label: string; url: string | nu
   const { hovered, bind } = useHover();
   const open = url ? () => void WebBrowser.openBrowserAsync(url) : undefined;
 
+  // Aligned on the baseline, not the box. Two sizes in two faces — 12px system
+  // and 10px mono — never agree about where the text sits inside a line box, so
+  // centring the boxes still leaves the path riding low under the name. Only
+  // the baseline is a line both of them are actually on. The glyph has no
+  // baseline worth the name, so it opts back out to centre.
   const body = (
-    <View className="flex-row items-center gap-1.5">
-      <FolderGit2 size={12} color={COLORS.muted} strokeWidth={2} />
+    <View className="flex-row items-baseline gap-1.5">
+      <View className="self-center">
+        <FolderGit2 size={12} color={COLORS.muted} strokeWidth={2} />
+      </View>
       <Text
-        className={['text-xs', url ? 'text-primary' : 'text-muted-foreground'].join(' ')}
+        className={['text-xs leading-4', url ? 'text-primary' : 'text-muted-foreground'].join(' ')}
         numberOfLines={1}
       >
         {label}
       </Text>
       {!!path && !!url && (
-        <Text className="min-w-0 flex-1 font-mono text-[10px] text-muted-foreground opacity-70" numberOfLines={1}>
+        <Text
+          className="min-w-0 flex-1 font-mono text-[10px] leading-4 text-muted-foreground opacity-70"
+          numberOfLines={1}
+        >
           {path}
         </Text>
       )}

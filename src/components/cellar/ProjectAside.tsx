@@ -7,6 +7,7 @@ import { StateSpread, type SpreadRow } from '@/components/cellar/StateSpread';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { Overline } from '@/components/ui/controls';
 import { ENTRY_STATES } from '@/lib/entryState';
+import { kindTallyLabel } from '@/lib/kinds';
 import { useEntryFilter } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 import type { EntryState, Kind } from '@/types/cellar';
@@ -53,7 +54,9 @@ export function ProjectAside({ stateSpread, kindBars, onEdit }: ProjectAsideProp
                 <View className="flex-row items-center justify-between gap-2">
                   <View className="min-w-0 flex-row items-center gap-2">
                     <KindGlyph kind={bar.kind} size={12} />
-                    <Text className="text-xs text-foreground">{bar.kind}</Text>
+                    <Text className="text-xs text-foreground" numberOfLines={1}>
+                      {kindTallyLabel(bar.kind)}
+                    </Text>
                   </View>
                   <Text className="text-xs text-muted-foreground">{bar.count}</Text>
                 </View>

@@ -3,9 +3,9 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { StateBadge } from '@/components/cellar/StateBadge';
-import { KIND_GUTTER, KindGlyph, kindLabel, TEXT_LINE } from '@/components/media/Glyphs';
+import { KIND_GUTTER, KindGlyph, kindLabel, LINE_ROW, TEXT_LINE } from '@/components/media/Glyphs';
 import { useHover, webTransition } from '@/hooks/useResponsive';
-import { stateMeta } from '@/lib/entryState';
+import { isDimmed } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
 import { COLORS } from '@/theme/colors';
 import type { Entry } from '@/types/cellar';
@@ -48,7 +48,10 @@ export const EntryCard = memo(function EntryCard({
   onFile,
   onCopy,
 }: EntryCardProps) {
-  const settled = stateMeta(entry.state).settled;
+  // Settled either way, or archived. Archive is a band rather than a state, so
+  // an archived `open` thought would otherwise sit in the quietest part of the
+  // list at full strength (lib/entryState).
+  const dimmed = isDimmed(entry);
   const grown = entry.lines.length;
   const { hovered, bind } = useHover();
 
@@ -58,21 +61,27 @@ export const EntryCard = memo(function EntryCard({
       // A row is a click target on web and looks like plain text until the
       // ground moves under the mouse (PING.md §4.5). The inbox row already has
       // a ground, so it lifts; a bare line grows one.
+      //
+      // The dim is on the row, not on its text: a greyed thought whose glyph,
+      // badge and timestamp still read at full strength is louder than the live
+      // row above it, which is the opposite of what settling means.
       style={[
         webTransition('background-color'),
         hovered ? { backgroundColor: COLORS.rowHover, borderRadius: 12 } : null,
+        dimmed ? { opacity: 0.5 } : null,
       ]}
     >
       {showCode && (
-        // Centred in the gutter on both axes, and the box is exactly one line
-        // of `text-sm` tall (14px over a 20px line box) so the glyph sits on the
-        // first line of a thought that wraps to three — not floated above it by
-        // a guessed top padding.
+        // Centred in the gutter on both axes, against the same box the text
+        // occupies — so the glyph sits on the *first* line of a thought that
+        // wraps to three rather than floating above it. That box is the line
+        // plus the row's own vertical padding on every variant but the inbox,
+        // whose Pressable has none.
         <View
           accessibilityLabel={kindLabel(entry.kind)}
           style={{
             width: KIND_GUTTER,
-            height: TEXT_LINE,
+            height: variant === 'inbox' ? TEXT_LINE : LINE_ROW,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -93,10 +102,7 @@ export const EntryCard = memo(function EntryCard({
           variant === 'inbox' ? '' : 'px-2 py-2.5',
         ].join(' ')}
       >
-        <Text
-          className={['min-w-0 flex-1 text-sm text-foreground', settled ? 'opacity-50' : ''].join(' ')}
-          numberOfLines={variant === 'hit' ? 2 : 3}
-        >
+        <Text className="min-w-0 flex-1 text-sm text-foreground" numberOfLines={variant === 'hit' ? 2 : 3}>
           {entry.text}
         </Text>
 
@@ -120,7 +126,7 @@ export const EntryCard = memo(function EntryCard({
           hitSlop={10}
           onPress={() => onCopy(entry)}
           className="items-center justify-center self-start rounded-md px-1.5 active:opacity-60"
-          style={{ height: TEXT_LINE + 20 }}
+          style={{ height: variant === 'inbox' ? TEXT_LINE : LINE_ROW }}
         >
           <Copy size={13} color={COLORS.muted} strokeWidth={2} />
         </Pressable>

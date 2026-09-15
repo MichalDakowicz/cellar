@@ -7,6 +7,7 @@ import {
   groupByStateAndKind,
   hasFilter,
   NO_FILTER,
+  recentEntries,
   searchEntries,
   tallyKinds,
   tallyStates,
@@ -178,5 +179,30 @@ describe('searchEntries', () => {
 
   it('returns nothing for an empty query rather than everything', () => {
     expect(searchEntries([entry()], '   ')).toEqual([]);
+  });
+});
+
+describe('recentEntries', () => {
+  const at = (id: string, createdAt: string, archived = false): Entry =>
+    entry({ id, createdAt, archived });
+
+  it('reads the whole cellar, newest first', () => {
+    const got = recentEntries([at('a', '2026-01-01T00:00:00Z'), at('c', '2026-03-01T00:00:00Z'), at('b', '2026-02-01T00:00:00Z')], 12);
+    expect(got.map((e) => e.id)).toEqual(['c', 'b', 'a']);
+  });
+
+  it('caps at the limit', () => {
+    const many = ['a', 'b', 'c', 'd'].map((id, index) => at(id, `2026-01-0${index + 1}T00:00:00Z`));
+    expect(recentEntries(many, 2)).toHaveLength(2);
+  });
+
+  // A thought you filed away is not what you were last thinking about.
+  it('leaves the archive out', () => {
+    const got = recentEntries([at('kept', '2026-01-01T00:00:00Z'), at('gone', '2026-02-01T00:00:00Z', true)], 12);
+    expect(got.map((e) => e.id)).toEqual(['kept']);
+  });
+
+  it('is empty on an empty cellar rather than throwing', () => {
+    expect(recentEntries([], 12)).toEqual([]);
   });
 });

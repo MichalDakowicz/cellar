@@ -4,8 +4,14 @@
 
 ### Fixed
 
+- Archived thoughts read greyed out wherever they are listed, heading included
 - Project: the figures rail is separated by space, with no stray line beside the scrollbar
 - Web: the scrollbar is the slim pill it was meant to be, with no arrow buttons
+- Project detail: the repo name and the checkout path sit on one line, level with each other
+- Stats and the project rail count the idea bar as idea/addition, so the bucket names itself
+- Dump: the band under the field is now lately, and shows recent thoughts from a cold start
+- The kind glyph beside an entry sits level with the first line of the thought, not above it
+- Project detail: the wheel scrolls the entries from anywhere on the page, not only over them
 
 ## 1.6.0 — 2026-09-15
 

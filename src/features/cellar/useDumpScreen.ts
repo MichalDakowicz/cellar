@@ -3,10 +3,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
+import { recentEntries } from '@/lib/entryGroups';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs } from '@/store/cellarPrefs';
-import type { Entry, Kind } from '@/types/cellar';
+import type { Kind } from '@/types/cellar';
 
 /**
  * The capture screen. Everything it derives lives here so the route is a
@@ -30,7 +31,6 @@ export function useDumpScreen() {
   const setLastProject = useCellarPrefs((state) => state.setLastProject);
 
   const [text, setText] = useState('');
-  const [justIds, setJustIds] = useState<string[]>([]);
 
   const shelfProjects = useMemo(
     () => projects.filter((project) => project.shelfId === shelf?.id),
@@ -49,13 +49,12 @@ export function useDumpScreen() {
     if (dropPlan.empty || drop.isPending) return;
     void drop
       .mutateAsync(dropPlan.texts.map((line) => ({ text: line, kind, projectId })))
-      .then((made: Entry[]) => {
+      .then(() => {
         setText('');
         // With "remember the last project" off, the chip snaps back to the
         // inbox — otherwise the second thought of the evening silently files
         // itself under whatever the first one was about.
         if (!settings.rememberLast) setLastProject(null);
-        setJustIds((previous) => [...made.map((entry) => entry.id), ...previous].slice(0, 3));
       });
   }, [dropPlan, drop, kind, projectId, settings.rememberLast, setLastProject]);
 
@@ -68,24 +67,16 @@ export function useDumpScreen() {
     [raw, submit],
   );
 
-  // The desktop column beside the field. The last few thoughts in the cellar,
-  // whichever project they landed in — the point is that a wide window can show
-  // you what you have been catching while you catch the next one, which is the
-  // one thing a phone has no room for.
-  const recent = useMemo(
-    () =>
-      entries
-        .filter((entry) => !entry.archived)
-        .slice()
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-        .slice(0, 12),
-    [entries],
-  );
-
-  const justDropped = useMemo(
-    () => justIds.map((id) => entries.find((entry) => entry.id === id)).filter((entry): entry is Entry => !!entry),
-    [justIds, entries],
-  );
+  // What you have been catching, on both shapes of the screen. The desktop
+  // column runs down the side of the field and has the room for a dozen; the
+  // phone gets a short band under the drop button and room for five.
+  //
+  // Both read the whole cellar rather than the ids dropped since this screen
+  // mounted. The band was a receipt for the current session, so it was empty on
+  // every cold start — the one moment you most want to see what is already
+  // there, and the moment you are most likely to dump the same thought twice.
+  const recent = useMemo(() => recentEntries(entries, 12), [entries]);
+  const latest = useMemo(() => recent.slice(0, 5), [recent]);
 
   return {
     loading,
@@ -113,8 +104,8 @@ export function useDumpScreen() {
       { value: '', label: 'inbox' },
       ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
     ],
-    justDropped,
     recent,
+    latest,
     showCodes: settings.showCodes,
   };
 }

@@ -1,5 +1,5 @@
-import { FlashList } from '@shopify/flash-list';
-import { type ReactElement } from 'react';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
+import { type ReactElement, type Ref } from 'react';
 import { Text, View } from 'react-native';
 
 import { EntryCard, type EntryVariant } from '@/components/cellar/EntryCard';
@@ -36,6 +36,11 @@ type EntryListProps = {
   onCopy?: (entry: Entry) => void;
   header?: ReactElement;
   empty?: { title: string; body: string; action?: { label: string; onPress: () => void } };
+  /**
+   * A handle on the scroller, for a screen that drives it from outside itself —
+   * the desktop wheel (`hooks/useWheelToList`). Nothing else should reach in.
+   */
+  listRef?: Ref<FlashListRef<EntryListItem>>;
 };
 
 /**
@@ -57,12 +62,14 @@ export function EntryList({
   onCopy,
   header,
   empty,
+  listRef,
 }: EntryListProps) {
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
 
   return (
     <FlashList
+      ref={listRef}
       data={items}
       keyExtractor={(item) => (item.type === 'section' ? `s:${item.section.key}` : item.entry.id)}
       getItemType={(item) => item.type}
@@ -112,7 +119,16 @@ function SectionRow({ section }: { section: EntrySection }) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: section.band.color, opacity: section.band.dim ? 0.5 : 1 }}
             />
-            <Text className="text-sm font-bold tracking-tight text-foreground" numberOfLines={1}>
+            <Text
+              className={[
+                'text-sm font-bold tracking-tight',
+                // A settled band is history. Its heading reads at the weight of
+                // the rows under it, or the archive announces itself louder
+                // than the work above it.
+                section.band.dim ? 'text-muted-foreground' : 'text-foreground',
+              ].join(' ')}
+              numberOfLines={1}
+            >
               {section.label}
             </Text>
           </View>
