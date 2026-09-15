@@ -17,6 +17,7 @@ fact drives everything below.
 ```
 cellar_orient  →  claim  →  work  →  append lines  →  finish
                                   ↘  ask  →  blocked  →  next thought
+                                              ↖  cellar_check_answers
 ```
 
 1. **`cellar_orient`** with the absolute path you are working in. One call gives you the
@@ -28,6 +29,8 @@ cellar_orient  →  claim  →  work  →  append lines  →  finish
 3. **Work it**, in the repo the brief names.
 4. **`cellar_append_line`** for each real finding, as you go.
 5. **`cellar_finish_entry`** as `done` or `dropped`, with one line saying what happened.
+6. **`cellar_check_answers`** before picking up the next thought. Nothing interrupts you when
+   the user answers something you asked — this is the only thing that tells you.
 
 Claim one entry at a time and finish it before claiming the next. A queue of half-claimed
 thoughts is worse than an untouched one.
@@ -78,8 +81,12 @@ thought and leaves the rest of the list workable. Then:
 2. **Work everything that does not depend on the answer.** By the time the list is empty the
    answer may already be there — `cellar_orient` lists what has been answered since, above
    the open thoughts.
-3. **Before you finish, read the entries you asked about again.** An answer that arrived is
-   yours to pick back up: the entry is `open` again, so claim it and carry on.
+3. **`cellar_check_answers` as each thought finishes, and again before you end the session.**
+   It takes no arguments and returns the questions *you* asked that have since been answered
+   or waved off, with what the user said. An answer that arrived is yours to pick back up:
+   the entry is `open` again, so claim it and carry on from the decision. Every write tool
+   prints the same thing as a tail on its own result, so an answer will find you — but the
+   tool is the one to call deliberately before you stop.
 4. **Still unanswered and out of work → ask that same question in the chat**, then
    `cellar_answer_question` with what they said. The entry keeps the pair, so the decision
    does not live only in a conversation that is gone.
@@ -127,6 +134,8 @@ Send the sentence worth reading in six months. One line per real finding.
 - **`cellar_archive_entry`** — already true, fixed elsewhere, no longer applies. Reason
   required. **There is no delete**: nothing in this app is destroyed to get it out of the
   way.
+- **`cellar_check_answers`** — no arguments, scoped to your own agent name. The other end of
+  `cellar_ask`: an answer lands in the database and nothing wakes you up to say so.
 - **`cellar_answer_question`** — you asked on the entry, ran out of other work, asked again
   in the chat. This writes what they said back onto the question and unblocks the entry if
   it was the last one outstanding. Only ever what the user actually said — an answer you
@@ -143,6 +152,8 @@ Send the sentence worth reading in six months. One line per real finding.
   chat and recording that answer is what unblocks it; the entry goes back to `open` and you
   claim it again from there
 - sit waiting on a question instead of moving to the next task
+- end a session without calling `cellar_check_answers` — an answered thought nobody picked
+  back up is the whole cost of asking
 - hold a question in your head until the end of the session
 - touch an `archived` entry; it was put away on purpose
 - mark `done` what you did not finish

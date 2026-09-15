@@ -2,14 +2,14 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { inProgress, waitingOnYou } from '@/lib/agentWork';
-import { readyToResume } from '@/lib/entryQuestions';
+import { answeredForAgent, readyToResume } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
-import { entryBrief, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
+import { answeredBlock, entryBrief, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
 
 /**
  * The reads. `cellar_orient` is the one that matters.
@@ -213,6 +213,31 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         const capped = rows.slice(0, limit ?? LIMIT);
         const note = rows.length > capped.length ? `\n\n(${rows.length - capped.length} more not shown)` : '';
         return text(`${ROW_LEGEND}\n${entryTable(capped, cellar.projects)}${note}`);
+      }),
+  );
+
+  server.registerTool(
+    'cellar_check_answers',
+    {
+      title: 'Check whether your questions have been answered',
+      description:
+        'The other end of cellar_ask: the questions YOU put on entries that the user has since answered or waved ' +
+        'off, with what they said. Takes nothing — it is scoped to your own agent name.\n\n' +
+        'Call it whenever you finish a thought and are about to pick up the next one, and always before you end ' +
+        'the session. An answer arrives while you are working on something else and nothing interrupts you to say ' +
+        'so, which is the whole reason this tool exists. An answered entry is back to open, so claim it and carry ' +
+        'on from the decision. Anything still unanswered when the work runs out is a question to ask in the chat, ' +
+        'then record with cellar_answer_question.',
+      inputSchema: {},
+    },
+    async () =>
+      guard(async () => {
+        const { ctx, cellar } = await withCellar(getCtx);
+        const answered = answeredForAgent(
+          cellar.entries.filter((entry) => !entry.archived),
+          ctx.agent,
+        );
+        return text(answeredBlock(answered, cellar.projects));
       }),
   );
 

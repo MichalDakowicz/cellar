@@ -115,3 +115,35 @@ export function readyToResume<T extends Pick<Entry, 'state' | 'archived' | 'ques
       entry.questions.some((question) => questionStatus(question) === 'answered'),
   );
 }
+
+/**
+ * The questions *you* asked that have since been settled, on thoughts nobody
+ * has picked back up.
+ *
+ * `readyToResume` is the session-start view — anything answered, whoever asked.
+ * This is the one an agent checks mid-session: it is scoped to its own name, so
+ * what comes back is a decision it is actually waiting on rather than a list of
+ * everything the user has ever answered. The agent name is the same one that
+ * went onto the question when it was asked, which is why the column is there.
+ *
+ * Dismissed counts. "do not wait on me for this" is an answer — it releases the
+ * entry and it changes what gets built, and an agent that only watched for
+ * `answered` would sit on a waved-off question forever.
+ */
+export function answeredForAgent<T extends Pick<Entry, 'state' | 'archived' | 'questions'>>(
+  entries: T[],
+  agent: string,
+): { entry: T; questions: EntryQuestion[] }[] {
+  const who = agent.trim().toLowerCase();
+  if (!who) return [];
+
+  const out: { entry: T; questions: EntryQuestion[] }[] = [];
+  for (const entry of entries) {
+    if (entry.state !== 'open' || entry.archived) continue;
+    const mine = entry.questions.filter(
+      (question) => question.agent?.trim().toLowerCase() === who && isSettled(question),
+    );
+    if (mine.length > 0) out.push({ entry, questions: mine });
+  }
+  return out;
+}

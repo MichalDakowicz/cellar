@@ -173,6 +173,6 @@ export function askRule(kind: Kind): string {
 export const ASK_WHERE = [
   'one task in this session: ask in the chat. the user is right there, and a blocked entry would stall the only thing they asked for',
   'several tasks: cellar_ask on the entry, then move to the next one — ask as soon as you know, never at the end, or a session that dies takes the question with it',
-  'before you finish: re-read the entries you asked about. an answer that arrived is yours to pick back up',
+  'as each thought finishes, and before you stop: cellar_check_answers — an answer that arrived is yours to pick back up',
   'still unanswered when the work runs out: ask that same question in the chat, then write the answer back with cellar_answer_question so the entry keeps the pair',
 ].join('\n           ');

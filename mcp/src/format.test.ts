@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { cellarOf, entry, NOW, question } from './fixtures.test-helpers.ts';
-import { entryBrief } from './format.ts';
+import { answeredBlock, answeredTail, entryBrief } from './format.ts';
 
 /**
  * The brief is the server's only real output.
@@ -74,5 +74,68 @@ describe('entryBrief — questions', () => {
     assert.match(out, /ask where/);
     assert.match(out, /one task in this session: ask in the chat/);
     assert.match(out, /several tasks: cellar_ask on the entry, then move to the next one/);
+  });
+});
+
+/**
+ * The recheck surfaces. What matters is that the answer itself comes back — an
+ * agent that has to make a second call to read the decision will not make it,
+ * which is the failure both of these exist to close.
+ */
+describe('answeredBlock', () => {
+  const answeredOn = (over = {}) => {
+    const one = entry({
+      state: 'open',
+      agent: null,
+      questions: [question('q1', 'which blue?', { answer: 'radar blue', answeredAt: '2026-09-14T11:30:00.000Z' })],
+      ...over,
+    });
+    return answeredBlock([{ entry: one, questions: one.questions }], cellarOf(one).projects, NOW);
+  };
+
+  it('prints the answer beside the thought, not just the question', () => {
+    const out = answeredOn();
+    assert.match(out, /1 answered since you asked/);
+    assert.match(out, /\? which blue\?/);
+    assert.match(out, /= radar blue/);
+    assert.match(out, /abcd1234/);
+  });
+
+  it('says a waved-off question was a decision rather than showing an empty answer', () => {
+    const out = answeredOn({
+      questions: [question('q1', 'which blue?', { dismissedAt: '2026-09-14T11:30:00.000Z' })],
+    });
+    assert.match(out, /= waved off/);
+  });
+
+  it('says plainly that nothing came back, and what to do about it', () => {
+    const out = answeredBlock([], cellarOf().projects, NOW);
+    assert.match(out, /Nothing answered since you asked/);
+    assert.match(out, /ask it in the chat/);
+  });
+});
+
+describe('answeredTail', () => {
+  const one = entry({
+    state: 'open',
+    questions: [question('q1', 'which blue?', { answer: 'radar blue', answeredAt: '2026-09-14T11:30:00.000Z' })],
+  });
+  const rows = [{ entry: one, questions: one.questions }];
+
+  it('is empty when nothing came back, so a result is not padded for no reason', () => {
+    assert.equal(answeredTail([]), '');
+  });
+
+  it('carries the answer and where to go for the rest', () => {
+    const tail = answeredTail(rows);
+    assert.match(tail, /answered since you asked/);
+    assert.match(tail, /radar blue/);
+    assert.match(tail, /cellar_check_answers/);
+  });
+
+  // The cellar snapshot predates the write, so without this a finish prints a
+  // nudge to pick the thought back up that it has just settled.
+  it('leaves out the entry the tool was acting on', () => {
+    assert.equal(answeredTail(rows, one.id), '');
   });
 });

@@ -241,6 +241,7 @@ Reads:
 | `cellar_list_projects` | Every project, its counts and its checkout                                          |
 | `cellar_list_entries`  | Filter by project, kind, state, text                                                |
 | `cellar_get_entry`     | One thought in full: both halves of its thread, its questions, its repo, its brief   |
+| `cellar_check_answers` | The questions **you** asked that have since been answered, with what they said      |
 
 Writes:
 
@@ -260,6 +261,15 @@ There is **no delete tool**, on purpose. Nothing in Cellar is destroyed to get i
 way; archive is the strongest thing an agent can do and it comes back in one tap.
 
 ## Design notes
+
+**Nothing interrupts an agent when an answer lands.** `cellar_ask` blocks the thought and
+the session moves on, but the answer arrives into a database nobody is watching — so
+`cellar_check_answers` is how it comes back, scoped to the asking agent through
+`cellar_entry_questions.agent`. Every write tool appends the same check to its own result as
+a two-line tail, because the failure being fixed is an agent not remembering to look, and a
+tool it has to remember to call does not fix that. The tail leaves out the entry the write
+was about: the cellar snapshot is read before the write, so a `finish` would otherwise print
+a nudge to pick the thought back up that it has just settled.
 
 **`cellar_orient` is the whole ergonomic argument.** Without it a session costs four round
 trips and a question to the user: list the projects, guess which one this repo is, confirm,
