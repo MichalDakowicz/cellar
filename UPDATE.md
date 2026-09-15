@@ -1,6 +1,10 @@
 # Update notes
 
-## 1.7.0 — Unreleased
+## 1.7.0 — 2026-09-15
+
+### Added
+
+- Project detail: the wheel scrolls the entries from anywhere on the page, not only over them
 
 ### Fixed
 
@@ -11,7 +15,6 @@
 - Stats and the project rail count the idea bar as idea/addition, so the bucket names itself
 - Dump: the band under the field is now lately, and shows recent thoughts from a cold start
 - The kind glyph beside an entry sits level with the first line of the thought, not above it
-- Project detail: the wheel scrolls the entries from anywhere on the page, not only over them
 
 ## 1.6.0 — 2026-09-15
 
