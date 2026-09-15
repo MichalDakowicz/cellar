@@ -85,7 +85,7 @@ export default function ProjectScreen() {
                 <View className="min-w-0 flex-1">{list}</View>
                 <View className={`w-[300px] border-l border-border/60 pl-6 pr-8 pt-1`}>
                   <ProjectAside
-                    stateCounts={project.stateCounts}
+                    stateSpread={project.stateSpread}
                     kindBars={project.kindBars}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />

@@ -10,8 +10,9 @@ import {
   groupByStateAndKind,
   hasFilter,
   tallyKinds,
+  tallyStates,
 } from '@/lib/entryGroups';
-import { ENTRY_STATES, stateMeta } from '@/lib/entryState';
+import { stateMeta } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
@@ -46,14 +47,17 @@ export function useProjectScreen(projectId: string | undefined) {
   // The desktop rail's two blocks. Derived here rather than in the route,
   // because a screen is a composition (PING.md §13) — and they are the same
   // numbers the meta line quotes, so they cannot disagree with it.
-  const stateCounts = useMemo(
+  //
+  // The same shape stats draws, off the same tally, so a project and the whole
+  // cellar are read the same way. It runs on `live`: the archive is a band at
+  // the foot of the list, not a state, and counting it here would put a share
+  // on the bar that the rest of the rail does not know about.
+  const stateSpread = useMemo(
     () =>
-      ENTRY_STATES.map((state) => ({
-        value: state.value,
-        label: state.label,
-        color: state.color,
-        count: live.filter((entry) => entry.state === state.value).length,
-      })),
+      tallyStates(live).map((tally) => {
+        const meta = stateMeta(tally.state);
+        return { value: tally.state, label: meta.label, color: meta.color, count: tally.count, pct: tally.pct };
+      }),
     [live],
   );
 
@@ -88,7 +92,7 @@ export function useProjectScreen(projectId: string | undefined) {
     repo: project && (project.repoPath || project.repoUrl)
       ? { label: repoLabel(project) ?? '', url: project.repoUrl, path: project.repoPath }
       : null,
-    stateCounts,
+    stateSpread,
     kindBars,
     entryCount: live.length,
     view,

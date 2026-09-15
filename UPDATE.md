@@ -2,6 +2,10 @@
 
 ## 1.4.0 — Unreleased
 
+### Changed
+
+- Project detail: where it stands is a spread line, with each state's share next to its count
+
 ## 1.3.0 — 2026-09-14
 
 ### Added

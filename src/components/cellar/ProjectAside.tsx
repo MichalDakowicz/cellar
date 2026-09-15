@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
+import { StateSpread, type SpreadRow } from '@/components/cellar/StateSpread';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { Overline } from '@/components/ui/controls';
 import { ENTRY_STATES } from '@/lib/entryState';
@@ -10,11 +11,10 @@ import { useEntryFilter } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 import type { EntryState, Kind } from '@/types/cellar';
 
-export type StateCount = { value: EntryState; label: string; color: string; count: number };
 export type KindBar = { kind: Kind; count: number; pct: number };
 
 type ProjectAsideProps = {
-  stateCounts: StateCount[];
+  stateSpread: SpreadRow[];
   kindBars: KindBar[];
   onEdit: () => void;
 };
@@ -30,7 +30,7 @@ type ProjectAsideProps = {
  * of the window sits empty next to it. The funnel is still there on phone; this
  * is the same store, so the two can never hold different filters.
  */
-export function ProjectAside({ stateCounts, kindBars, onEdit }: ProjectAsideProps) {
+export function ProjectAside({ stateSpread, kindBars, onEdit }: ProjectAsideProps) {
   const filter = useEntryFilter((state) => state.filter);
   const setFilter = useEntryFilter((state) => state.setFilter);
   const toggleKind = useEntryFilter((state) => state.toggleKind);
@@ -40,14 +40,8 @@ export function ProjectAside({ stateCounts, kindBars, onEdit }: ProjectAsideProp
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
       <Overline>where it stands</Overline>
-      <View className="mt-3 gap-2">
-        {stateCounts.map((state) => (
-          <View key={state.value} className="flex-row items-center gap-2.5">
-            <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: state.color }} />
-            <Text className="min-w-0 flex-1 text-sm text-foreground">{state.label}</Text>
-            <Text className="text-sm font-semibold text-muted-foreground">{state.count}</Text>
-          </View>
-        ))}
+      <View className="mt-3">
+        <StateSpread rows={stateSpread} />
       </View>
 
       {kindBars.length > 0 && (
