@@ -9,13 +9,16 @@ type StateSpreadProps = {
 };
 
 /**
- * Where the cellar stands: one stacked line, then the five states under it.
+ * Where the cellar — or one project — stands: one stacked line, then the five
+ * states under it.
  *
  * The line is the reading — five widths tell you at a glance whether this is a
  * pile of open thoughts or a pile of settled ones, which a column of numbers
  * never does. It is the same device Radar splits films from TV with
  * (components/stats/ContentMix), so the two apps' stats pages read the same way
- * with nothing shared but the shape.
+ * with nothing shared but the shape. Stats draws it over a shelf, a project's
+ * rail over that project, and they read identically because it is one
+ * component fed by one tally (tallyStates).
  *
  * `open` and `dropped` carry the same grey in `entryState` — badged versus not
  * is what separates them on a row, and a bar has no badge. Dropped is drawn at
