@@ -7,6 +7,7 @@
 - Archived thoughts read greyed out wherever they are listed, heading included
 - Project: the figures rail is separated by space, with no stray line beside the scrollbar
 - Web: the scrollbar is the slim pill it was meant to be, with no arrow buttons
+- Project detail: the repo name and the checkout path sit on one line, level with each other
 
 ## 1.6.0 — 2026-09-15
 

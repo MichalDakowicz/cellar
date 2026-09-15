@@ -21,17 +21,24 @@ export function RepoLink({ label, url, path }: { label: string; url: string | nu
   const { hovered, bind } = useHover();
   const open = url ? () => void WebBrowser.openBrowserAsync(url) : undefined;
 
+  // Both labels state the same line box — `leading-4`, the 16px one `text-xs`
+  // already carries. `items-center` centres *boxes*, and the path had no line
+  // height of its own, so it took whatever the mono face's metrics gave it: a
+  // shorter box, centred, which drops the path below the name it sits beside.
   const body = (
     <View className="flex-row items-center gap-1.5">
       <FolderGit2 size={12} color={COLORS.muted} strokeWidth={2} />
       <Text
-        className={['text-xs', url ? 'text-primary' : 'text-muted-foreground'].join(' ')}
+        className={['text-xs leading-4', url ? 'text-primary' : 'text-muted-foreground'].join(' ')}
         numberOfLines={1}
       >
         {label}
       </Text>
       {!!path && !!url && (
-        <Text className="min-w-0 flex-1 font-mono text-[10px] text-muted-foreground opacity-70" numberOfLines={1}>
+        <Text
+          className="min-w-0 flex-1 font-mono text-[10px] leading-4 text-muted-foreground opacity-70"
+          numberOfLines={1}
+        >
           {path}
         </Text>
       )}
