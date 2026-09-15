@@ -65,6 +65,17 @@ export const KIND_GUTTER = 22;
  */
 export const TEXT_LINE = 20;
 
+/**
+ * The height of a padded row: the line box plus the `py-2.5` the text sits in.
+ *
+ * A row's furniture — the glyph in the gutter, the copy control at the other
+ * end — is laid out beside the *Pressable*, not inside it, so it does not
+ * inherit that padding. Centring it in `TEXT_LINE` alone centres it on a box
+ * that starts 10px above the text it is supposed to line up with, and the
+ * glyph floats over the row instead of sitting on its first line.
+ */
+export const LINE_ROW = TEXT_LINE + 20;
+
 /** What a screen reader says where a sighted reader sees the glyph. */
 export function kindLabel(kind: Kind): string {
   return kindMeta(kind).label;
