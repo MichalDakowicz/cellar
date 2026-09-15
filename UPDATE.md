@@ -8,6 +8,7 @@
 - Project: the figures rail is separated by space, with no stray line beside the scrollbar
 - Web: the scrollbar is the slim pill it was meant to be, with no arrow buttons
 - Project detail: the repo name and the checkout path sit on one line, level with each other
+- Stats and the project rail count the idea bar as idea/addition, so the bucket names itself
 
 ## 1.6.0 — 2026-09-15
 

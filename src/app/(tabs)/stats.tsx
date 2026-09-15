@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/ui/states';
 import { useStatsScreen } from '@/features/cellar/useStatsScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useHover, webTransition, useSidebarSpace } from '@/hooks/useResponsive';
+import { kindTallyLabel } from '@/lib/kinds';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
@@ -85,7 +86,7 @@ export default function StatsScreen() {
                     <View className="flex-row items-center justify-between gap-2.5">
                       <View className="flex-row items-center gap-2">
                         <KindGlyph kind={bar.kind} size={13} />
-                        <Text className="text-sm font-semibold text-foreground">{bar.kind}</Text>
+                        <Text className="text-sm font-semibold text-foreground">{kindTallyLabel(bar.kind)}</Text>
                       </View>
                       <Text className="text-xs text-muted-foreground">{bar.count}</Text>
                     </View>
