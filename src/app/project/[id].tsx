@@ -81,9 +81,15 @@ export default function ProjectScreen() {
                 )}
               </View>
 
-              <View className="flex-1 flex-row">
+              {/* The gap does the separating, the way the dump screen's aside
+                  does it — a hairline edges a surface, and a rail of figures on
+                  the page ground is not one (PING.md §6). The rule that used to
+                  be here also landed 3px from the list's scrollbar gutter, so it
+                  read as a stray line stuck to the scrollbar rather than as the
+                  edge of a column. */}
+              <View className="flex-1 flex-row gap-10">
                 <View className="min-w-0 flex-1">{list}</View>
-                <View className={`w-[300px] border-l border-border/60 pl-6 pr-8 pt-1`}>
+                <View className="w-[300px] pr-8 pt-1">
                   <ProjectAside
                     stateSpread={project.stateSpread}
                     kindBars={project.kindBars}

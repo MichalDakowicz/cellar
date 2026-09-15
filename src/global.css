@@ -18,10 +18,22 @@
  * off the same tokens as everything else, so it follows the theme switch with
  * no second definition (PING.md §4.1). Ignored off web — react-native has no
  * scrollbar to style.
+ *
+ * The two halves are mutually exclusive, and that is the whole trick. Chromium
+ * supports both, and the moment `scrollbar-width` or `scrollbar-color` is set it
+ * renders the standard scrollbar and ignores every ::-webkit-scrollbar rule
+ * below — so declaring them unconditionally silently killed all of this.
+ * Nothing errored and the bar was still grey, which is why it survived: what
+ * actually shipped was Chrome's own thin bar with arrow buttons, a thumb filling
+ * the full gutter instead of floating as a pill, and a hover state that never
+ * fired. Firefox is the mirror image, with no webkit pseudos at all, so it takes
+ * the standard properties and is the only thing that does.
  */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -32,6 +44,12 @@
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* No arrows. They are the loudest part of the OS bar and the one part of it that
+   cannot be made to look like anything else. */
+::-webkit-scrollbar-button {
+  display: none;
 }
 
 /* Padded with a transparent border and clipped to the content box, so the thumb

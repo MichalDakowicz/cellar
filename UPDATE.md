@@ -2,6 +2,11 @@
 
 ## 1.7.0 — Unreleased
 
+### Fixed
+
+- Project: the figures rail is separated by space, with no stray line beside the scrollbar
+- Web: the scrollbar is the slim pill it was meant to be, with no arrow buttons
+
 ## 1.6.0 — 2026-09-15
 
 ### Added
