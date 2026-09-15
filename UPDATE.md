@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Archived thoughts read greyed out wherever they are listed, heading included
 - Project: the figures rail is separated by space, with no stray line beside the scrollbar
 - Web: the scrollbar is the slim pill it was meant to be, with no arrow buttons
 

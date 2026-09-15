@@ -53,3 +53,15 @@ export function isEntryState(value: unknown): value is EntryState {
 export function isLive(value: EntryState): boolean {
   return LIVE_STATES.includes(value);
 }
+
+/**
+ * A row that is no longer work reads dimmed.
+ *
+ * Archive is not a state — it is the band *under* the states (lib/entryGroups)
+ * — so it has to be asked about separately. Reading `settled` alone leaves an
+ * archived `open` thought rendering at full strength in the archive band, which
+ * is the one place everything is supposed to be quiet.
+ */
+export function isDimmed(entry: { state: EntryState; archived: boolean }): boolean {
+  return stateMeta(entry.state).settled || entry.archived;
+}

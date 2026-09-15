@@ -5,7 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 import { StateBadge } from '@/components/cellar/StateBadge';
 import { KIND_GUTTER, KindGlyph, kindLabel, TEXT_LINE } from '@/components/media/Glyphs';
 import { useHover, webTransition } from '@/hooks/useResponsive';
-import { stateMeta } from '@/lib/entryState';
+import { isDimmed } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
 import { COLORS } from '@/theme/colors';
 import type { Entry } from '@/types/cellar';
@@ -48,7 +48,10 @@ export const EntryCard = memo(function EntryCard({
   onFile,
   onCopy,
 }: EntryCardProps) {
-  const settled = stateMeta(entry.state).settled;
+  // Settled either way, or archived. Archive is a band rather than a state, so
+  // an archived `open` thought would otherwise sit in the quietest part of the
+  // list at full strength (lib/entryState).
+  const dimmed = isDimmed(entry);
   const grown = entry.lines.length;
   const { hovered, bind } = useHover();
 
@@ -58,9 +61,13 @@ export const EntryCard = memo(function EntryCard({
       // A row is a click target on web and looks like plain text until the
       // ground moves under the mouse (PING.md §4.5). The inbox row already has
       // a ground, so it lifts; a bare line grows one.
+      // The dim is on the row, not on its text: a greyed thought whose glyph,
+      // badge and timestamp still read at full strength is louder than the
+      // live row above it, which is the opposite of what settling means.
       style={[
         webTransition('background-color'),
         hovered ? { backgroundColor: COLORS.rowHover, borderRadius: 12 } : null,
+        dimmed ? { opacity: 0.5 } : null,
       ]}
     >
       {showCode && (
@@ -94,7 +101,7 @@ export const EntryCard = memo(function EntryCard({
         ].join(' ')}
       >
         <Text
-          className={['min-w-0 flex-1 text-sm text-foreground', settled ? 'opacity-50' : ''].join(' ')}
+          className="min-w-0 flex-1 text-sm text-foreground"
           numberOfLines={variant === 'hit' ? 2 : 3}
         >
           {entry.text}

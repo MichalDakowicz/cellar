@@ -112,7 +112,16 @@ function SectionRow({ section }: { section: EntrySection }) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: section.band.color, opacity: section.band.dim ? 0.5 : 1 }}
             />
-            <Text className="text-sm font-bold tracking-tight text-foreground" numberOfLines={1}>
+            <Text
+              className={[
+                'text-sm font-bold tracking-tight',
+                // A settled band is history. Its heading reads at the weight of
+                // the rows under it, or the archive announces itself louder
+                // than the work above it.
+                section.band.dim ? 'text-muted-foreground' : 'text-foreground',
+              ].join(' ')}
+              numberOfLines={1}
+            >
               {section.label}
             </Text>
           </View>
