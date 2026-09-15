@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
 
-import { EntryList } from '@/components/cellar/EntryList';
+import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { RepoLink } from '@/components/cellar/RepoLink';
@@ -13,6 +13,7 @@ import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
+import { useWheelToList } from '@/hooks/useWheelToList';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
 
@@ -39,12 +40,17 @@ export default function ProjectScreen() {
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const isDesktop = useIsDesktop();
+  // The list is a column with a rail beside it and a lot of page around both,
+  // and a wheel only moves what it is over. This hands the whole page's wheel
+  // to the list, except over something that scrolls itself (hooks/useWheelToList).
+  const { listRef, attachPage } = useWheelToList<EntryListItem>();
 
   if (project.error) return <ErrorState message={readError(project.error)} onRetry={project.refetch} />;
   if (project.loading) return <LoadingState label="opening the project" />;
 
   const list = (
     <EntryList
+      listRef={listRef}
       items={project.items}
       showCode={project.showCodes}
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
@@ -55,7 +61,7 @@ export default function ProjectScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" ref={attachPage}>
       <View className="flex-1" style={{ marginLeft: sidebar }}>
         <ContentShell maxWidth={MAX_W.grid} fill>
           {isDesktop ? (
