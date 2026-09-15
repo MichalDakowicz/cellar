@@ -2,6 +2,7 @@ import { usePathname, useRouter } from 'expo-router';
 import { ChevronDown, Settings } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { LiveCue } from '@/components/layout/LiveCue';
 import { activeTabFor, NAV_DESTINATIONS, type NavDestination } from '@/components/layout/navDestinations';
 import { Overline } from '@/components/ui/controls';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -83,6 +84,12 @@ export function DesktopSidebar() {
         </View>
 
       </ScrollView>
+
+      {/* Sits above the footer rather than beside the destinations: it is a
+          statement about the whole window, not about a route. */}
+      <View className="items-start px-3">
+        <LiveCue />
+      </View>
 
       {/* Two Pressables side by side, never one inside the other: on web a
           Pressable is a <button>, and a button inside a button is invalid DOM

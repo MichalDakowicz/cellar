@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { CellarLive } from '@/features/cellar/CellarLive';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
 // Imported for its side effect: the background task has to be defined at
@@ -76,6 +77,7 @@ export default function RootLayout() {
             <ThemeProvider>
               <ToastProvider>
                 <AuthGate>
+                  <CellarLive />
                   <QuestionSync />
                   <AppShell>
                     <Stack screenOptions={{ headerShown: false }} />
