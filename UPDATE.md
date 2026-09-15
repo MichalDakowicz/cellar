@@ -1,6 +1,10 @@
 # Update notes
 
-## 1.5.0 — Unreleased
+## 1.5.0 — 2026-09-15
+
+### Added
+
+- An agent finds out you answered its question without waiting for its next session
 
 ## 1.4.0 — 2026-09-15
 
