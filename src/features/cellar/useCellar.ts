@@ -23,6 +23,7 @@ import {
   type NewEntry,
 } from '@/features/cellar/cellarApi';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { ENTRIES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
 import { unblocksEntry } from '@/lib/entryQuestions';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 import type { Entry, Project, Shelf } from '@/types/cellar';
@@ -36,14 +37,10 @@ import type { Entry, Project, Shelf } from '@/types/cellar';
  * open.
  */
 
-const SHELVES = ['cellar', 'shelves'] as const;
-const PROJECTS = ['cellar', 'projects'] as const;
-const ENTRIES = ['cellar', 'entries'] as const;
-
 export function useCellar() {
-  const shelves = useQuery({ queryKey: SHELVES, queryFn: fetchShelves });
-  const projects = useQuery({ queryKey: PROJECTS, queryFn: fetchProjects });
-  const entries = useQuery({ queryKey: ENTRIES, queryFn: fetchEntries });
+  const shelves = useQuery({ queryKey: SHELVES_KEY, queryFn: fetchShelves });
+  const projects = useQuery({ queryKey: PROJECTS_KEY, queryFn: fetchProjects });
+  const entries = useQuery({ queryKey: ENTRIES_KEY, queryFn: fetchEntries });
 
   return {
     shelves: shelves.data ?? EMPTY_SHELVES,
@@ -97,23 +94,23 @@ export function useCellarWrites() {
 
   const drop = useMutation({
     mutationFn: (batch: NewEntry[]) => createEntries(requireUser(user?.id), batch),
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   const update = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: EntryPatch }) => patchEntry(id, patch),
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteEntry(id),
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   const addLine = useMutation({
     mutationFn: ({ entryId, text }: { entryId: string; text: string }) =>
       appendLine(requireUser(user?.id), entryId, text),
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   // Settling the last outstanding question lifts `blocked` on its own — the
@@ -138,7 +135,7 @@ export function useCellarWrites() {
       await answerQuestion(questionId, text);
       await settle(entry, questionId);
     },
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   const dismiss = useMutation({
@@ -146,47 +143,47 @@ export function useCellarWrites() {
       await dismissQuestion(questionId);
       await settle(entry, questionId);
     },
-    onSuccess: () => invalidate(ENTRIES),
+    onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
   const addShelf = useMutation({
     mutationFn: ({ name, position }: { name: string; position: number }) =>
       createShelf(requireUser(user?.id), name, position),
-    onSuccess: () => invalidate(SHELVES),
+    onSuccess: () => invalidate(SHELVES_KEY),
   });
 
   const addProject = useMutation({
     mutationFn: ({ shelfId, name, position }: { shelfId: string; name: string; position: number }) =>
       createProject(requireUser(user?.id), shelfId, name, position),
-    onSuccess: () => invalidate(PROJECTS),
+    onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
   const editProject = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => renameProject(id, name),
-    onSuccess: () => invalidate(PROJECTS),
+    onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
   const linkProject = useMutation({
     mutationFn: ({ id, ...repo }: { id: string; repoPath: string | null; repoUrl: string | null }) =>
       setProjectRepo(id, repo),
-    onSuccess: () => invalidate(PROJECTS),
+    onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
   const relocateProject = useMutation({
     mutationFn: ({ id, shelfId }: { id: string; shelfId: string }) => moveProject(id, shelfId),
-    onSuccess: () => invalidate(PROJECTS),
+    onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
   const removeProject = useMutation({
     mutationFn: (id: string) => deleteProject(id),
     // Entries move to the inbox rather than going with the project, so the
     // entry list is stale too.
-    onSuccess: () => invalidate(PROJECTS, ENTRIES),
+    onSuccess: () => invalidate(PROJECTS_KEY, ENTRIES_KEY),
   });
 
   const editShelf = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => renameShelf(id, name),
-    onSuccess: () => invalidate(SHELVES),
+    onSuccess: () => invalidate(SHELVES_KEY),
   });
 
   const removeShelf = useMutation({
@@ -194,7 +191,7 @@ export function useCellarWrites() {
     // The projects cascade and their entries fall to the inbox, so all three
     // lists are stale — invalidating only SHELVES leaves a shelf screen
     // rendering projects that no longer exist.
-    onSuccess: () => invalidate(SHELVES, PROJECTS, ENTRIES),
+    onSuccess: () => invalidate(SHELVES_KEY, PROJECTS_KEY, ENTRIES_KEY),
   });
 
   return {

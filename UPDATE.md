@@ -2,6 +2,12 @@
 
 ## 1.6.0 — Unreleased
 
+### Added
+
+- What you dump, file or answer on one device shows up on the other without a refresh
+- An agent's line, question or claim lands on the screen you are on as it happens
+- A quiet mark by the nav when live changes are not getting through
+
 ## 1.5.0 — 2026-09-15
 
 ### Added

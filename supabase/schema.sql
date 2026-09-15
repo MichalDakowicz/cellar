@@ -411,19 +411,38 @@ grant execute on function public.cellar_resolve_agent_token(text) to anon, authe
 --
 -- The cellar is one account across a phone and a browser, and the thing you
 -- dump on one should be in the list on the other without a refetch.
+--
+-- All five tables the app reads, not only the two that hold a thought. An
+-- agent's ordinary work is `cellar_append_line` and `cellar_ask`, which write
+-- lines and questions and never touch `cellar_entries` — publishing only the
+-- parent would leave the one case this exists for silent.
+--
+-- `replica identity full` is what makes a delete arrive. Postgres sends only
+-- the primary key for a delete otherwise, and the client subscribes with
+-- `user_id=eq.<uid>`: with no `user_id` in the old record the filter drops the
+-- event, and a thought deleted on the phone would sit on the browser until a
+-- reload. The rows are a line of text each, so the extra WAL is nothing.
 -- ============================================================================
 do $$
+declare
+  t text;
 begin
-  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
-    begin
-      alter publication supabase_realtime add table public.cellar_entries;
-    exception when duplicate_object then null;
-    end;
-    begin
-      alter publication supabase_realtime add table public.cellar_projects;
-    exception when duplicate_object then null;
-    end;
-  end if;
+  foreach t in array array[
+    'cellar_shelves',
+    'cellar_projects',
+    'cellar_entries',
+    'cellar_entry_lines',
+    'cellar_entry_questions'
+  ] loop
+    execute format('alter table public.%I replica identity full', t);
+
+    if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+      begin
+        execute format('alter publication supabase_realtime add table public.%I', t);
+      exception when duplicate_object then null;
+      end;
+    end if;
+  end loop;
 end $$;
 
 -- ============================================================================

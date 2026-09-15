@@ -5,6 +5,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LiveCue } from '@/components/layout/LiveCue';
 import { useNavAction } from '@/components/layout/navActions';
 import { DEST_HEIGHT, DEST_WIDTH, NavDestinationButton } from '@/components/layout/NavDestinationButton';
 import { activeTabFor, NAV_DESTINATIONS, type NavDestination } from '@/components/layout/navDestinations';
@@ -74,58 +75,64 @@ export function NavIslands() {
   return (
     <View
       style={[styles.bar, { bottom: insets.bottom + NAV_ISLAND_GAP }]}
-      // The row spans the screen so the islands can centre in it, but only the
+      // The bar spans the screen so the islands can centre in it, but only the
       // islands themselves may swallow taps — the rest is scrolling content.
       pointerEvents="box-none"
     >
-      <Island style={styles.round}>
-        <Pressable
-          onPress={action.onPress}
-          accessibilityRole="button"
-          accessibilityLabel={action.label}
-          {...actionHover.bind}
-          style={[styles.roundPress, actionHover.hovered ? styles.roundHover : null]}
-        >
-          <action.Icon size={21} color="#fafafa" strokeWidth={2.2} />
-          {action.badge > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{action.badge > 9 ? '9+' : action.badge}</Text>
-            </View>
-          )}
-          {/* The action is currently on — a raw dump, a live filter. A dot
-              rather than a lit glyph, because the glyph is already saying which
-              mode you are in and two signals for one bit is one too many. */}
-          {action.active && action.badge === 0 && <View style={styles.dot} />}
-        </Pressable>
-      </Island>
+      {/* Above the glass rather than on it: the islands are five fixed shapes
+          and a sixth that appears only sometimes would move them. */}
+      <LiveCue />
 
-      <Island style={styles.pill}>
-        <Animated.View style={[styles.marker, markerStyle]} pointerEvents="none" />
-        {DESTINATIONS.map((destination) => (
-          <NavDestinationButton
-            key={destination.tabName}
-            destination={destination}
-            active={destination.tabName === activeTab}
-            badge={destination.tabName === 'inbox' ? unfiled : 0}
-            onPress={() => go(destination)}
-          />
-        ))}
-      </Island>
+      <View style={styles.row} pointerEvents="box-none">
+        <Island style={styles.round}>
+          <Pressable
+            onPress={action.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={action.label}
+            {...actionHover.bind}
+            style={[styles.roundPress, actionHover.hovered ? styles.roundHover : null]}
+          >
+            <action.Icon size={21} color="#fafafa" strokeWidth={2.2} />
+            {action.badge > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{action.badge > 9 ? '9+' : action.badge}</Text>
+              </View>
+            )}
+            {/* The action is currently on — a raw dump, a live filter. A dot
+                rather than a lit glyph, because the glyph is already saying which
+                mode you are in and two signals for one bit is one too many. */}
+            {action.active && action.badge === 0 && <View style={styles.dot} />}
+          </Pressable>
+        </Island>
 
-      {/* The plate's hairline turns accent when active — never a ring drawn
-          around the avatar itself, which reads as a notification. */}
-      <Island style={[styles.round, { borderColor: profileActive ? COLORS.accent : COLORS.islandEdge }]}>
-        <Pressable
-          onPress={() => go(PROFILE)}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: profileActive }}
-          accessibilityLabel={PROFILE.label}
-          {...profileHover.bind}
-          style={[styles.roundPress, profileHover.hovered ? styles.roundHover : null]}
-        >
-          <Avatar profile={profile} size={44} />
-        </Pressable>
-      </Island>
+        <Island style={styles.pill}>
+          <Animated.View style={[styles.marker, markerStyle]} pointerEvents="none" />
+          {DESTINATIONS.map((destination) => (
+            <NavDestinationButton
+              key={destination.tabName}
+              destination={destination}
+              active={destination.tabName === activeTab}
+              badge={destination.tabName === 'inbox' ? unfiled : 0}
+              onPress={() => go(destination)}
+            />
+          ))}
+        </Island>
+
+        {/* The plate's hairline turns accent when active — never a ring drawn
+            around the avatar itself, which reads as a notification. */}
+        <Island style={[styles.round, { borderColor: profileActive ? COLORS.accent : COLORS.islandEdge }]}>
+          <Pressable
+            onPress={() => go(PROFILE)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: profileActive }}
+            accessibilityLabel={PROFILE.label}
+            {...profileHover.bind}
+            style={[styles.roundPress, profileHover.hovered ? styles.roundHover : null]}
+          >
+            <Avatar profile={profile} size={44} />
+          </Pressable>
+        </Island>
+      </View>
     </View>
   );
 }
@@ -151,11 +158,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 9,
   },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 },
   island: {
     height: NAV_ISLAND_HEIGHT,
     borderRadius: 99,
