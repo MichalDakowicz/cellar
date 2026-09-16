@@ -24,8 +24,15 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, body, action }: EmptyStateProps) {
   return (
-    <View className="items-center gap-2 px-6 py-14">
-      <Text className="text-xl font-bold text-foreground">{title}</Text>
+    // `w-full` is what makes the centring hold. `items-center` centres children
+    // inside whatever width this box ends up with, so any parent that shrinks
+    // it to its content — a row, a list's empty slot — leaves the block sitting
+    // wherever that parent put it while every line inside it is perfectly
+    // centred on nothing.
+    <View className="w-full items-center gap-2 px-6 py-14">
+      {/* Centred as a line too, not only as a box — a title long enough to wrap
+          would otherwise sit centred on the page and ragged in itself. */}
+      <Text className="text-center text-xl font-bold text-foreground">{title}</Text>
       <Text className="text-center text-sm text-muted-foreground">{body}</Text>
       {action && (
         <Pressable
@@ -43,8 +50,8 @@ export function EmptyState({ title, body, action }: EmptyStateProps) {
 
 export function ErrorState({ message, onRetry }: { message?: string; onRetry?: () => void }) {
   return (
-    <View className="items-center gap-2 px-6 py-14">
-      <Text className="text-xl font-bold text-foreground">that did not load</Text>
+    <View className="w-full items-center gap-2 px-6 py-14">
+      <Text className="text-center text-xl font-bold text-foreground">that did not load</Text>
       <Text className="text-center text-sm text-muted-foreground">
         {message ?? 'the connection dropped somewhere between here and the server.'}
       </Text>
