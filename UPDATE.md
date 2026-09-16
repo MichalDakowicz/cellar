@@ -5,6 +5,7 @@
 ### Fixed
 
 - Projects: a tile counts only glitches still open, so one you have fixed stops showing
+- Projects: the count by a shelf name leaves out archived thoughts and matches the tiles
 
 ## 1.7.0 — 2026-09-15
 
