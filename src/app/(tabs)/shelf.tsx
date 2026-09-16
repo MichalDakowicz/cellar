@@ -38,11 +38,14 @@ export default function ShelfScreen() {
     <ScrollView
       className="flex-1 bg-background"
       style={{ marginLeft: sidebar }}
-      contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
+      // `flexGrow` rather than a height: the content still grows past the
+      // viewport once there is a grid, but a shelf with nothing on it fills it
+      // instead of collapsing to the height of two lines of text.
+      contentContainerStyle={{ paddingBottom: navBarSpace + 8, flexGrow: 1 }}
     >
       <ScreenTop />
-      <ContentShell maxWidth={MAX_W.grid}>
-        <View className={gutter}>
+      <ContentShell maxWidth={MAX_W.grid} fill>
+        <View className={`flex-1 ${gutter}`}>
           <View className="flex-row items-baseline justify-between gap-3">
             <Pressable
               accessibilityRole="button"
@@ -73,7 +76,12 @@ export default function ShelfScreen() {
             <Text className="text-sm text-muted-foreground">search every entry</Text>
           </Pressable>
 
-          <View className="mt-4">
+          {/*
+            Only the empty state takes the leftover height and centres in it. A
+            grid that did the same would float its first row down the page the
+            moment a shelf held two projects, which is a different bug.
+          */}
+          <View className={shelf.isEmpty ? 'mt-4 flex-1 justify-center' : 'mt-4'}>
             {shelf.loading ? (
               <LoadingState label="opening the cellar" />
             ) : shelf.tiles.length === 0 ? (

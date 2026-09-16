@@ -48,6 +48,8 @@ export function useShelfScreen() {
     error,
     refetch,
     shelf,
+    /** Settled, and nothing on the shelf — the one case the screen centres. */
+    isEmpty: !loading && tiles.length === 0,
     shelfName: shelf?.name ?? 'cellar',
     meta: `${plural(tiles.length, 'project')} · ${plural(shelfEntryCount, 'entry', 'entries')}`,
     tiles,

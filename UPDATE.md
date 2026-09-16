@@ -8,6 +8,7 @@
 - Projects: the count by a shelf name leaves out archived thoughts and matches the tiles
 - Projects: the edit dot on a tile no longer vanishes as you reach for it on the web
 - Projects: the edit dot sits inside the tile artwork, off the bottom edge it was stuck to
+- Projects: the message on an empty shelf sits in the middle of the page, not up at the top
 
 ## 1.7.0 — 2026-09-15
 

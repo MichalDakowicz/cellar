@@ -25,7 +25,9 @@ type EmptyStateProps = {
 export function EmptyState({ title, body, action }: EmptyStateProps) {
   return (
     <View className="items-center gap-2 px-6 py-14">
-      <Text className="text-xl font-bold text-foreground">{title}</Text>
+      {/* Centred as a line too, not only as a box — a title long enough to wrap
+          would otherwise sit centred on the page and ragged in itself. */}
+      <Text className="text-center text-xl font-bold text-foreground">{title}</Text>
       <Text className="text-center text-sm text-muted-foreground">{body}</Text>
       {action && (
         <Pressable
