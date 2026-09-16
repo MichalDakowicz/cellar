@@ -1,6 +1,7 @@
 import {
   applyFilter,
   countLive,
+  countLiveOfKind,
   filterSummary,
   groupByDay,
   groupByKind,
@@ -168,6 +169,29 @@ describe('countLive', () => {
       entry({ state: 'open', archived: true }),
     ];
     expect(countLive(entries)).toBe(2);
+  });
+});
+
+describe('countLiveOfKind', () => {
+  it('stops counting a glitch once it is settled, so a fixed project reads clean', () => {
+    const entries = [
+      entry({ kind: 'glitch', state: 'done' }),
+      entry({ kind: 'glitch', state: 'dropped' }),
+      entry({ kind: 'idea', state: 'open' }),
+    ];
+    expect(countLiveOfKind(entries, 'glitch')).toBe(0);
+  });
+
+  it('counts the live ones of that kind and nothing else', () => {
+    const entries = [
+      entry({ kind: 'glitch', state: 'open' }),
+      entry({ kind: 'glitch', state: 'doing' }),
+      entry({ kind: 'glitch', state: 'blocked' }),
+      entry({ kind: 'glitch', state: 'done' }),
+      entry({ kind: 'glitch', state: 'open', archived: true }),
+      entry({ kind: 'idea', state: 'open' }),
+    ];
+    expect(countLiveOfKind(entries, 'glitch')).toBe(3);
   });
 });
 

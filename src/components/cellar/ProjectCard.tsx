@@ -12,6 +12,7 @@ export type ProjectTile = {
   initials: string;
   entryCount: number;
   liveCount: number;
+  /** Live glitches only — a fixed one is history and must not keep the tile lit. */
   glitchCount: number;
 };
 
@@ -96,7 +97,7 @@ export const ProjectCard = memo(function ProjectCard({
   );
 });
 
-/** "12 entries · 3 glitches". The glitch count only appears when there are any. */
+/** "12 entries · 3 glitches". The glitch half appears only while glitches are still live. */
 export function projectMeta(project: ProjectTile): string {
   const entries = plural(project.entryCount, 'entry', 'entries');
   if (project.glitchCount === 0) return entries;

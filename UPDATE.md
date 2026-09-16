@@ -2,6 +2,10 @@
 
 ## 1.8.0 — Unreleased
 
+### Fixed
+
+- Projects: a tile counts only glitches still open, so one you have fixed stops showing
+
 ## 1.7.0 — 2026-09-15
 
 ### Added

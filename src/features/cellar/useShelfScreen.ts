@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import type { ProjectTile } from '@/components/cellar/ProjectCard';
 import { useCellar, useCurrentShelf } from '@/features/cellar/useCellar';
-import { countLive } from '@/lib/entryGroups';
+import { countLive, countLiveOfKind } from '@/lib/entryGroups';
 import { plural } from '@/lib/utils';
 
 /**
@@ -12,6 +12,9 @@ import { plural } from '@/lib/utils';
  * `liveCount` is the badge on the tile and it deliberately counts open *and*
  * doing — "how much is still owed here" is one number, and splitting it into
  * two badges makes a grid of tiles unreadable at a glance.
+ *
+ * `glitchCount` is live as well, for the same reason: both numbers on a tile
+ * answer "what is still owed", and a glitch you fixed is not owed.
  */
 export function useShelfScreen() {
   const { shelves, projects, entries, loading, error, refetch } = useCellar();
@@ -29,7 +32,7 @@ export function useShelfScreen() {
           initials: project.name.trim().slice(0, 2).toLowerCase() || '··',
           entryCount: mine.length,
           liveCount: countLive(mine),
-          glitchCount: mine.filter((entry) => entry.kind === 'glitch').length,
+          glitchCount: countLiveOfKind(mine, 'glitch'),
         };
       });
   }, [projects, entries, shelf]);
