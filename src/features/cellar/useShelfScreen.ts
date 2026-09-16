@@ -37,10 +37,11 @@ export function useShelfScreen() {
       });
   }, [projects, entries, shelf]);
 
-  const shelfEntryCount = useMemo(() => {
-    const ids = new Set(tiles.map((tile) => tile.id));
-    return entries.filter((entry) => entry.projectId && ids.has(entry.projectId)).length;
-  }, [entries, tiles]);
+  // The sum of the tiles, not a second sweep of the entries. The header and the
+  // grid under it each worked out what was on this shelf on their own, and only
+  // the grid remembered the archive — so a shelf read "42 entries" above tiles
+  // that added up to 39. Summing what is rendered cannot disagree with it.
+  const shelfEntryCount = useMemo(() => tiles.reduce((total, tile) => total + tile.entryCount, 0), [tiles]);
 
   return {
     loading,
