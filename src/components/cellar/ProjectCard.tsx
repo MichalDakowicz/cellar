@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
+import { showsHoverControl } from '@/lib/hoverReveal';
 import { plural } from '@/lib/utils';
 
 export type ProjectTile = {
@@ -38,12 +39,23 @@ export const ProjectCard = memo(function ProjectCard({
   /** Presence of a handler is what shows the affordance. */
   onEdit?: (id: string) => void;
 }) {
-  const { hovered, bind } = useHover();
+  const tile = useHover();
+  const edit = useHover();
   const isDesktop = useIsDesktop();
   // A mouse can reveal a control; a thumb cannot. The edit dot is permanent on
   // phone and hover-only on desktop, where five always-lit dots across a grid
   // are five things competing with the tile they sit on.
-  const showEdit = !!onEdit && (!isDesktop || hovered);
+  //
+  // The dot's own hover counts as the tile's, or reaching for it takes it away
+  // (lib/hoverReveal) — and the lift reads the same union, so the tile does not
+  // drop back down the moment the pointer lands on the control it just offered.
+  const showEdit = showsHoverControl({
+    hasHandler: !!onEdit,
+    isDesktop,
+    onSurface: tile.hovered,
+    onControl: edit.hovered,
+  });
+  const hovered = tile.hovered || edit.hovered;
 
   return (
     <View
@@ -56,7 +68,7 @@ export const ProjectCard = memo(function ProjectCard({
         onPress={() => onPress(project.id)}
         // react-native-web implements hover on Pressable only, so the bind can
         // never sit on the View that carries the lift.
-        {...bind}
+        {...tile.bind}
         className="active:opacity-80"
       >
         <View className="aspect-[4/3] justify-end rounded-md bg-neutral-900 p-3">
@@ -80,12 +92,23 @@ export const ProjectCard = memo(function ProjectCard({
         </Text>
       </Pressable>
 
-      {showEdit && (
+      {!!onEdit && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`edit ${project.name}`}
           hitSlop={8}
-          onPress={() => onEdit?.(project.id)}
+          onPress={() => onEdit(project.id)}
+          {...edit.bind}
+          // Faded rather than unmounted. The dot has to still be there to be
+          // hovered, and unmounting it on the tile's hover-out is what made it
+          // vanish from under the pointer on the way to the click; a node that
+          // survives the hand-off gets its own hover and stays up.
+          //
+          // Not focusable while it is invisible, so a tab does not land on
+          // something nobody can see.
+          focusable={showEdit}
+          pointerEvents={showEdit ? 'auto' : 'none'}
+          style={[webTransition('opacity'), { opacity: showEdit ? 1 : 0 }]}
           // Its own Pressable over the tile's, not nested inside it — a nested
           // pressable inside a pressed parent swallows the press on Android.
           className="absolute bottom-[46px] right-2 h-8 w-8 items-center justify-center rounded-full bg-black/50 active:opacity-70"
