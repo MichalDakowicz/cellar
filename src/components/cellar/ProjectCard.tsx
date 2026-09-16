@@ -93,31 +93,44 @@ export const ProjectCard = memo(function ProjectCard({
       </Pressable>
 
       {!!onEdit && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`edit ${project.name}`}
-          hitSlop={8}
-          onPress={() => onEdit(project.id)}
-          {...edit.bind}
-          // Faded rather than unmounted. The dot has to still be there to be
-          // hovered, and unmounting it on the tile's hover-out is what made it
-          // vanish from under the pointer on the way to the click; a node that
-          // survives the hand-off gets its own hover and stays up.
-          //
-          // Out of the tab order while it is invisible, so a tab does not land
-          // on something nobody can see. `focusable` alone does not do it on
-          // web — react-native-web leaves the tabindex at 0 — so the web side
-          // has to be said in the prop that reaches it.
-          focusable={showEdit}
-          tabIndex={showEdit ? 0 : -1}
-          pointerEvents={showEdit ? 'auto' : 'none'}
-          style={[webTransition('opacity'), { opacity: showEdit ? 1 : 0 }]}
-          // Its own Pressable over the tile's, not nested inside it — a nested
-          // pressable inside a pressed parent swallows the press on Android.
-          className="absolute bottom-[46px] right-2 h-8 w-8 items-center justify-center rounded-full bg-black/50 active:opacity-70"
-        >
-          <MoreHorizontal size={16} color="#fafafa" strokeWidth={2} />
-        </Pressable>
+        // The dot belongs to the artwork, not to the card. Offsetting it from
+        // the bottom of the card meant clearing the name and the meta line by
+        // hand — 46px of guessed line heights — which left it flush against the
+        // artwork's bottom edge while its right inset was a clean 8px, and web
+        // metrics are not native metrics, so it read as stuck to the bottom.
+        // An overlay the exact shape of the artwork gives it the same inset on
+        // both axes, on both platforms, with no arithmetic left to drift.
+        //
+        // `box-none` so the overlay itself is not a target: the tile underneath
+        // has to stay clickable everywhere the dot is not.
+        <View pointerEvents="box-none" className="absolute inset-x-0 top-0 aspect-[4/3]">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`edit ${project.name}`}
+            hitSlop={8}
+            onPress={() => onEdit(project.id)}
+            {...edit.bind}
+            // Faded rather than unmounted. The dot has to still be there to be
+            // hovered, and unmounting it on the tile's hover-out is what made
+            // it vanish from under the pointer on the way to the click; a node
+            // that survives the hand-off gets its own hover and stays up.
+            //
+            // Out of the tab order while it is invisible, so a tab does not
+            // land on something nobody can see. `focusable` alone does not do
+            // it on web — react-native-web leaves the tabindex at 0 — so the
+            // web side has to be said in the prop that reaches it.
+            focusable={showEdit}
+            tabIndex={showEdit ? 0 : -1}
+            pointerEvents={showEdit ? 'auto' : 'none'}
+            style={[webTransition('opacity'), { opacity: showEdit ? 1 : 0 }]}
+            // Its own Pressable over the tile's, not nested inside it — a
+            // nested pressable inside a pressed parent swallows the press on
+            // Android.
+            className="absolute bottom-2 right-2 h-8 w-8 items-center justify-center rounded-full bg-black/50 active:opacity-70"
+          >
+            <MoreHorizontal size={16} color="#fafafa" strokeWidth={2} />
+          </Pressable>
+        </View>
       )}
     </View>
   );
