@@ -153,6 +153,20 @@ export function countLive(entries: Entry[]): number {
   return entries.filter((entry) => !entry.archived && isLive(entry.state)).length;
 }
 
+/**
+ * The live ones of a single kind — what the shelf tile's "3 glitches" means.
+ *
+ * It has to be the live count and not a plain kind tally: a glitch you fixed is
+ * history, and a tile that still reads "3 glitches" once all three are done
+ * says the project is on fire when nothing is. Settled either way drops out, so
+ * a dropped glitch stops counting too, which is the same rule `countLive` uses
+ * for the badge above it — the two numbers on one tile must not disagree about
+ * what counts as work.
+ */
+export function countLiveOfKind(entries: Entry[], kind: Kind): number {
+  return countLive(entries.filter((entry) => entry.kind === kind));
+}
+
 /** Case-insensitive substring, over the entry and every line appended to it. */
 export function searchEntries(entries: Entry[], query: string): Entry[] {
   const needle = query.trim().toLowerCase();
