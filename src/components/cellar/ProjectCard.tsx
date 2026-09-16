@@ -118,11 +118,10 @@ export const ProjectCard = memo(function ProjectCard({
             // it vanish from under the pointer on the way to the click; a node
             // that survives the hand-off gets its own hover and stays up.
             //
-            // Asking to be out of the tab order while invisible. Native takes
-            // it; react-native-web currently renders the tabindex as 0 either
-            // way, so a keyboard tab can still land on the faded dot on the
-            // web. It is inert to a pointer regardless, and both props are the
-            // right ones to be setting — the web side is a gap, not a choice.
+            // Out of the tab order while it is invisible, so a tab does not
+            // land on something nobody can see. `focusable` alone does not do
+            // it on web — react-native-web leaves the tabindex at 0 — so the
+            // web side has to be said in the prop that reaches it.
             focusable={showEdit}
             tabIndex={showEdit ? 0 : -1}
             pointerEvents={showEdit ? 'auto' : 'none'}
