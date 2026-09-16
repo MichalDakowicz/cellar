@@ -104,9 +104,12 @@ export const ProjectCard = memo(function ProjectCard({
           // vanish from under the pointer on the way to the click; a node that
           // survives the hand-off gets its own hover and stays up.
           //
-          // Not focusable while it is invisible, so a tab does not land on
-          // something nobody can see.
+          // Out of the tab order while it is invisible, so a tab does not land
+          // on something nobody can see. `focusable` alone does not do it on
+          // web — react-native-web leaves the tabindex at 0 — so the web side
+          // has to be said in the prop that reaches it.
           focusable={showEdit}
+          tabIndex={showEdit ? 0 : -1}
           pointerEvents={showEdit ? 'auto' : 'none'}
           style={[webTransition('opacity'), { opacity: showEdit ? 1 : 0 }]}
           // Its own Pressable over the tile's, not nested inside it — a nested
