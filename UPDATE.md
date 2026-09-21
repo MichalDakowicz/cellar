@@ -6,6 +6,7 @@
 
 - Settings: signing out drops you straight on the login screen instead of leaving you sitting there
 - Stats: the shelf the figures count sits opposite the heading instead of under it
+- Inbox: the file pill lines up with the thought it files instead of hanging below the row
 
 ## 1.8.0 — 2026-09-16
 
