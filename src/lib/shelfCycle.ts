@@ -66,3 +66,30 @@ export function cycleShelf<T extends { id: string }>(
   const step = direction === 'next' ? 1 : -1;
   return shelves[(from + step + shelves.length) % shelves.length].id;
 }
+
+/**
+ * How far the block travels under the finger, and how far it slides off before
+ * the next shelf arrives.
+ *
+ * Damped rather than one-to-one: the block is not going anywhere — it is
+ * telling you a drag has been noticed and which way it is reading. A panel
+ * that tracks the finger exactly promises a page turn that never comes, and at
+ * 48px of commit distance a full-width slide would be mostly off screen before
+ * anything happened.
+ */
+export const SWIPE_DAMPING = 0.45;
+
+/** The cap, which is also the distance the block leaves and re-enters by. */
+export const SWIPE_TRAVEL = 64;
+
+export function dragOffset(dx: number): number {
+  const damped = dx * SWIPE_DAMPING;
+  if (damped > SWIPE_TRAVEL) return SWIPE_TRAVEL;
+  if (damped < -SWIPE_TRAVEL) return -SWIPE_TRAVEL;
+  return damped;
+}
+
+/** Which way the block leaves: a drag to the left carries it left. */
+export function exitOffset(direction: SwipeDirection): number {
+  return direction === 'next' ? -SWIPE_TRAVEL : SWIPE_TRAVEL;
+}

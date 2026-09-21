@@ -1,8 +1,11 @@
 import {
   claimsHorizontalPan,
   cycleShelf,
+  dragOffset,
+  exitOffset,
   SWIPE_CLAIM_DISTANCE,
   SWIPE_MIN_DISTANCE,
+  SWIPE_TRAVEL,
   swipeDirection,
 } from '@/lib/shelfCycle';
 
@@ -60,5 +63,32 @@ describe('cycleShelf', () => {
     expect(cycleShelf(shelves, null, 'next')).toBe('b');
     expect(cycleShelf(shelves, 'gone', 'next')).toBe('b');
     expect(cycleShelf(shelves, null, 'previous')).toBe('c');
+  });
+});
+
+describe('dragOffset', () => {
+  it('stays put when the finger has not moved', () => {
+    expect(dragOffset(0)).toBe(0);
+  });
+
+  it('damps, so the block never promises a page turn', () => {
+    expect(Math.abs(dragOffset(40))).toBeLessThan(40);
+  });
+
+  it('caps in both directions rather than sliding off', () => {
+    expect(dragOffset(1000)).toBe(SWIPE_TRAVEL);
+    expect(dragOffset(-1000)).toBe(-SWIPE_TRAVEL);
+  });
+
+  it('follows the finger, not the other way', () => {
+    expect(dragOffset(30)).toBeGreaterThan(0);
+    expect(dragOffset(-30)).toBeLessThan(0);
+  });
+});
+
+describe('exitOffset', () => {
+  it('leaves the way the drag was going', () => {
+    expect(exitOffset('next')).toBe(-SWIPE_TRAVEL);
+    expect(exitOffset('previous')).toBe(SWIPE_TRAVEL);
   });
 });

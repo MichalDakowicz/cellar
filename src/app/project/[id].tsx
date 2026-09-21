@@ -71,21 +71,20 @@ export default function ProjectScreen() {
                 {/* Back rides the heading rather than a row of its own above
                     it: on a window this wide that row was a pill adrift in the
                     content column, a browser's own back sits level with the
-                    page title, and beside the mark this one does too. */}
-                <View className="flex-row items-center gap-3.5">
-                  <ScreenAction />
-                  <View className="min-w-0 flex-1">
-                    <ProjectHeader
-                      name={project.name}
-                      meta={project.meta}
-                      initials={project.initials}
-                      view={project.view}
-                      onView={project.setView}
-                      filtered={project.filtered}
-                      large
-                    />
-                  </View>
-                </View>
+                    page title, and beside the mark this one does too. The
+                    header takes it as a slot rather than being wrapped in
+                    another row, because where it goes also decides where the
+                    counts go. */}
+                <ProjectHeader
+                  name={project.name}
+                  meta={project.meta}
+                  initials={project.initials}
+                  view={project.view}
+                  onView={project.setView}
+                  filtered={project.filtered}
+                  large
+                  lead={<ScreenAction />}
+                />
                 {project.repo && (
                   <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
                 )}
