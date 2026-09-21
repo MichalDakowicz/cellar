@@ -11,6 +11,7 @@
 - Dump: the key hint names what your keyboard actually has, so a phone stops being told shift + return
 - Entry: long press one of your own lines to remove it, with a confirm and undo until you leave
 - Projects: a rename you backed out of is gone next time you open the sheet, not waiting
+- Entry: backing out of delete leaves the thought alone instead of quietly archiving it
 
 ## 1.8.0 — 2026-09-16
 

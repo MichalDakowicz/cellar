@@ -239,6 +239,11 @@ export default function EntryScreen() {
           setConfirmDelete(false);
           if (!entry.archived) entry.toggleArchive();
         }}
+        // The secondary button here is not cancel — it archives. A tap on the
+        // backdrop, Escape, or the Android back gesture must close the sheet
+        // and nothing else, or backing out of a delete quietly files the
+        // thought away and it is gone from the inbox and the project.
+        onRequestClose={() => setConfirmDelete(false)}
       />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
