@@ -102,7 +102,12 @@ export default function ProjectScreen() {
                     />
                   </View>
                   {project.repo && (
-                    <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
+                    <RepoLink
+                      label={project.repo.label}
+                      url={project.repo.url}
+                      path={project.repo.path}
+                      align="end"
+                    />
                   )}
                 </View>
               </View>
