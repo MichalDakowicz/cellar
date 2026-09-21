@@ -1,9 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
+import { ProjectViews } from '@/components/cellar/ProjectViews';
 import { RepoLink } from '@/components/cellar/RepoLink';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ContentShell } from '@/components/layout/ContentShell';
@@ -16,6 +18,9 @@ import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResp
 import { useWheelToList } from '@/hooks/useWheelToList';
 import { readError } from '@/lib/utils';
 import { useCellarSheets } from '@/store/cellarPrefs';
+
+/** Breathing room between the chrome column and the heading it stands beside. */
+const CHROME_GAP = 24;
 
 /**
  * One project, in whichever of the two readings you left it in.
@@ -44,6 +49,10 @@ export default function ProjectScreen() {
   // and a wheel only moves what it is over. This hands the whole page's wheel
   // to the list, except over something that scrolls itself (hooks/useWheelToList).
   const { listRef, attachPage } = useWheelToList<EntryListItem>();
+  // Measured rather than assumed: back's pill is as wide as the word on it and
+  // the toggle grows a segment on a narrower window, so a constant here would
+  // be wrong the first time either changes.
+  const [chrome, setChrome] = useState(0);
 
   if (project.error) return <ErrorState message={readError(project.error)} onRetry={project.refetch} />;
   if (project.loading) return <LoadingState label="opening the project" />;
@@ -68,26 +77,34 @@ export default function ProjectScreen() {
             <View className="flex-1">
               <ScreenTop />
               <View className={`pb-5 ${gutter}`}>
-                {/* Back rides the heading rather than a row of its own above
-                    it: on a window this wide that row was a pill adrift in the
-                    content column, a browser's own back sits level with the
-                    page title, and beside the mark this one does too. The
-                    header takes it as a slot rather than being wrapped in
-                    another row, because giving it one is also what sends the
-                    project across to the far end. */}
-                <ProjectHeader
-                  name={project.name}
-                  meta={project.meta}
-                  initials={project.initials}
-                  view={project.view}
-                  onView={project.setView}
-                  filtered={project.filtered}
-                  large
-                  lead={<ScreenAction />}
-                />
-                {project.repo && (
-                  <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
-                )}
+                {/* Back and the view toggle stack at the left, out of flow on
+                    purpose: they are chrome, and chrome should not decide how
+                    tall a heading is. Left in the row they made it the height
+                    of a pill plus a segmented control, which is taller than
+                    the project block it was supposed to be framing.
+                    The measured padding is what keeps the name — and the repo
+                    line under it — clear of the column rather than a constant
+                    that goes stale the first time either control changes. */}
+                <View style={{ paddingLeft: chrome ? chrome + CHROME_GAP : 0 }}>
+                  <View
+                    className="absolute left-0 top-0 items-start gap-1.5"
+                    onLayout={(event) => setChrome(event.nativeEvent.layout.width)}
+                  >
+                    <ScreenAction />
+                    <ProjectViews view={project.view} onView={project.setView} filtered={project.filtered} />
+                  </View>
+                  <View className="flex-row justify-end">
+                    <ProjectHeader
+                      name={project.name}
+                      meta={project.meta}
+                      initials={project.initials}
+                      large
+                    />
+                  </View>
+                  {project.repo && (
+                    <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
+                  )}
+                </View>
               </View>
 
               {/* The gap does the separating, the way the dump screen's aside

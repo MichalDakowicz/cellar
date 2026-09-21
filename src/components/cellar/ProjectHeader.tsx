@@ -1,9 +1,6 @@
-import { Funnel, List, Rows3 } from 'lucide-react-native';
-import type { ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { useHover, webTransition } from '@/hooks/useResponsive';
-import { COLORS } from '@/theme/colors';
+import { ProjectViews } from '@/components/cellar/ProjectViews';
 import type { ProjectView } from '@/store/cellarPrefs';
 
 type ProjectHeaderProps = {
@@ -11,53 +8,48 @@ type ProjectHeaderProps = {
   meta: string;
   /** Two letters, the same mark the tile wears on the shelf. */
   initials: string;
-  view: ProjectView;
-  onView: (view: ProjectView) => void;
-  filtered: boolean;
-  /** Phone only — on desktop the filter is open in the rail beside the list. */
-  onFilter?: () => void;
   /** Desktop wears the mark and a bigger title; phone keeps the line it had. */
   large?: boolean;
   /**
-   * A control that holds the left of the row on its own — back, on a pushed
-   * desktop screen. Giving it one also moves everything about the project to
-   * the other end, so see the note in the body.
+   * The view toggle, when it belongs to this row. Leaving `onView` out is how
+   * the desktop screen says it has put the control somewhere else — under
+   * back, in the chrome column — and that this is the heading alone.
    */
-  lead?: ReactNode;
+  view?: ProjectView;
+  onView?: (view: ProjectView) => void;
+  filtered?: boolean;
+  /** Phone only — on desktop the filter is open in the rail beside the list. */
+  onFilter?: () => void;
 };
 
 /**
- * A project's heading: the mark, the name, what is in it, and the two readings.
+ * A project's heading: the name, what is in it, and the mark.
  *
  * The mark is the shelf tile's own two letters, at size. A project has no
  * artwork and never will (components/cellar/ProjectCard), so those letters are
  * the only thing that makes one project's page recognisably not another's —
  * which on a wide screen, where the page is otherwise a column of text, is the
  * difference between arriving somewhere and arriving at a list.
+ *
+ * The name leads and the mark closes the line. On desktop the whole block sits
+ * at the right end of its row, so the mark lands on the outside edge of the
+ * page and the words stay next to the text they head.
  */
 export function ProjectHeader({
   name,
   meta,
   initials,
+  large,
   view,
   onView,
-  filtered,
+  filtered = false,
   onFilter,
-  large,
-  lead,
 }: ProjectHeaderProps) {
-  // The project itself: mark, name, and what is in it. One block, so it can be
-  // put at either end of the row without the three coming apart.
+  const alone = !onView || !view;
+
   const identity = (
-    <View className={['min-w-0 flex-row items-center gap-3.5', lead ? 'shrink' : 'flex-1'].join(' ')}>
-      {large && (
-        <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
-          <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
-            {initials}
-          </Text>
-        </View>
-      )}
-      <View className={['min-w-0', lead ? 'shrink' : 'flex-1'].join(' ')}>
+    <View className={['min-w-0 flex-row items-center gap-3.5', alone ? 'shrink' : 'flex-1'].join(' ')}>
+      <View className={['min-w-0', alone ? 'shrink' : 'flex-1'].join(' ')}>
         <Text
           className={[
             'font-bold leading-tight tracking-tight text-foreground',
@@ -71,74 +63,22 @@ export function ProjectHeader({
           {meta}
         </Text>
       </View>
-    </View>
-  );
-
-  const readings = (
-    <View className="flex-row items-center gap-1 rounded-lg bg-secondary p-[3px]">
-      <Segment label="grouped by kind" active={view === 'grouped'} onPress={() => onView('grouped')}>
-        <Rows3 size={16} color={view === 'grouped' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
-      </Segment>
-      <Segment label="one stream" active={view === 'stream'} onPress={() => onView('stream')}>
-        <List size={16} color={view === 'stream' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
-      </Segment>
-      {onFilter && (
-        <Segment label="filter" active={filtered} onPress={onFilter}>
-          <Funnel size={16} color={filtered ? COLORS.accent : COLORS.muted} strokeWidth={2} />
-        </Segment>
+      {large && (
+        <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
+          <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
+            {initials}
+          </Text>
+        </View>
       )}
     </View>
   );
 
-  // Back holds the left on its own, and everything about the project moves
-  // across to join the toggle. Stacking a control, a 56px mark, a 30px name
-  // and a line of counts into the same corner is the cramming this avoids —
-  // the row has a whole window of width and was using one end of it.
-  if (lead) {
-    return (
-      <View className="flex-row items-end justify-between gap-6">
-        {lead}
-        <View className="min-w-0 flex-row items-end justify-end gap-5">
-          {identity}
-          {readings}
-        </View>
-      </View>
-    );
-  }
+  if (alone) return identity;
 
   return (
     <View className="flex-row items-end justify-between gap-3">
       {identity}
-      {readings}
+      <ProjectViews view={view} onView={onView} filtered={filtered} onFilter={onFilter} />
     </View>
-  );
-}
-
-function Segment({
-  label,
-  active,
-  onPress,
-  children,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  children: React.ReactNode;
-}) {
-  const { hovered, bind } = useHover();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: active }}
-      hitSlop={4}
-      onPress={onPress}
-      {...bind}
-      style={[webTransition('background-color'), hovered && !active ? { backgroundColor: COLORS.chipGround } : null]}
-      className={['h-[30px] w-[34px] items-center justify-center rounded-md', active ? 'bg-white/10' : ''].join(' ')}
-    >
-      {children}
-    </Pressable>
   );
 }
