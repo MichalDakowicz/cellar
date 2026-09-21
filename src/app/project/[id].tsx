@@ -67,21 +67,25 @@ export default function ProjectScreen() {
           {isDesktop ? (
             <View className="flex-1">
               <ScreenTop />
-              {/* Back sits above the title, where a browser user looks for it,
-                  rather than in the sidebar a screen-width away. */}
-              <View className={`flex-row pb-3 ${gutter}`}>
-                <ScreenAction />
-              </View>
               <View className={`pb-5 ${gutter}`}>
-                <ProjectHeader
-                  name={project.name}
-                  meta={project.meta}
-                  initials={project.initials}
-                  view={project.view}
-                  onView={project.setView}
-                  filtered={project.filtered}
-                  large
-                />
+                {/* Back rides the heading rather than a row of its own above
+                    it: on a window this wide that row was a pill adrift in the
+                    content column, a browser's own back sits level with the
+                    page title, and beside the mark this one does too. */}
+                <View className="flex-row items-center gap-3.5">
+                  <ScreenAction />
+                  <View className="min-w-0 flex-1">
+                    <ProjectHeader
+                      name={project.name}
+                      meta={project.meta}
+                      initials={project.initials}
+                      view={project.view}
+                      onView={project.setView}
+                      filtered={project.filtered}
+                      large
+                    />
+                  </View>
+                </View>
                 {project.repo && (
                   <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />
                 )}

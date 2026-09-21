@@ -12,6 +12,8 @@
 - Entry: long press one of your own lines to remove it, with a confirm and undo until you leave
 - Projects: a rename you backed out of is gone next time you open the sheet, not waiting
 - Entry: backing out of delete leaves the thought alone instead of quietly archiving it
+- Entry, project, search, settings: back sits on the title row instead of a row of its own
+- Entry: a thought that is gone keeps the nav, so there is still a way off the screen
 
 ## 1.8.0 — 2026-09-16
 
