@@ -24,7 +24,7 @@ const to = join(root, 'public', 'skill');
 await rm(to, { recursive: true, force: true });
 await mkdir(join(to, 'commands'), { recursive: true });
 
-for (const name of ['SKILL.md', 'install.sh', 'install.ps1']) {
+for (const name of ['SKILL.md', 'install.sh', 'install.ps1', 'mcp-entry.mjs']) {
   await copyFile(join(from, name), join(to, name));
 }
 

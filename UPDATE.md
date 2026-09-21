@@ -15,6 +15,7 @@
 - Entry, project, search, settings: back sits on the title row instead of a row of its own
 - Entry: a thought that is gone keeps the nav, so there is still a way off the screen
 - Dump: swipe across the file it block to step to the next shelf, no picker needed
+- Settings: one line sets an agent up, registering the server and installing the skill together
 
 ## 1.8.0 — 2026-09-16
 

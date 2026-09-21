@@ -12,6 +12,8 @@
  * there is no second thing to keep in step.
  */
 
+import { mcpEndpoint } from '@/lib/agentConfig';
+
 /**
  * Where the files live. Hosting is a fixed address for a fixed project, and the
  * string has to appear verbatim in something the user pastes, so it is written
@@ -36,4 +38,35 @@ export function skillInstall(shell: Shell, base: string = SKILL_HOME): string {
   return shell === 'powershell'
     ? `irm ${home}/install.ps1 | iex`
     : `curl -fsSL ${home}/install.sh | sh`;
+}
+
+/**
+ * The whole setup in one line: the server registered and the skill installed,
+ * with the token already in it.
+ *
+ * Setting up an agent used to be three copies and a config file to find — the
+ * token, the JSON block it goes in, and the skill install. The installer takes
+ * the token now and writes the MCP entry itself, so there is no `claude` CLI
+ * to have, no file to open, and nothing to paste in the right place.
+ *
+ * Environment variables rather than arguments because a script read off a pipe
+ * has no argv: `iex` is running text and `sh` is running a stream, and neither
+ * one's own arguments are the script's.
+ *
+ * Single quotes around the values are safe rather than lucky — a minted token
+ * is `clr_` and 64 hex characters (`cellar_create_agent_token`), and the
+ * endpoint is a URL this app built. Neither can carry a quote out of here.
+ */
+export function fullSetup(
+  shell: Shell,
+  supabaseUrl: string,
+  token: string,
+  base: string = SKILL_HOME,
+): string {
+  const home = base.trim().replace(/\/+$/, '');
+  const url = mcpEndpoint(supabaseUrl);
+  const clean = token.trim();
+  return shell === 'powershell'
+    ? `$env:CELLAR_TOKEN='${clean}'; $env:CELLAR_MCP_URL='${url}'; irm ${home}/install.ps1 | iex`
+    : `curl -fsSL ${home}/install.sh | CELLAR_TOKEN='${clean}' CELLAR_MCP_URL='${url}' sh`;
 }
