@@ -8,6 +8,7 @@ import {
   createProject,
   createShelf,
   deleteEntry,
+  deleteLine,
   deleteProject,
   deleteShelf,
   dismissQuestion,
@@ -108,8 +109,15 @@ export function useCellarWrites() {
   });
 
   const addLine = useMutation({
-    mutationFn: ({ entryId, text }: { entryId: string; text: string }) =>
-      appendLine(requireUser(user?.id), entryId, text),
+    // `createdAt` is undo putting a line back at the moment it was written,
+    // never a fresh append (features/cellar/cellarApi.ts).
+    mutationFn: ({ entryId, text, createdAt }: { entryId: string; text: string; createdAt?: string }) =>
+      appendLine(requireUser(user?.id), entryId, text, 'user', createdAt),
+    onSuccess: () => invalidate(ENTRIES_KEY),
+  });
+
+  const removeLine = useMutation({
+    mutationFn: (id: string) => deleteLine(id),
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
@@ -199,6 +207,7 @@ export function useCellarWrites() {
     update,
     remove,
     addLine,
+    removeLine,
     answer,
     dismiss,
     addShelf,

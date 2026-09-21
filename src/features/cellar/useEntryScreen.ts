@@ -5,7 +5,7 @@ import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { dropStamp, shortRel } from '@/lib/relTime';
-import type { Entry, EntryState, Kind } from '@/types/cellar';
+import type { Entry, EntryLine, EntryState, Kind } from '@/types/cellar';
 
 /**
  * One entry, and the four things you can do to it: re-kind it, move its state,
@@ -20,8 +20,15 @@ import type { Entry, EntryState, Kind } from '@/types/cellar';
 export function useEntryScreen(entryId: string | undefined) {
   const router = useRouter();
   const { entries, projects } = useCellar();
-  const { update, remove, addLine } = useCellarWrites();
+  const { update, remove, addLine, removeLine } = useCellarWrites();
   const [line, setLine] = useState('');
+
+  // Removing a line is the one destructive thing on this screen that is not
+  // the entry itself, so it is armed rather than immediate — and the rows it
+  // took come back until you leave. The stack lives in screen state on
+  // purpose: undo is for the mistake you just made, not a second bin.
+  const [arming, setArming] = useState<EntryLine | null>(null);
+  const [removed, setRemoved] = useState<EntryLine[]>([]);
 
   const entry = entries.find((candidate) => candidate.id === entryId) ?? null;
   const projectName = projects.find((project) => project.id === entry?.projectId)?.name ?? 'inbox';
@@ -49,6 +56,23 @@ export function useEntryScreen(entryId: string | undefined) {
     setLine('');
     addLine.mutate({ entryId: entry.id, text });
   }, [line, entry, addLine]);
+
+  const confirmRemoveLine = useCallback(() => {
+    const target = arming;
+    setArming(null);
+    if (!target) return;
+    setRemoved((stack) => [...stack, target]);
+    removeLine.mutate(target.id);
+  }, [arming, removeLine]);
+
+  // Puts the last one back where it was — same text, same stamp, so it lands in
+  // its old place in the thread rather than at the bottom as a new thought.
+  const undoRemove = useCallback(() => {
+    const last = removed[removed.length - 1];
+    if (!last || !entry) return;
+    setRemoved((stack) => stack.slice(0, -1));
+    addLine.mutate({ entryId: entry.id, text: last.text, createdAt: last.createdAt });
+  }, [removed, entry, addLine]);
 
   const deleteEntry = useCallback(() => {
     if (!entry) return;
@@ -86,6 +110,13 @@ export function useEntryScreen(entryId: string | undefined) {
     line,
     setLine,
     appendLine,
+    /** Only your own lines are offered — the agent's are its report, not yours to edit. */
+    armRemoveLine: (target: EntryLine) => setArming(target),
+    cancelRemoveLine: () => setArming(null),
+    confirmRemoveLine,
+    lineToRemove: arming,
+    undoneCount: removed.length,
+    undoRemove,
     setKind: (kind: Kind) => patch({ kind }),
     stateOptions: ENTRY_STATES.map((meta) => ({ value: meta.value, label: meta.label })),
     // Moving the state by hand takes the entry back: whatever an agent was

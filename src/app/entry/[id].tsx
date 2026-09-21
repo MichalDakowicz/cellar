@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AgentQuestion } from '@/components/cellar/AgentQuestion';
 import { AgentThread } from '@/components/cellar/AgentThread';
+import { EntryThread } from '@/components/cellar/EntryThread';
 import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
@@ -110,17 +111,12 @@ export default function EntryScreen() {
               onDismiss={(view) => questions.askDismiss(view.question)}
             />
 
-            {entry.thread.length > 0 && (
-              <View className="mt-4">
-                {entry.thread.map((line) => (
-                  <View key={line.id} className="flex-row items-start gap-2.5 py-2">
-                    <Text className="w-6 pt-0.5 font-mono text-[11px] text-muted-foreground">+</Text>
-                    <Text className="min-w-0 flex-1 text-sm text-foreground">{line.text}</Text>
-                    <Text className="pt-0.5 text-xs text-muted-foreground">{line.rel}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
+            <EntryThread
+              lines={entry.thread}
+              onRemove={entry.armRemoveLine}
+              undone={entry.undoneCount}
+              onUndo={entry.undoRemove}
+            />
 
             <View className="mt-3.5 flex-row gap-2">
               <TextInput
@@ -248,6 +244,17 @@ export default function EntryScreen() {
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
           screen mounts it itself, which is also where the phone build's left
           island turns into Back (components/layout/navActions). */}
+      <SheetDialog
+        open={!!entry.lineToRemove}
+        title="remove this line?"
+        body={entry.lineToRemove ? `"${entry.lineToRemove.text}" comes off the thought. undo is there until you leave.` : undefined}
+        confirmLabel="remove it"
+        dismissLabel="keep it"
+        tone="destructive"
+        onConfirm={entry.confirmRemoveLine}
+        onDismiss={entry.cancelRemoveLine}
+      />
+
       <AppChrome />
     </View>
   );

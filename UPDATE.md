@@ -9,6 +9,7 @@
 - Inbox: the file pill lines up with the thought it files instead of hanging below the row
 - Dump: return makes a new line on a phone instead of dropping the thought half-typed
 - Dump: the key hint names what your keyboard actually has, so a phone stops being told shift + return
+- Entry: long press one of your own lines to remove it, with a confirm and undo until you leave
 
 ## 1.8.0 — 2026-09-16
 
