@@ -16,7 +16,7 @@
 - Entry: a thought that is gone keeps the nav, so there is still a way off the screen
 - Dump: swipe across the file it block to step to the next shelf, and it moves as you drag
 - Settings: one line sets an agent up, registering the server and installing the skill together
-- Project detail: the counts sit by the view toggle instead of crowding the title next to back
+- Project detail: the project sits at the far end of its row, with back alone on the left
 
 ## 1.8.0 — 2026-09-16
 

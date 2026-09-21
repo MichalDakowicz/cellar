@@ -19,8 +19,9 @@ type ProjectHeaderProps = {
   /** Desktop wears the mark and a bigger title; phone keeps the line it had. */
   large?: boolean;
   /**
-   * Something that goes in front of the mark — back, on a pushed desktop
-   * screen. It also moves the counts, so see the note on the meta line.
+   * A control that holds the left of the row on its own — back, on a pushed
+   * desktop screen. Giving it one also moves everything about the project to
+   * the other end, so see the note in the body.
    */
   lead?: ReactNode;
 };
@@ -45,61 +46,70 @@ export function ProjectHeader({
   large,
   lead,
 }: ProjectHeaderProps) {
+  // The project itself: mark, name, and what is in it. One block, so it can be
+  // put at either end of the row without the three coming apart.
+  const identity = (
+    <View className={['min-w-0 flex-row items-center gap-3.5', lead ? 'shrink' : 'flex-1'].join(' ')}>
+      {large && (
+        <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
+          <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
+            {initials}
+          </Text>
+        </View>
+      )}
+      <View className={['min-w-0', lead ? 'shrink' : 'flex-1'].join(' ')}>
+        <Text
+          className={[
+            'font-bold leading-tight tracking-tight text-foreground',
+            large ? 'text-3xl' : 'text-2xl',
+          ].join(' ')}
+          numberOfLines={2}
+        >
+          {name}
+        </Text>
+        <Text className="mt-1 text-xs text-muted-foreground" numberOfLines={1}>
+          {meta}
+        </Text>
+      </View>
+    </View>
+  );
+
+  const readings = (
+    <View className="flex-row items-center gap-1 rounded-lg bg-secondary p-[3px]">
+      <Segment label="grouped by kind" active={view === 'grouped'} onPress={() => onView('grouped')}>
+        <Rows3 size={16} color={view === 'grouped' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
+      </Segment>
+      <Segment label="one stream" active={view === 'stream'} onPress={() => onView('stream')}>
+        <List size={16} color={view === 'stream' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
+      </Segment>
+      {onFilter && (
+        <Segment label="filter" active={filtered} onPress={onFilter}>
+          <Funnel size={16} color={filtered ? COLORS.accent : COLORS.muted} strokeWidth={2} />
+        </Segment>
+      )}
+    </View>
+  );
+
+  // Back holds the left on its own, and everything about the project moves
+  // across to join the toggle. Stacking a control, a 56px mark, a 30px name
+  // and a line of counts into the same corner is the cramming this avoids —
+  // the row has a whole window of width and was using one end of it.
+  if (lead) {
+    return (
+      <View className="flex-row items-end justify-between gap-6">
+        {lead}
+        <View className="min-w-0 flex-row items-end justify-end gap-5">
+          {identity}
+          {readings}
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-row items-end justify-between gap-3">
-      <View className="min-w-0 flex-1 flex-row items-center gap-3.5">
-        {lead}
-        {large && (
-          <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
-            <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
-              {initials}
-            </Text>
-          </View>
-        )}
-        <View className="min-w-0 flex-1">
-          <Text
-            className={[
-              'font-bold leading-tight tracking-tight text-foreground',
-              large ? 'text-3xl' : 'text-2xl',
-            ].join(' ')}
-            numberOfLines={2}
-          >
-            {name}
-          </Text>
-          {/* Under the name only while nothing leads the row. Once back is in
-              front of the mark, this corner is carrying four things — a
-              control, a 56px mark, a 30px title and a line of counts — and the
-              title is the one that loses. The counts are a reading, not a
-              heading, so they cross to the other side of the row where the
-              view toggle already lives. */}
-          {!lead && (
-            <Text className="mt-1 text-xs text-muted-foreground" numberOfLines={1}>
-              {meta}
-            </Text>
-          )}
-        </View>
-      </View>
-
-      <View className="flex-row items-center gap-3">
-        {!!lead && (
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-            {meta}
-          </Text>
-        )}
-        <View className="flex-row items-center gap-1 rounded-lg bg-secondary p-[3px]">
-        <Segment label="grouped by kind" active={view === 'grouped'} onPress={() => onView('grouped')}>
-          <Rows3 size={16} color={view === 'grouped' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
-        </Segment>
-        <Segment label="one stream" active={view === 'stream'} onPress={() => onView('stream')}>
-          <List size={16} color={view === 'stream' ? COLORS.foreground : COLORS.muted} strokeWidth={2} />
-        </Segment>
-        {onFilter && (
-          <Segment label="filter" active={filtered} onPress={onFilter}>
-            <Funnel size={16} color={filtered ? COLORS.accent : COLORS.muted} strokeWidth={2} />
-          </Segment>
-        )}
-        </View>
-      </View>
+      {identity}
+      {readings}
     </View>
   );
 }

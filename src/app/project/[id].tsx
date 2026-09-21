@@ -73,8 +73,8 @@ export default function ProjectScreen() {
                     content column, a browser's own back sits level with the
                     page title, and beside the mark this one does too. The
                     header takes it as a slot rather than being wrapped in
-                    another row, because where it goes also decides where the
-                    counts go. */}
+                    another row, because giving it one is also what sends the
+                    project across to the far end. */}
                 <ProjectHeader
                   name={project.name}
                   meta={project.meta}
