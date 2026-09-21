@@ -5,6 +5,7 @@ import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-na
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
+import { SwipeShelf } from '@/components/cellar/SwipeShelf';
 import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
@@ -123,24 +124,31 @@ export default function DumpScreen() {
             <Text className="text-xs text-muted-foreground">{dump.hint}</Text>
           </View>
 
-          <View className="mb-2 mt-6 flex-row items-center justify-between gap-3">
-            <Overline>file it</Overline>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="switch shelf"
-              onPress={() => openShelfPicker?.()}
-              className="flex-row items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 active:opacity-80"
-            >
-              <Text className="text-xs font-semibold text-foreground">{dump.shelfName}</Text>
-              <ChevronDown size={12} color={COLORS.muted} strokeWidth={2.4} />
-            </Pressable>
-          </View>
-          <ChipWrap
-            label="project"
-            options={dump.projectOptions}
-            selected={dump.projectId ?? ''}
-            onToggle={(value) => dump.setProject(value === '' ? null : value)}
-          />
+          {/* The whole block is the shelf control, not just the pill: with two
+              or three shelves the picker is a sheet and a tap to move one place
+              along a line you can already see, and the chips are the widest,
+              closest thing to the thumb. Tapping the pill still opens the
+              picker, which is what a cellar with eight shelves wants. */}
+          <SwipeShelf enabled={dump.canSwipeShelf} onSwipe={dump.swipeShelf}>
+            <View className="mb-2 mt-6 flex-row items-center justify-between gap-3">
+              <Overline>file it</Overline>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="switch shelf"
+                onPress={() => openShelfPicker?.()}
+                className="flex-row items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 active:opacity-80"
+              >
+                <Text className="text-xs font-semibold text-foreground">{dump.shelfName}</Text>
+                <ChevronDown size={12} color={COLORS.muted} strokeWidth={2.4} />
+              </Pressable>
+            </View>
+            <ChipWrap
+              label="project"
+              options={dump.projectOptions}
+              selected={dump.projectId ?? ''}
+              onToggle={(value) => dump.setProject(value === '' ? null : value)}
+            />
+          </SwipeShelf>
 
           <View className="mb-2 mt-5">
             <Overline>kind</Overline>

@@ -5,6 +5,7 @@ import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/u
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
+import { cycleShelf, type SwipeDirection } from '@/lib/shelfCycle';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -30,6 +31,7 @@ export function useDumpScreen() {
   const setKind = useCellarPrefs((state) => state.setDraftKind);
   const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
   const setLastProject = useCellarPrefs((state) => state.setLastProject);
+  const setShelf = useCellarPrefs((state) => state.setShelf);
 
   const [text, setText] = useState('');
 
@@ -79,12 +81,26 @@ export function useDumpScreen() {
   const recent = useMemo(() => recentEntries(entries, 12), [entries]);
   const latest = useMemo(() => recent.slice(0, 5), [recent]);
 
+  // Dragging across the file it block steps along the shelves. Stable, because
+  // the responder that calls it is memoised on this identity and one rebuilt
+  // mid-gesture drops the gesture (components/cellar/SwipeShelf).
+  const swipeShelf = useCallback(
+    (direction: SwipeDirection) => {
+      const next = cycleShelf(shelves, shelf?.id ?? null, direction);
+      if (next) setShelf(next);
+    },
+    [shelves, shelf?.id, setShelf],
+  );
+
   return {
     loading,
     error,
     refetch,
     shelf,
     shelfName: shelf?.name ?? 'cellar',
+    swipeShelf,
+    /** One shelf is nowhere to swipe to, so the drag stays the scroll's. */
+    canSwipeShelf: shelves.length > 1,
     /** "4 today · 218 in the cellar". The line beside the heading. */
     todayLine: `${countToday(entries.map((entry) => entry.createdAt))} today · ${plural(entries.length, 'entry', 'entries')} in the cellar`,
     text,
