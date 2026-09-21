@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarLive } from '@/features/cellar/CellarLive';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
@@ -24,6 +25,11 @@ SplashScreen.preventAutoHideAsync();
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth();
+
+  // Above the Stack, so it also covers settings, search, an entry and a project
+  // — the screens pushed out of the tabs, where the tabs navigator's own
+  // <Redirect> never runs.
+  useSessionRoute();
 
   useEffect(() => {
     if (!loading) SplashScreen.hideAsync();

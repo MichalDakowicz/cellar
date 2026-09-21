@@ -2,6 +2,10 @@
 
 ## 1.9.0 — Unreleased
 
+### Fixed
+
+- Settings: signing out drops you straight on the login screen instead of leaving you sitting there
+
 ## 1.8.0 — 2026-09-16
 
 ### Fixed
