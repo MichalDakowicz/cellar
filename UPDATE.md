@@ -10,6 +10,7 @@
 - Dump: return makes a new line on a phone instead of dropping the thought half-typed
 - Dump: the key hint names what your keyboard actually has, so a phone stops being told shift + return
 - Entry: long press one of your own lines to remove it, with a confirm and undo until you leave
+- Projects: a rename you backed out of is gone next time you open the sheet, not waiting
 
 ## 1.8.0 — 2026-09-16
 
