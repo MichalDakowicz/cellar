@@ -53,7 +53,7 @@ export function ProjectHeader({
         <Text
           className={[
             'font-bold leading-tight tracking-tight text-foreground',
-            large ? 'text-3xl' : 'text-2xl',
+            large ? 'text-3xl text-right' : 'text-2xl',
           ].join(' ')}
           numberOfLines={2}
         >
