@@ -65,23 +65,24 @@ export default function SearchScreen() {
             header={
               <View>
                 <ScreenTop />
-                <View className={`flex-row pb-3 ${gutter}`}>
-                  <ScreenAction />
-                </View>
                 <View className={`pb-2 ${gutter}`}>
-                  <TextInput
-                    className="h-[42px] rounded-lg bg-secondary px-3.5 text-foreground"
-                    style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(focused)]}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    placeholder="search every entry"
-                    placeholderTextColor={COLORS.muted}
-                    value={query}
-                    onChangeText={setQuery}
-                    autoFocus
-                    autoCorrect={false}
-                    accessibilityLabel="search every entry"
-                  />
+                  {/* The field is this screen's heading, so back rides its row. */}
+                  <View className="flex-row items-center gap-3">
+                    <ScreenAction />
+                    <TextInput
+                      className="h-[42px] min-w-0 flex-1 rounded-lg bg-secondary px-3.5 text-foreground"
+                      style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(focused)]}
+                      onFocus={() => setFocused(true)}
+                      onBlur={() => setFocused(false)}
+                      placeholder="search every entry"
+                      placeholderTextColor={COLORS.muted}
+                      value={query}
+                      onChangeText={setQuery}
+                      autoFocus
+                      autoCorrect={false}
+                      accessibilityLabel="search every entry"
+                    />
+                  </View>
                   <Text className="mt-3 text-xs text-muted-foreground">
                     {query.trim()
                       ? `${plural(hits.length, 'match', 'matches')} · archived included`

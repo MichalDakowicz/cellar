@@ -133,15 +133,26 @@ export const EntryCard = memo(function EntryCard({
       )}
 
       {onFile && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`file ${entry.text}`}
-          hitSlop={8}
-          onPress={() => onFile(entry)}
-          className="rounded-full bg-primary/15 px-3 py-1.5 active:opacity-70"
+        // Centred on the same first-line box as the glyph and the copy button.
+        // At its own height the pill is taller than the line it sits beside, so
+        // top-aligned in an `items-start` row it dropped `file` below the
+        // thought's own text and hung past the bottom of a one-line row.
+        <View
+          style={{
+            height: variant === 'inbox' ? TEXT_LINE : LINE_ROW,
+            justifyContent: 'center',
+          }}
         >
-          <Text className="text-xs font-bold text-primary">file</Text>
-        </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`file ${entry.text}`}
+            hitSlop={8}
+            onPress={() => onFile(entry)}
+            className="rounded-full bg-primary/15 px-3 py-1 active:opacity-70"
+          >
+            <Text className="text-xs font-bold text-primary">file</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );

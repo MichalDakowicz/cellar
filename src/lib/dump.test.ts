@@ -75,6 +75,12 @@ describe('shouldSubmitOnReturn', () => {
 describe('copy', () => {
   it('gives each mode its own placeholder and key hint', () => {
     expect(dumpPlaceholder(false)).not.toBe(dumpPlaceholder(true));
-    expect(returnHint(false)).not.toBe(returnHint(true));
+    expect(returnHint(false, true)).not.toBe(returnHint(true, true));
+  });
+
+  it('names no modifier a soft keyboard does not have', () => {
+    expect(returnHint(false, false)).not.toMatch(/shift|ctrl/);
+    expect(returnHint(true, false)).not.toMatch(/shift|ctrl/);
+    expect(returnHint(false, false)).not.toBe(returnHint(true, false));
   });
 });

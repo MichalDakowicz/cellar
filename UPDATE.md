@@ -1,6 +1,27 @@
 # Update notes
 
-## 1.9.0 — Unreleased
+## 1.9.0 — 2026-09-21
+
+### Added
+
+- Entry: long press one of your own lines to remove it, with a confirm and undo until you leave
+- Dump: swipe across the file it block to step to the next shelf, and it moves as you drag
+- Settings: one line sets an agent up, registering the server and installing the skill together
+
+### Changed
+
+- Entry, project, search, settings: back sits on the title row instead of a row of its own
+- Project detail: the heading sits at the right, with back and the view toggle stacked left
+- Stats: the shelf the figures count sits opposite the heading instead of under it
+
+### Fixed
+
+- Settings: signing out drops you straight on the login screen instead of leaving you sitting there
+- Entry: backing out of delete leaves the thought alone instead of quietly archiving it
+- Entry: a thought that is gone keeps the nav, so there is still a way off the screen
+- Projects: a rename you backed out of is gone next time you open the sheet, not waiting
+- Dump: return makes a new line on a phone, and the key hint names what your keyboard has
+- Inbox: the file pill lines up with the thought it files instead of hanging below the row
 
 ## 1.8.0 — 2026-09-16
 

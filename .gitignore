@@ -35,6 +35,9 @@ ios
 # Secrets and local project links
 .env
 .env.local
+
+# Points an agent at the hosted MCP server and carries a live cellar token.
+.mcp.json
 .firebase
 .firebaserc
 

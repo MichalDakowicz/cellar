@@ -194,14 +194,33 @@ export async function appendLine(
   entryId: string,
   text: string,
   source: LineSource = 'user',
+  /**
+   * Only ever set by undo, which is putting a line back where it was. The
+   * thread is ordered by this, so restoring with `now()` would drop the line at
+   * the bottom and quietly rewrite when it was thought.
+   */
+  createdAt?: string,
 ): Promise<EntryLine> {
   const { data, error } = await supabase
     .from('cellar_entry_lines')
-    .insert({ user_id: userId, entry_id: entryId, text, source })
+    .insert({ user_id: userId, entry_id: entryId, text, source, ...(createdAt ? { created_at: createdAt } : null) })
     .select(LINE_COLUMNS)
     .single();
   if (error) throw error;
   return normalizeLine(data as LineRow);
+}
+
+/**
+ * Takes a line off an entry.
+ *
+ * The one destructive write below entry level, and it exists because a line
+ * dumped into the wrong thought otherwise sits there forever — the thought
+ * itself is immutable on purpose, its lines are not the same promise. The
+ * screen confirms first and keeps the row in memory for undo until you leave.
+ */
+export async function deleteLine(id: string): Promise<void> {
+  const { error } = await supabase.from('cellar_entry_lines').delete().eq('id', id);
+  if (error) throw error;
 }
 
 /**

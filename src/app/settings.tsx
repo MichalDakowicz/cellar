@@ -54,10 +54,13 @@ export default function Settings() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
-          <View className={`flex-row pt-4 ${gutter}`}>
+          {/* Back rides the title row rather than sitting in one of its own.
+              On desktop that row was a pill floating in the middle of a centred
+              text column; on a phone, where ScreenAction renders nothing at all
+              because the island has the action, it was an empty band of
+              padding. Both go away when back belongs to the heading. */}
+          <View className={`flex-row items-center gap-3 pt-4 ${gutter}`}>
             <ScreenAction />
-          </View>
-          <View className={`pt-4 ${gutter}`}>
             <Text className="text-2xl font-bold tracking-tight text-foreground">settings</Text>
           </View>
 

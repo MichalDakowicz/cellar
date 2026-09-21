@@ -21,8 +21,8 @@ import { COLORS } from '@/theme/colors';
  *
  * Three figures, the seven kinds as bars, and the projects you cannot stop
  * thinking about. The scope — one shelf, or every shelf — is the left island's
- * action, and it is named on the page too so the figures are never ambiguous
- * about what they are counting.
+ * action, and it is named opposite the heading so the figures are never
+ * ambiguous about what they are counting.
  */
 export default function StatsScreen() {
   const stats = useStatsScreen();
@@ -44,18 +44,28 @@ export default function StatsScreen() {
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.detail}>
         <View className={gutter}>
+          {/* The scope sits opposite the heading, not under it: it is what the
+              figures are counting, and hung off the title it read as a
+              subtitle of the page instead of a control (shelf does the same
+              with its meta). */}
           <View className="flex-row items-center justify-between gap-3">
-            <Text className="text-2xl font-bold tracking-tight text-foreground">what you dump</Text>
-            <ScreenAction />
+            <Text className="min-w-0 shrink text-2xl font-bold tracking-tight text-foreground" numberOfLines={1}>
+              what you dump
+            </Text>
+            <View className="shrink-0 flex-row items-center gap-2.5">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="narrow to a shelf"
+                onPress={() => openScope?.()}
+                className="max-w-[180px] rounded-full bg-secondary px-3 py-1.5 active:opacity-80"
+              >
+                <Text className="text-xs font-semibold text-foreground" numberOfLines={1}>
+                  {stats.scopeName}
+                </Text>
+              </Pressable>
+              <ScreenAction />
+            </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="narrow to a shelf"
-            onPress={() => openScope?.()}
-            className="mt-2 self-start rounded-full bg-secondary px-3 py-1.5 active:opacity-80"
-          >
-            <Text className="text-xs font-semibold text-foreground">{stats.scopeName}</Text>
-          </Pressable>
         </View>
 
         {stats.isEmpty ? (

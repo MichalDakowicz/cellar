@@ -113,7 +113,10 @@ export function AgentTokens({ gutter }: { gutter: string }) {
         </View>
       )}
 
-      <SkillInstall />
+      {/* With a token in hand this is the whole setup in one line, not just
+          the skill — so the three copies collapse to one the moment there is
+          something to put in it. */}
+      <SkillInstall token={fresh} supabaseUrl={url} />
     </View>
   );
 }

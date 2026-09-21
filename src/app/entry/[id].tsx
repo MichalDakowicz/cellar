@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AgentQuestion } from '@/components/cellar/AgentQuestion';
 import { AgentThread } from '@/components/cellar/AgentThread';
+import { EntryThread } from '@/components/cellar/EntryThread';
 import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
@@ -21,7 +22,7 @@ import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntryQuestions } from '@/features/cellar/useEntryQuestions';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, webFocusRing, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, webFocusRing, useSidebarSpace } from '@/hooks/useResponsive';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 
@@ -43,22 +44,28 @@ export default function EntryScreen() {
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
-  const isDesktop = useIsDesktop();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [lineFocused, setLineFocused] = useState(false);
 
   if (!entry.entry) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenTop />
-        <EmptyState
-          title="that entry is gone"
-          body={
-            isDesktop
-              ? 'it was deleted, or it never made it here. use back in the sidebar.'
-              : 'it was deleted, or it never made it here. tap back on the left of the nav bar.'
-          }
-        />
+        <View className="flex-1" style={{ marginLeft: sidebar }}>
+          <ScreenTop />
+          <ContentShell maxWidth={MAX_W.text}>
+            <View className={`flex-row items-center ${gutter}`}>
+              <ScreenAction />
+            </View>
+          </ContentShell>
+          {/* No instruction for where back is any more: it is on this screen,
+              level with everything else, and naming a place it used to be is
+              how the copy went stale in the first place. */}
+          <EmptyState title="that entry is gone" body="it was deleted, or it never made it here." />
+        </View>
+        {/* A pushed route mounts its own chrome, and this branch used to return
+            before it did — so the one screen with nothing on it was also the
+            one with no way off it. */}
+        <AppChrome />
       </View>
     );
   }
@@ -72,15 +79,19 @@ export default function EntryScreen() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
-          <View className={`flex-row pb-3 ${gutter}`}>
-            <ScreenAction />
-          </View>
           <View className={gutter}>
-            <View className="flex-row items-center gap-2">
-              <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />
-              <Text className="text-xs font-semibold text-primary">{entry.entry.kind}</Text>
-              <Text className="text-xs text-muted-foreground">· {entry.projectName}</Text>
-              {!!entry.agentName && <Text className="text-xs text-muted-foreground">· {entry.agentName}</Text>}
+            {/* Back leads the entry's own first line rather than sitting in a
+                row of its own above it — that row was a pill adrift in a
+                centred column on desktop, and empty padding on a phone, where
+                the island carries the action and ScreenAction renders null. */}
+            <View className="flex-row items-center gap-3">
+              <ScreenAction />
+              <View className="min-w-0 flex-1 flex-row items-center gap-2">
+                <KindGlyph kind={entry.entry.kind} size={14} color={COLORS.accent} />
+                <Text className="text-xs font-semibold text-primary">{entry.entry.kind}</Text>
+                <Text className="text-xs text-muted-foreground">· {entry.projectName}</Text>
+                {!!entry.agentName && <Text className="text-xs text-muted-foreground">· {entry.agentName}</Text>}
+              </View>
             </View>
             <Text className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground">
               {entry.entry.text}
@@ -110,17 +121,12 @@ export default function EntryScreen() {
               onDismiss={(view) => questions.askDismiss(view.question)}
             />
 
-            {entry.thread.length > 0 && (
-              <View className="mt-4">
-                {entry.thread.map((line) => (
-                  <View key={line.id} className="flex-row items-start gap-2.5 py-2">
-                    <Text className="w-6 pt-0.5 font-mono text-[11px] text-muted-foreground">+</Text>
-                    <Text className="min-w-0 flex-1 text-sm text-foreground">{line.text}</Text>
-                    <Text className="pt-0.5 text-xs text-muted-foreground">{line.rel}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
+            <EntryThread
+              lines={entry.thread}
+              onRemove={entry.armRemoveLine}
+              undone={entry.undoneCount}
+              onUndo={entry.undoRemove}
+            />
 
             <View className="mt-3.5 flex-row gap-2">
               <TextInput
@@ -243,11 +249,27 @@ export default function EntryScreen() {
           setConfirmDelete(false);
           if (!entry.archived) entry.toggleArchive();
         }}
+        // The secondary button here is not cancel — it archives. A tap on the
+        // backdrop, Escape, or the Android back gesture must close the sheet
+        // and nothing else, or backing out of a delete quietly files the
+        // thought away and it is gone from the inbox and the project.
+        onRequestClose={() => setConfirmDelete(false)}
       />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
           screen mounts it itself, which is also where the phone build's left
           island turns into Back (components/layout/navActions). */}
+      <SheetDialog
+        open={!!entry.lineToRemove}
+        title="remove this line?"
+        body={entry.lineToRemove ? `"${entry.lineToRemove.text}" comes off the thought. undo is there until you leave.` : undefined}
+        confirmLabel="remove it"
+        dismissLabel="keep it"
+        tone="destructive"
+        onConfirm={entry.confirmRemoveLine}
+        onDismiss={entry.cancelRemoveLine}
+      />
+
       <AppChrome />
     </View>
   );
