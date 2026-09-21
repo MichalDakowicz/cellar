@@ -7,6 +7,8 @@
 - Settings: signing out drops you straight on the login screen instead of leaving you sitting there
 - Stats: the shelf the figures count sits opposite the heading instead of under it
 - Inbox: the file pill lines up with the thought it files instead of hanging below the row
+- Dump: return makes a new line on a phone instead of dropping the thought half-typed
+- Dump: the key hint names what your keyboard actually has, so a phone stops being told shift + return
 
 ## 1.8.0 — 2026-09-16
 

@@ -59,12 +59,22 @@ export function dumpPlaceholder(raw: boolean): string {
 /**
  * Return drops; the modifier makes a newline. Raw mode inverts it, because in
  * raw mode a newline is the *content* and dropping is the rare act.
+ *
+ * Only ever asked on a keyboard that has the modifiers. A soft keyboard has
+ * neither shift nor ctrl to offer, so the caller does not consult this at all
+ * there — return is a newline and the drop button is the drop.
  */
 export function shouldSubmitOnReturn(raw: boolean, modifiers: { shift: boolean; meta: boolean }): boolean {
   return raw ? modifiers.meta : !modifiers.shift;
 }
 
-export function returnHint(raw: boolean): string {
+/**
+ * The line under the drop button, and it has to be true on the device reading
+ * it. `modifiers` is a real keyboard — a phone has no shift + return to offer,
+ * and telling it to press one is how a capture screen stops being trusted.
+ */
+export function returnHint(raw: boolean, modifiers: boolean): string {
+  if (!modifiers) return raw ? 'one thought per line · drop to catch them' : 'return for a new line · drop to catch it';
   return raw ? 'ctrl + return to drop' : 'return to drop · shift + return for a new line';
 }
 

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
 
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
@@ -91,7 +92,9 @@ export function useDumpScreen() {
     raw,
     placeholder: dumpPlaceholder(raw),
     hint: dumpHint(draft),
-    keyHint: returnHint(raw),
+    // Web is the only build with a shift or a ctrl to press. `lib/dump` stays
+    // free of react-native, so the platform is read here and handed over.
+    keyHint: returnHint(raw, Platform.OS === 'web'),
     dropLabel: dropPlan.label,
     canDrop: !dropPlan.empty && !drop.isPending,
     submit,

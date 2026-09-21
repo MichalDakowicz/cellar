@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { ChevronDown } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
@@ -93,13 +93,25 @@ export default function DumpScreen() {
             multiline
             value={dump.text}
             onChangeText={dump.setText}
-            onKeyPress={({ nativeEvent }) => {
-              // Web only — RN's onKeyPress carries no modifiers on native, where
-              // the keyboard's own return key is the whole interaction anyway.
-              const event = nativeEvent as unknown as { key: string; shiftKey?: boolean; metaKey?: boolean; ctrlKey?: boolean };
-              if (event.key !== 'Enter') return;
-              dump.onReturn({ shift: !!event.shiftKey, meta: !!(event.metaKey || event.ctrlKey) });
-            }}
+            // Web only, and gated rather than commented: RN's onKeyPress carries
+            // no modifiers on native, so shift read as false and return dropped
+            // the thought on a phone — which is a soft keyboard's only way to
+            // reach the next line. There, return is a newline and the drop
+            // button is the drop.
+            onKeyPress={
+              Platform.OS === 'web'
+                ? ({ nativeEvent }) => {
+                    const event = nativeEvent as unknown as {
+                      key: string;
+                      shiftKey?: boolean;
+                      metaKey?: boolean;
+                      ctrlKey?: boolean;
+                    };
+                    if (event.key !== 'Enter') return;
+                    dump.onReturn({ shift: !!event.shiftKey, meta: !!(event.metaKey || event.ctrlKey) });
+                  }
+                : undefined
+            }
             textAlignVertical="top"
             accessibilityLabel="what just hit you"
           />
