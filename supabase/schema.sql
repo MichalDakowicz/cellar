@@ -219,6 +219,74 @@ create table if not exists public.cellar_agent_tokens (
 create index if not exists cellar_agent_tokens_user_idx
   on public.cellar_agent_tokens (user_id, created_at desc);
 
+-- ----------------------------------------------------------------------------
+-- 8. Attached docs — a link or a path, hung off a thought
+--
+-- One field, `ref`, holding either kind: a thought is one line, and deciding
+-- "is this a url or a path" at capture time is a decision on every drop. What
+-- it is gets resolved by looking at it, so pasting a link works, typing a path
+-- works, and neither needs a mode.
+--
+-- A table rather than a column, because "docs" is plural and a column caps it
+-- at one forever — a table holding one row is the same thing as a column, and
+-- the reverse is a migration.
+--
+-- Cascades with the entry. An attachment to a thought that is gone is not a
+-- record of anything.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_entry_docs (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  entry_id   uuid not null references public.cellar_entries(id) on delete cascade,
+  -- The url or the path, exactly as it was given. Never normalised on the way
+  -- in: a path the user typed is the path they meant.
+  ref        text not null,
+  -- What to call it. Null falls back to the ref itself, the way a link with no
+  -- title falls back to its host.
+  label      text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists cellar_entry_docs_entry_idx
+  on public.cellar_entry_docs (entry_id, created_at);
+
+-- ----------------------------------------------------------------------------
+-- 9. The trail — what happened to a thought, and exactly when
+--
+-- `created_at` and the state on the row say where a thought is now; nothing
+-- said how it got there. This is the trail: one row per change, with the exact
+-- stamp.
+--
+-- It carries exact times and the rest of the app keeps saying "2d". The trail
+-- is the one surface where "17:04, 22 September" is the useful answer, and
+-- turning every relative stamp in a list of one-line thoughts into a timestamp
+-- would be a wall of numbers nobody reads.
+--
+-- Append only in practice: nothing writes to a row here twice, and a trail that
+-- can be edited is not a trail.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_entry_events (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  entry_id   uuid not null references public.cellar_entries(id) on delete cascade,
+  -- What happened, as the display word, like `kind` and `state`:
+  -- 'dropped' | 'state' | 'kind' | 'filed' | 'claimed' | 'released' |
+  -- 'line' | 'asked' | 'answered' | 'archived' | 'restored'
+  what       text not null,
+  -- Where it went, and where it came from. Both null for an event that is not
+  -- a move — a line landing, a question asked.
+  from_value text,
+  to_value   text,
+  -- 'user' or 'agent', the same two words `cellar_entry_lines.source` carries.
+  source     text not null default 'user',
+  -- Named when an agent did it, so the trail says who without a join.
+  agent      text,
+  at         timestamptz not null default now()
+);
+
+create index if not exists cellar_entry_events_entry_idx
+  on public.cellar_entry_events (entry_id, at);
+
 -- ============================================================================
 -- Row level security
 --
@@ -231,6 +299,8 @@ alter table public.cellar_projects     enable row level security;
 alter table public.cellar_entries      enable row level security;
 alter table public.cellar_entry_lines  enable row level security;
 alter table public.cellar_entry_questions enable row level security;
+alter table public.cellar_entry_docs   enable row level security;
+alter table public.cellar_entry_events enable row level security;
 alter table public.cellar_settings     enable row level security;
 alter table public.cellar_agent_tokens enable row level security;
 
@@ -259,6 +329,17 @@ create policy cellar_entry_lines_owner_all on public.cellar_entry_lines for all
 -- Same shape, same reason: keyed to user_id, not joined back to the entry.
 drop policy if exists cellar_entry_questions_owner_all on public.cellar_entry_questions;
 create policy cellar_entry_questions_owner_all on public.cellar_entry_questions for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Same shape again: keyed to user_id, not joined back to the entry.
+drop policy if exists cellar_entry_docs_owner_all on public.cellar_entry_docs;
+create policy cellar_entry_docs_owner_all on public.cellar_entry_docs for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists cellar_entry_events_owner_all on public.cellar_entry_events;
+create policy cellar_entry_events_owner_all on public.cellar_entry_events for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -511,3 +592,48 @@ alter table public.cellar_entries
 -- Radar's involved; see docs/agent-notifications.md.
 alter table public.cellar_settings
   add column if not exists notify_questions boolean not null default true;
+
+-- 2026-09-22 — a project that sorts first inside its own shelf.
+--
+-- On the project rather than in MMKV: which shelf you are standing in front of
+-- is where you are standing, but a pin is a fact about the project, and it has
+-- to be the same one in the browser. The same argument `position` already makes
+-- two columns to the left.
+--
+-- It sorts, and that is all it does. There is deliberately no pinned band and
+-- no pinned section — a project that appears twice on one screen is a project
+-- you have to check twice, and the shelf is already the grouping this app is
+-- built around. The file-it list reads the same column, so a project you pinned
+-- because you file into it constantly is at the top of the sheet as well.
+alter table public.cellar_projects
+  add column if not exists pinned boolean not null default false;
+
+-- 2026-09-22 — how much a thought matters, inside its kind.
+--
+-- Three levels and no more: 'low' | 'normal' | 'high', stored as the display
+-- word like `kind` and `state`. Five would be a form to fill in on a screen
+-- whose entire point is that catching a thought costs one line.
+--
+-- It is a mark on the row, not a sort. Entries are getting a drag position in
+-- the same pass, and two manual orders fighting over one list is one too many —
+-- importance says how much this matters, position says where you put it, and
+-- they answer different questions.
+--
+-- Defaulted to 'normal' and not null, so every thought that already exists is
+-- correctly unremarkable without a backfill.
+alter table public.cellar_entries
+  add column if not exists importance text not null default 'normal';
+
+-- 2026-09-22 — where you dragged a thought to.
+--
+-- Shelves and projects have carried a `position` since the beginning and only
+-- their create ever wrote it; entries had none at all and came back ordered by
+-- `created_at`. Dragging needs a column that survives the drag.
+--
+-- Defaulted to 0 rather than to a backfilled index, and that is the trap worth
+-- knowing: every existing row shares position 0, so a list sorted on this
+-- column alone is in an arbitrary order until something writes it. Anything
+-- reading it must sort `position, created_at desc`, which keeps newest-first
+-- for everything untouched and puts a dragged thought exactly where it was put.
+alter table public.cellar_entries
+  add column if not exists position int not null default 0;
