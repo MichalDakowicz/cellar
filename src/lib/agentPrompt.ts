@@ -1,4 +1,4 @@
-import type { Entry } from '@/types/cellar';
+import type { Entry, Project } from '@/types/cellar';
 
 /**
  * The line you paste into an agent to start a thought.
@@ -30,6 +30,34 @@ export function shortEntryId(id: string): string {
   return id.slice(0, SHORT_ID);
 }
 
+/**
+ * A project wears a prefix; an entry does not.
+ *
+ * Both ids are the same slice of the same kind of uuid, so out of context there
+ * is nothing to tell `4f2a9c33` from `4f2a9c33` — and the two are arguments to
+ * different tools. The prefix is the whole distinction, which is why it is two
+ * characters rather than a longer word: it has to survive being read at the end
+ * of a pasted line.
+ */
+export const PROJECT_PREFIX = 'p-';
+
+export function shortProjectId(id: string): string {
+  return `${PROJECT_PREFIX}${id.slice(0, SHORT_ID)}`;
+}
+
+/**
+ * The prefix back off again, for the side that resolves it.
+ *
+ * Only ever stripped for an *id* match. A project is also resolvable by name,
+ * and a project someone called `p-old` has to stay findable by the name they
+ * gave it — so the caller matches the raw string against names and the stripped
+ * one against ids, never the other way round.
+ */
+export function bareProjectId(ref: string): string {
+  const trimmed = ref.trim();
+  return trimmed.toLowerCase().startsWith(PROJECT_PREFIX) ? trimmed.slice(PROJECT_PREFIX.length) : trimmed;
+}
+
 export function agentPrompt(entry: Pick<Entry, 'id' | 'text'>, projectName?: string | null): string {
   // The project is named even though the agent resolves it from the working
   // directory, because the likeliest mistake is pasting into a session opened
@@ -37,4 +65,15 @@ export function agentPrompt(entry: Pick<Entry, 'id' | 'text'>, projectName?: str
   // working in the wrong one.
   const where = projectName ? ` in ${projectName}` : '';
   return `pick up cellar entry ${shortEntryId(entry.id)}${where} — ${entry.text}`;
+}
+
+/**
+ * The line that hands a whole project over, rather than one thought in it.
+ *
+ * Same verb as the entry form on purpose: `pick up` is what triggers the skill,
+ * and a second phrasing for the same act would be a second thing to get right
+ * on the other end. What follows it says which of the two this is.
+ */
+export function projectPrompt(project: Pick<Project, 'id' | 'name'>): string {
+  return `pick up cellar project ${shortProjectId(project.id)} — ${project.name}`;
 }

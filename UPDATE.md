@@ -2,6 +2,10 @@
 
 ## 1.10.0 — Unreleased
 
+### Added
+
+- Project detail: copy a prompt for the whole project, not just for one thought in it
+
 ## 1.9.0 — 2026-09-21
 
 ### Added

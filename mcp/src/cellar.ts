@@ -16,6 +16,7 @@ import {
 } from '@/lib/rows';
 import type { Entry, EntryQuestion, EntryState, Kind, Project, Shelf } from '@/types/cellar';
 
+import { bareProjectId } from '@/lib/agentPrompt';
 import { agentLine } from '@/lib/agentWork';
 import { normalizeOptions, unblocksEntry } from '@/lib/entryQuestions';
 
@@ -80,12 +81,19 @@ export function resolveEntry(ref: string, entries: Entry[]): Entry {
   throw new Error(`"${ref}" matches ${hits.length} entries. Use more of the id.`);
 }
 
-/** A project by id, by short id, or by name. `inbox` and `all` are the caller's job. */
+/**
+ * A project by id, by short id, or by name. `inbox` and `all` are the caller's job.
+ *
+ * The id may arrive wearing the `p-` the app prints, and the prefix is stripped
+ * for the id match only — names are matched against what was actually typed, so
+ * a project someone called `p-old` is still findable by its name.
+ */
 export function resolveProject(ref: string, projects: Project[]): Project {
   const needle = ref.trim().toLowerCase();
   if (!needle) throw new Error('No project given.');
 
-  const byId = projects.find((project) => project.id === needle || project.id.startsWith(needle));
+  const id = bareProjectId(needle);
+  const byId = id ? projects.find((project) => project.id === id || project.id.startsWith(id)) : undefined;
   if (byId) return byId;
 
   const named = projects.filter((project) => project.name.toLowerCase() === needle);

@@ -3,8 +3,8 @@ import { useCallback } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
-import { agentPrompt } from '@/lib/agentPrompt';
-import type { Entry } from '@/types/cellar';
+import { agentPrompt, projectPrompt } from '@/lib/agentPrompt';
+import type { Entry, Project } from '@/types/cellar';
 
 /**
  * Copies the one line that starts a thought in an agent.
@@ -31,5 +31,26 @@ export function useCopyPrompt() {
       say('copied — paste it into an agent');
     },
     [projects, say],
+  );
+}
+
+/**
+ * The same act one level up: hand over a whole project rather than one thought
+ * in it.
+ *
+ * Its own hook rather than a second return value, because every screen in the
+ * app copies entries and exactly one copies a project — folding it into
+ * `useCopyPrompt` would put a projects lookup behind every list in the app for
+ * one caller.
+ */
+export function useCopyProjectPrompt() {
+  const { say } = useToast();
+
+  return useCallback(
+    (project: Pick<Project, 'id' | 'name'>) => {
+      void Clipboard.setStringAsync(projectPrompt(project));
+      say('copied — paste it into an agent');
+    },
+    [say],
   );
 }
