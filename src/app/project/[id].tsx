@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
+import { KanbanBoard } from '@/components/cellar/KanbanBoard';
 import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
@@ -25,7 +26,7 @@ import { useCellarSheets } from '@/store/cellarPrefs';
 const CHROME_GAP = 24;
 
 /**
- * One project, in whichever of the two readings you left it in.
+ * One project, in whichever of the three readings you left it in.
  *
  * Two shapes. On a phone the whole screen is the list, and the things that act
  * on it — the filter, the archived toggle, Back — are a sheet, a line of text
@@ -83,6 +84,29 @@ export default function ProjectScreen() {
     />
   );
 
+  // The board carries no list header, so on a phone the heading the list was
+  // drawing has to be drawn above it instead.
+  const board = (
+    <View className="flex-1">
+      {!isDesktop && (
+        <PhoneHeader
+          project={project}
+          gutter={gutter}
+          onFilter={() => openFilter?.()}
+          onCopyProject={copyProjectPrompt}
+        />
+      )}
+      <KanbanBoard
+        columns={project.columns}
+        showCode={project.showCodes}
+        onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
+        onCopy={copyPrompt}
+      />
+    </View>
+  );
+
+  const reading = project.view === 'kanban' ? board : list;
+
   return (
     <View className="flex-1 bg-background" ref={attachPage}>
       <View className="flex-1" style={{ marginLeft: sidebar }}>
@@ -105,7 +129,13 @@ export default function ProjectScreen() {
                     onLayout={(event) => setChrome(event.nativeEvent.layout.width)}
                   >
                     <ScreenAction />
-                    <ProjectViews view={project.view} onView={project.setView} filtered={project.filtered} />
+                    <ProjectViews
+                      view={project.view}
+                      onView={project.setView}
+                      axis={project.kanbanAxis}
+                      onAxis={project.setKanbanAxis}
+                      filtered={project.filtered}
+                    />
                   </View>
                   <View className="flex-row justify-end">
                     <ProjectHeader
@@ -142,7 +172,7 @@ export default function ProjectScreen() {
                   read as a stray line stuck to the scrollbar rather than as the
                   edge of a column. */}
               <View className="flex-1 flex-row gap-10">
-                <View className="min-w-0 flex-1">{list}</View>
+                <View className="min-w-0 flex-1">{reading}</View>
                 <View className="w-[300px] pr-8 pt-1">
                   <ProjectAside
                     stateSpread={project.stateSpread}
@@ -153,7 +183,7 @@ export default function ProjectScreen() {
               </View>
             </View>
           ) : (
-            list
+            reading
           )}
         </ContentShell>
       </View>
@@ -166,7 +196,7 @@ export default function ProjectScreen() {
   );
 }
 
-/** The phone's list header: heading, the two readings, the funnel, archived. */
+/** The phone's list header: heading, the three readings, the funnel, archived. */
 function PhoneHeader({
   project,
   gutter,
@@ -188,6 +218,8 @@ function PhoneHeader({
           initials={project.initials}
           view={project.view}
           onView={project.setView}
+          axis={project.kanbanAxis}
+          onAxis={project.setKanbanAxis}
           filtered={project.filtered}
           onFilter={onFilter}
         />
