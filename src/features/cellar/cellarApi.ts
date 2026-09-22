@@ -161,6 +161,9 @@ export async function deleteProject(id: string): Promise<void> {
 
 export type NewEntry = { text: string; kind: Kind; projectId: string | null };
 
+/** A thought and the notes typed under it, which is what a normal dump is now. */
+export type NewDrop = NewEntry & { lines: string[] };
+
 /** One insert for a whole raw dump — many lines in, many entries out, one round trip. */
 export async function createEntries(userId: string, entries: NewEntry[]): Promise<Entry[]> {
   const { data, error } = await supabase
@@ -169,6 +172,47 @@ export async function createEntries(userId: string, entries: NewEntry[]): Promis
     .select(ENTRY_COLUMNS);
   if (error) throw error;
   return (data as EntryRow[]).map(normalizeEntry);
+}
+
+/**
+ * A whole dump, however many entries and notes it turned out to be.
+ *
+ * Entries with no notes go in one insert, because that is the raw dump and it
+ * is forty rows on a bad day. An entry that *has* notes is inserted on its own
+ * so its lines can be hung off the id that comes back — there is at most one of
+ * those per dump, since only normal mode makes them.
+ */
+export async function dropEntries(userId: string, drops: NewDrop[]): Promise<void> {
+  const plain = drops.filter((drop) => drop.lines.length === 0);
+  if (plain.length > 0) await createEntries(userId, plain);
+
+  for (const drop of drops.filter((candidate) => candidate.lines.length > 0)) {
+    const [entry] = await createEntries(userId, [drop]);
+    await appendNotes(userId, entry.id, drop.lines);
+  }
+}
+
+/**
+ * The notes under a thought, in the order they were typed.
+ *
+ * Stamped a millisecond apart rather than left to the column default. A thread
+ * is ordered by `created_at` alone (lib/rows), and every row of one insert gets
+ * the same transaction timestamp — so a batch would come back in whatever order
+ * the read felt like, which for "a title with the detail under it" is the one
+ * thing that must not happen.
+ */
+async function appendNotes(userId: string, entryId: string, texts: string[]): Promise<void> {
+  const start = Date.now();
+  const { error } = await supabase.from('cellar_entry_lines').insert(
+    texts.map((text, index) => ({
+      user_id: userId,
+      entry_id: entryId,
+      text,
+      source: 'user' as const,
+      created_at: new Date(start + index).toISOString(),
+    })),
+  );
+  if (error) throw error;
 }
 
 export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'archived' | 'projectId' | 'agent'>>;

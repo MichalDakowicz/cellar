@@ -4,7 +4,6 @@ import { useCallback, useMemo } from 'react';
 import {
   answerQuestion,
   appendLine,
-  createEntries,
   createProject,
   createShelf,
   deleteEntry,
@@ -12,6 +11,7 @@ import {
   deleteProject,
   deleteShelf,
   dismissQuestion,
+  dropEntries,
   fetchEntries,
   fetchProjects,
   fetchShelves,
@@ -21,7 +21,7 @@ import {
   renameShelf,
   setProjectRepo,
   type EntryPatch,
-  type NewEntry,
+  type NewDrop,
 } from '@/features/cellar/cellarApi';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { ENTRIES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
@@ -94,7 +94,7 @@ export function useCellarWrites() {
   );
 
   const drop = useMutation({
-    mutationFn: (batch: NewEntry[]) => createEntries(requireUser(user?.id), batch),
+    mutationFn: (batch: NewDrop[]) => dropEntries(requireUser(user?.id), batch),
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 

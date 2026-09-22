@@ -4,7 +4,13 @@
 
 ### Added
 
+- Project detail: copy a prompt for the whole project, not just for one thought in it
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
+
+### Changed
+
+- Dump: a new line becomes a note under the thought instead of running into one long line
+- Entry: the reports section reads from agent rather than naming the tool that wrote them
 
 ## 1.9.0 — 2026-09-21
 
