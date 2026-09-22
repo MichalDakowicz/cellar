@@ -104,8 +104,10 @@ export default function ProjectScreen() {
       <KanbanBoard
         columns={project.columns}
         showCode={project.showCodes}
-        onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-        onCopy={copyPrompt}
+        onPress={selection.onPress}
+        onLongPress={selection.onLongPress}
+        selectedIds={selection.selectedIds}
+        onCopy={selection.selecting ? undefined : copyPrompt}
       />
     </View>
   );
