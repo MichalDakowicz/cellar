@@ -45,11 +45,12 @@ async function readMeta(href: string): Promise<LinkMeta | null> {
       signal: controller.signal,
       headers: {
         accept: 'text/html',
-        // Everything worth reading is in the head. A host that honours this
-        // sends 65KB instead of the 1.7MB a video page weighs, which is the
-        // difference between resolving and timing out on a phone; one that
-        // ignores it answers 200 with the lot and still works.
-        range: `bytes=0-${META_BYTES - 1}`,
+        // No Range header, deliberately. Asking for the first 64KB looks like
+        // the obvious saving and is the bug this feature shipped with: a
+        // document's head is not near its front, and youtube.com puts its
+        // `og:title` at byte 707,923. A host that honoured the range would
+        // hand back a page with no title in it, which caches as a failure.
+        //
         // Sites serve a different page to something that does not look like a
         // browser — a consent wall, or no open graph at all. This asks for the
         // page a person would see, which is the page the title belongs to.
@@ -57,14 +58,13 @@ async function readMeta(href: string): Promise<LinkMeta | null> {
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
       },
     });
-    // 206 is the ranged read succeeding, and it is the good case.
-    if (!response.ok && response.status !== 206) return null;
+    if (!response.ok) return null;
 
     const type = response.headers.get('content-type') ?? '';
     if (type && !type.includes('html')) return null;
 
-    // Cut again after the fact: react-native's fetch has no streaming reader,
-    // so a host that ignored the range still hands over the whole page.
+    // The cap is a guard against something pathological, not a budget — the
+    // parser bounds its own work to the head (`lib/linkMeta`).
     const meta = parseLinkMeta((await response.text()).slice(0, META_BYTES));
     return isEmptyMeta(meta) ? null : meta;
   } catch {

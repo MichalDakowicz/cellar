@@ -1,4 +1,4 @@
-import { decodeEntities, isEmptyMeta, parseLinkMeta } from '@/lib/linkMeta';
+import { decodeEntities, headOf, isEmptyMeta, parseLinkMeta } from '@/lib/linkMeta';
 
 describe('parseLinkMeta', () => {
   it('prefers open graph over the title tag', () => {
@@ -58,5 +58,31 @@ describe('decodeEntities', () => {
   it('leaves an entity it does not know alone rather than mangling it', () => {
     expect(decodeEntities('a &frac12; b')).toBe('a &frac12; b');
     expect(decodeEntities('a &amp; b')).toBe('a & b');
+  });
+});
+
+describe('headOf', () => {
+  it('stops at the closing head tag, so the body is never scanned', () => {
+    expect(headOf('<head><title>a</title></head><body>b</body>')).toBe('<head><title>a</title>');
+  });
+
+  it('hands back the whole document when there is no closing head tag', () => {
+    expect(headOf('<title>a</title>')).toBe('<title>a</title>');
+  });
+});
+
+/**
+ * The bug this feature shipped with, pinned.
+ *
+ * A document's head is not near its front — youtube.com puts `og:title` at
+ * byte 707,923 — so a parser handed a 64KB prefix found nothing, cached a
+ * failure, and left the link reading as its host forever.
+ */
+describe('a head that is a long way in', () => {
+  const far = `<html><head>${'<script>x</script>'.repeat(5000)}<title>Found anyway</title></head><body>b</body></html>`;
+
+  it('finds a title past where a 64KB read would have stopped', () => {
+    expect(far.search(/<title/i)).toBeGreaterThan(64 * 1024);
+    expect(parseLinkMeta(far).title).toBe('Found anyway');
   });
 });

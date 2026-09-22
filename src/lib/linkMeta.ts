@@ -24,8 +24,27 @@ export type LinkMeta = {
 
 export const EMPTY_META: LinkMeta = { title: null, site: null, description: null };
 
-/** How much of a response is worth reading. A head is small; a page is not. */
-export const META_BYTES = 64 * 1024;
+/**
+ * A guard against a pathological response, not a budget.
+ *
+ * It was 64KB, on the assumption that a document's head is near its front. It
+ * is not: youtube.com puts `og:title` at byte 707,923, so a 64KB read found
+ * nothing, cached a failure, and the link stayed as its host forever. Anything
+ * that caps this below a megabyte is choosing which sites are allowed to work.
+ */
+export const META_BYTES = 2 * 1024 * 1024;
+
+/**
+ * The part of the document the tags are in.
+ *
+ * `</head>` when there is one — which bounds the regex work to the head however
+ * big the body is — and the whole thing when there is not, because a page with
+ * no closing head tag still has a title somewhere in it.
+ */
+export function headOf(html: string): string {
+  const end = html.search(/<\/head\s*>/i);
+  return end === -1 ? html : html.slice(0, end);
+}
 
 function metaContent(html: string, property: string): string | null {
   // Both orders: `<meta property=... content=...>` and the reverse, because
@@ -64,7 +83,8 @@ function clean(value: string | null, cap: number): string | null {
   return text.length > cap ? `${text.slice(0, cap - 1).trimEnd()}…` : text;
 }
 
-export function parseLinkMeta(html: string): LinkMeta {
+export function parseLinkMeta(document: string): LinkMeta {
+  const html = headOf(document);
   const title = metaContent(html, 'og:title') ?? html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? null;
   const description = metaContent(html, 'og:description') ?? metaContent(html, 'description');
 
