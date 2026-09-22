@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { LinkedText } from '@/components/cellar/LinkedText';
 import { StateBadge } from '@/components/cellar/StateBadge';
 import { KIND_GUTTER, KindGlyph, kindLabel, LINE_ROW, TEXT_LINE } from '@/components/media/Glyphs';
 import { useHover, webTransition } from '@/hooks/useResponsive';
@@ -116,9 +117,11 @@ export const EntryCard = memo(function EntryCard({
           variant === 'inbox' ? '' : 'px-2 py-2.5',
         ].join(' ')}
       >
-        <Text className="min-w-0 flex-1 text-sm text-foreground" numberOfLines={variant === 'hit' ? 2 : 3}>
-          {entry.text}
-        </Text>
+        <LinkedText
+          text={entry.text}
+          className="min-w-0 flex-1 text-sm text-foreground"
+          numberOfLines={variant === 'hit' ? 2 : 3}
+        />
 
         {grown > 0 && <Text className="pt-px text-xs text-muted-foreground">+{grown}</Text>}
         <StateBadge state={entry.state} />

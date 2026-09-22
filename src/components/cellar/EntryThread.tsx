@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 
+import { LinkedText } from '@/components/cellar/LinkedText';
 import { useHover, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
@@ -85,7 +86,7 @@ function ThreadRow<T extends ThreadLine>({ line, onRemove }: { line: T; onRemove
       className="flex-row items-start gap-2.5 px-1 py-2"
     >
       <Text className="w-6 pt-0.5 font-mono text-[11px] text-muted-foreground">+</Text>
-      <Text className="min-w-0 flex-1 text-sm text-foreground">{line.text}</Text>
+      <LinkedText text={line.text} className="min-w-0 flex-1 text-sm text-foreground" />
       <Text className="pt-0.5 text-xs text-muted-foreground">{line.rel}</Text>
     </Pressable>
   );

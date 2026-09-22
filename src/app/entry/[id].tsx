@@ -7,6 +7,8 @@ import { AgentQuestion } from '@/components/cellar/AgentQuestion';
 import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { AgentThread } from '@/components/cellar/AgentThread';
 import { EntryThread } from '@/components/cellar/EntryThread';
+import { LinkedText } from '@/components/cellar/LinkedText';
+import { LinkPreviews } from '@/components/cellar/LinkPreview';
 import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
@@ -94,13 +96,18 @@ export default function EntryScreen() {
                 {!!entry.agentName && <Text className="text-xs text-muted-foreground">· {entry.agentName}</Text>}
               </View>
             </View>
-            <Text className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground">
-              {entry.entry.text}
-            </Text>
+            <LinkedText
+              text={entry.entry.text}
+              className="mt-2.5 text-2xl font-bold leading-tight tracking-tight text-foreground"
+            />
             <View className="mt-2.5 flex-row items-center gap-3">
               <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
               <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
             </View>
+
+            {/* Under the thought and above everything else: a link dumped with
+                a thought is usually the thing the thought is about. */}
+            <LinkPreviews hrefs={entry.links} />
 
             {entry.legacyQuestion && <AgentQuestion question={entry.legacyQuestion} agent={entry.agentName} />}
 
