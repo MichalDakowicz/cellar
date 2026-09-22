@@ -6,6 +6,8 @@
 
 - Project detail: copy a prompt for the whole project, not just for one thought in it
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
+- Entry: hold an option on a question to pick more than one, and answer with all of them
+- Entry: a settled question keeps its options on show, with the ones the answer took ticked
 
 ### Changed
 
