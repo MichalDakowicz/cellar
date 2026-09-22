@@ -51,7 +51,7 @@ export function useDumpScreen() {
   const submit = useCallback(() => {
     if (dropPlan.empty || drop.isPending) return;
     void drop
-      .mutateAsync(dropPlan.texts.map((line) => ({ text: line, kind, projectId })))
+      .mutateAsync(dropPlan.drops.map((entry) => ({ ...entry, kind, projectId })))
       .then(() => {
         setText('');
         // With "remember the last project" off, the chip snaps back to the

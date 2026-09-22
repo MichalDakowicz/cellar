@@ -3,15 +3,27 @@ import type { Draft, Kind } from '@/types/cellar';
 /**
  * The capture rule: what a draft becomes when you drop it.
  *
- * Normal mode is one entry, always — the newlines a soft keyboard sneaks in get
- * collapsed rather than silently splitting a thought in two. Raw mode is the
- * opposite promise: one line in, one entry out, blank lines ignored. The whole
- * value of the raw toggle is that the two modes never guess.
+ * Normal mode is one entry, always. Its first line is the thought and every
+ * line under it becomes a note on that entry — the shape you already get by
+ * coming back and dumping more into something, reached from the field instead.
+ * Newlines used to be collapsed here; that turned a title and two notes into
+ * one long run-on, which is the thing this app exists to stop.
+ *
+ * Raw mode is the opposite promise and is unchanged: one line in, one entry
+ * out, blank lines ignored, nothing nested. The value of the toggle is that the
+ * two modes never guess.
  */
 
+/** One entry to create, and the notes that came in under it. */
+export type Drop = {
+  text: string;
+  /** Appended to the entry in this order. Empty in raw mode, always. */
+  lines: string[];
+};
+
 export type DumpPlan = {
-  /** The text of each entry to create, in the order they were typed. */
-  texts: string[];
+  /** Each entry to create, in the order they were typed. */
+  drops: Drop[];
   /** What the drop button says. Names the count and the destination, never "submit". */
   label: string;
   /** Nothing to drop — an empty draft, or a raw dump of nothing but blank lines. */
@@ -32,12 +44,26 @@ export function splitLines(text: string): string[] {
 }
 
 export function plan(draft: Draft, projectName: string | null): DumpPlan {
-  const texts = draft.raw ? splitLines(draft.text) : oneLine(draft.text) ? [oneLine(draft.text)] : [];
+  const drops = draft.raw ? splitLines(draft.text).map(bare) : titleAndNotes(draft.text);
   const where = projectName ?? 'inbox';
 
-  if (texts.length === 0) return { texts, label: `drop into ${where}`, empty: true };
-  if (texts.length === 1) return { texts, label: `drop into ${where}`, empty: false };
-  return { texts, label: `drop ${texts.length} entries into ${where}`, empty: false };
+  if (drops.length === 0) return { drops, label: `drop into ${where}`, empty: true };
+  if (drops.length === 1) return { drops, label: `drop into ${where}`, empty: false };
+  return { drops, label: `drop ${drops.length} entries into ${where}`, empty: false };
+}
+
+const bare = (text: string): Drop => ({ text, lines: [] });
+
+/**
+ * The first line is the thought; the rest are notes under it.
+ *
+ * `oneLine` still runs on each of them, so a soft keyboard's stray wrapping
+ * inside one line collapses the way it always did — what changed is that a
+ * deliberate return is now a note boundary rather than a space.
+ */
+function titleAndNotes(text: string): Drop[] {
+  const [title, ...notes] = splitLines(text).map(oneLine).filter(Boolean);
+  return title ? [{ text: title, lines: notes }] : [];
 }
 
 /**
@@ -46,7 +72,11 @@ export function plan(draft: Draft, projectName: string | null): DumpPlan {
  * to be able to check before they commit to it.
  */
 export function dumpHint(draft: Draft): string {
-  if (!draft.raw) return 'many lines at once';
+  if (!draft.raw) {
+    const notes = titleAndNotes(draft.text)[0]?.lines.length ?? 0;
+    if (notes === 0) return 'a new line becomes a note under it';
+    return notes === 1 ? '1 thought · 1 note' : `1 thought · ${notes} notes`;
+  }
   const count = splitLines(draft.text).length;
   if (count === 0) return 'one thought per line';
   return count === 1 ? '1 line → 1 entry' : `${count} lines → ${count} entries`;
