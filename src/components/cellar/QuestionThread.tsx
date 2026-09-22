@@ -22,11 +22,22 @@ export type QuestionThreadProps = {
   settled: QuestionView[];
   onDraft: (id: string, text: string) => void;
   onPick: (id: string, option: string) => void;
+  onHold: (id: string, option: string) => void;
+  onSendHeld: (id: string) => void;
   onSubmit: (id: string) => void;
   onDismiss: (view: QuestionView) => void;
 };
 
-export function QuestionThread({ pending, settled, onDraft, onPick, onSubmit, onDismiss }: QuestionThreadProps) {
+export function QuestionThread({
+  pending,
+  settled,
+  onDraft,
+  onPick,
+  onHold,
+  onSendHeld,
+  onSubmit,
+  onDismiss,
+}: QuestionThreadProps) {
   if (pending.length === 0 && settled.length === 0) return null;
 
   const card = (view: QuestionView) => (
@@ -40,8 +51,11 @@ export function QuestionThread({ pending, settled, onDraft, onPick, onSubmit, on
       agent={view.question.agent}
       rel={view.rel}
       draft={view.draft}
+      held={view.held}
       onDraft={(text) => onDraft(view.question.id, text)}
       onPick={(option) => onPick(view.question.id, option)}
+      onHold={(option) => onHold(view.question.id, option)}
+      onSendHeld={() => onSendHeld(view.question.id)}
       onSubmit={() => onSubmit(view.question.id)}
       onDismiss={() => onDismiss(view)}
     />

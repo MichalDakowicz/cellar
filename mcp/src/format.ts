@@ -1,6 +1,12 @@
 import { shortEntryId } from '@/lib/agentPrompt';
 import { askRule, ASK_WHERE, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
-import { optionLabel, pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
+import {
+  optionLabel,
+  pendingQuestions,
+  pickedOptions,
+  questionStatus,
+  settledQuestions,
+} from '@/lib/entryQuestions';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
@@ -133,16 +139,35 @@ function questionBlocks(questions: EntryQuestion[], now: number): string[] {
 
   if (settled.length > 0) {
     out.push('', 'asked and settled — build to these, do not ask again:');
-    for (const question of settled) {
-      out.push(`  ? ${question.question}`);
-      out.push(
-        questionStatus(question) === 'dismissed'
-          ? `  = waved off${question.answer ? ` (was: ${question.answer})` : ' — they chose not to answer, so use your judgement'}`
-          : `  = ${question.answer ?? '(no answer recorded)'}`,
-      );
-    }
+    for (const question of settled) out.push(...settledLines(question, '  '));
   }
 
+  return out;
+}
+
+/**
+ * A settled question, its options, and which of them the answer took.
+ *
+ * The options are the part that used to be missing, and an answer printed
+ * without them is sometimes unreadable rather than merely terse: an answer of
+ * "c and d both" against a question whose choices were dropped is a decision
+ * nobody — user or agent — can recover. So the choices are always printed back
+ * with the answer, and the ones the answer names wear a tick.
+ *
+ * One function, used by the brief and by the answered listing, because the two
+ * disagreeing about what a settled question looks like is how the gap got in.
+ */
+export function settledLines(question: EntryQuestion, indent: string): string[] {
+  const out = [`${indent}? ${question.question}`];
+  const taken = pickedOptions(question.answer, question.options);
+  question.options.forEach((option, index) =>
+    out.push(`${indent}  ${taken.includes(option) ? '✓' : ' '} ${optionLabel(index)}) ${option}`),
+  );
+  out.push(
+    questionStatus(question) === 'dismissed'
+      ? `${indent}= waved off${question.answer ? ` (was: ${question.answer})` : ' — they chose not to answer, so use your judgement'}`
+      : `${indent}= ${question.answer ?? '(no answer recorded)'}`,
+  );
   return out;
 }
 

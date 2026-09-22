@@ -1,8 +1,8 @@
-import { X } from 'lucide-react-native';
+import { Check, X } from 'lucide-react-native';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { ANDROID_METRICS } from '@/components/ui/controls';
-import { optionLabel } from '@/lib/entryQuestions';
+import { optionLabel, pickedOptions } from '@/lib/entryQuestions';
 import type { QuestionStatus } from '@/types/cellar';
 import { COLORS } from '@/theme/colors';
 
@@ -14,9 +14,15 @@ import { COLORS } from '@/theme/colors';
  * reason a question sits here rather than in a chat is that answering it should
  * cost one tap while you are already looking at the thought.
  *
- * Answered and waved-off ones stay, quiet, with the answer underneath. They are
- * the record of why the thought was built the way it was — the half that was
- * never written down anywhere.
+ * A tap therefore still answers, immediately, with that one option. Holding an
+ * option instead starts a multi-pick — the same gesture that holds several
+ * entry rows, so the app has one way of meaning "and this one too" rather than
+ * two. The answer then reads as the option text joined, never as "c and d":
+ * letters are unreadable to the agent that comes back for the decision.
+ *
+ * Answered and waved-off ones stay, quiet, with the options still under them
+ * and the picked ones ticked. They are the record of why the thought was built
+ * the way it was — the half that was never written down anywhere.
  */
 
 export type QuestionCardProps = {
@@ -28,8 +34,12 @@ export type QuestionCardProps = {
   agent: string | null;
   rel: string;
   draft: string;
+  /** Options held for a multi-pick. Empty means a tap still answers outright. */
+  held: string[];
   onDraft: (text: string) => void;
   onPick: (option: string) => void;
+  onHold: (option: string) => void;
+  onSendHeld: () => void;
   onSubmit: () => void;
   onDismiss: () => void;
 };
@@ -49,13 +59,20 @@ export function QuestionCard({
   agent,
   rel,
   draft,
+  held,
   onDraft,
   onPick,
+  onHold,
+  onSendHeld,
   onSubmit,
   onDismiss,
 }: QuestionCardProps) {
   const tone = TONE[status];
   const open = status === 'unanswered';
+  const picking = held.length > 0;
+  // On a settled question the options are history, and what matters is which
+  // of them the answer took.
+  const taken = open ? [] : pickedOptions(answer, options);
 
   return (
     <View className="mt-2.5 rounded-lg px-3.5 py-3" style={{ backgroundColor: tone.ground }}>
@@ -69,21 +86,37 @@ export function QuestionCard({
 
       <Text className="mt-1.5 text-sm leading-snug text-foreground">{question}</Text>
 
-      {open && options.length > 0 && (
+      {options.length > 0 && (
         <View className="mt-2.5">
           {options.map((option, index) => (
-            <Pressable
+            <Option
               key={option}
-              accessibilityRole="button"
-              accessibilityLabel={`answer ${optionLabel(index)}: ${option}`}
-              onPress={() => onPick(option)}
-              className="mt-1.5 flex-row items-start gap-2.5 rounded-lg bg-secondary px-3 py-2.5 active:opacity-70"
-            >
-              <Text className="w-4 pt-px font-mono text-[11px] text-muted-foreground">{optionLabel(index)}</Text>
-              <Text className="min-w-0 flex-1 text-sm text-foreground">{option}</Text>
-            </Pressable>
+              label={optionLabel(index)}
+              text={option}
+              open={open}
+              marked={open ? held.includes(option) : taken.includes(option)}
+              onPress={() => (open ? (picking ? onHold(option) : onPick(option)) : undefined)}
+              onLongPress={() => (open ? onHold(option) : undefined)}
+            />
           ))}
         </View>
+      )}
+
+      {open && options.length > 1 && !picking && (
+        <Text className="mt-1.5 text-xs text-muted-foreground">hold an option to pick more than one</Text>
+      )}
+
+      {open && picking && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`answer with ${held.length} options`}
+          onPress={onSendHeld}
+          className="mt-2 flex-row items-center justify-center gap-2 rounded-lg bg-primary/15 py-2.5 active:opacity-70"
+        >
+          <Text className="text-sm font-bold text-primary">
+            answer with {held.length === 1 ? 'this one' : `these ${held.length}`}
+          </Text>
+        </Pressable>
       )}
 
       {open && (
@@ -125,5 +158,61 @@ export function QuestionCard({
         <Text className="mt-1.5 text-xs text-muted-foreground">waved off without an answer</Text>
       )}
     </View>
+  );
+}
+
+/**
+ * One option, at one of two weights.
+ *
+ * On an open question it is a tap target. On a settled one it is the record —
+ * still listed, because an answer with the choices stripped off it is what made
+ * "c and d both" impossible to read back, and the one it took wears a tick.
+ */
+function Option({
+  label,
+  text,
+  open,
+  marked,
+  onPress,
+  onLongPress,
+}: {
+  label: string;
+  text: string;
+  open: boolean;
+  marked: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
+}) {
+  const body = (
+    <View
+      className={[
+        'mt-1.5 flex-row items-start gap-2.5 rounded-lg px-3',
+        open ? 'bg-secondary py-2.5' : 'py-1.5',
+      ].join(' ')}
+      style={marked && open ? { backgroundColor: COLORS.accentSoft } : undefined}
+    >
+      <Text className="w-4 pt-px font-mono text-[11px] text-muted-foreground">{label}</Text>
+      <Text
+        className={['min-w-0 flex-1 text-sm', marked || open ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
+      >
+        {text}
+      </Text>
+      {marked && <Check size={14} color={COLORS.accent} strokeWidth={2.5} />}
+    </View>
+  );
+
+  if (!open) return body;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`answer ${label}: ${text}`}
+      accessibilityState={{ selected: marked }}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      className="active:opacity-70"
+    >
+      {body}
+    </Pressable>
   );
 }

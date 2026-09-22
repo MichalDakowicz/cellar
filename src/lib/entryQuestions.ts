@@ -45,6 +45,34 @@ export function normalizeOptions(raw: unknown): string[] {
 }
 
 /**
+ * Several options as one answer.
+ *
+ * The labels go in, not the letters. An answer of "c and d both" is unreadable
+ * six months later and unreadable to an agent that was not holding the option
+ * list — which is exactly what happened before this existed, and it is the
+ * reason the answer is stored as prose rather than as indices.
+ */
+export function joinAnswers(options: string[]): string {
+  const picked = options.filter((option) => option.trim().length > 0);
+  if (picked.length <= 1) return picked[0] ?? '';
+  return `${picked.slice(0, -1).join(', ')} and ${picked[picked.length - 1]}`;
+}
+
+/**
+ * Which options an answer picked, for ticking them where the question is shown.
+ *
+ * Matched on the option text appearing in the answer, because that is what
+ * `joinAnswers` wrote. It is deliberately forgiving: an answer typed in the
+ * user's own words that happens to quote an option still lights it up, and one
+ * that does not simply lights nothing, which is the honest result.
+ */
+export function pickedOptions(answer: string | null, options: string[]): string[] {
+  const body = (answer ?? '').toLowerCase();
+  if (!body) return [];
+  return options.filter((option) => option.trim().length > 0 && body.includes(option.toLowerCase()));
+}
+
+/**
  * Dismissed wins over answered.
  *
  * Both stamps being set means you answered it and then waved it off, and the
