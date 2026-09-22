@@ -2,6 +2,10 @@
 
 ## 1.10.0 — Unreleased
 
+### Changed
+
+- Entry: the reports section reads from agent rather than naming the tool that wrote them
+
 ## 1.9.0 — 2026-09-21
 
 ### Added
