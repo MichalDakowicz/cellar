@@ -2,6 +2,10 @@
 
 ## 1.10.0 — Unreleased
 
+### Changed
+
+- Dump: a new line becomes a note under the thought instead of running into one long line
+
 ## 1.9.0 — 2026-09-21
 
 ### Added
