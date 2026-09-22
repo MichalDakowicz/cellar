@@ -6,6 +6,10 @@
 
 - Project detail: copy a prompt for the whole project, not just for one thought in it
 
+### Changed
+
+- Entry: the reports section reads from agent rather than naming the tool that wrote them
+
 ## 1.9.0 — 2026-09-21
 
 ### Added
