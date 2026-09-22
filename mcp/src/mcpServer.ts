@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { CtxProvider } from './context.ts';
 import { registerReadTools } from './tools/read.ts';
+import { registerStructureTools } from './tools/structure.ts';
 import { registerWriteTools } from './tools/write.ts';
 
 /**
@@ -32,12 +33,17 @@ export function createCellarServer(getCtx: CtxProvider): McpServer {
         '',
         'Write like the user does: lowercase, one line, no full stop, no markdown. These lines sit in a list next to',
         'their own thoughts, and an assistant voice in that list makes it unreadable.',
+        '',
+        'The shelves and projects holding the thoughts are yours to read and to tidy — cellar_list_shelves,',
+        'cellar_create_project and the rest. Nothing deletes anywhere on this server, and the settings row is not',
+        'reachable at all: how their own app opens is theirs.',
       ].join('\n'),
     },
   );
 
   registerReadTools(server, getCtx);
   registerWriteTools(server, getCtx);
+  registerStructureTools(server, getCtx);
 
   return server;
 }

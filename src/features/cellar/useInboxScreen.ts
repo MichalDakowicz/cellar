@@ -46,6 +46,8 @@ export function useInboxScreen() {
     sortLabel: INBOX_SORTS.find((option) => option.value === sort)?.label ?? 'newest first',
     meta: waiting.length > 0 ? `${waiting.length} waiting · ${unfiled.length} unfiled` : `${unfiled.length} unfiled`,
     items,
+    /** Everything on this screen, flat — what a multi-select resolves ids against. */
+    onScreen: useMemo(() => [...waiting, ...unfiled], [waiting, unfiled]),
     whereFor,
     showCodes: settings.showCodes,
     isEmpty: unfiled.length === 0 && waiting.length === 0,

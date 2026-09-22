@@ -1,11 +1,13 @@
 import {
   answeredForAgent,
   isSettled,
+  joinAnswers,
   MAX_OPTIONS,
   normalizeOptions,
   optionLabel,
   pendingQuestions,
   pendingSummary,
+  pickedOptions,
   questionStatus,
   readyToResume,
   settledQuestions,
@@ -167,5 +169,52 @@ describe('answeredForAgent', () => {
   it('is empty for an agent with no name rather than matching every unstamped question', () => {
     const list = [entry('a', 'open', [q('1', { answeredAt: 'then', agent: null })])];
     expect(answeredForAgent(list, '  ')).toEqual([]);
+  });
+});
+
+/**
+ * The two halves of answering with more than one option. The letters never
+ * leave the UI — an answer of "c and d both" is what this pair exists to stop.
+ */
+describe('joinAnswers', () => {
+  it('is the option itself when there is one', () => {
+    expect(joinAnswers(['a board'])).toBe('a board');
+  });
+
+  it('joins two with and', () => {
+    expect(joinAnswers(['the title on the row', 'a preview card'])).toBe('the title on the row and a preview card');
+  });
+
+  it('joins three as a list', () => {
+    expect(joinAnswers(['one', 'two', 'three'])).toBe('one, two and three');
+  });
+
+  it('is empty when nothing is held, so nothing is sent', () => {
+    expect(joinAnswers([])).toBe('');
+    expect(joinAnswers(['   '])).toBe('');
+  });
+});
+
+describe('pickedOptions', () => {
+  const options = ['the title on the row', 'a preview card', 'nothing at all'];
+
+  it('finds every option the answer names', () => {
+    expect(pickedOptions('the title on the row and a preview card', options)).toEqual([
+      'the title on the row',
+      'a preview card',
+    ]);
+  });
+
+  it('ignores case, because an answer is prose', () => {
+    expect(pickedOptions('A Preview Card', options)).toEqual(['a preview card']);
+  });
+
+  it('marks nothing for an answer typed in their own words', () => {
+    expect(pickedOptions('neither, do it later', options)).toEqual([]);
+  });
+
+  it('marks nothing when there is no answer', () => {
+    expect(pickedOptions(null, options)).toEqual([]);
+    expect(pickedOptions('', options)).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react-native';
+import { Check, Copy } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -21,6 +21,10 @@ type EntryCardProps = {
   /** Where it lives, for a list that spans projects — the inbox and search. */
   where?: string;
   onPress: (entry: Entry) => void;
+  /** Starts a multi-select. Presence of a handler is what makes the row hold-able. */
+  onLongPress?: (entry: Entry) => void;
+  /** Held in a multi-select: the gutter wears a tick and the row takes a ground. */
+  selected?: boolean;
   /** Presence of a handler is what shows the file affordance. */
   onFile?: (entry: Entry) => void;
   /** Copies the line that starts this thought in an agent. Same rule. */
@@ -46,6 +50,8 @@ export const EntryCard = memo(function EntryCard({
   showCode = true,
   where,
   onPress,
+  onLongPress,
+  selected = false,
   onFile,
   onCopy,
 }: EntryCardProps) {
@@ -69,10 +75,13 @@ export const EntryCard = memo(function EntryCard({
       style={[
         webTransition('background-color'),
         hovered ? { backgroundColor: COLORS.rowHover, borderRadius: 12 } : null,
-        dimmed ? { opacity: 0.5 } : null,
+        // Held beats hovered and beats dimmed: while a selection is up, which
+        // rows are in it is the only thing the list is saying.
+        selected ? { backgroundColor: COLORS.chipGround, borderRadius: 12 } : null,
+        dimmed && !selected ? { opacity: 0.5 } : null,
       ]}
     >
-      {showCode && (
+      {(showCode || selected) && (
         // Centred in the gutter on both axes, against the same box the text
         // occupies — so the glyph sits on the *first* line of a thought that
         // wraps to three rather than floating above it. That box is the line
@@ -87,7 +96,11 @@ export const EntryCard = memo(function EntryCard({
             justifyContent: 'center',
           }}
         >
-          <KindGlyph kind={entry.kind} />
+          {/* The tick takes the glyph's place rather than sitting beside it.
+              The gutter is what makes a wall of one-line rows scan, and a
+              column that grows by 20px the moment you hold a row re-flows
+              every line of text on the screen. */}
+          {selected ? <Check size={14} color={COLORS.accent} strokeWidth={2.5} /> : <KindGlyph kind={entry.kind} />}
         </View>
       )}
 
@@ -95,6 +108,7 @@ export const EntryCard = memo(function EntryCard({
         accessibilityRole="button"
         accessibilityLabel={entry.text}
         onPress={() => onPress(entry)}
+        onLongPress={onLongPress ? () => onLongPress(entry) : undefined}
         // Hover binds to the Pressable, never to the View around it —
         // react-native-web only implements onHoverIn/Out on Pressable.
         {...bind}

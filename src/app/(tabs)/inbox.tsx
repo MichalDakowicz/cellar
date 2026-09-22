@@ -2,11 +2,13 @@ import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { EntryList } from '@/components/cellar/EntryList';
+import { SelectionBar } from '@/components/cellar/SelectionBar';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
+import { useEntrySelection } from '@/features/cellar/useEntrySelection';
 import { useInboxScreen } from '@/features/cellar/useInboxScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { readError } from '@/lib/utils';
@@ -24,6 +26,7 @@ export default function InboxScreen() {
   const copyPrompt = useCopyPrompt();
   const router = useRouter();
   const fileUnder = useCellarSheets((state) => state.fileUnder);
+  const selection = useEntrySelection(inbox.onScreen, (entry) => router.navigate(`/entry/${entry.id}`));
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const isDesktop = useIsDesktop();
@@ -40,9 +43,11 @@ export default function InboxScreen() {
             variant="inbox"
             showCode={inbox.showCodes}
             whereFor={inbox.whereFor}
-            onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-            onFile={(entry) => fileUnder?.(entry.id)}
-            onCopy={copyPrompt}
+            onPress={selection.onPress}
+            onLongPress={selection.onLongPress}
+            selectedIds={selection.selectedIds}
+            onFile={selection.selecting ? undefined : (entry) => fileUnder?.(entry.id)}
+            onCopy={selection.selecting ? undefined : copyPrompt}
             header={
               <View>
                 <ScreenTop />
@@ -70,6 +75,12 @@ export default function InboxScreen() {
           />
         </ContentShell>
       </View>
+      <SelectionBar
+        count={selection.count}
+        onFile={selection.file}
+        onCopy={selection.copy}
+        onClear={selection.clear}
+      />
     </View>
   );
 }

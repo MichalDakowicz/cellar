@@ -3,7 +3,8 @@ import { useCallback } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
-import { agentPrompt, projectPrompt } from '@/lib/agentPrompt';
+import { agentPrompt, agentPromptMany, projectPrompt } from '@/lib/agentPrompt';
+import { sharedProjectId } from '@/lib/entrySelection';
 import type { Entry, Project } from '@/types/cellar';
 
 /**
@@ -29,6 +30,30 @@ export function useCopyPrompt() {
         : null;
       void Clipboard.setStringAsync(agentPrompt(entry, project));
       say('copied — paste it into an agent');
+    },
+    [projects, say],
+  );
+}
+
+/**
+ * The same act for a held selection: one line that starts all of them.
+ *
+ * One entry still copies the single form, text and all — a selection of one is
+ * not a different thing from a row you pressed copy on, and two phrasings for
+ * it would be two things to get right on the other end.
+ */
+export function useCopySelection() {
+  const { projects } = useCellar();
+  const { say } = useToast();
+
+  return useCallback(
+    (entries: Entry[]) => {
+      if (entries.length === 0) return;
+      const projectId = sharedProjectId(entries);
+      const name = projectId ? (projects.find((candidate) => candidate.id === projectId)?.name ?? null) : null;
+      const line = entries.length === 1 ? agentPrompt(entries[0], name) : agentPromptMany(entries, name);
+      void Clipboard.setStringAsync(line);
+      say(`copied ${entries.length === 1 ? 'a thought' : `${entries.length} thoughts`} — paste it into an agent`);
     },
     [projects, say],
   );
