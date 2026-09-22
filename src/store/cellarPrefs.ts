@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { toggleCollapsed } from '@/lib/entryCollapse';
 import { NO_FILTER, type EntryFilter } from '@/lib/entryGroups';
+import type { KanbanAxis } from '@/lib/kanban';
 import { mmkvStorage } from '@/lib/mmkvStorage';
 import type { Kind } from '@/types/cellar';
 
@@ -19,7 +20,7 @@ import type { Kind } from '@/types/cellar';
  * a dot whenever it is on.
  */
 
-export type ProjectView = 'grouped' | 'stream';
+export type ProjectView = 'grouped' | 'stream' | 'kanban';
 
 /** How the unfiled pile is stacked. The inbox's left-island action. */
 export type InboxSort = 'newest' | 'oldest' | 'kind';
@@ -34,6 +35,8 @@ type PrefsState = {
   /** `null` until the first shelf loads, then the shelf you were last in. */
   shelfId: string | null;
   view: ProjectView;
+  /** What the board's columns are cut by. Only read while `view` is kanban. */
+  kanbanAxis: KanbanAxis;
   /** Many-lines capture mode, sticky because it is a mode you work in. */
   raw: boolean;
   /** The project chip the capture screen last dropped into. */
@@ -44,6 +47,7 @@ type PrefsState = {
   statsShelfId: string | null;
   setShelf: (shelfId: string | null) => void;
   setView: (view: ProjectView) => void;
+  setKanbanAxis: (axis: KanbanAxis) => void;
   setRaw: (raw: boolean) => void;
   setLastProject: (projectId: string | null) => void;
   setDraftKind: (kind: Kind) => void;
@@ -56,6 +60,7 @@ export const useCellarPrefs = create<PrefsState>()(
     (set) => ({
       shelfId: null,
       view: 'grouped',
+      kanbanAxis: 'state',
       raw: false,
       lastProjectId: null,
       draftKind: 'idea',
@@ -63,6 +68,7 @@ export const useCellarPrefs = create<PrefsState>()(
       statsShelfId: null,
       setShelf: (shelfId) => set({ shelfId }),
       setView: (view) => set({ view }),
+      setKanbanAxis: (kanbanAxis) => set({ kanbanAxis }),
       setRaw: (raw) => set({ raw }),
       setLastProject: (lastProjectId) => set({ lastProjectId }),
       setDraftKind: (draftKind) => set({ draftKind }),
