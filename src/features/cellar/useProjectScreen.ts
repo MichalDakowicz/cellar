@@ -133,6 +133,8 @@ export function useProjectScreen(projectId: string | undefined) {
     setKanbanAxis,
     items,
     columns,
+    /** Everything the filter lets through, flat — what a multi-select resolves ids against. */
+    onScreen: visible,
     collapsed,
     toggleSection,
     showCodes: settings.showCodes,

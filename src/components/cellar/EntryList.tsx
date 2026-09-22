@@ -34,6 +34,10 @@ type EntryListProps = {
   /** Names each entry's project. Set on lists that span more than one. */
   whereFor?: (entry: Entry) => string | undefined;
   onPress: (entry: Entry) => void;
+  /** Starts a multi-select on a row. Leave it out and rows do not hold. */
+  onLongPress?: (entry: Entry) => void;
+  /** The ids currently held. Rows in it wear a tick in place of their glyph. */
+  selectedIds?: ReadonlySet<string>;
   onFile?: (entry: Entry) => void;
   onCopy?: (entry: Entry) => void;
   header?: ReactElement;
@@ -69,6 +73,8 @@ export function EntryList({
   showCode = true,
   whereFor,
   onPress,
+  onLongPress,
+  selectedIds,
   onFile,
   onCopy,
   header,
@@ -112,6 +118,8 @@ export function EntryList({
               showCode={showCode}
               where={whereFor?.(item.entry)}
               onPress={onPress}
+              onLongPress={onLongPress}
+              selected={selectedIds?.has(item.entry.id) ?? false}
               onFile={onFile}
               onCopy={onCopy}
             />

@@ -76,7 +76,7 @@ export function useNavAction(pathname: string, activeTab: string | null): NavAct
           label: 'new project',
           badge: 0,
           active: false,
-          onPress: () => sheets.newProject?.(null),
+          onPress: () => sheets.newProject?.([]),
         };
       case 'inbox':
         return {

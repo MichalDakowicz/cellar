@@ -92,7 +92,7 @@ export default function ShelfScreen() {
                     ? 'use new project beside the heading to start one, or switch shelves at the top of the sidebar.'
                     : 'tap the folder on the left of the nav bar to start one, or tap the shelf name to switch shelves.'
                 }
-                action={{ label: 'new project', onPress: () => openNewProject?.(null) }}
+                action={{ label: 'new project', onPress: () => openNewProject?.([]) }}
               />
             ) : (
               <ProjectGrid
