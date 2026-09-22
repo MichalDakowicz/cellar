@@ -239,6 +239,7 @@ Reads:
 | ---------------------- | ---------------------------------------------------------------------------------- |
 | `cellar_orient`        | **Start here.** cwd → project, shelf, repo, and everything open/claimed/blocked in it |
 | `cellar_list_projects` | Every project, its counts and its checkout                                          |
+| `cellar_list_shelves`  | Every shelf, what is on it and how much                                             |
 | `cellar_list_entries`  | Filter by project, kind, state, text                                                |
 | `cellar_get_entry`     | One thought in full: both halves of its thread, its questions, its repo, its brief   |
 | `cellar_check_answers` | The questions **you** asked that have since been answered, with what they said      |
@@ -257,8 +258,28 @@ Writes:
 | `cellar_archive_entry` | Put a thought away, reason required                                          |
 | `cellar_link_repo`     | Point a project at a checkout, so this never has to be worked out again      |
 
+Structure — the shelves and projects the thoughts sit in:
+
+| Tool                     | For                                                                       |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `cellar_create_shelf`    | A new layer above projects, for a different kind of work                   |
+| `cellar_rename_shelf`    | Rename one; nothing on it moves                                            |
+| `cellar_create_project`  | A project on a shelf, optionally pointed at a checkout as it lands         |
+| `cellar_rename_project`  | Rename one; its contents and its repo link are untouched                   |
+| `cellar_move_project`    | Onto another shelf, at the end of it, with everything in it                |
+
+Names go through the app's own `checkName`, so a name an agent may write is exactly a name
+the user could have typed.
+
 There is **no delete tool**, on purpose. Nothing in Cellar is destroyed to get it out of the
-way; archive is the strongest thing an agent can do and it comes back in one tap.
+way; archive is the strongest thing an agent can do and it comes back in one tap. That holds
+for the containers too: a shelf takes its projects with it and a project sends its thoughts
+to the inbox, so deleting one is the largest destructive act in the app and stays the user's,
+in the app, with the cost in front of them.
+
+`cellar_settings` is **not reachable from any tool**. How the user's own app opens, what a
+draft starts as and whether a banner is raised are theirs, and an agent quietly changing them
+reads as the app misbehaving rather than as an agent helping.
 
 ## Design notes
 
