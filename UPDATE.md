@@ -6,6 +6,8 @@
 
 - Project detail: copy a prompt for the whole project, not just for one thought in it
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
+- Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
+- Entry: a link on the thought grows a card with the site, the title and what the page says
 
 ### Changed
 

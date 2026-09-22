@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
+import { collectLinks } from '@/lib/links';
 import { dropStamp, shortRel } from '@/lib/relTime';
 import type { Entry, EntryLine, EntryState, Kind } from '@/types/cellar';
 
@@ -88,8 +89,22 @@ export function useEntryScreen(entryId: string | undefined) {
     (entry?.lines ?? []).map((entryLine) => ({ ...entryLine, rel: shortRel(entryLine.createdAt) })),
   );
 
+  // Memoized rather than run per render: it walks the thought and every line
+  // under it, and this screen re-renders on every keystroke in the append
+  // field.
+  const links = useMemo(
+    () => collectLinks([entry?.text ?? '', ...(entry?.lines ?? []).map((one) => one.text)]),
+    [entry?.text, entry?.lines],
+  );
+
   return {
     entry,
+    /**
+     * Every link on this thought and under it, deduped and in the order they
+     * appear — the cards the entry page grows under the thought. Derived here
+     * rather than in the route, because a screen composes (PING.md §13).
+     */
+    links,
     projectName,
     stamp: entry ? dropStamp(entry.createdAt) : '',
     thread: yours,

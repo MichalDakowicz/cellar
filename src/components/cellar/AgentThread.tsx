@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 
+import { LinkedText } from '@/components/cellar/LinkedText';
 import { Overline } from '@/components/ui/controls';
 
 type ReportLine = { id: string; text: string; rel: string };
@@ -30,7 +31,7 @@ export function AgentThread({ lines }: { lines: ReportLine[] }) {
         {lines.map((line) => (
           <View key={line.id} className="flex-row items-start gap-2.5 py-2">
             <Text className="w-6 pt-0.5 font-mono text-[11px] text-muted-foreground">{'>'}</Text>
-            <Text className="min-w-0 flex-1 text-sm text-foreground">{line.text}</Text>
+            <LinkedText text={line.text} className="min-w-0 flex-1 text-sm text-foreground" />
             <Text className="pt-0.5 text-xs text-muted-foreground">{line.rel}</Text>
           </View>
         ))}
