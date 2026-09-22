@@ -34,10 +34,20 @@ type EntryListProps = {
   /** Names each entry's project. Set on lists that span more than one. */
   whereFor?: (entry: Entry) => string | undefined;
   onPress: (entry: Entry) => void;
+  /** Starts a multi-select on a row. Leave it out and rows do not hold. */
+  onLongPress?: (entry: Entry) => void;
+  /** The ids currently held. Rows in it wear a tick in place of their glyph. */
+  selectedIds?: ReadonlySet<string>;
   onFile?: (entry: Entry) => void;
   onCopy?: (entry: Entry) => void;
   header?: ReactElement;
   empty?: { title: string; body: string; action?: { label: string; onPress: () => void } };
+  /**
+   * Overrides the screen gutter on the rows and headings. The board's columns
+   * are 280px wide and a `px-8` screen gutter inside one eats a quarter of it,
+   * so a column passes its own inset rather than inheriting the page's.
+   */
+  inset?: string;
   /** Which heading keys are folded. Leave it out and headings are not pressable. */
   collapsed?: ReadonlySet<string>;
   onToggleSection?: (key: string) => void;
@@ -63,16 +73,20 @@ export function EntryList({
   showCode = true,
   whereFor,
   onPress,
+  onLongPress,
+  selectedIds,
   onFile,
   onCopy,
   header,
   empty,
+  inset,
   collapsed,
   onToggleSection,
   listRef,
 }: EntryListProps) {
   const navBarSpace = useNavBarSpace();
-  const gutter = useGutter();
+  const screenGutter = useGutter();
+  const gutter = inset ?? screenGutter;
 
   return (
     <FlashList
@@ -94,6 +108,7 @@ export function EntryList({
             section={item.section}
             folded={collapsed?.has(item.section.key) ?? false}
             onToggle={onToggleSection}
+            inset={inset}
           />
         ) : (
           <View className={variant === 'inbox' ? `pb-2 ${gutter}` : gutter}>
@@ -103,6 +118,8 @@ export function EntryList({
               showCode={showCode}
               where={whereFor?.(item.entry)}
               onPress={onPress}
+              onLongPress={onLongPress}
+              selected={selectedIds?.has(item.entry.id) ?? false}
               onFile={onFile}
               onCopy={onCopy}
             />
@@ -126,12 +143,15 @@ function SectionRow({
   section,
   folded,
   onToggle,
+  inset,
 }: {
   section: EntrySection;
   folded: boolean;
   onToggle?: (key: string) => void;
+  inset?: string;
 }) {
-  const gutter = useGutter();
+  const screenGutter = useGutter();
+  const gutter = inset ?? screenGutter;
   const Chevron = folded ? ChevronRight : ChevronDown;
 
   const chevron = onToggle ? (

@@ -1,6 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { ProjectViews } from '@/components/cellar/ProjectViews';
+import type { KanbanAxis } from '@/lib/kanban';
 import type { ProjectView } from '@/store/cellarPrefs';
 
 type ProjectHeaderProps = {
@@ -17,6 +18,9 @@ type ProjectHeaderProps = {
    */
   view?: ProjectView;
   onView?: (view: ProjectView) => void;
+  /** The board's column axis, passed straight through to the view control. */
+  axis?: KanbanAxis;
+  onAxis?: (axis: KanbanAxis) => void;
   filtered?: boolean;
   /** Phone only — on desktop the filter is open in the rail beside the list. */
   onFilter?: () => void;
@@ -42,6 +46,8 @@ export function ProjectHeader({
   large,
   view,
   onView,
+  axis,
+  onAxis,
   filtered = false,
   onFilter,
 }: ProjectHeaderProps) {
@@ -78,7 +84,14 @@ export function ProjectHeader({
   return (
     <View className="flex-row items-end justify-between gap-3">
       {identity}
-      <ProjectViews view={view} onView={onView} filtered={filtered} onFilter={onFilter} />
+      <ProjectViews
+        view={view}
+        onView={onView}
+        axis={axis}
+        onAxis={onAxis}
+        filtered={filtered}
+        onFilter={onFilter}
+      />
     </View>
   );
 }

@@ -120,6 +120,7 @@ export default function Settings() {
               options={[
                 { value: 'grouped', label: 'by kind' },
                 { value: 'stream', label: 'one stream' },
+                { value: 'kanban', label: 'a board' },
               ]}
             />
           </View>

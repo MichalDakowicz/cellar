@@ -1,5 +1,6 @@
 import {
   agentPrompt,
+  agentPromptMany,
   bareProjectId,
   projectPrompt,
   PROJECT_PREFIX,
@@ -64,6 +65,29 @@ describe('bareProjectId', () => {
   // than matching every project on an empty prefix.
   it('is empty when the prefix is all there was', () => {
     expect(bareProjectId('p-')).toBe('');
+  });
+});
+
+describe('agentPromptMany', () => {
+  const a = { id: '4f2a9c33-0000-4000-8000-000000000000' };
+  const b = { id: '9b1cde07-0000-4000-8000-000000000000' };
+
+  it('names every id on one line, and the project they share', () => {
+    expect(agentPromptMany([a, b], 'cellar')).toBe('pick up cellar entries 4f2a9c33 9b1cde07 in cellar');
+  });
+
+  // The thoughts are deliberately absent: six ids read, six thoughts do not.
+  it('carries no thought text', () => {
+    expect(agentPromptMany([a, b], 'cellar')).not.toContain('—');
+  });
+
+  it('leaves the project out when they do not share one', () => {
+    expect(agentPromptMany([a, b], null)).toBe('pick up cellar entries 4f2a9c33 9b1cde07');
+    expect(agentPromptMany([a, b])).toBe('pick up cellar entries 4f2a9c33 9b1cde07');
+  });
+
+  it('keeps the order it was handed', () => {
+    expect(agentPromptMany([b, a])).toBe('pick up cellar entries 9b1cde07 4f2a9c33');
   });
 });
 

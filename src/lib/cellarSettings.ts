@@ -13,7 +13,13 @@ import type { Kind } from '@/types/cellar';
  * No React import, so the allow-list below is testable without a renderer.
  */
 
-export type ProjectViewPref = 'grouped' | 'stream';
+export type ProjectViewPref = 'grouped' | 'stream' | 'kanban';
+
+const PROJECT_VIEWS: ProjectViewPref[] = ['grouped', 'stream', 'kanban'];
+
+function isProjectView(value: unknown): value is ProjectViewPref {
+  return PROJECT_VIEWS.includes(value as ProjectViewPref);
+}
 
 export type CellarSettings = {
   showCodes: boolean;
@@ -51,7 +57,7 @@ export function normalizeCellarSettings(row: CellarSettingsRow | null): CellarSe
     rawDefault: row.raw_default ?? DEFAULT_CELLAR_SETTINGS.rawDefault,
     rememberLast: row.remember_last ?? DEFAULT_CELLAR_SETTINGS.rememberLast,
     defaultKind: isKind(row.default_kind) ? row.default_kind : DEFAULT_CELLAR_SETTINGS.defaultKind,
-    defaultView: row.default_view === 'stream' ? 'stream' : 'grouped',
+    defaultView: isProjectView(row.default_view) ? row.default_view : DEFAULT_CELLAR_SETTINGS.defaultView,
     notifyQuestions: row.notify_questions ?? DEFAULT_CELLAR_SETTINGS.notifyQuestions,
   };
 }
@@ -67,7 +73,7 @@ export function cellarSettingsToRow(patch: Partial<CellarSettings>): Record<stri
   if (patch.rawDefault !== undefined) row.raw_default = patch.rawDefault;
   if (patch.rememberLast !== undefined) row.remember_last = patch.rememberLast;
   if (patch.defaultKind !== undefined && isKind(patch.defaultKind)) row.default_kind = patch.defaultKind;
-  if (patch.defaultView !== undefined) row.default_view = patch.defaultView;
+  if (patch.defaultView !== undefined && isProjectView(patch.defaultView)) row.default_view = patch.defaultView;
   if (patch.notifyQuestions !== undefined) row.notify_questions = patch.notifyQuestions;
   return row;
 }

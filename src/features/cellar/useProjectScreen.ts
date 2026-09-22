@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import type { EntryListItem } from '@/components/cellar/EntryList';
+import type { BoardColumn } from '@/components/cellar/KanbanBoard';
 import { useCellar } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import {
@@ -13,6 +14,7 @@ import {
   tallyStates,
 } from '@/lib/entryGroups';
 import { collapseItems } from '@/lib/entryCollapse';
+import { kanbanColumns } from '@/lib/kanban';
 import { stateMeta } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
@@ -21,13 +23,15 @@ import { useCellarPrefs, useCollapsedSections, useEntryFilter } from '@/store/ce
 import type { Entry } from '@/types/cellar';
 
 /**
- * One project, two ways to read it.
+ * One project, three ways to read it.
  *
  * **grouped** — every kind that has anything in it, in the fixed kind order, so
  * "what are the open glitches" is one glance. **stream** — one list cut into
- * days, so "what was I thinking about on Tuesday" is one glance. They are the
- * same entries and the same filter; only the cut changes, which is why they
- * share one hook and one list rather than being two screens.
+ * days, so "what was I thinking about on Tuesday" is one glance. **kanban** —
+ * the same rows stood up in columns, cut by state or by kind, so "what is in
+ * flight" is one glance. They are the same entries and the same filter; only
+ * the cut changes, which is why they share one hook rather than being three
+ * screens.
  */
 export function useProjectScreen(projectId: string | undefined) {
   const { projects, entries, loading, error, refetch } = useCellar();
@@ -36,6 +40,8 @@ export function useProjectScreen(projectId: string | undefined) {
   const toggleSection = useCollapsedSections((state) => state.toggle);
   const view = useCellarPrefs((state) => state.view);
   const setView = useCellarPrefs((state) => state.setView);
+  const kanbanAxis = useCellarPrefs((state) => state.kanbanAxis);
+  const setKanbanAxis = useCellarPrefs((state) => state.setKanbanAxis);
   const filter = useEntryFilter((state) => state.filter);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
@@ -71,10 +77,25 @@ export function useProjectScreen(projectId: string | undefined) {
   }, [live]);
 
   const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
-  const grouped = useMemo(
-    () => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)),
-    [visible, view],
-  );
+  const grouped = useMemo(() => {
+    if (view === 'kanban') return [];
+    return view === 'grouped' ? groupedItems(visible) : streamItems(visible);
+  }, [visible, view]);
+
+  // The board's own shape. Flattened here rather than in `lib/kanban`, because
+  // `EntryListItem` is the list component's type and lib stays free of both
+  // React and anything that imports it.
+  const columns = useMemo<BoardColumn[]>(() => {
+    if (view !== 'kanban') return [];
+    return kanbanColumns(visible, kanbanAxis).map((column) => ({
+      key: column.key,
+      label: column.label,
+      band: column.band,
+      kind: column.kind,
+      count: column.entries.length,
+      items: column.entries.map((entry) => ({ type: 'entry' as const, entry })),
+    }));
+  }, [visible, view, kanbanAxis]);
 
   // Folding is applied here rather than inside the list, so what the list is
   // handed is what it draws — a virtualizer that filters its own data is a
@@ -108,7 +129,12 @@ export function useProjectScreen(projectId: string | undefined) {
     entryCount: live.length,
     view,
     setView,
+    kanbanAxis,
+    setKanbanAxis,
     items,
+    columns,
+    /** Everything the filter lets through, flat — what a multi-select resolves ids against. */
+    onScreen: visible,
     collapsed,
     toggleSection,
     showCodes: settings.showCodes,

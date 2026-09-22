@@ -22,23 +22,35 @@ type Which = 'filter' | 'shelf' | 'project' | 'file' | 'sort' | 'scope' | 'editP
 export function CellarSheets() {
   const [which, setWhich] = useState<Which>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
+  // The file sheet is the one that can be handed several. Kept apart from
+  // `targetId` rather than widening it, because every other sheet takes exactly
+  // one id and a union there would put a `typeof` in each of them.
+  const [targetIds, setTargetIds] = useState<string[]>([]);
   const register = useCellarSheets((state) => state.register);
 
   const close = useCallback(() => {
     setWhich(null);
     setTargetId(null);
+    setTargetIds([]);
   }, []);
 
   useEffect(() => {
     const open = (next: Which, id: string | null = null) => {
       setTargetId(id);
+      setTargetIds(id ? [id] : []);
+      setWhich(next);
+    };
+    const openMany = (next: Which, ids: string[]) => {
+      setTargetId(null);
+      setTargetIds(ids);
       setWhich(next);
     };
     register({
       filter: () => open('filter'),
       shelfPicker: () => open('shelf'),
-      newProject: (entryId) => open('project', entryId),
+      newProject: (entryIds) => openMany('project', entryIds),
       fileUnder: (entryId) => open('file', entryId),
+      fileMany: (entryIds) => openMany('file', entryIds),
       inboxSort: () => open('sort'),
       statsScope: () => open('scope'),
       editProject: (projectId) => open('editProject', projectId),
@@ -50,6 +62,7 @@ export function CellarSheets() {
         shelfPicker: null,
         newProject: null,
         fileUnder: null,
+        fileMany: null,
         inboxSort: null,
         statsScope: null,
         editProject: null,
@@ -61,8 +74,8 @@ export function CellarSheets() {
     <>
       <FilterSheet open={which === 'filter'} onClose={close} />
       <ShelfSheet open={which === 'shelf'} onClose={close} />
-      <NewProjectSheet open={which === 'project'} entryId={targetId} onClose={close} />
-      <FileUnderSheet open={which === 'file'} entryId={targetId} onClose={close} />
+      <NewProjectSheet open={which === 'project'} entryIds={targetIds} onClose={close} />
+      <FileUnderSheet open={which === 'file'} entryIds={targetIds} onClose={close} />
       <SortSheet open={which === 'sort'} onClose={close} />
       <ScopeSheet open={which === 'scope'} onClose={close} />
       <EditProjectSheet open={which === 'editProject'} projectId={targetId} onClose={close} />
