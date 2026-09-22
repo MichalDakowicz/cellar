@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
+import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
@@ -12,11 +13,12 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
-import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
+import { useCopyPrompt, useCopyProjectPrompt } from '@/features/cellar/useCopyPrompt';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useWheelToList } from '@/hooks/useWheelToList';
 import { readError } from '@/lib/utils';
+import type { Project } from '@/types/cellar';
 import { useCellarSheets } from '@/store/cellarPrefs';
 
 /** Breathing room between the chrome column and the heading it stands beside. */
@@ -39,6 +41,7 @@ export default function ProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const project = useProjectScreen(id);
   const copyPrompt = useCopyPrompt();
+  const copyProjectPrompt = useCopyProjectPrompt();
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
@@ -64,7 +67,16 @@ export default function ProjectScreen() {
       showCode={project.showCodes}
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
       onCopy={copyPrompt}
-      header={isDesktop ? undefined : <PhoneHeader project={project} gutter={gutter} onFilter={() => openFilter?.()} />}
+      header={
+        isDesktop ? undefined : (
+          <PhoneHeader
+            project={project}
+            gutter={gutter}
+            onFilter={() => openFilter?.()}
+            onCopyProject={copyProjectPrompt}
+          />
+        )
+      }
       empty={emptyFor(project, isDesktop, () => openFilter?.())}
     />
   );
@@ -109,6 +121,15 @@ export default function ProjectScreen() {
                       align="end"
                     />
                   )}
+                  {!!project.project && (
+                    <View className="mt-1.5">
+                      <CopyPrompt
+                        onPress={() => project.project && copyProjectPrompt(project.project)}
+                        what="this project"
+                        align="end"
+                      />
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -148,10 +169,12 @@ function PhoneHeader({
   project,
   gutter,
   onFilter,
+  onCopyProject,
 }: {
   project: ReturnType<typeof useProjectScreen>;
   gutter: string;
   onFilter: () => void;
+  onCopyProject: (project: Project) => void;
 }) {
   return (
     <View>
@@ -167,6 +190,11 @@ function PhoneHeader({
           onFilter={onFilter}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
+        {!!project.project && (
+          <View className="mt-1.5">
+            <CopyPrompt onPress={() => project.project && onCopyProject(project.project)} what="this project" />
+          </View>
+        )}
       </View>
     </View>
   );

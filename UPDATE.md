@@ -2,6 +2,10 @@
 
 ## 1.10.0 — Unreleased
 
+### Added
+
+- Project detail: copy a prompt for the whole project, not just for one thought in it
+
 ### Changed
 
 - Entry: the reports section reads from agent rather than naming the tool that wrote them

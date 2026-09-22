@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Copy, Plus, Trash } from 'lucide-react-native';
+import { Plus, Trash } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AgentQuestion } from '@/components/cellar/AgentQuestion';
+import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { AgentThread } from '@/components/cellar/AgentThread';
 import { EntryThread } from '@/components/cellar/EntryThread';
 import { QuestionThread } from '@/components/cellar/QuestionThread';
@@ -98,16 +99,7 @@ export default function EntryScreen() {
             </Text>
             <View className="mt-2.5 flex-row items-center gap-3">
               <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="copy a prompt for an agent"
-                hitSlop={8}
-                onPress={() => entry.entry && copyPrompt(entry.entry)}
-                className="flex-row items-center gap-1.5 active:opacity-60"
-              >
-                <Copy size={12} color={COLORS.muted} strokeWidth={2} />
-                <Text className="text-xs text-muted-foreground">copy a prompt</Text>
-              </Pressable>
+              <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
             </View>
 
             {entry.legacyQuestion && <AgentQuestion question={entry.legacyQuestion} agent={entry.agentName} />}
