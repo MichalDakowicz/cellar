@@ -7,14 +7,14 @@ import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/u
 import { checkName, nameErrorText } from '@/lib/containers';
 import { useCellarSheets } from '@/store/cellarPrefs';
 
-/** A new project on the current shelf, optionally filing an entry into it as it lands. */
+/** A new project on the current shelf, filing whatever was held into it as it lands. */
 export function NewProjectSheet({
   open,
-  entryId,
+  entryIds,
   onClose,
 }: {
   open: boolean;
-  entryId: string | null;
+  entryIds: string[];
   onClose: () => void;
 }) {
   const { shelves, projects } = useCellar();
@@ -31,7 +31,7 @@ export function NewProjectSheet({
       { shelfId: shelf.id, name: name.trim(), position: siblings.length },
       {
         onSuccess: (made) => {
-          if (entryId) update.mutate({ id: entryId, patch: { projectId: made.id } });
+          for (const id of entryIds) update.mutate({ id, patch: { projectId: made.id } });
           setName('');
           onClose();
         },
@@ -63,23 +63,35 @@ export function NewProjectSheet({
   );
 }
 
-/** Files one entry under a project, from anywhere in the app. */
+/**
+ * Files one entry — or a held selection of them — under a project, from
+ * anywhere in the app.
+ *
+ * One sheet for both because they are one act. The only difference is what the
+ * body says it is about: the thought itself when there is one, a count when
+ * there are several and quoting one of them would be a lie about the rest.
+ *
+ * "new project" carries the whole selection through to the sheet behind it, so
+ * filing six loose thoughts into a project that does not exist yet is one pass
+ * rather than six.
+ */
 export function FileUnderSheet({
   open,
-  entryId,
+  entryIds,
   onClose,
 }: {
   open: boolean;
-  entryId: string | null;
+  entryIds: string[];
   onClose: () => void;
 }) {
   const { shelves, projects, entries } = useCellar();
   const { update } = useCellarWrites();
   const newProject = useCellarSheets((state) => state.newProject);
-  const entry = entries.find((candidate) => candidate.id === entryId) ?? null;
+  const one = entryIds.length === 1 ? entryIds[0] : null;
+  const entry = one ? (entries.find((candidate) => candidate.id === one) ?? null) : null;
 
   const file = (projectId: string) => {
-    if (entryId) update.mutate({ id: entryId, patch: { projectId } });
+    for (const id of entryIds) update.mutate({ id, patch: { projectId } });
     onClose();
   };
 
@@ -87,12 +99,12 @@ export function FileUnderSheet({
     <SheetDialog
       open={open}
       title="file it under"
-      body={entry?.text}
+      body={entry ? entry.text : `${entryIds.length} thoughts`}
       confirmLabel="new project"
-      dismissLabel="leave it unfiled"
+      dismissLabel={one ? 'leave it unfiled' : 'leave them unfiled'}
       onConfirm={() => {
         onClose();
-        newProject?.(entryId);
+        newProject?.(entryIds);
       }}
       onDismiss={onClose}
     >

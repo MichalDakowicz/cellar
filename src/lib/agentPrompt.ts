@@ -68,6 +68,24 @@ export function agentPrompt(entry: Pick<Entry, 'id' | 'text'>, projectName?: str
 }
 
 /**
+ * The same line for several thoughts at once — what a multi-select copies.
+ *
+ * The thoughts themselves are left out, and that is the difference from the
+ * single form. One id plus one line reads; six ids plus six lines is a
+ * paragraph nobody reads, and the agent resolves every one of them anyway. The
+ * ids are in the order they were picked.
+ *
+ * The project is named only when they all share one (`sharedProjectId`) — a
+ * line that names one project for thoughts from two would send the agent to the
+ * wrong repo, which is the exact mistake naming it is there to prevent.
+ */
+export function agentPromptMany(entries: Pick<Entry, 'id'>[], projectName?: string | null): string {
+  const ids = entries.map((entry) => shortEntryId(entry.id)).join(' ');
+  const where = projectName ? ` in ${projectName}` : '';
+  return `pick up cellar entries ${ids}${where}`;
+}
+
+/**
  * The line that hands a whole project over, rather than one thought in it.
  *
  * Same verb as the entry form on purpose: `pick up` is what triggers the skill,

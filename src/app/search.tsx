@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
+import { SelectionBar } from '@/components/cellar/SelectionBar';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -10,6 +11,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { useCellar } from '@/features/cellar/useCellar';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
+import { useEntrySelection } from '@/features/cellar/useEntrySelection';
 import { MAX_W, useGutter, webFocusRing, useSidebarSpace } from '@/hooks/useResponsive';
 import { searchEntries } from '@/lib/entryGroups';
 import { plural } from '@/lib/utils';
@@ -33,6 +35,7 @@ export default function SearchScreen() {
   const sidebar = useSidebarSpace();
 
   const hits = useMemo(() => searchEntries(entries, query), [entries, query]);
+  const selection = useEntrySelection(hits, (entry) => router.navigate(`/entry/${entry.id}`));
 
   const items = useMemo<EntryListItem[]>(() => {
     const byProject = new Map<string, typeof hits>();
@@ -60,8 +63,10 @@ export default function SearchScreen() {
           <EntryList
             items={items}
             variant="hit"
-            onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-            onCopy={copyPrompt}
+            onPress={selection.onPress}
+            onLongPress={selection.onLongPress}
+            selectedIds={selection.selectedIds}
+            onCopy={selection.selecting ? undefined : copyPrompt}
             header={
               <View>
                 <ScreenTop />
@@ -99,6 +104,13 @@ export default function SearchScreen() {
           />
         </ContentShell>
       </View>
+
+      <SelectionBar
+        count={selection.count}
+        onFile={selection.file}
+        onCopy={selection.copy}
+        onClear={selection.clear}
+      />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
           screen mounts it itself, which is also where the phone build's left
