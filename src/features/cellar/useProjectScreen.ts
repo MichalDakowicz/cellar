@@ -12,11 +12,12 @@ import {
   tallyKinds,
   tallyStates,
 } from '@/lib/entryGroups';
+import { collapseItems } from '@/lib/entryCollapse';
 import { stateMeta } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
-import { useCellarPrefs, useEntryFilter } from '@/store/cellarPrefs';
+import { useCellarPrefs, useCollapsedSections, useEntryFilter } from '@/store/cellarPrefs';
 import type { Entry } from '@/types/cellar';
 
 /**
@@ -31,6 +32,8 @@ import type { Entry } from '@/types/cellar';
 export function useProjectScreen(projectId: string | undefined) {
   const { projects, entries, loading, error, refetch } = useCellar();
   const { settings } = useCellarSettings();
+  const collapsed = useCollapsedSections((state) => state.collapsed);
+  const toggleSection = useCollapsedSections((state) => state.toggle);
   const view = useCellarPrefs((state) => state.view);
   const setView = useCellarPrefs((state) => state.setView);
   const filter = useEntryFilter((state) => state.filter);
@@ -68,7 +71,15 @@ export function useProjectScreen(projectId: string | undefined) {
   }, [live]);
 
   const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
-  const items = useMemo(() => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)), [visible, view]);
+  const grouped = useMemo(
+    () => (view === 'grouped' ? groupedItems(visible) : streamItems(visible)),
+    [visible, view],
+  );
+
+  // Folding is applied here rather than inside the list, so what the list is
+  // handed is what it draws — a virtualizer that filters its own data is a
+  // virtualizer whose item count and its rows disagree.
+  const items = useMemo(() => collapseItems(grouped, collapsed), [grouped, collapsed]);
 
   const filtered = hasFilter(filter);
   const meta = [
@@ -98,6 +109,8 @@ export function useProjectScreen(projectId: string | undefined) {
     view,
     setView,
     items,
+    collapsed,
+    toggleSection,
     showCodes: settings.showCodes,
     filtered,
     /** Nothing matches, versus nothing here yet — two different empties (PING.md §9.9). */

@@ -1,12 +1,14 @@
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
+import { ChevronDown, ChevronRight } from 'lucide-react-native';
 import { type ReactElement, type Ref } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { EntryCard, type EntryVariant } from '@/components/cellar/EntryCard';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { EmptyState } from '@/components/ui/states';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { useGutter } from '@/hooks/useResponsive';
+import { COLORS } from '@/theme/colors';
 import type { Entry, Kind } from '@/types/cellar';
 
 /**
@@ -36,6 +38,9 @@ type EntryListProps = {
   onCopy?: (entry: Entry) => void;
   header?: ReactElement;
   empty?: { title: string; body: string; action?: { label: string; onPress: () => void } };
+  /** Which heading keys are folded. Leave it out and headings are not pressable. */
+  collapsed?: ReadonlySet<string>;
+  onToggleSection?: (key: string) => void;
   /**
    * A handle on the scroller, for a screen that drives it from outside itself —
    * the desktop wheel (`hooks/useWheelToList`). Nothing else should reach in.
@@ -62,6 +67,8 @@ export function EntryList({
   onCopy,
   header,
   empty,
+  collapsed,
+  onToggleSection,
   listRef,
 }: EntryListProps) {
   const navBarSpace = useNavBarSpace();
@@ -83,7 +90,11 @@ export function EntryList({
       contentContainerStyle={{ paddingBottom: navBarSpace + 8 }}
       renderItem={({ item }) =>
         item.type === 'section' ? (
-          <SectionRow section={item.section} />
+          <SectionRow
+            section={item.section}
+            folded={collapsed?.has(item.section.key) ?? false}
+            onToggle={onToggleSection}
+          />
         ) : (
           <View className={variant === 'inbox' ? `pb-2 ${gutter}` : gutter}>
             <EntryCard
@@ -106,47 +117,76 @@ export function EntryList({
  * One heading, at one of two weights. A band rules off with a hairline and
  * wears the state's own dot; a kind heading inside it stays the quiet line it
  * has always been, so the two levels never read as the same level.
+ *
+ * Pressable when the list folds. The chevron is the only thing added — the
+ * count beside it already says how much is under there, which is what makes a
+ * folded band readable rather than just gone.
  */
-function SectionRow({ section }: { section: EntrySection }) {
+function SectionRow({
+  section,
+  folded,
+  onToggle,
+}: {
+  section: EntrySection;
+  folded: boolean;
+  onToggle?: (key: string) => void;
+}) {
   const gutter = useGutter();
+  const Chevron = folded ? ChevronRight : ChevronDown;
 
-  if (section.band) {
-    return (
-      <View className={`border-t border-border/60 pb-1 pt-7 ${gutter}`}>
-        <View className="flex-row items-center justify-between gap-3">
-          <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
-            <View
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: section.band.color, opacity: section.band.dim ? 0.5 : 1 }}
-            />
-            <Text
-              className={[
-                'text-sm font-bold tracking-tight',
-                // A settled band is history. Its heading reads at the weight of
-                // the rows under it, or the archive announces itself louder
-                // than the work above it.
-                section.band.dim ? 'text-muted-foreground' : 'text-foreground',
-              ].join(' ')}
-              numberOfLines={1}
-            >
-              {section.label}
-            </Text>
-          </View>
-          {!!section.meta && <Text className="text-xs font-semibold text-muted-foreground">{section.meta}</Text>}
+  const chevron = onToggle ? (
+    <Chevron size={section.band ? 14 : 12} color={COLORS.muted} strokeWidth={2} />
+  ) : null;
+
+  const body = section.band ? (
+    <View className={`border-t border-border/60 pb-1 pt-7 ${gutter}`}>
+      <View className="flex-row items-center justify-between gap-3">
+        <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+          <View
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: section.band.color, opacity: section.band.dim ? 0.5 : 1 }}
+          />
+          <Text
+            className={[
+              'text-sm font-bold tracking-tight',
+              // A settled band is history. Its heading reads at the weight of
+              // the rows under it, or the archive announces itself louder
+              // than the work above it.
+              section.band.dim ? 'text-muted-foreground' : 'text-foreground',
+            ].join(' ')}
+            numberOfLines={1}
+          >
+            {section.label}
+          </Text>
+          {chevron}
         </View>
+        {!!section.meta && <Text className="text-xs font-semibold text-muted-foreground">{section.meta}</Text>}
       </View>
-    );
-  }
-
-  return (
+    </View>
+  ) : (
     <View className={`flex-row items-center justify-between gap-3 pb-1.5 pt-4 ${gutter}`}>
       <View className="min-w-0 flex-1 flex-row items-center gap-2">
         {section.kind && <KindGlyph kind={section.kind} size={13} />}
         <Text className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground" numberOfLines={1}>
           {section.label}
         </Text>
+        {chevron}
       </View>
       {!!section.meta && <Text className="text-[11px] font-semibold text-muted-foreground">{section.meta}</Text>}
     </View>
+  );
+
+  if (!onToggle) return body;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ expanded: !folded }}
+      accessibilityLabel={`${folded ? 'show' : 'hide'} ${section.label}`}
+      onPress={() => onToggle(section.key)}
+      className="active:opacity-60"
+    >
+      {body}
+    </Pressable>
   );
 }

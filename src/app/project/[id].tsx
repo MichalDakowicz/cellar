@@ -65,6 +65,8 @@ export default function ProjectScreen() {
       listRef={listRef}
       items={project.items}
       showCode={project.showCodes}
+      collapsed={project.collapsed}
+      onToggleSection={project.toggleSection}
       onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
       onCopy={copyPrompt}
       header={
