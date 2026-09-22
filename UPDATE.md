@@ -8,6 +8,7 @@
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
 - Project detail: read a project as a board, with columns by state or by kind under a toggle
 - Project, inbox, search: long press a thought to hold several, then file or copy them in one go
+- Agent tools: an agent can now list shelves, and create, rename or move a shelf or a project
 
 ### Changed
 

@@ -3,6 +3,7 @@
     "@cellar/mcp/": "../../../mcp/src/",
     "@/lib/agentPrompt": "../../../src/lib/agentPrompt.ts",
     "@/lib/agentWork": "../../../src/lib/agentWork.ts",
+    "@/lib/containers": "../../../src/lib/containers.ts",
     "@/lib/dump": "../../../src/lib/dump.ts",
     "@/lib/entryQuestions": "../../../src/lib/entryQuestions.ts",
     "@/lib/entryState": "../../../src/lib/entryState.ts",

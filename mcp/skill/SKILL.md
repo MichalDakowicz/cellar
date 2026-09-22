@@ -144,6 +144,10 @@ Send the sentence worth reading in six months. One line per real finding.
 - **`cellar_link_repo`** — `cellar_orient` found no project for a repo that clearly has one.
   Linking it is the one change that stops the question recurring in every future session.
   Offer it; do not invent a new project on your own.
+- **The structure tools** — `cellar_list_shelves`, and creating, renaming and moving a shelf
+  or a project. For a repo the cellar has no project for at all, where linking has nothing to
+  link to: offer to make one on a named shelf, do not make it unasked. Nothing here deletes,
+  and there is no settings tool — how the user's own app opens is theirs.
 
 ## Never
 
