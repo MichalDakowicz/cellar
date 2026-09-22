@@ -2,6 +2,10 @@
 
 ## 1.10.0 — Unreleased
 
+### Added
+
+- Project detail: tap a state or kind heading to fold its entries away, and again to show them
+
 ## 1.9.0 — 2026-09-21
 
 ### Added

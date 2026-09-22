@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { toggleCollapsed } from '@/lib/entryCollapse';
 import { NO_FILTER, type EntryFilter } from '@/lib/entryGroups';
 import { mmkvStorage } from '@/lib/mmkvStorage';
 import type { Kind } from '@/types/cellar';
@@ -92,6 +93,29 @@ export const useEntryFilter = create<FilterState>((set) => ({
       },
     })),
   clear: () => set({ filter: NO_FILTER }),
+}));
+
+/**
+ * Which headings are folded away right now.
+ *
+ * Not persisted, and for the filter's reason: a band you folded three days ago
+ * and cannot see is the fastest way to conclude the app has lost your entries.
+ * It survives moving between screens within a session and nothing more.
+ *
+ * One set for the whole app rather than one per project, because the keys are
+ * the band and the kind — `b:open`, `open:glitch` — and folding "done" away
+ * means the same thing in every project you open.
+ */
+type CollapsedState = {
+  collapsed: Set<string>;
+  toggle: (key: string) => void;
+  clear: () => void;
+};
+
+export const useCollapsedSections = create<CollapsedState>((set) => ({
+  collapsed: new Set<string>(),
+  toggle: (key) => set((state) => ({ collapsed: toggleCollapsed(state.collapsed, key) })),
+  clear: () => set({ collapsed: new Set<string>() }),
 }));
 
 /**
