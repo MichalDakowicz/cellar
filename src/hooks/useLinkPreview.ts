@@ -21,8 +21,21 @@ import { useLinkPreviews, type LinkRecord } from '@/store/linkPreviews';
 
 const inFlight = new Set<string>();
 
-/** Long enough for a slow host, short enough not to hold a row's fetch open. */
-const TIMEOUT_MS = 8000;
+/**
+ * Links whose cached failure has already been retried this launch.
+ *
+ * A failure is cached so that the login-walled half of a cellar is not refetched
+ * forever — but caching it permanently means one slow morning marks a link dead
+ * for good, which is the worse of the two mistakes. Once per launch is the
+ * middle: a link that is genuinely unreachable costs one request a session.
+ */
+const retried = new Set<string>();
+
+/**
+ * Generous, because the alternative to waiting is caching a failure. Nothing is
+ * blocked on it — the row already reads as its host while this runs.
+ */
+const TIMEOUT_MS = 15000;
 
 async function readMeta(href: string): Promise<LinkMeta | null> {
   const controller = new AbortController();
@@ -30,15 +43,28 @@ async function readMeta(href: string): Promise<LinkMeta | null> {
   try {
     const response = await fetch(href, {
       signal: controller.signal,
-      headers: { accept: 'text/html' },
+      headers: {
+        accept: 'text/html',
+        // Everything worth reading is in the head. A host that honours this
+        // sends 65KB instead of the 1.7MB a video page weighs, which is the
+        // difference between resolving and timing out on a phone; one that
+        // ignores it answers 200 with the lot and still works.
+        range: `bytes=0-${META_BYTES - 1}`,
+        // Sites serve a different page to something that does not look like a
+        // browser — a consent wall, or no open graph at all. This asks for the
+        // page a person would see, which is the page the title belongs to.
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
+      },
     });
-    if (!response.ok) return null;
+    // 206 is the ranged read succeeding, and it is the good case.
+    if (!response.ok && response.status !== 206) return null;
 
     const type = response.headers.get('content-type') ?? '';
-    if (!type.includes('html')) return null;
+    if (type && !type.includes('html')) return null;
 
-    // The whole body, then cut: react-native's fetch has no streaming reader,
-    // so the cap is about what gets regexed rather than what comes down.
+    // Cut again after the fact: react-native's fetch has no streaming reader,
+    // so a host that ignored the range still hands over the whole page.
     const meta = parseLinkMeta((await response.text()).slice(0, META_BYTES));
     return isEmptyMeta(meta) ? null : meta;
   } catch {
@@ -59,8 +85,14 @@ export function useLinkPreview(href: string | null): LinkRecord | null {
   const fail = useLinkPreviews((state) => state.fail);
 
   useEffect(() => {
-    if (!href || record || inFlight.has(href)) return;
+    if (!href || inFlight.has(href)) return;
+    // A known title is final. A known *failure* is worth one more try per
+    // launch, because the usual reason for one is that the network was bad for
+    // a moment rather than that the page does not exist.
+    if (record && !(record.failedAt && !retried.has(href))) return;
+
     inFlight.add(href);
+    retried.add(href);
     void readMeta(href)
       .then((meta) => (meta ? remember(href, meta) : fail(href)))
       .finally(() => inFlight.delete(href));
