@@ -127,9 +127,11 @@ export const useCollapsedSections = create<CollapsedState>((set) => ({
 type SheetHandles = {
   filter: (() => void) | null;
   shelfPicker: (() => void) | null;
-  /** `entryId` files an existing entry; `null` just creates a project. */
-  newProject: ((entryId: string | null) => void) | null;
+  /** Files these entries into the project as it lands; empty just creates one. */
+  newProject: ((entryIds: string[]) => void) | null;
   fileUnder: ((entryId: string) => void) | null;
+  /** The same sheet for a held selection. One entry is `fileUnder`'s job. */
+  fileMany: ((entryIds: string[]) => void) | null;
   inboxSort: (() => void) | null;
   statsScope: (() => void) | null;
   /** Rename, move or delete one project. */
@@ -165,6 +167,7 @@ export const useCellarSheets = create<SheetHandles>((set) => ({
   shelfPicker: null,
   newProject: null,
   fileUnder: null,
+  fileMany: null,
   inboxSort: null,
   statsScope: null,
   editProject: null,

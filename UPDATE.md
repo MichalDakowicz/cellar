@@ -6,6 +6,7 @@
 
 - Project detail: copy a prompt for the whole project, not just for one thought in it
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
+- Project, inbox, search: long press a thought to hold several, then file or copy them in one go
 
 ### Changed
 

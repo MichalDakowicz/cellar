@@ -8,12 +8,14 @@ import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
 import { RepoLink } from '@/components/cellar/RepoLink';
+import { SelectionBar } from '@/components/cellar/SelectionBar';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { useCopyPrompt, useCopyProjectPrompt } from '@/features/cellar/useCopyPrompt';
+import { useEntrySelection } from '@/features/cellar/useEntrySelection';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useWheelToList } from '@/hooks/useWheelToList';
@@ -45,6 +47,7 @@ export default function ProjectScreen() {
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
+  const selection = useEntrySelection(project.onScreen, (entry) => router.navigate(`/entry/${entry.id}`));
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const isDesktop = useIsDesktop();
@@ -67,8 +70,10 @@ export default function ProjectScreen() {
       showCode={project.showCodes}
       collapsed={project.collapsed}
       onToggleSection={project.toggleSection}
-      onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-      onCopy={copyPrompt}
+      onPress={selection.onPress}
+      onLongPress={selection.onLongPress}
+      selectedIds={selection.selectedIds}
+      onCopy={selection.selecting ? undefined : copyPrompt}
       header={
         isDesktop ? undefined : (
           <PhoneHeader
@@ -157,6 +162,13 @@ export default function ProjectScreen() {
           )}
         </ContentShell>
       </View>
+
+      <SelectionBar
+        count={selection.count}
+        onFile={selection.file}
+        onCopy={selection.copy}
+        onClear={selection.clear}
+      />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
           screen mounts it itself, which is also where the phone build's left
