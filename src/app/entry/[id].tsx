@@ -153,7 +153,7 @@ export default function EntryScreen() {
               </Pressable>
             </View>
 
-            <AgentThread lines={entry.agentLines} agent={entry.agentName} />
+            <AgentThread lines={entry.agentLines} />
 
             <View className="mb-2 mt-7">
               <Overline>state</Overline>
