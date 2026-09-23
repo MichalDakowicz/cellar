@@ -648,3 +648,26 @@ alter table public.cellar_entries
 -- agent, so nobody has to ask.
 alter table public.cellar_settings
   add column if not exists agent_device boolean not null default false;
+
+-- 2026-09-23 — how the cellar reads: seven preferences asked for at once.
+--
+-- On the account like the rest of this row, so the phone and the browser read
+-- the same. Every value is the display word, and every reader falls back to
+-- the default for a word it does not know (src/lib/displayPrefs.ts), so none
+-- of these needs a check constraint to stay safe.
+--
+--   row_density   roomy | compact        — padding on every entry row
+--   text_size     small | normal | large — the thought line
+--   haptics       a tap under the thumb on a hold and a drop
+--   project_sort  newest | oldest        — inside a project
+--   hide_settled  done and dropped start folded in a project
+--   start_tab     dump | shelf | inbox | stats — where the app opens
+--   kind_order    the kinds you put first; null is the default order, and a
+--                 kind it leaves out keeps its default place after them
+alter table public.cellar_settings add column if not exists row_density text not null default 'roomy';
+alter table public.cellar_settings add column if not exists text_size text not null default 'normal';
+alter table public.cellar_settings add column if not exists haptics boolean not null default true;
+alter table public.cellar_settings add column if not exists project_sort text not null default 'newest';
+alter table public.cellar_settings add column if not exists hide_settled boolean not null default false;
+alter table public.cellar_settings add column if not exists start_tab text not null default 'dump';
+alter table public.cellar_settings add column if not exists kind_order text[];

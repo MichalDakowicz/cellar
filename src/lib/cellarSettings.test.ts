@@ -62,6 +62,15 @@ describe('cellarSettingsToRow', () => {
     expect(normalizeCellarSettings(row({ agent_device: undefined })).agentDevice).toBe(false);
   });
 
+  it('reads the display prefs with their defaults, and writes only known words', () => {
+    const read = normalizeCellarSettings(row({ row_density: 'compact', text_size: 'huge', kind_order: ['copy'] }));
+    expect(read.rowDensity).toBe('compact');
+    expect(read.textSize).toBe('normal');
+    expect(read.kindOrder).toEqual(['copy']);
+    expect(cellarSettingsToRow({ startTab: 'inbox', hideSettled: true })).toEqual({ start_tab: 'inbox', hide_settled: true });
+    expect(cellarSettingsToRow({ kindOrder: null })).toEqual({ kind_order: null });
+  });
+
   it('keeps false — a patch turning something off is not an absent field', () => {
     expect(cellarSettingsToRow({ rememberLast: false })).toEqual({ remember_last: false });
   });

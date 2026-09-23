@@ -12,6 +12,7 @@ import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
 import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
+import { DisplaySettings } from '@/features/settings/DisplaySettings';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
@@ -104,7 +105,7 @@ export default function Settings() {
             <Overline>default kind</Overline>
             <ChipWrap
               label="default kind"
-              options={kindChips(settings.defaultKind)}
+              options={kindChips(settings.defaultKind, settings.kindOrder)}
               selected={settings.defaultKind}
               onToggle={(kind) => {
                 setDraftKind(kind);
@@ -130,6 +131,8 @@ export default function Settings() {
               ]}
             />
           </View>
+
+          <DisplaySettings gutter={gutter} />
 
           <View className={`gap-3 pt-7 ${gutter}`}>
             <Overline>theme</Overline>

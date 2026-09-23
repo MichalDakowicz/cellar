@@ -14,6 +14,9 @@
 - Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
 - Entry: a link on the thought grows a card with the site, the title and what the page says
 - Settings: let agents test on your phone, and every agent is told without having to ask
+- Settings: compact or roomy rows, small to large text, and haptics on a hold and a drop
+- Settings: a project reads newest or oldest first, and can start with done and dropped folded
+- Settings: pick the tab the app opens on, and which kinds come first everywhere
 
 ### Changed
 

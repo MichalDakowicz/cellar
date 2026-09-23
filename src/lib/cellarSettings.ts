@@ -1,3 +1,14 @@
+import {
+  kindOrderOf,
+  projectSortOf,
+  rowDensityOf,
+  startTabOf,
+  textSizeOf,
+  type ProjectSort,
+  type RowDensity,
+  type StartTab,
+  type TextSize,
+} from '@/lib/displayPrefs';
 import { isKind } from '@/lib/kinds';
 import type { Kind } from '@/types/cellar';
 
@@ -36,6 +47,16 @@ export type CellarSettings = {
    * question worth answering once and on purpose (`agentWork.deviceRule`).
    */
   agentDevice: boolean;
+  // How the cellar reads — the words and what they do are `lib/displayPrefs.ts`.
+  rowDensity: RowDensity;
+  textSize: TextSize;
+  haptics: boolean;
+  projectSort: ProjectSort;
+  /** Done and dropped start folded in a project, one tap from open. */
+  hideSettled: boolean;
+  startTab: StartTab;
+  /** `null` is the default order. */
+  kindOrder: Kind[] | null;
 };
 
 export type CellarSettingsRow = {
@@ -46,11 +67,19 @@ export type CellarSettingsRow = {
   default_view: string | null;
   notify_questions: boolean | null;
   agent_device?: boolean | null;
+  row_density?: string | null;
+  text_size?: string | null;
+  haptics?: boolean | null;
+  project_sort?: string | null;
+  hide_settled?: boolean | null;
+  start_tab?: string | null;
+  kind_order?: string[] | null;
 };
 
 /** The one select the app makes on this row. Kept beside the mapping so a new column is one edit. */
 export const CELLAR_SETTINGS_COLUMNS =
-  'show_codes, raw_default, remember_last, default_kind, default_view, notify_questions, agent_device';
+  'show_codes, raw_default, remember_last, default_kind, default_view, notify_questions, agent_device, ' +
+  'row_density, text_size, haptics, project_sort, hide_settled, start_tab, kind_order';
 
 export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   showCodes: true,
@@ -60,6 +89,13 @@ export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   defaultView: 'grouped',
   notifyQuestions: true,
   agentDevice: false,
+  rowDensity: 'roomy',
+  textSize: 'normal',
+  haptics: true,
+  projectSort: 'newest',
+  hideSettled: false,
+  startTab: 'dump',
+  kindOrder: null,
 };
 
 /** A missing row is the defaults, not an error — the row is created on first write. */
@@ -73,6 +109,13 @@ export function normalizeCellarSettings(row: CellarSettingsRow | null): CellarSe
     defaultView: isProjectView(row.default_view) ? row.default_view : DEFAULT_CELLAR_SETTINGS.defaultView,
     notifyQuestions: row.notify_questions ?? DEFAULT_CELLAR_SETTINGS.notifyQuestions,
     agentDevice: row.agent_device ?? DEFAULT_CELLAR_SETTINGS.agentDevice,
+    rowDensity: rowDensityOf(row.row_density),
+    textSize: textSizeOf(row.text_size),
+    haptics: row.haptics ?? DEFAULT_CELLAR_SETTINGS.haptics,
+    projectSort: projectSortOf(row.project_sort),
+    hideSettled: row.hide_settled ?? DEFAULT_CELLAR_SETTINGS.hideSettled,
+    startTab: startTabOf(row.start_tab),
+    kindOrder: kindOrderOf(row.kind_order),
   };
 }
 
@@ -90,5 +133,12 @@ export function cellarSettingsToRow(patch: Partial<CellarSettings>): Record<stri
   if (patch.defaultView !== undefined && isProjectView(patch.defaultView)) row.default_view = patch.defaultView;
   if (patch.notifyQuestions !== undefined) row.notify_questions = patch.notifyQuestions;
   if (patch.agentDevice !== undefined) row.agent_device = patch.agentDevice;
+  if (patch.rowDensity !== undefined) row.row_density = rowDensityOf(patch.rowDensity);
+  if (patch.textSize !== undefined) row.text_size = textSizeOf(patch.textSize);
+  if (patch.haptics !== undefined) row.haptics = patch.haptics;
+  if (patch.projectSort !== undefined) row.project_sort = projectSortOf(patch.projectSort);
+  if (patch.hideSettled !== undefined) row.hide_settled = patch.hideSettled;
+  if (patch.startTab !== undefined) row.start_tab = startTabOf(patch.startTab);
+  if (patch.kindOrder !== undefined) row.kind_order = kindOrderOf(patch.kindOrder);
   return row;
 }

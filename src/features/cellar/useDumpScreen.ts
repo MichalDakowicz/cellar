@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
+import { useHaptics } from '@/hooks/useHaptics';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
 import { cycleShelf, type SwipeDirection } from '@/lib/shelfCycle';
@@ -25,6 +26,7 @@ export function useDumpScreen() {
   const { shelf } = useCurrentShelf(shelves);
   const { drop } = useCellarWrites();
   const { settings } = useCellarSettings();
+  const haptics = useHaptics();
 
   const raw = useCellarPrefs((state) => state.raw);
   const kind = useCellarPrefs((state) => state.draftKind);
@@ -53,13 +55,14 @@ export function useDumpScreen() {
     void drop
       .mutateAsync(dropPlan.drops.map((entry) => ({ ...entry, kind, projectId })))
       .then(() => {
+        haptics.drop();
         setText('');
         // With "remember the last project" off, the chip snaps back to the
         // inbox — otherwise the second thought of the evening silently files
         // itself under whatever the first one was about.
         if (!settings.rememberLast) setLastProject(null);
       });
-  }, [dropPlan, drop, kind, projectId, settings.rememberLast, setLastProject]);
+  }, [dropPlan, drop, kind, projectId, settings.rememberLast, setLastProject, haptics]);
 
   const onReturn = useCallback(
     (modifiers: { shift: boolean; meta: boolean }) => {
@@ -126,5 +129,6 @@ export function useDumpScreen() {
     recent,
     latest,
     showCodes: settings.showCodes,
+    kindOrder: settings.kindOrder,
   };
 }

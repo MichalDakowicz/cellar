@@ -2,6 +2,7 @@ import { Redirect, Tabs } from 'expo-router';
 
 import { AppChrome } from '@/components/layout/AppChrome';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { StartTab } from '@/features/cellar/CellarDisplay';
 import { CellarSheets } from '@/features/cellar/CellarSheets';
 
 /**
@@ -38,6 +39,7 @@ export default function TabsLayout() {
       {/* One instance of each sheet for the whole app, so the nav island and a
           row's own button open the same one (PING.md §9.8). */}
       <CellarSheets />
+      <StartTab />
     </>
   );
 }

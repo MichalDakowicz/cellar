@@ -1,5 +1,5 @@
 import { ENTRY_STATES, isLive } from '@/lib/entryState';
-import { KINDS } from '@/lib/kinds';
+import { orderedKinds, sortForProject, type ProjectSort } from '@/lib/displayPrefs';
 import type { Entry, EntryState, Kind } from '@/types/cellar';
 
 /**
@@ -49,12 +49,12 @@ export function filterSummary(filter: EntryFilter): string {
 export type KindGroup = { kind: Kind; code: string; entries: Entry[] };
 
 /**
- * Grouped by kind, in the fixed order of KINDS — not by size. A project whose
+ * Grouped by kind, in your kind order (the fixed KINDS order by default) — not by size. A project whose
  * sections reorder themselves as you file things is a project you have to
  * re-read every visit. Empty kinds drop out entirely.
  */
-export function groupByKind(entries: Entry[]): KindGroup[] {
-  return KINDS.map((meta) => ({
+export function groupByKind(entries: Entry[], order?: readonly string[] | null): KindGroup[] {
+  return orderedKinds(order).map((meta) => ({
     kind: meta.value,
     code: meta.code,
     entries: entries.filter((entry) => entry.kind === meta.value),
@@ -93,10 +93,10 @@ export type BandGroup = { band: Band; count: number; kinds: KindGroup[] };
  *
  * Empty bands drop out, the same way empty kinds already do.
  */
-export function groupByStateAndKind(entries: Entry[]): BandGroup[] {
+export function groupByStateAndKind(entries: Entry[], order?: readonly string[] | null): BandGroup[] {
   return BANDS.map((band) => {
     const mine = entries.filter((entry) => bandOf(entry) === band);
-    return { band, count: mine.length, kinds: groupByKind(mine) };
+    return { band, count: mine.length, kinds: groupByKind(mine, order) };
   }).filter((group) => group.count > 0);
 }
 
@@ -106,9 +106,9 @@ export type DayGroup = { key: string; entries: Entry[] };
  * One stream, newest first, cut into local days. The key is `YYYY-MM-DD` so the
  * label stays a presentation decision.
  */
-export function groupByDay(entries: Entry[]): DayGroup[] {
+export function groupByDay(entries: Entry[], sort: ProjectSort = 'newest'): DayGroup[] {
   const groups: DayGroup[] = [];
-  for (const entry of [...entries].sort((a, b) => b.createdAt.localeCompare(a.createdAt))) {
+  for (const entry of sortForProject(entries, sort)) {
     const key = dayKeyOf(entry.createdAt);
     const last = groups[groups.length - 1];
     if (last && last.key === key) last.entries.push(entry);
@@ -125,8 +125,8 @@ function dayKeyOf(iso: string): string {
 export type KindTally = { kind: Kind; count: number };
 
 /** Every kind, including the ones at zero — a kind you never dump is information. */
-export function tallyKinds(entries: Entry[]): KindTally[] {
-  return KINDS.map((meta) => ({ kind: meta.value, count: entries.filter((e) => e.kind === meta.value).length }));
+export function tallyKinds(entries: Entry[], order?: readonly string[] | null): KindTally[] {
+  return orderedKinds(order).map((meta) => ({ kind: meta.value, count: entries.filter((e) => e.kind === meta.value).length }));
 }
 
 export type StateTally = { state: EntryState; count: number; pct: number };

@@ -169,7 +169,7 @@ export default function EntryScreen() {
             <View className="mb-2 mt-5">
               <Overline>kind</Overline>
             </View>
-            <ChipWrap label="kind" options={kindChips(entry.entry.kind)} selected={entry.entry.kind} onToggle={entry.setKind} />
+            <ChipWrap label="kind" options={kindChips(entry.entry.kind, entry.kindOrder)} selected={entry.entry.kind} onToggle={entry.setKind} />
 
             <View className="mt-7 flex-row gap-2.5">
               <Pressable

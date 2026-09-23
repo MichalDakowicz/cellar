@@ -182,6 +182,7 @@ export default function ProjectScreen() {
                   <ProjectAside
                     stateSpread={project.stateSpread}
                     kindBars={project.kindBars}
+                    kindOrder={project.kindOrder}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />
                 </View>

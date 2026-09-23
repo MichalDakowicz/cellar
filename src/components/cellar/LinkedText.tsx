@@ -1,5 +1,5 @@
 import * as WebBrowser from 'expo-web-browser';
-import { Text } from 'react-native';
+import { Text, type StyleProp, type TextStyle } from 'react-native';
 
 import { useLinkPreview } from '@/hooks/useLinkPreview';
 import { linkHost, splitLinks } from '@/lib/links';
@@ -25,16 +25,18 @@ import { linkHost, splitLinks } from '@/lib/links';
 export function LinkedText({
   text,
   className,
+  style,
   numberOfLines,
 }: {
   text: string;
   className?: string;
+  style?: StyleProp<TextStyle>;
   numberOfLines?: number;
 }) {
   const segments = splitLinks(text);
 
   return (
-    <Text className={className} numberOfLines={numberOfLines}>
+    <Text className={className} style={style} numberOfLines={numberOfLines}>
       {segments.map((segment, index) =>
         segment.type === 'text' ? (
           segment.value

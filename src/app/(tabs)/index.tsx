@@ -153,7 +153,7 @@ export default function DumpScreen() {
           <View className="mb-2 mt-5">
             <Overline>kind</Overline>
           </View>
-          <ChipWrap label="kind" options={kindChips(dump.kind)} selected={dump.kind} onToggle={dump.setKind} />
+          <ChipWrap label="kind" options={kindChips(dump.kind, dump.kindOrder)} selected={dump.kind} onToggle={dump.setKind} />
 
           <Pressable
             accessibilityRole="button"
