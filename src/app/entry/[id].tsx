@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Plus, Trash } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
@@ -13,7 +13,9 @@ import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
+import { EntryActions } from '@/components/cellar/EntryActions';
 import { EntryCard } from '@/components/cellar/EntryCard';
+import { EntryDocs } from '@/components/cellar/EntryDocs';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -156,6 +158,17 @@ export default function EntryScreen() {
 
             <AgentThread lines={entry.agentLines} />
 
+            <EntryDocs
+              rows={entry.docs.rows}
+              draft={entry.docs.draft}
+              onDraft={entry.docs.setDraft}
+              canAttach={entry.docs.canAttach}
+              draftNote={entry.docs.draftNote}
+              onAttach={entry.docs.attach}
+              onOpen={entry.docs.open}
+              onDetach={entry.docs.detach}
+            />
+
             <View className="mb-2 mt-7">
               <Overline>state</Overline>
             </View>
@@ -171,39 +184,12 @@ export default function EntryScreen() {
             </View>
             <ChipWrap label="kind" options={kindChips(entry.entry.kind)} selected={entry.entry.kind} onToggle={entry.setKind} />
 
-            <View className="mt-7 flex-row gap-2.5">
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="move to another project"
-                onPress={() => fileUnder?.(entry.entry!.id)}
-                className="h-11 flex-1 items-center justify-center rounded-full bg-secondary active:opacity-80"
-              >
-                <Text className="text-sm font-semibold text-foreground">move</Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={entry.archiveLabel}
-                onPress={entry.toggleArchive}
-                className="h-11 flex-1 items-center justify-center rounded-full active:opacity-80"
-                style={{ backgroundColor: COLORS.accentSoft }}
-              >
-                <Text className="text-sm font-semibold text-primary">{entry.archiveLabel}</Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="delete this entry"
-                hitSlop={6}
-                onPress={() => setConfirmDelete(true)}
-                className="h-11 w-11 items-center justify-center rounded-full active:opacity-80"
-                style={{ backgroundColor: COLORS.dangerSoft }}
-              >
-                <Trash size={16} color={COLORS.danger} strokeWidth={2} />
-              </Pressable>
-            </View>
-            <Text className="mt-3 text-xs text-muted-foreground">
-              archiving takes it out of the project and the inbox without losing it. search still finds it, and it comes
-              back.
-            </Text>
+            <EntryActions
+              archiveLabel={entry.archiveLabel}
+              onMove={() => fileUnder?.(entry.entry!.id)}
+              onArchive={entry.toggleArchive}
+              onDelete={() => setConfirmDelete(true)}
+            />
           </View>
 
           {entry.siblings.length > 0 && (

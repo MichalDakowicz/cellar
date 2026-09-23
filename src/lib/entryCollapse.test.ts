@@ -13,6 +13,7 @@ const entry = (id: string): Entry => ({
   agent: null,
   lines: [],
   questions: [],
+  docs: [],
 });
 
 const band = (key: string): EntryListItem => ({

@@ -82,6 +82,24 @@ describe('entryBrief — questions', () => {
  * agent that has to make a second call to read the decision will not make it,
  * which is the failure both of these exist to close.
  */
+describe('entryBrief — docs', () => {
+  it('lists attached docs as links or paths before the thread', () => {
+    const out = brief({
+      docs: [
+        { id: 'd1', ref: 'docs/OVERVIEW.md', label: null, createdAt: '2026-09-14T10:00:00.000Z' },
+        { id: 'd2', ref: 'https://expo.dev/x', label: 'expo notes', createdAt: '2026-09-14T10:01:00.000Z' },
+      ],
+    });
+    assert.match(out, /read these first — attached to the thought:/);
+    assert.match(out, /path {2}docs\/OVERVIEW\.md/);
+    assert.match(out, /link {2}https:\/\/expo\.dev\/x {2}\(expo notes\)/);
+  });
+
+  it('says nothing about docs when there are none', () => {
+    assert.ok(!brief().includes('read these first'));
+  });
+});
+
 describe('answeredBlock', () => {
   const answeredOn = (over = {}) => {
     const one = entry({

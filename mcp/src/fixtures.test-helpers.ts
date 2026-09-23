@@ -42,6 +42,7 @@ export function entry(over: Partial<Entry> = {}): Entry {
     agent: 'claude',
     lines: [],
     questions: [],
+    docs: [],
     ...over,
   };
 }
