@@ -4,9 +4,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
+import { IMPORTANCES } from '@/lib/importance';
 import { collectLinks } from '@/lib/links';
 import { dropStamp, shortRel } from '@/lib/relTime';
-import type { Entry, EntryLine, EntryState, Kind } from '@/types/cellar';
+import type { Entry, EntryLine, EntryState, Importance, Kind } from '@/types/cellar';
 
 /**
  * One entry, and the four things you can do to it: re-kind it, move its state,
@@ -133,6 +134,8 @@ export function useEntryScreen(entryId: string | undefined) {
     undoneCount: removed.length,
     undoRemove,
     setKind: (kind: Kind) => patch({ kind }),
+    importanceOptions: IMPORTANCES.map((meta) => ({ value: meta.value, label: meta.label })),
+    setImportance: (importance: Importance) => patch({ importance }),
     stateOptions: ENTRY_STATES.map((meta) => ({ value: meta.value, label: meta.label })),
     // Moving the state by hand takes the entry back: whatever an agent was
     // doing with it, you have just decided otherwise, and leaving its name on

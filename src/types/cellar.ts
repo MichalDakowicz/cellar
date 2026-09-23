@@ -14,6 +14,9 @@
 
 export type Kind = 'idea' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
 
+/** How much a thought matters inside its kind. A mark, never a sort (`lib/importance.ts`). */
+export type Importance = 'low' | 'normal' | 'high';
+
 /**
  * `blocked` is the agent's only way to reach you: it asked something it cannot
  * answer from the repo and moved on to its other work. It lifts on its own when
@@ -105,6 +108,7 @@ export type Entry = {
   text: string;
   kind: Kind;
   state: EntryState;
+  importance: Importance;
   /**
    * Out of the project and out of the inbox, still in search, one tap from
    * coming back. Nothing in this app is deleted to get it out of the way.

@@ -1,5 +1,6 @@
 import { normalizeOptions } from '@/lib/entryQuestions';
 import { isEntryState } from '@/lib/entryState';
+import { importanceOf } from '@/lib/importance';
 import { isKind } from '@/lib/kinds';
 import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
 
@@ -50,6 +51,7 @@ export type EntryRow = {
   text: string;
   kind: string;
   state: string;
+  importance?: string | null;
   archived: boolean;
   created_at: string;
   agent: string | null;
@@ -67,7 +69,7 @@ export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_p
 export const QUESTION_COLUMNS =
   'id, question, options, answer, answered_at, answered_via, dismissed_at, agent, created_at' as const;
 export const ENTRY_COLUMNS =
-  `id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS})` as const;
+  `id, project_id, text, kind, state, importance, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS})` as const;
 
 export function normalizeShelf(row: ShelfRow): Shelf {
   return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
@@ -127,6 +129,7 @@ export function normalizeEntry(row: EntryRow): Entry {
     // before this build knows the word for it.
     kind: isKind(row.kind) ? row.kind : 'idea',
     state: isEntryState(row.state) ? row.state : 'open',
+    importance: importanceOf(row.importance),
     archived: row.archived,
     createdAt: row.created_at,
     agent: row.agent,
