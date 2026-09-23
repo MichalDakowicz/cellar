@@ -252,6 +252,17 @@ export async function setEntryState(
   return refetch(client, entryId);
 }
 
+/** Writes a `reopenPlan` patch. The plan decides; this only carries it. */
+export async function reopenEntry(
+  client: SupabaseClient,
+  entryId: string,
+  patch: { state: EntryState; agent: string | null; archived: false },
+): Promise<Entry> {
+  const { error } = await client.from('cellar_entries').update(patch).eq('id', entryId);
+  if (error) throw error;
+  return refetch(client, entryId);
+}
+
 export async function archiveEntry(client: SupabaseClient, entryId: string): Promise<Entry> {
   const { error } = await client.from('cellar_entries').update({ archived: true }).eq('id', entryId);
   if (error) throw error;

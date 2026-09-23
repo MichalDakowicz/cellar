@@ -19,6 +19,10 @@
 - Dump: a new line becomes a note under the thought instead of running into one long line
 - Entry: the reports section reads from agent rather than naming the tool that wrote them
 
+### Fixed
+
+- Agent tools: an agent can bring a done, dropped or archived thought back to open when asked
+
 ## 1.9.0 — 2026-09-21
 
 ### Added

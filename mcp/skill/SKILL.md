@@ -140,7 +140,11 @@ Send the sentence worth reading in six months. One line per real finding.
   in the chat. This writes what they said back onto the question and unblocks the entry if
   it was the last one outstanding. Only ever what the user actually said — an answer you
   reasoned out yourself is a guess with their name on it.
-- **`cellar_unclaim_entry`** — you ran out of room or the user moved on. Put it back.
+- **`cellar_unclaim_entry`** — you ran out of room or the user moved on. Put it back. Only
+  for a claim: it refuses a thought that is not `doing`.
+- **`cellar_reopen_entry`** — a done, dropped or archived thought that should be on the list
+  again: the user asked, or the fix did not hold. Reason required. It lands open with nobody
+  on it — claim it if it is yours to work. Never reopen something just to take it.
 - **`cellar_link_repo`** — `cellar_orient` found no project for a repo that clearly has one.
   Linking it is the one change that stops the question recurring in every future session.
   Offer it; do not invent a new project on your own.
