@@ -1,13 +1,14 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { inProgress, waitingOnYou } from '@/lib/agentWork';
+import { deviceRule, inProgress, waitingOnYou } from '@/lib/agentWork';
 import { answeredForAgent, readyToResume } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
+import { loadAgentDevice } from '../settings.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
 import { answeredBlock, entryBrief, entryData, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
 
@@ -24,7 +25,7 @@ import { answeredBlock, entryBrief, entryData, entryTable, projectRow, ROW_LEGEN
 
 const LIMIT = 40;
 
-function orientBody(cellar: Cellar, cwd: string): string {
+function orientBody(cellar: Cellar, cwd: string, phone: boolean | null): string {
   const here = projectForPath(cwd, cellar.projects);
   const below = projectsUnderPath(cwd, cellar.projects);
   const out: string[] = [`cwd      ${cwd}`];
@@ -50,6 +51,10 @@ function orientBody(cellar: Cellar, cwd: string): string {
       'at this path — after that every session resolves it on its own.',
     );
   }
+
+  // The user's standing answer to "may I test this on your phone", from their
+  // own settings switch — so no session has to ask it.
+  out.push(`phone    ${deviceRule(phone)}`);
 
   const mine = here ? cellar.entries.filter((entry) => entry.projectId === here.id) : cellar.entries;
   const live = mine.filter((entry) => !entry.archived);
@@ -125,7 +130,7 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
               'of the directory you are working in.',
           );
         }
-        return text(orientBody(cellar, where));
+        return text(orientBody(cellar, where, await loadAgentDevice(ctx.client)));
       }),
   );
 

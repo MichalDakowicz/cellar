@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
+import { useHaptics } from '@/hooks/useHaptics';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
 import { fanOut, INBOX_TARGET, liveTargets, pickTarget, targetLabel, toggleTarget } from '@/lib/fileTargets';
@@ -26,6 +27,7 @@ export function useDumpScreen() {
   const { shelf } = useCurrentShelf(shelves);
   const { drop } = useCellarWrites();
   const { settings } = useCellarSettings();
+  const haptics = useHaptics();
 
   const raw = useCellarPrefs((state) => state.raw);
   const kind = useCellarPrefs((state) => state.draftKind);
@@ -60,13 +62,14 @@ export function useDumpScreen() {
     void drop
       .mutateAsync(fanOut(dropPlan.drops, targets).map((entry) => ({ ...entry, kind })))
       .then(() => {
+        haptics.drop();
         setText('');
         // With "remember the last project" off, the chips snap back to the
         // inbox — otherwise the second thought of the evening silently files
         // itself under whatever the first one was about.
         if (!settings.rememberLast) setLastProjects([]);
       });
-  }, [dropPlan, drop, kind, targets, settings.rememberLast, setLastProjects]);
+  }, [dropPlan, drop, kind, targets, settings.rememberLast, setLastProjects, haptics]);
 
   const onReturn = useCallback(
     (modifiers: { shift: boolean; meta: boolean }) => {
@@ -129,7 +132,10 @@ export function useDumpScreen() {
     /** A tap: this one, as it always was. */
     pickProject: (value: string) => setLastProjects(pickTarget(value)),
     /** A hold: this one as well, or not any more. */
-    holdProject: (value: string) => setLastProjects(toggleTarget(targets, value)),
+    holdProject: (value: string) => {
+      haptics.hold();
+      setLastProjects(toggleTarget(targets, value));
+    },
     /** Said once more than one is on, so a thought landing twice is never a surprise. */
     targetsHint: targets.length > 1 ? `lands in each of ${targets.length}` : 'hold a project to file it into more than one',
     projectOptions: [
@@ -139,5 +145,6 @@ export function useDumpScreen() {
     recent,
     latest,
     showCodes: settings.showCodes,
+    kindOrder: settings.kindOrder,
   };
 }

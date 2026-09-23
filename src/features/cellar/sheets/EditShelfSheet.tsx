@@ -1,4 +1,5 @@
-import { View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
 import { Field } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
@@ -30,6 +31,7 @@ export function EditShelfSheet({
   shelfId: string | null;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const { shelves, projects, entries } = useCellar();
   const { editShelf, removeShelf } = useCellarWrites();
   const currentShelfId = useCellarPrefs((state) => state.shelfId);
@@ -85,6 +87,16 @@ export function EditShelfSheet({
             onSubmitEditing={save}
             error={nameErrorText(error, 'shelf')}
           />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              onClose();
+              router.push({ pathname: '/arrange', params: { what: 'projects', id: shelf.id } });
+            }}
+            className="mt-3 self-start py-1 active:opacity-70"
+          >
+            <Text className="text-xs font-semibold text-muted-foreground">arrange its projects</Text>
+          </Pressable>
         </View>
       </SheetDialog>
 

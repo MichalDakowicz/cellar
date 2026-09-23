@@ -11,6 +11,7 @@ import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 import { useSessionRoute } from '@/features/auth/useSessionRoute';
+import { CellarDisplay } from '@/features/cellar/CellarDisplay';
 import { CellarLive } from '@/features/cellar/CellarLive';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
@@ -85,9 +86,11 @@ export default function RootLayout() {
                 <AuthGate>
                   <CellarLive />
                   <QuestionSync />
-                  <AppShell>
-                    <Stack screenOptions={{ headerShown: false }} />
-                  </AppShell>
+                  <CellarDisplay>
+                    <AppShell>
+                      <Stack screenOptions={{ headerShown: false }} />
+                    </AppShell>
+                  </CellarDisplay>
                 </AuthGate>
               </ToastProvider>
             </ThemeProvider>

@@ -25,6 +25,9 @@ export function QuestionSync() {
   const { entries, projects } = useCellar();
   const { settings } = useCellarSettings();
   const wanted = settings.notifyQuestions;
+  // The background wake carries both passes, so it stays registered while
+  // either switch is on (lib/blockedWatchTask).
+  const wake = settings.notifyQuestions || settings.notifyNudges;
 
   // Channels first and unconditionally: Android shows their names in the system
   // permission sheet, so creating them after the prompt describes nothing.
@@ -36,9 +39,9 @@ export function QuestionSync() {
   // has to actively take it away rather than just stop re-adding it.
   useEffect(() => {
     if (!user?.id) return;
-    if (wanted) void registerBlockedWatchTask();
+    if (wake) void registerBlockedWatchTask();
     else void unregisterBlockedWatchTask();
-  }, [user?.id, wanted]);
+  }, [user?.id, wake]);
 
   useEffect(() => {
     if (!user?.id || !wanted || entries.length === 0) return;

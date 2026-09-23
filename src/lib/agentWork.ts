@@ -220,3 +220,17 @@ export const ASK_WHERE = [
   'as each thought finishes, and before you stop: cellar_check_answers — an answer that arrived is yours to pick back up',
   'still unanswered when the work runs out: ask that same question in the chat, then write the answer back with cellar_answer_question so the entry keeps the pair',
 ].join('\n           ');
+
+/**
+ * Whether the phone is fair game, as the line `cellar_orient` prints.
+ *
+ * Read off the user's own switch (`cellar_settings.agent_device`), so the
+ * answer is given once, in the app, and every agent hears it — instead of each
+ * session stopping to ask "may I install this on your phone" or, worse, not
+ * asking. Unknown reads as no: a failed read must never be a yes.
+ */
+export function deviceRule(allowed: boolean | null): string {
+  return allowed
+    ? 'yes — you may install the app on their phone over adb, launch it and drive it to test your change, without asking first'
+    : 'no — do not install on or drive their phone; if only a device test would settle it, say so and ask in the chat';
+}

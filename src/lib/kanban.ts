@@ -1,5 +1,5 @@
 import { BANDS, bandOf } from '@/lib/entryGroups';
-import { KINDS } from '@/lib/kinds';
+import { orderedKinds } from '@/lib/displayPrefs';
 import type { Band } from '@/lib/entryGroups';
 import type { Entry, Kind } from '@/types/cellar';
 
@@ -36,9 +36,9 @@ export type KanbanColumn = {
  * Order within a column is the order it was handed, so the board agrees with
  * the stream about which thought is newest.
  */
-export function kanbanColumns(entries: Entry[], axis: KanbanAxis): KanbanColumn[] {
+export function kanbanColumns(entries: Entry[], axis: KanbanAxis, order?: readonly string[] | null): KanbanColumn[] {
   if (axis === 'kind') {
-    return KINDS.map((meta) => ({
+    return orderedKinds(order).map((meta) => ({
       key: `k:${meta.value}`,
       label: meta.value,
       kind: meta.value,

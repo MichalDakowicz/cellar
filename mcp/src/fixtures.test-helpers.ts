@@ -38,6 +38,7 @@ export function entry(over: Partial<Entry> = {}): Entry {
     kind: 'idea',
     state: 'blocked',
     importance: 'normal',
+    position: 0,
     archived: false,
     createdAt: '2026-09-14T10:00:00.000Z',
     agent: 'claude',

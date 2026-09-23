@@ -3,11 +3,13 @@ import { Platform } from 'react-native';
 
 // Android routes every notification through a channel, and the channel — not
 // the message — owns whether it makes a sound, vibrates, or is allowed to
-// interrupt. Cellar raises exactly one kind of notification, so there is one
-// channel; splitting it would be inventing a setting nobody asked for.
+// interrupt. Two kinds, two channels: an agent waiting on you, and a nudge
+// about a thought left alone — so the system settings can silence one without
+// the other.
 
 export const CHANNELS = {
   questions: 'questions',
+  nudges: 'nudges',
 } as const;
 
 export type ChannelId = (typeof CHANNELS)[keyof typeof CHANNELS];
@@ -26,6 +28,15 @@ const SPECS = [
     description: 'When an agent working on one of your projects stops to ask you something',
     importance: AndroidImportance.DEFAULT,
     showBadge: true,
+  },
+  {
+    id: CHANNELS.nudges,
+    name: 'Nudges',
+    // LOW: a nudge is a reminder, not an interruption — it lands in the shade
+    // without a sound, and never badges over a question that is really waiting.
+    description: 'When a thought you dumped has sat untouched past the days you picked',
+    importance: AndroidImportance.LOW,
+    showBadge: false,
   },
 ];
 

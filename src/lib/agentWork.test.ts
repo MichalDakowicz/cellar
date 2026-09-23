@@ -4,6 +4,7 @@ import {
   askRule,
   canClaim,
   canUnclaim,
+  deviceRule,
   inProgress,
   kindWork,
   reopenPlan,
@@ -168,5 +169,16 @@ describe('askRule', () => {
 
   it('tells a glitch to ask only when two readings would differ', () => {
     expect(askRule('glitch')).toContain('two readings');
+  });
+});
+
+describe('deviceRule', () => {
+  it('says yes, and that there is no need to ask, when the switch is on', () => {
+    expect(deviceRule(true)).toMatch(/^yes — .*without asking first/);
+  });
+
+  it('says no when the switch is off, and when it could not be read', () => {
+    expect(deviceRule(false)).toMatch(/^no — do not install/);
+    expect(deviceRule(null)).toBe(deviceRule(false));
   });
 });

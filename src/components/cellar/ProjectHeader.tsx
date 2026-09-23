@@ -24,6 +24,7 @@ type ProjectHeaderProps = {
   filtered?: boolean;
   /** Phone only — on desktop the filter is open in the rail beside the list. */
   onFilter?: () => void;
+  onArrange?: () => void;
 };
 
 /**
@@ -50,6 +51,7 @@ export function ProjectHeader({
   onAxis,
   filtered = false,
   onFilter,
+  onArrange,
 }: ProjectHeaderProps) {
   const alone = !onView || !view;
 
@@ -91,6 +93,7 @@ export function ProjectHeader({
         onAxis={onAxis}
         filtered={filtered}
         onFilter={onFilter}
+        onArrange={onArrange}
       />
     </View>
   );

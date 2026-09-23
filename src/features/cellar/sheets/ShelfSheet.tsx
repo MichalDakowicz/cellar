@@ -1,4 +1,5 @@
 import { Pencil } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -22,6 +23,7 @@ export function ShelfSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const { shelf, setShelf } = useCurrentShelf(shelves);
   const { addShelf } = useCellarWrites();
   const editShelf = useCellarSheets((state) => state.editShelf);
+  const router = useRouter();
   const [name, setName] = useState('');
 
   const error = name.trim() ? checkName(name, shelves.map((candidate) => candidate.name)) : null;
@@ -93,6 +95,18 @@ export function ShelfSheet({ open, onClose }: { open: boolean; onClose: () => vo
             </View>
           );
         })}
+        {shelves.length > 1 && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              onClose();
+              router.push({ pathname: '/arrange', params: { what: 'shelves' } });
+            }}
+            className="self-start py-1 active:opacity-70"
+          >
+            <Text className="text-xs font-semibold text-muted-foreground">arrange shelves</Text>
+          </Pressable>
+        )}
         <View className="mt-1">
           <Field
             placeholder="new shelf"

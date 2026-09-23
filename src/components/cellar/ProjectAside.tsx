@@ -17,6 +17,8 @@ export type KindBar = { kind: Kind; count: number; pct: number };
 type ProjectAsideProps = {
   stateSpread: SpreadRow[];
   kindBars: KindBar[];
+  /** Your kind order, for the filter chips. */
+  kindOrder: Kind[] | null;
   onEdit: () => void;
 };
 
@@ -31,7 +33,7 @@ type ProjectAsideProps = {
  * of the window sits empty next to it. The funnel is still there on phone; this
  * is the same store, so the two can never hold different filters.
  */
-export function ProjectAside({ stateSpread, kindBars, onEdit }: ProjectAsideProps) {
+export function ProjectAside({ stateSpread, kindBars, kindOrder, onEdit }: ProjectAsideProps) {
   const filter = useEntryFilter((state) => state.filter);
   const setFilter = useEntryFilter((state) => state.setFilter);
   const toggleKind = useEntryFilter((state) => state.toggleKind);
@@ -80,7 +82,7 @@ export function ProjectAside({ stateSpread, kindBars, onEdit }: ProjectAsideProp
       <View className="mt-2.5 gap-3">
         <ChipWrap
           label="kind"
-          options={kindChips(filter.kinds)}
+          options={kindChips(filter.kinds, kindOrder)}
           selected={filter.kinds}
           onToggle={(kind: Kind) => toggleKind(kind)}
         />

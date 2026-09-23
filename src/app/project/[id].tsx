@@ -142,6 +142,7 @@ export default function ProjectScreen() {
                       axis={project.kanbanAxis}
                       onAxis={project.setKanbanAxis}
                       filtered={project.filtered}
+                      onArrange={project.arrange}
                     />
                   </View>
                   <View className="flex-row justify-end">
@@ -184,6 +185,7 @@ export default function ProjectScreen() {
                   <ProjectAside
                     stateSpread={project.stateSpread}
                     kindBars={project.kindBars}
+                    kindOrder={project.kindOrder}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />
                 </View>
@@ -235,6 +237,7 @@ function PhoneHeader({
           axis={project.kanbanAxis}
           onAxis={project.setKanbanAxis}
           filtered={project.filtered}
+          onArrange={project.arrange}
           onFilter={onFilter}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}

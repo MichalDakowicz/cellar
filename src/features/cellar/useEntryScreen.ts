@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { useEntryDocs } from '@/features/cellar/useEntryDocs';
 import { useEntryTrail } from '@/features/cellar/useEntryTrail';
+import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { IMPORTANCES } from '@/lib/importance';
@@ -25,6 +26,7 @@ export function useEntryScreen(entryId: string | undefined) {
   const router = useRouter();
   const { entries, projects } = useCellar();
   const { update, remove, addLine, removeLine } = useCellarWrites();
+  const { settings } = useCellarSettings();
   const [line, setLine] = useState('');
 
   // Removing a line is the one destructive thing on this screen that is not
@@ -141,6 +143,7 @@ export function useEntryScreen(entryId: string | undefined) {
     setKind: (kind: Kind) => patch({ kind }),
     importanceOptions: IMPORTANCES.map((meta) => ({ value: meta.value, label: meta.label })),
     setImportance: (importance: Importance) => patch({ importance }),
+    kindOrder: settings.kindOrder,
     stateOptions: ENTRY_STATES.map((meta) => ({ value: meta.value, label: meta.label })),
     // Moving the state by hand takes the entry back: whatever an agent was
     // doing with it, you have just decided otherwise, and leaving its name on

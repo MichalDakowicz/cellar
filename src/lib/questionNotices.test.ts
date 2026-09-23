@@ -28,6 +28,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   kind: 'glitch',
   state: 'blocked' as EntryState,
   importance: 'normal',
+  position: 0,
   archived: false,
   createdAt: '2026-09-14T09:00:00.000Z',
   agent: 'claude',

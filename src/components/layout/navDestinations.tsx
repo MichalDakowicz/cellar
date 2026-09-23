@@ -85,6 +85,7 @@ export function isPushedRoute(pathname: string): boolean {
     pathname.startsWith('/entry/') ||
     pathname.startsWith('/project/') ||
     pathname.startsWith('/search') ||
-    pathname.startsWith('/settings')
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/arrange')
   );
 }

@@ -5,7 +5,8 @@ import { Pressable, Text, View } from 'react-native';
 import { ImportanceMark } from '@/components/cellar/ImportanceMark';
 import { LinkedText } from '@/components/cellar/LinkedText';
 import { StateBadge } from '@/components/cellar/StateBadge';
-import { KIND_GUTTER, KindGlyph, kindLabel, LINE_ROW, TEXT_LINE } from '@/components/media/Glyphs';
+import { KIND_GUTTER, KindGlyph, kindLabel } from '@/components/media/Glyphs';
+import { useRowStyle } from '@/components/cellar/rowStyle';
 import { useHover, webTransition } from '@/hooks/useResponsive';
 import { isDimmed } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
@@ -62,6 +63,11 @@ export const EntryCard = memo(function EntryCard({
   const dimmed = isDimmed(entry);
   const grown = entry.lines.length;
   const { hovered, bind } = useHover();
+  // Density and text size (settings). The first-line box the gutter, the copy
+  // button and the file pill all centre on is the line plus the row's own
+  // padding — on every variant but the inbox, whose Pressable has none.
+  const row = useRowStyle();
+  const box = variant === 'inbox' ? row.lineHeight : row.lineHeight + 2 * row.padY;
 
   return (
     <View
@@ -92,7 +98,7 @@ export const EntryCard = memo(function EntryCard({
           accessibilityLabel={kindLabel(entry.kind)}
           style={{
             width: KIND_GUTTER,
-            height: variant === 'inbox' ? TEXT_LINE : LINE_ROW,
+            height: box,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -115,12 +121,14 @@ export const EntryCard = memo(function EntryCard({
         {...bind}
         className={[
           'min-w-0 flex-1 flex-row items-start gap-2.5 rounded-lg active:opacity-80',
-          variant === 'inbox' ? '' : 'px-2 py-2.5',
+          variant === 'inbox' ? '' : 'px-2',
         ].join(' ')}
+        style={variant === 'inbox' ? undefined : { paddingVertical: row.padY }}
       >
         <LinkedText
           text={entry.text}
-          className="min-w-0 flex-1 text-sm text-foreground"
+          className="min-w-0 flex-1 text-foreground"
+          style={{ fontSize: row.fontSize, lineHeight: row.lineHeight }}
           numberOfLines={variant === 'hit' ? 2 : 3}
         />
 
@@ -145,7 +153,7 @@ export const EntryCard = memo(function EntryCard({
           hitSlop={10}
           onPress={() => onCopy(entry)}
           className="items-center justify-center self-start rounded-md px-1.5 active:opacity-60"
-          style={{ height: variant === 'inbox' ? TEXT_LINE : LINE_ROW }}
+          style={{ height: box }}
         >
           <Copy size={13} color={COLORS.muted} strokeWidth={2} />
         </Pressable>
@@ -158,7 +166,7 @@ export const EntryCard = memo(function EntryCard({
         // thought's own text and hung past the bottom of a one-line row.
         <View
           style={{
-            height: variant === 'inbox' ? TEXT_LINE : LINE_ROW,
+            height: box,
             justifyContent: 'center',
           }}
         >

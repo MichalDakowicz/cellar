@@ -19,6 +19,12 @@
 - Agent tools: the lookup commands show their result as one live page, updated in place each time
 - Entry: a history of the thought to the minute — dropped, moved, claimed, asked, answered
 - Entry: attach a link or a repo path to a thought, and an agent is told to read it first
+- Settings: let agents test on your phone, and every agent is told without having to ask
+- Settings: compact or roomy rows, small to large text, and haptics on a hold and a drop
+- Settings: a project reads newest or oldest first, and can start with done and dropped folded
+- Settings: pick the tab the app opens on, and which kinds come first everywhere
+- Settings: a nudge when a thought sits untouched, with the days and how many a day yours to pick
+- Shelves, projects, project detail: hold and drag to put shelves, projects or thoughts in your order
 
 ### Changed
 
