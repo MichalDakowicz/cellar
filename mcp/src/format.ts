@@ -7,6 +7,7 @@ import {
   questionStatus,
   settledQuestions,
 } from '@/lib/entryQuestions';
+import { importanceMeta } from '@/lib/importance';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
@@ -52,7 +53,9 @@ export function entryRow(entry: Entry, projects: Project[], now = Date.now()): s
     pad(shortRel(entry.createdAt, now), 4),
     pad(projectName(entry, projects), 12),
   ];
-  const tail = [entry.agent ? `(${entry.agent})` : null, entry.archived ? '(archived)' : null]
+  // Only the exceptions, like the app's row: `normal` is most of the cellar.
+  const weight = importanceMeta(entry.importance).marked ? `(${entry.importance})` : null;
+  const tail = [weight, entry.agent ? `(${entry.agent})` : null, entry.archived ? '(archived)' : null]
     .filter(Boolean)
     .join(' ');
   return `${marks.join(' ')} ${entry.text}${tail ? ` ${tail}` : ''}`;
@@ -92,6 +95,7 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
     `thought  ${entry.text}`,
     `kind     ${entry.kind} — ${work.brief}`,
     `state    ${entry.state}${entry.agent ? ` (${entry.agent})` : ''}${entry.archived ? ' · archived' : ''}`,
+    `matters  ${entry.importance}${entry.importance === 'high' ? ' — the user marked this one as mattering more than the rest of its kind' : ''}`,
     `dumped   ${longRel(entry.createdAt, now)}`,
     `project  ${project?.name ?? 'inbox — no project, so no repo to work in'}`,
   ];

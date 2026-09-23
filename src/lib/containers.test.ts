@@ -25,6 +25,7 @@ const entry = (projectId: string | null): Entry => ({
   text: 't',
   kind: 'idea',
   state: 'open',
+  importance: 'normal',
   agent: null,
   archived: false,
   createdAt: '',

@@ -8,6 +8,7 @@ const entry = (id: string): Entry => ({
   text: id,
   kind: 'idea',
   state: 'open',
+  importance: 'normal',
   archived: false,
   createdAt: '2026-09-14T11:00:00.000Z',
   agent: null,

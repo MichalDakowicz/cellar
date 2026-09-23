@@ -171,6 +171,16 @@ export default function EntryScreen() {
             </View>
             <ChipWrap label="kind" options={kindChips(entry.entry.kind)} selected={entry.entry.kind} onToggle={entry.setKind} />
 
+            <View className="mb-2 mt-5">
+              <Overline>importance</Overline>
+            </View>
+            <ChipWrap
+              label="importance"
+              options={entry.importanceOptions}
+              selected={entry.entry.importance}
+              onToggle={entry.setImportance}
+            />
+
             <View className="mt-7 flex-row gap-2.5">
               <Pressable
                 accessibilityRole="button"

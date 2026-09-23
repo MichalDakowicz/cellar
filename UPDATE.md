@@ -13,6 +13,7 @@
 - Entry: a settled question keeps its options on show, with the ones the answer took ticked
 - Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
 - Entry: a link on the thought grows a card with the site, the title and what the page says
+- Entry: mark a thought low or high importance, and the row carries the mark everywhere
 
 ### Changed
 

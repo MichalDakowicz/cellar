@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { ImportanceMark } from '@/components/cellar/ImportanceMark';
 import { LinkedText } from '@/components/cellar/LinkedText';
 import { StateBadge } from '@/components/cellar/StateBadge';
 import { KIND_GUTTER, KindGlyph, kindLabel, LINE_ROW, TEXT_LINE } from '@/components/media/Glyphs';
@@ -124,6 +125,7 @@ export const EntryCard = memo(function EntryCard({
         />
 
         {grown > 0 && <Text className="pt-px text-xs text-muted-foreground">+{grown}</Text>}
+        <ImportanceMark importance={entry.importance} />
         <StateBadge state={entry.state} />
         {variant !== 'hit' && <Text className="pt-px text-xs text-muted-foreground">{shortRel(entry.createdAt)}</Text>}
         {!!where && (
