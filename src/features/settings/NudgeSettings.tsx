@@ -1,6 +1,4 @@
-import { Text, View } from 'react-native';
-
-import { Linking } from 'react-native';
+import { Linking, Text, View } from 'react-native';
 
 import { Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
