@@ -5,6 +5,7 @@ import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/u
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
+import { fanOut, INBOX_TARGET, liveTargets, pickTarget, targetLabel, toggleTarget } from '@/lib/fileTargets';
 import { cycleShelf, type SwipeDirection } from '@/lib/shelfCycle';
 import { countToday } from '@/lib/relTime';
 import { plural } from '@/lib/utils';
@@ -29,8 +30,8 @@ export function useDumpScreen() {
   const raw = useCellarPrefs((state) => state.raw);
   const kind = useCellarPrefs((state) => state.draftKind);
   const setKind = useCellarPrefs((state) => state.setDraftKind);
-  const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
-  const setLastProject = useCellarPrefs((state) => state.setLastProject);
+  const lastProjectIds = useCellarPrefs((state) => state.lastProjectIds);
+  const setLastProjects = useCellarPrefs((state) => state.setLastProjects);
   const setShelf = useCellarPrefs((state) => state.setShelf);
 
   const [text, setText] = useState('');
@@ -40,26 +41,32 @@ export function useDumpScreen() {
     [projects, shelf?.id],
   );
 
-  // A project chip pointing at another shelf would drop the thought somewhere
-  // you are not looking, so switching shelves silently falls back to the inbox.
-  const projectId = shelfProjects.some((project) => project.id === lastProjectId) ? lastProjectId : null;
-  const projectName = shelfProjects.find((project) => project.id === projectId)?.name ?? null;
+  // Cut to this shelf: a chip on another shelf would file the thought somewhere
+  // you are not looking (lib/fileTargets).
+  const targets = useMemo(
+    () => liveTargets(lastProjectIds, shelfProjects.map((project) => project.id)),
+    [lastProjectIds, shelfProjects],
+  );
+  const where = useMemo(
+    () => targetLabel(targets.map((id) => shelfProjects.find((project) => project.id === id)?.name ?? '')),
+    [targets, shelfProjects],
+  );
 
-  const draft = useMemo(() => ({ text, kind, projectId, raw }), [text, kind, projectId, raw]);
-  const dropPlan = useMemo(() => plan(draft, projectName), [draft, projectName]);
+  const draft = useMemo(() => ({ text, kind, projectId: targets[0] ?? null, raw }), [text, kind, targets, raw]);
+  const dropPlan = useMemo(() => plan(draft, where), [draft, where]);
 
   const submit = useCallback(() => {
     if (dropPlan.empty || drop.isPending) return;
     void drop
-      .mutateAsync(dropPlan.drops.map((entry) => ({ ...entry, kind, projectId })))
+      .mutateAsync(fanOut(dropPlan.drops, targets).map((entry) => ({ ...entry, kind })))
       .then(() => {
         setText('');
-        // With "remember the last project" off, the chip snaps back to the
+        // With "remember the last project" off, the chips snap back to the
         // inbox — otherwise the second thought of the evening silently files
         // itself under whatever the first one was about.
-        if (!settings.rememberLast) setLastProject(null);
+        if (!settings.rememberLast) setLastProjects([]);
       });
-  }, [dropPlan, drop, kind, projectId, settings.rememberLast, setLastProject]);
+  }, [dropPlan, drop, kind, targets, settings.rememberLast, setLastProjects]);
 
   const onReturn = useCallback(
     (modifiers: { shift: boolean; meta: boolean }) => {
@@ -117,10 +124,16 @@ export function useDumpScreen() {
     onReturn,
     kind,
     setKind: (next: Kind) => setKind(next),
-    projectId,
-    setProject: setLastProject,
+    /** The chips that read as on. The inbox is on exactly when nothing else is. */
+    selectedTargets: targets.length > 0 ? targets : [INBOX_TARGET],
+    /** A tap: this one, as it always was. */
+    pickProject: (value: string) => setLastProjects(pickTarget(value)),
+    /** A hold: this one as well, or not any more. */
+    holdProject: (value: string) => setLastProjects(toggleTarget(targets, value)),
+    /** Said once more than one is on, so a thought landing twice is never a surprise. */
+    targetsHint: targets.length > 1 ? `lands in each of ${targets.length}` : 'hold a project to file it into more than one',
     projectOptions: [
-      { value: '', label: 'inbox' },
+      { value: INBOX_TARGET, label: 'inbox' },
       ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
     ],
     recent,

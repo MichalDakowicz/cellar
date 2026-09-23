@@ -10,6 +10,8 @@ type ChipWrapProps<T extends string> = {
   /** A set for multi-select, a single value for one-of-N, `null` for none. */
   selected: T[] | T | null;
   onToggle: (value: T) => void;
+  /** A hold on a chip. Presence of a handler is what makes a chip hold-able. */
+  onHold?: (value: T) => void;
   label: string;
 };
 
@@ -26,7 +28,7 @@ type ChipWrapProps<T extends string> = {
  * in the app — it is where you learn that the telescope in a list gutter means
  * research. Icon-only chips would make the gutter unlearnable.
  */
-export function ChipWrap<T extends string>({ options, selected, onToggle, label }: ChipWrapProps<T>) {
+export function ChipWrap<T extends string>({ options, selected, onToggle, onHold, label }: ChipWrapProps<T>) {
   const isOn = (value: T) => (Array.isArray(selected) ? selected.includes(value) : selected === value);
 
   return (
@@ -40,6 +42,7 @@ export function ChipWrap<T extends string>({ options, selected, onToggle, label 
             accessibilityLabel={option.label}
             accessibilityState={{ selected: active }}
             onPress={() => onToggle(option.value)}
+            onLongPress={onHold ? () => onHold(option.value) : undefined}
             className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-80"
             style={{
               borderColor: active ? COLORS.accent : 'transparent',
