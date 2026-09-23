@@ -26,6 +26,7 @@
 ### Changed
 
 - Dump: a new line becomes a note under the thought instead of running into one long line
+- Project detail: copy a prompt is an icon beside the project name instead of a row of its own
 - Entry: the reports section reads from agent rather than naming the tool that wrote them
 
 ## 1.9.0 — 2026-09-21
