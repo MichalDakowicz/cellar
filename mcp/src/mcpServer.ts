@@ -36,7 +36,8 @@ export function createCellarServer(getCtx: CtxProvider): McpServer {
         '',
         'The shelves and projects holding the thoughts are yours to read and to tidy — cellar_list_shelves,',
         'cellar_create_project and the rest. Nothing deletes anywhere on this server, and the settings row is not',
-        'reachable at all: how their own app opens is theirs.',
+        'writable: how their own app opens is theirs. The one thing read from it is whether you may test on their',
+        'phone — cellar_orient prints it as the phone line, and that line is the answer; do not ask it again.',
       ].join('\n'),
     },
   );

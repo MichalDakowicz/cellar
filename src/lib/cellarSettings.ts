@@ -29,6 +29,13 @@ export type CellarSettings = {
   defaultView: ProjectViewPref;
   /** Raise a banner when an agent stops and asks something. */
   notifyQuestions: boolean;
+  /**
+   * An agent may install the app on your phone over adb, open it and drive it
+   * to check its own work, without asking first. Off by default — a phone is
+   * the most personal device in the room, and "may I take it over" is a
+   * question worth answering once and on purpose (`agentWork.deviceRule`).
+   */
+  agentDevice: boolean;
 };
 
 export type CellarSettingsRow = {
@@ -38,7 +45,12 @@ export type CellarSettingsRow = {
   default_kind: string | null;
   default_view: string | null;
   notify_questions: boolean | null;
+  agent_device?: boolean | null;
 };
+
+/** The one select the app makes on this row. Kept beside the mapping so a new column is one edit. */
+export const CELLAR_SETTINGS_COLUMNS =
+  'show_codes, raw_default, remember_last, default_kind, default_view, notify_questions, agent_device';
 
 export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   showCodes: true,
@@ -47,6 +59,7 @@ export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   defaultKind: 'idea',
   defaultView: 'grouped',
   notifyQuestions: true,
+  agentDevice: false,
 };
 
 /** A missing row is the defaults, not an error — the row is created on first write. */
@@ -59,6 +72,7 @@ export function normalizeCellarSettings(row: CellarSettingsRow | null): CellarSe
     defaultKind: isKind(row.default_kind) ? row.default_kind : DEFAULT_CELLAR_SETTINGS.defaultKind,
     defaultView: isProjectView(row.default_view) ? row.default_view : DEFAULT_CELLAR_SETTINGS.defaultView,
     notifyQuestions: row.notify_questions ?? DEFAULT_CELLAR_SETTINGS.notifyQuestions,
+    agentDevice: row.agent_device ?? DEFAULT_CELLAR_SETTINGS.agentDevice,
   };
 }
 
@@ -75,5 +89,6 @@ export function cellarSettingsToRow(patch: Partial<CellarSettings>): Record<stri
   if (patch.defaultKind !== undefined && isKind(patch.defaultKind)) row.default_kind = patch.defaultKind;
   if (patch.defaultView !== undefined && isProjectView(patch.defaultView)) row.default_view = patch.defaultView;
   if (patch.notifyQuestions !== undefined) row.notify_questions = patch.notifyQuestions;
+  if (patch.agentDevice !== undefined) row.agent_device = patch.agentDevice;
   return row;
 }

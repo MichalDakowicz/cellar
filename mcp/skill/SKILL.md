@@ -109,6 +109,16 @@ a/b/c/d taps in the app, and a question answerable in one tap gets answered.
 `design` does not mean "check it against a design system". Only reach for one if the project
 actually has one.
 
+## Testing on their phone
+
+`cellar_orient` prints a **phone** line, read off a switch in the app's settings — *let agents
+test on my phone*. It is the user's standing answer, given once, so never ask it again:
+
+- **yes** → you may install the app on their phone over adb, launch it and drive it to check
+  your change, the way the repo's own instructions describe. No need to ask first.
+- **no** → do not install on it or drive it. If only a device test would settle something,
+  say so and ask in the chat.
+
 ## Write like they do
 
 Your lines sit in a list directly beneath the user's own thoughts. An assistant voice there

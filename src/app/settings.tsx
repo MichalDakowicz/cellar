@@ -92,6 +92,12 @@ export default function Settings() {
               value={settings.notifyQuestions && notifications.granted !== false}
               onChange={(value) => void notifications.set(value)}
             />
+            <SwitchRow
+              label="let agents test on my phone"
+              sub="an agent may install the app over adb, open it and drive it to check its work, without asking"
+              value={settings.agentDevice}
+              onChange={(value) => void updateSettings({ agentDevice: value })}
+            />
           </View>
 
           <View className={`gap-2 pt-7 ${gutter}`}>

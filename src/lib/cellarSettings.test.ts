@@ -12,6 +12,7 @@ const row = (over: Partial<CellarSettingsRow> = {}): CellarSettingsRow => ({
   default_kind: 'idea',
   default_view: 'grouped',
   notify_questions: true,
+  agent_device: false,
   ...over,
 });
 
@@ -54,6 +55,11 @@ describe('cellarSettingsToRow', () => {
 
   it('drops a kind that is not one of the seven', () => {
     expect(cellarSettingsToRow({ defaultKind: 'sketch' as never })).toEqual({});
+  });
+
+  it('writes the phone switch, and reads a missing column as off', () => {
+    expect(cellarSettingsToRow({ agentDevice: true })).toEqual({ agent_device: true });
+    expect(normalizeCellarSettings(row({ agent_device: undefined })).agentDevice).toBe(false);
   });
 
   it('keeps false — a patch turning something off is not an absent field', () => {

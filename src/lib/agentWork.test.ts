@@ -1,4 +1,14 @@
-import { AGENT_LINE_MAX, agentLine, askRule, canClaim, inProgress, kindWork, splitThread, waitingOnYou } from '@/lib/agentWork';
+import {
+  AGENT_LINE_MAX,
+  agentLine,
+  askRule,
+  canClaim,
+  deviceRule,
+  inProgress,
+  kindWork,
+  splitThread,
+  waitingOnYou,
+} from '@/lib/agentWork';
 import { KINDS } from '@/lib/kinds';
 
 const entry = (over: Partial<Parameters<typeof canClaim>[0]> & Record<string, unknown> = {}) => ({
@@ -103,5 +113,16 @@ describe('askRule', () => {
 
   it('tells a glitch to ask only when two readings would differ', () => {
     expect(askRule('glitch')).toContain('two readings');
+  });
+});
+
+describe('deviceRule', () => {
+  it('says yes, and that there is no need to ask, when the switch is on', () => {
+    expect(deviceRule(true)).toMatch(/^yes — .*without asking first/);
+  });
+
+  it('says no when the switch is off, and when it could not be read', () => {
+    expect(deviceRule(false)).toMatch(/^no — do not install/);
+    expect(deviceRule(null)).toBe(deviceRule(false));
   });
 });

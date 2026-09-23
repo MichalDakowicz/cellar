@@ -13,6 +13,7 @@
 - Entry: a settled question keeps its options on show, with the ones the answer took ticked
 - Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
 - Entry: a link on the thought grows a card with the site, the title and what the page says
+- Settings: let agents test on your phone, and every agent is told without having to ask
 
 ### Changed
 

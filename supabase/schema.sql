@@ -637,3 +637,14 @@ alter table public.cellar_entries
 -- for everything untouched and puts a dragged thought exactly where it was put.
 alter table public.cellar_entries
   add column if not exists position int not null default 0;
+
+-- 2026-09-23 — whether an agent may test on your phone without asking.
+--
+-- An agent that has finished a change wants to see it run, and the phone on
+-- the desk is the real target. Installing over adb and driving the app is
+-- taking the device over, though, so it is a standing yes you give once and on
+-- purpose — not a question every session asks, and not a default. Off until
+-- you turn it on in settings; cellar_orient reads it and says so to every
+-- agent, so nobody has to ask.
+alter table public.cellar_settings
+  add column if not exists agent_device boolean not null default false;
