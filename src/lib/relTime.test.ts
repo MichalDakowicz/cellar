@@ -1,4 +1,4 @@
-import { countToday, dayLabel, dropStamp, longRel, shortRel } from '@/lib/relTime';
+import { countToday, dayLabel, dropStamp, exactStamp, longRel, shortRel } from '@/lib/relTime';
 
 const NOW = new Date('2026-09-13T12:00:00.000Z').getTime();
 const ago = (ms: number) => new Date(NOW - ms).toISOString();
@@ -58,5 +58,23 @@ describe('dropStamp', () => {
 describe('countToday', () => {
   it('counts the last 24 hours, not the calendar day', () => {
     expect(countToday([ago(HOUR), ago(23 * HOUR), ago(25 * HOUR)], NOW)).toBe(2);
+  });
+});
+
+describe('exactStamp', () => {
+  // Built from local parts, so the assertion holds in any timezone the suite runs in.
+  const local = (y: number, m: number, d: number, h: number, min: number) => new Date(y, m, d, h, min).toISOString();
+
+  it('is the clock and the day, padded and lowercase', () => {
+    expect(exactStamp(local(2026, 8, 22, 17, 4), NOW)).toBe('17:04 · 22 sep');
+    expect(exactStamp(local(2026, 0, 3, 9, 5), NOW)).toBe('09:05 · 3 jan');
+  });
+
+  it('names the year only when it is not this one', () => {
+    expect(exactStamp(local(2025, 11, 31, 23, 59), NOW)).toBe('23:59 · 31 dec 2025');
+  });
+
+  it('says nothing for a stamp it cannot read', () => {
+    expect(exactStamp('not a date', NOW)).toBe('');
   });
 });

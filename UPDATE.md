@@ -17,6 +17,7 @@
 - Projects: pin a project from its edit sheet to sort it first on its shelf and in file it
 - Entry: mark a thought low or high importance, and the row carries the mark everywhere
 - Agent tools: the lookup commands show their result as one live page, updated in place each time
+- Entry: a history of the thought to the minute — dropped, moved, claimed, asked, answered
 
 ### Changed
 

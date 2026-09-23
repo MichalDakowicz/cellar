@@ -2,8 +2,16 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { canUnclaim, reopenPlan } from '@/lib/agentWork';
+import { patchEvents } from '@/lib/entryTrail';
 
-import { addAgentLine, archiveEntry, reopenEntry, resolveEntry, setEntryState } from '../cellar.ts';
+import {
+  addAgentLine,
+  archiveEntry,
+  reopenEntry,
+  resolveEntry,
+  setEntryState,
+} from '../cellar.ts';
+import { byAgent, logMoves } from '../trail.ts';
 import { guard, text, withAnswered, withCellar, type CtxProvider } from '../context.ts';
 import { shortId } from '../format.ts';
 
@@ -46,6 +54,7 @@ export function registerSettleTools(server: McpServer, getCtx: CtxProvider): voi
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, note);
         // The name comes off with the claim: nobody is on it any more.
         await setEntryState(ctx.client, target.id, outcome, null);
+        await logMoves(ctx.client, ctx.userId, target.id, patchEvents(target, { state: outcome }, byAgent(ctx.agent)));
         return text(withAnswered(`${shortId(target.id)} is ${outcome}:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );
@@ -75,6 +84,9 @@ export function registerSettleTools(server: McpServer, getCtx: CtxProvider): voi
         }
         if (note?.trim()) await addAgentLine(ctx.client, ctx.userId, target.id, note);
         await setEntryState(ctx.client, target.id, 'open', null);
+        await logMoves(ctx.client, ctx.userId, target.id, [
+          { what: 'released', fromValue: 'doing', toValue: 'open', ...byAgent(ctx.agent) },
+        ]);
         return text(withAnswered(`${shortId(target.id)} is open again.`, cellar, ctx.agent, target.id));
       }),
   );
@@ -103,6 +115,7 @@ export function registerSettleTools(server: McpServer, getCtx: CtxProvider): voi
 
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, reason);
         const back = await reopenEntry(ctx.client, target.id, plan.patch);
+        await logMoves(ctx.client, ctx.userId, target.id, patchEvents(target, plan.patch, byAgent(ctx.agent)));
         return text(
           withAnswered(`${shortId(target.id)} is ${back.state} again:\n> ${written}`, cellar, ctx.agent, target.id),
         );
@@ -129,6 +142,7 @@ export function registerSettleTools(server: McpServer, getCtx: CtxProvider): voi
         const target = resolveEntry(entry, cellar.entries);
         const written = await addAgentLine(ctx.client, ctx.userId, target.id, reason);
         await archiveEntry(ctx.client, target.id);
+        await logMoves(ctx.client, ctx.userId, target.id, patchEvents(target, { archived: true }, byAgent(ctx.agent)));
         return text(withAnswered(`${shortId(target.id)} is archived:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );

@@ -14,6 +14,7 @@ import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { EntryCard } from '@/components/cellar/EntryCard';
+import { EntryTrail } from '@/components/cellar/EntryTrail';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -214,6 +215,8 @@ export default function EntryScreen() {
               archiving takes it out of the project and the inbox without losing it. search still finds it, and it comes
               back.
             </Text>
+
+            <EntryTrail items={entry.trail} />
           </View>
 
           {entry.siblings.length > 0 && (

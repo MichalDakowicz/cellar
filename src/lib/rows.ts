@@ -1,5 +1,6 @@
 import { normalizeOptions } from '@/lib/entryQuestions';
 import { isEntryState } from '@/lib/entryState';
+import type { NewTrailEvent, TrailEvent } from '@/lib/entryTrail';
 import { importanceOf } from '@/lib/importance';
 import { isKind } from '@/lib/kinds';
 import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
@@ -164,5 +165,42 @@ export function normalizeAgentToken(row: AgentTokenRow): AgentToken {
     lastUsedAt: row.last_used_at,
     expiresAt: row.expires_at,
     revokedAt: row.revoked_at,
+  };
+}
+
+export type EventRow = {
+  id: string;
+  what: string;
+  from_value: string | null;
+  to_value: string | null;
+  source: string | null;
+  agent: string | null;
+  at: string;
+};
+
+export const EVENT_COLUMNS = 'id, what, from_value, to_value, source, agent, at';
+
+export function normalizeEvent(row: EventRow): TrailEvent {
+  return {
+    id: row.id,
+    what: row.what,
+    fromValue: row.from_value,
+    toValue: row.to_value,
+    source: row.source === 'agent' ? 'agent' : 'user',
+    agent: row.agent,
+    at: row.at,
+  };
+}
+
+/** A move as the insert wants it. `at` is the database's clock, never the writer's. */
+export function eventInsert(userId: string, entryId: string, event: NewTrailEvent) {
+  return {
+    user_id: userId,
+    entry_id: entryId,
+    what: event.what,
+    from_value: event.fromValue,
+    to_value: event.toValue,
+    source: event.source,
+    agent: event.agent,
   };
 }

@@ -14,6 +14,13 @@ export const SHELVES_KEY = ['cellar', 'shelves'] as const;
 export const PROJECTS_KEY = ['cellar', 'projects'] as const;
 export const ENTRIES_KEY = ['cellar', 'entries'] as const;
 
+/**
+ * One entry's trail. Under `ENTRIES_KEY` on purpose: every write to an entry
+ * already invalidates that key, and a prefix match refreshes the trail with it,
+ * so the events table needs no live listener of its own.
+ */
+export const entryEventsKey = (entryId: string) => [...ENTRIES_KEY, 'events', entryId] as const;
+
 export type CellarKey = typeof SHELVES_KEY | typeof PROJECTS_KEY | typeof ENTRIES_KEY;
 
 /**

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
+import { useEntryTrail } from '@/features/cellar/useEntryTrail';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { IMPORTANCES } from '@/lib/importance';
@@ -34,6 +35,7 @@ export function useEntryScreen(entryId: string | undefined) {
 
   const entry = entries.find((candidate) => candidate.id === entryId) ?? null;
   const projectName = projects.find((project) => project.id === entry?.projectId)?.name ?? 'inbox';
+  const trail = useEntryTrail(entry, projects);
 
   const siblings = useMemo(
     () =>
@@ -146,6 +148,8 @@ export function useEntryScreen(entryId: string | undefined) {
     toggleArchive: () => patch({ archived: !entry?.archived }),
     moveTo: (projectId: string | null) => patch({ projectId }),
     deleteEntry,
+    /** Every stamp and every logged move, exact to the minute (`lib/entryTrail`). */
+    trail,
     siblings: siblings as Entry[],
   };
 }
