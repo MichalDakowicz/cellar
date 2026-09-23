@@ -19,6 +19,7 @@ import type { Entry, EntryQuestion, EntryState, Kind, Project, Shelf } from '@/t
 import { bareProjectId } from '@/lib/agentPrompt';
 import { agentLine } from '@/lib/agentWork';
 import { normalizeOptions, unblocksEntry } from '@/lib/entryQuestions';
+import { pinnedFirst } from '@/lib/projectOrder';
 
 /**
  * Every query this server makes.
@@ -55,7 +56,8 @@ export async function loadCellar(client: SupabaseClient): Promise<Cellar> {
 
   return {
     shelves: (shelves.data as ShelfRow[]).map(normalizeShelf),
-    projects: (projects.data as ProjectRow[]).map(normalizeProject),
+    // The app's order, pins first, so a list here reads the way the shelf does.
+    projects: pinnedFirst((projects.data as ProjectRow[]).map(normalizeProject)),
     entries: (entries.data as EntryRow[]).map(normalizeEntry),
   };
 }

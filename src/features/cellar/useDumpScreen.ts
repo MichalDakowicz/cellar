@@ -134,7 +134,7 @@ export function useDumpScreen() {
     targetsHint: targets.length > 1 ? `lands in each of ${targets.length}` : 'hold a project to file it into more than one',
     projectOptions: [
       { value: INBOX_TARGET, label: 'inbox' },
-      ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
+      ...shelfProjects.map((project) => ({ value: project.id, label: project.name, pinned: project.pinned })),
     ],
     recent,
     latest,

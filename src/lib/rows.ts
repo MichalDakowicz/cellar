@@ -27,6 +27,7 @@ export type ProjectRow = {
   created_at: string;
   repo_path: string | null;
   repo_url: string | null;
+  pinned?: boolean | null;
 };
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
@@ -58,7 +59,7 @@ export type EntryRow = {
 
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
-export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url';
+export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url, pinned';
 // `as const` on both, and the embed built as a template literal, so the select
 // string keeps its literal type: supabase-js resolves the row shape from it at
 // compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
@@ -81,6 +82,7 @@ export function normalizeProject(row: ProjectRow): Project {
     createdAt: row.created_at,
     repoPath: row.repo_path,
     repoUrl: row.repo_url,
+    pinned: row.pinned === true,
   };
 }
 
