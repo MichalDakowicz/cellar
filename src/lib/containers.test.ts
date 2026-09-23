@@ -16,6 +16,7 @@ const project = (id: string, shelfId: string): Project => ({
   createdAt: '',
   repoPath: null,
   repoUrl: null,
+  pinned: false,
 });
 
 let seq = 0;

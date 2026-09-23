@@ -4,25 +4,28 @@ import { useCallback, useMemo } from 'react';
 import {
   answerQuestion,
   appendLine,
-  createProject,
-  createShelf,
   deleteEntry,
   deleteLine,
-  deleteProject,
-  deleteShelf,
   dismissQuestion,
   dropEntries,
   fetchEntries,
   fetchProjects,
   fetchShelves,
-  moveProject,
   patchEntry,
-  renameProject,
-  renameShelf,
-  setProjectRepo,
   type EntryPatch,
   type NewDrop,
 } from '@/features/cellar/cellarApi';
+import {
+  createProject,
+  createShelf,
+  deleteProject,
+  deleteShelf,
+  moveProject,
+  renameProject,
+  renameShelf,
+  setProjectPinned,
+  setProjectRepo,
+} from '@/features/cellar/structureApi';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { ENTRIES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
 import { unblocksEntry } from '@/lib/entryQuestions';
@@ -177,6 +180,11 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
+  const pinProject = useMutation({
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => setProjectPinned(id, pinned),
+    onSuccess: () => invalidate(PROJECTS_KEY),
+  });
+
   const relocateProject = useMutation({
     mutationFn: ({ id, shelfId }: { id: string; shelfId: string }) => moveProject(id, shelfId),
     onSuccess: () => invalidate(PROJECTS_KEY),
@@ -216,6 +224,7 @@ export function useCellarWrites() {
     addProject,
     editProject,
     linkProject,
+    pinProject,
     relocateProject,
     removeProject,
   };

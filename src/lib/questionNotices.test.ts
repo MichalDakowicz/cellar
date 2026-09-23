@@ -36,7 +36,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
 });
 
 const projects: Project[] = [
-  { id: 'p1', shelfId: 's1', name: 'cellar', position: 0, createdAt: '', repoPath: null, repoUrl: null },
+  { id: 'p1', shelfId: 's1', name: 'cellar', position: 0, createdAt: '', repoPath: null, repoUrl: null, pinned: false },
 ];
 
 describe('pendingNotices', () => {

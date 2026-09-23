@@ -1,10 +1,11 @@
-import { MoreHorizontal } from 'lucide-react-native';
+import { MoreHorizontal, Pin } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
 import { showsHoverControl } from '@/lib/hoverReveal';
 import { plural } from '@/lib/utils';
+import { COLORS } from '@/theme/colors';
 
 export type ProjectTile = {
   id: string;
@@ -15,6 +16,8 @@ export type ProjectTile = {
   liveCount: number;
   /** Live glitches only — a fixed one is history and must not keep the tile lit. */
   glitchCount: number;
+  /** Already sorted first by the time it is a tile; this only draws the mark. */
+  pinned: boolean;
 };
 
 /**
@@ -78,6 +81,14 @@ export const ProjectCard = memo(function ProjectCard({
           >
             {project.initials}
           </Text>
+          {project.pinned && (
+            // Top-left, opposite the live count: the badge answers "how much is
+            // owed", the pin answers "why is this first", and one corner each
+            // keeps them from reading as one number.
+            <View className="absolute left-2 top-2" accessibilityLabel="pinned">
+              <Pin size={12} color={COLORS.muted} strokeWidth={2.2} />
+            </View>
+          )}
           {project.liveCount > 0 && (
             <View className="absolute right-2 top-2 rounded-full bg-primary/20 px-2 py-0.5">
               <Text className="text-[10px] font-bold text-primary">{project.liveCount}</Text>
