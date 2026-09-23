@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { canClaim, LINE_VOICE } from '@/lib/agentWork';
+import { patchEvents } from '@/lib/entryTrail';
 import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { normalizeRepoPath, normalizeRepoUrl, repoLabel } from '@/lib/repoLink';
@@ -9,15 +10,14 @@ import type { Kind } from '@/types/cellar';
 
 import {
   addAgentLine,
-  answerQuestion,
-  askQuestion,
   claimEntry,
   createEntry,
   linkRepo,
   resolveEntry,
   resolveProject,
-  resolveQuestion,
 } from '../cellar.ts';
+import { answerQuestion, askQuestion, resolveQuestion } from '../questions.ts';
+import { byAgent, logMoves } from '../trail.ts';
 import { guard, text, withAnswered, withCellar, type CtxProvider } from '../context.ts';
 import { entryBrief, shortId } from '../format.ts';
 
@@ -68,6 +68,9 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
               `${claim.entry.agent ? ` and ${claim.entry.agent} has it` : ''}. Pick another entry.`,
           );
         }
+        await logMoves(ctx.client, ctx.userId, target.id, [
+          { what: 'claimed', fromValue: 'open', toValue: 'doing', source: 'agent', agent: ctx.agent },
+        ]);
 
         return text(
           withAnswered(
@@ -153,6 +156,8 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           options: options ?? [],
           agent: ctx.agent,
         });
+        // The question is its own stamp on the trail; the block is the move.
+        await logMoves(ctx.client, ctx.userId, target.id, patchEvents(target, { state: 'blocked' }, byAgent(ctx.agent)));
 
         return text(
           withAnswered(
@@ -217,7 +222,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           );
         }
 
-        const written = await answerQuestion(ctx.client, target, chosen.id, answer);
+        const written = await answerQuestion(ctx.client, ctx, target, chosen.id, answer);
         const left = pending.filter((one) => one.id !== chosen.id).length;
         return text(
           `Recorded on ${shortId(target.id)}:\n  ? ${written.question}\n  = ${written.answer}\n\n` +

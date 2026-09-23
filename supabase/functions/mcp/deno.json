@@ -7,6 +7,7 @@
     "@/lib/dump": "../../../src/lib/dump.ts",
     "@/lib/entryQuestions": "../../../src/lib/entryQuestions.ts",
     "@/lib/entryState": "../../../src/lib/entryState.ts",
+    "@/lib/entryTrail": "../../../src/lib/entryTrail.ts",
     "@/lib/kinds": "../../../src/lib/kinds.ts",
     "@/lib/plural": "../../../src/lib/plural.ts",
     "@/lib/relTime": "../../../src/lib/relTime.ts",

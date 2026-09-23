@@ -51,3 +51,23 @@ export function dropStamp(iso: string, now: number = Date.now()): string {
 export function countToday(isoDates: string[], now: number = Date.now()): number {
   return isoDates.filter((iso) => now - new Date(iso).getTime() < DAY).length;
 }
+
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+/**
+ * `17:04 · 22 sep`, and the year only once it is not this one. The trail's
+ * stamp — the one place in the app a thought's time is exact.
+ *
+ * Built by hand rather than with `toLocaleString`: the trail is a column of
+ * these, and a locale that writes "22.09., 17:04" on one row and a 12-hour
+ * clock on a device set differently turns a column into noise. Lowercase, the
+ * way every other word in this app is.
+ */
+export function exactStamp(iso: string, now: number = Date.now()): string {
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return '';
+  const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+  const day = `${when.getDate()} ${MONTHS[when.getMonth()]}`;
+  const year = when.getFullYear() === new Date(now).getFullYear() ? '' : ` ${when.getFullYear()}`;
+  return `${time} · ${day}${year}`;
+}

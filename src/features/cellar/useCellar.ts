@@ -23,9 +23,11 @@ import {
   type EntryPatch,
   type NewDrop,
 } from '@/features/cellar/cellarApi';
+import { logEvents } from '@/features/cellar/trailApi';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { ENTRIES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
 import { unblocksEntry } from '@/lib/entryQuestions';
+import { patchEvents } from '@/lib/entryTrail';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 import type { Entry, Project, Shelf } from '@/types/cellar';
 
@@ -84,6 +86,7 @@ export function useCurrentShelf(shelves: Shelf[]) {
 
 export function useCellarWrites() {
   const { user } = useAuth();
+  const userId = user?.id;
   const client = useQueryClient();
 
   const invalidate = useCallback(
@@ -98,8 +101,14 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
+  // The entry as it was is read from the cache rather than passed in, so every
+  // caller of `update` gets a trail without knowing there is one.
   const update = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: EntryPatch }) => patchEntry(id, patch),
+    mutationFn: async ({ id, patch }: { id: string; patch: EntryPatch }) => {
+      const before = client.getQueryData<Entry[]>(ENTRIES_KEY)?.find((entry) => entry.id === id);
+      await patchEntry(id, patch);
+      if (before && userId) await logEvents(userId, id, patchEvents(before, patch, BY_YOU));
+    },
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
@@ -134,8 +143,9 @@ export function useCellarWrites() {
       if (entry.state !== 'blocked') return;
       if (!unblocksEntry(entry.questions, questionId)) return;
       await patchEntry(entry.id, { state: 'open', agent: null });
+      if (userId) await logEvents(userId, entry.id, patchEvents(entry, { state: 'open' }, BY_YOU));
     },
-    [],
+    [userId],
   );
 
   const answer = useMutation({
@@ -220,6 +230,8 @@ export function useCellarWrites() {
     removeProject,
   };
 }
+
+const BY_YOU = { source: 'user' as const, agent: null };
 
 function requireUser(id: string | undefined): string {
   if (!id) throw new Error('not signed in');
