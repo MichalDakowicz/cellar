@@ -10,6 +10,7 @@ function entry(id: string, kind: Kind, state: EntryState, archived = false): Ent
     text: id,
     kind,
     state,
+    position: 0,
     archived,
     createdAt: '2026-09-20T10:00:00.000Z',
     agent: null,

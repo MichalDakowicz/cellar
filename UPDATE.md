@@ -18,6 +18,7 @@
 - Settings: a project reads newest or oldest first, and can start with done and dropped folded
 - Settings: pick the tab the app opens on, and which kinds come first everywhere
 - Settings: a nudge when a thought sits untouched, with the days and how many a day yours to pick
+- Shelves, projects, project detail: hold and drag to put shelves, projects or thoughts in your order
 
 ### Changed
 

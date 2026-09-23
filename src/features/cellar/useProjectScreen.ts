@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 
 import type { EntryListItem } from '@/components/cellar/EntryList';
@@ -35,6 +36,7 @@ import type { Entry, Kind } from '@/types/cellar';
  * screens.
  */
 export function useProjectScreen(projectId: string | undefined) {
+  const router = useRouter();
   const { projects, entries, loading, error, refetch } = useCellar();
   const { settings } = useCellarSettings();
   const toggled = useCollapsedSections((state) => state.collapsed);
@@ -152,6 +154,8 @@ export function useProjectScreen(projectId: string | undefined) {
     toggleSection,
     showCodes: settings.showCodes,
     kindOrder: settings.kindOrder,
+    /** The drag-to-order screen for this project's thoughts. */
+    arrange: () => projectId && router.push({ pathname: '/arrange', params: { what: 'entries', id: projectId } }),
     filtered,
     /** Nothing matches, versus nothing here yet — two different empties (PING.md §9.9). */
     emptyKind: all.length === 0 ? ('nothing' as const) : visible.length === 0 ? ('filtered' as const) : null,

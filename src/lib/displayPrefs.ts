@@ -1,3 +1,4 @@
+import { byPosition } from '@/lib/arrange';
 import { KINDS, type KindMeta } from '@/lib/kinds';
 import type { Entry, Kind } from '@/types/cellar';
 
@@ -13,12 +14,12 @@ import type { Entry, Kind } from '@/types/cellar';
 
 export type RowDensity = 'roomy' | 'compact';
 export type TextSize = 'small' | 'normal' | 'large';
-export type ProjectSort = 'newest' | 'oldest';
+export type ProjectSort = 'newest' | 'oldest' | 'manual';
 export type StartTab = 'dump' | 'shelf' | 'inbox' | 'stats';
 
 const DENSITIES: RowDensity[] = ['roomy', 'compact'];
 const TEXT_SIZES: TextSize[] = ['small', 'normal', 'large'];
-const PROJECT_SORTS: ProjectSort[] = ['newest', 'oldest'];
+const PROJECT_SORTS: ProjectSort[] = ['newest', 'oldest', 'manual'];
 const START_TABS: StartTab[] = ['dump', 'shelf', 'inbox', 'stats'];
 
 function oneOf<T extends string>(allowed: readonly T[], fallback: T) {
@@ -78,8 +79,15 @@ export function kindOrderOf(value: unknown): Kind[] | null {
   return given.length > 0 ? [...new Set(given)] : null;
 }
 
-/** A project's rows in the chosen order. Ties on the stamp keep the order they came in. */
-export function sortForProject<T extends Pick<Entry, 'createdAt'>>(entries: T[], sort: ProjectSort): T[] {
+/**
+ * A project's rows in the chosen order. Ties on the stamp keep the order they
+ * came in. `manual` is where you dragged them (`lib/arrange.byPosition`).
+ */
+export function sortForProject<T extends Pick<Entry, 'createdAt'> & { position?: number }>(
+  entries: T[],
+  sort: ProjectSort,
+): T[] {
+  if (sort === 'manual') return byPosition(entries);
   const sign = sort === 'oldest' ? 1 : -1;
   return entries
     .map((entry, index) => ({ entry, index }))

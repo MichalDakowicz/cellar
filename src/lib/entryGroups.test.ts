@@ -24,6 +24,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   text: 'a thought',
   kind: 'idea',
   state: 'open',
+  position: 0,
   archived: false,
   createdAt: '2026-09-13T10:00:00.000Z',
   agent: null,

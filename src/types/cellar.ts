@@ -99,6 +99,8 @@ export type Entry = {
   text: string;
   kind: Kind;
   state: EntryState;
+  /** Where you dragged it. 0 is never placed, which sorts first (`lib/arrange`). */
+  position: number;
   /**
    * Out of the project and out of the inbox, still in search, one tap from
    * coming back. Nothing in this app is deleted to get it out of the way.

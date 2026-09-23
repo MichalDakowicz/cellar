@@ -53,8 +53,9 @@ export function DisplaySettings({ gutter }: { gutter: string }) {
           value={settings.projectSort}
           onChange={(projectSort) => set({ projectSort })}
           options={[
-            { value: 'newest', label: 'newest first' },
-            { value: 'oldest', label: 'oldest first' },
+            { value: 'newest', label: 'newest' },
+            { value: 'oldest', label: 'oldest' },
+            { value: 'manual', label: 'yours' },
           ]}
         />
         <SwitchRow
