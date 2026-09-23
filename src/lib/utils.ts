@@ -10,10 +10,7 @@ export function monogram(name: string | null | undefined): string {
   return (name ?? '').trim().charAt(0).toUpperCase() || '?';
 }
 
-/** "4 entries" / "1 entry". Pluralisation everywhere, in one place. */
-export function plural(n: number, one: string, many = `${one}s`): string {
-  return `${n} ${n === 1 ? one : many}`;
-}
+export { plural } from '@/lib/plural';
 
 /**
  * Turns a Supabase read failure into a sentence.
