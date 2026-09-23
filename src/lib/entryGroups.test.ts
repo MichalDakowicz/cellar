@@ -30,6 +30,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   agent: null,
   lines: [],
   questions: [],
+  docs: [],
   ...over,
 });
 

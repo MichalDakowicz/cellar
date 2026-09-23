@@ -18,6 +18,7 @@
 - Entry: mark a thought low or high importance, and the row carries the mark everywhere
 - Agent tools: the lookup commands show their result as one live page, updated in place each time
 - Entry: a history of the thought to the minute — dropped, moved, claimed, asked, answered
+- Entry: attach a link or a repo path to a thought, and an agent is told to read it first
 
 ### Changed
 

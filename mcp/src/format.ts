@@ -7,6 +7,7 @@ import {
   questionStatus,
   settledQuestions,
 } from '@/lib/entryQuestions';
+import { docKind } from '@/lib/entryDocs';
 import { importanceMeta } from '@/lib/importance';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
@@ -125,6 +126,17 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
 
   if (project?.repoPath) out.push(`repo     ${project.repoPath}`);
   if (project?.repoUrl) out.push(`remote   ${project.repoUrl}`);
+
+  // Above the thread: a doc the user hung off a thought is what they want read
+  // before anyone starts, and a path is relative to the repo just named.
+  if (entry.docs.length > 0) {
+    out.push('', 'read these first — attached to the thought:');
+    out.push(
+      ...entry.docs.map(
+        (doc) => `  ${docKind(doc.ref) === 'url' ? 'link' : 'path'}  ${doc.ref}${doc.label ? `  (${doc.label})` : ''}`,
+      ),
+    );
+  }
 
   if (yours.length > 0) {
     out.push('', 'what they added since:');

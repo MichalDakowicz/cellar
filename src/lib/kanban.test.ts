@@ -16,6 +16,7 @@ function entry(id: string, kind: Kind, state: EntryState, archived = false): Ent
     agent: null,
     lines: [],
     questions: [],
+    docs: [],
   };
 }
 

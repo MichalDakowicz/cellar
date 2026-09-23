@@ -33,6 +33,7 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   agent: 'claude',
   lines: [line('l1', 'which surface — dump, filter, or both?', 'agent')],
   questions: [],
+  docs: [],
   ...over,
 });
 

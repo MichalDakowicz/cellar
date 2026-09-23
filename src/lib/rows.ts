@@ -58,7 +58,10 @@ export type EntryRow = {
   agent: string | null;
   cellar_entry_lines: LineRow[] | null;
   cellar_entry_questions: QuestionRow[] | null;
+  cellar_entry_docs?: DocRow[] | null;
 };
+
+export type DocRow = { id: string; ref: string; label: string | null; created_at: string };
 
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
@@ -70,7 +73,7 @@ export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_p
 export const QUESTION_COLUMNS =
   'id, question, options, answer, answered_at, answered_via, dismissed_at, agent, created_at' as const;
 export const ENTRY_COLUMNS =
-  `id, project_id, text, kind, state, importance, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS})` as const;
+  `id, project_id, text, kind, state, importance, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS}), cellar_entry_docs(id, ref, label, created_at)` as const;
 
 export function normalizeShelf(row: ShelfRow): Shelf {
   return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
@@ -137,6 +140,9 @@ export function normalizeEntry(row: EntryRow): Entry {
     lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     questions: (row.cellar_entry_questions ?? [])
       .map(normalizeQuestion)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    docs: (row.cellar_entry_docs ?? [])
+      .map((doc) => ({ id: doc.id, ref: doc.ref, label: doc.label, createdAt: doc.created_at }))
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }

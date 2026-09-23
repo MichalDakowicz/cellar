@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
+import { useEntryDocs } from '@/features/cellar/useEntryDocs';
 import { useEntryTrail } from '@/features/cellar/useEntryTrail';
 import { splitThread } from '@/lib/agentWork';
 import { ENTRY_STATES } from '@/lib/entryState';
@@ -34,7 +35,9 @@ export function useEntryScreen(entryId: string | undefined) {
   const [removed, setRemoved] = useState<EntryLine[]>([]);
 
   const entry = entries.find((candidate) => candidate.id === entryId) ?? null;
-  const projectName = projects.find((project) => project.id === entry?.projectId)?.name ?? 'inbox';
+  const project = projects.find((candidate) => candidate.id === entry?.projectId) ?? null;
+  const projectName = project?.name ?? 'inbox';
+  const docs = useEntryDocs(entry, project);
   const trail = useEntryTrail(entry, projects);
 
   const siblings = useMemo(
@@ -148,6 +151,8 @@ export function useEntryScreen(entryId: string | undefined) {
     toggleArchive: () => patch({ archived: !entry?.archived }),
     moveTo: (projectId: string | null) => patch({ projectId }),
     deleteEntry,
+    /** Links and repo paths on the thought, and the field that attaches one. */
+    docs,
     /** Every stamp and every logged move, exact to the minute (`lib/entryTrail`). */
     trail,
     siblings: siblings as Entry[],

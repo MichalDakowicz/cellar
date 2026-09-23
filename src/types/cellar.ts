@@ -70,6 +70,15 @@ export type Project = {
   pinned: boolean;
 };
 
+/** A link or a repo path attached to a thought. Which one it is, is read off the ref. */
+export type EntryDoc = {
+  id: string;
+  ref: string;
+  /** What to call it. Null falls back to the host, or the file name. */
+  label: string | null;
+  createdAt: string;
+};
+
 /** One appended thought. Ordered oldest first, the way it was dumped. */
 export type EntryLine = {
   id: string;
@@ -120,6 +129,8 @@ export type Entry = {
   lines: EntryLine[];
   /** Oldest first. `blocked` means at least one of these is still unanswered. */
   questions: EntryQuestion[];
+  /** Links and repo paths hung off it, oldest first (`lib/entryDocs.ts`). */
+  docs: EntryDoc[];
 };
 
 /** What the capture screen holds before it becomes entries. */
