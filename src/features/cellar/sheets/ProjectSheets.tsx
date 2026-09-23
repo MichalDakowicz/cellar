@@ -1,3 +1,4 @@
+import { Pin } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -6,6 +7,7 @@ import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
 import { checkName, nameErrorText } from '@/lib/containers';
 import { useCellarSheets } from '@/store/cellarPrefs';
+import { COLORS } from '@/theme/colors';
 
 /** A new project on the current shelf, filing whatever was held into it as it lands. */
 export function NewProjectSheet({
@@ -117,6 +119,7 @@ export function FileUnderSheet({
             onPress={() => file(project.id)}
             className="flex-row items-center gap-3 rounded-xl bg-neutral-900 p-3 active:opacity-80"
           >
+            {project.pinned && <Pin size={13} color={COLORS.muted} strokeWidth={2.2} />}
             <Text className="min-w-0 flex-1 text-base font-bold text-foreground" numberOfLines={1}>
               {project.name}
             </Text>

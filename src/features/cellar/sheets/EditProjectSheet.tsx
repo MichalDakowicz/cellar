@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
-import { Field, Overline } from '@/components/ui/controls';
+import { Field, Overline, SwitchRow } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useSheetDraft } from '@/features/cellar/sheets/useSheetDraft';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
@@ -27,7 +27,7 @@ export function EditProjectSheet({
   onClose: () => void;
 }) {
   const { shelves, projects, entries } = useCellar();
-  const { editProject, linkProject, relocateProject, removeProject } = useCellarWrites();
+  const { editProject, linkProject, pinProject, relocateProject, removeProject } = useCellarWrites();
   const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
   const setLastProject = useCellarPrefs((state) => state.setLastProject);
 
@@ -90,6 +90,16 @@ export function EditProjectSheet({
             error={nameErrorText(error, 'project')}
           />
         </View>
+
+        {/* Applied as it is flipped, like the shelf chips below: it is a sort,
+            not a field, and a save button between you and the order you just
+            asked for is a round trip for nothing. */}
+        <SwitchRow
+          label="pin it"
+          sub="sorts first on its shelf, and first when you file a thought"
+          value={project.pinned}
+          onChange={(pinned) => pinProject.mutate({ id: project.id, pinned })}
+        />
 
         <View className="mt-5 gap-2">
           <Overline>where it lives</Overline>

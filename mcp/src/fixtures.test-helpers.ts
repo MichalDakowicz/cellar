@@ -56,6 +56,7 @@ const project: Project = {
   createdAt: '2026-09-01T00:00:00.000Z',
   repoPath: 'C:/ping/cellar',
   repoUrl: 'https://github.com/MichalDakowicz/cellar',
+  pinned: false,
 };
 
 export function cellarOf(...entries: Entry[]): Cellar {

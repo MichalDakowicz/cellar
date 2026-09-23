@@ -61,6 +61,7 @@ function proj(id: string, name: string): Project {
     createdAt: '2026-09-01T00:00:00.000Z',
     repoPath: null,
     repoUrl: null,
+    pinned: false,
   };
 }
 

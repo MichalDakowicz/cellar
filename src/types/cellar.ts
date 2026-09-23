@@ -59,6 +59,12 @@ export type Project = {
   repoPath: string | null;
   /** The remote, for opening. Never matched against — a URL is not a directory. */
   repoUrl: string | null;
+  /**
+   * Sorts first inside its own shelf, and first in every list of projects that
+   * spans shelves. That is all it does — there is no pinned band, so a pinned
+   * project is never on one screen twice (`lib/projectOrder.ts`).
+   */
+  pinned: boolean;
 };
 
 /** One appended thought. Ordered oldest first, the way it was dumped. */

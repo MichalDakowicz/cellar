@@ -5,6 +5,7 @@ import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-na
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
+import { projectChips } from '@/components/cellar/projectChips';
 import { SwipeShelf } from '@/components/cellar/SwipeShelf';
 import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
@@ -144,7 +145,7 @@ export default function DumpScreen() {
             </View>
             <ChipWrap
               label="project"
-              options={dump.projectOptions}
+              options={projectChips(dump.projectOptions, dump.projectId ?? '')}
               selected={dump.projectId ?? ''}
               onToggle={(value) => dump.setProject(value === '' ? null : value)}
             />

@@ -8,6 +8,7 @@
     "@/lib/entryQuestions": "../../../src/lib/entryQuestions.ts",
     "@/lib/entryState": "../../../src/lib/entryState.ts",
     "@/lib/kinds": "../../../src/lib/kinds.ts",
+    "@/lib/projectOrder": "../../../src/lib/projectOrder.ts",
     "@/lib/relTime": "../../../src/lib/relTime.ts",
     "@/lib/repoLink": "../../../src/lib/repoLink.ts",
     "@/lib/rows": "../../../src/lib/rows.ts",

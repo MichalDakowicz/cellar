@@ -121,7 +121,7 @@ export function useDumpScreen() {
     setProject: setLastProject,
     projectOptions: [
       { value: '', label: 'inbox' },
-      ...shelfProjects.map((project) => ({ value: project.id, label: project.name })),
+      ...shelfProjects.map((project) => ({ value: project.id, label: project.name, pinned: project.pinned })),
     ],
     recent,
     latest,
