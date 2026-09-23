@@ -61,6 +61,29 @@ export function entryRow(entry: Entry, projects: Project[], now = Date.now()): s
   return `${marks.join(' ')} ${entry.text}${tail ? ` ${tail}` : ''}`;
 }
 
+/**
+ * The same row as data, for a page rather than a terminal.
+ *
+ * The lookups publish a live view, and a page that re-parsed the fixed-width
+ * row would split "aetherial enchanting" into a project and half a thought —
+ * the padded project column is only as wide as a short name. Same fields as the
+ * row, same short id, nothing a row does not already show.
+ */
+export function entryData(entry: Entry, projects: Project[], now = Date.now()) {
+  return {
+    id: shortId(entry.id),
+    kind: entry.kind,
+    code: kindMeta(entry.kind).code,
+    state: entry.state,
+    age: shortRel(entry.createdAt, now),
+    project: projectName(entry, projects),
+    text: entry.text,
+    agent: entry.agent,
+    archived: entry.archived,
+    lines: entry.lines.length,
+  };
+}
+
 export function entryTable(entries: Entry[], projects: Project[], now = Date.now()): string {
   if (entries.length === 0) return '(nothing)';
   return entries.map((entry) => entryRow(entry, projects, now)).join('\n');

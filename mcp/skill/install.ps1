@@ -11,8 +11,9 @@
 # Env vars rather than parameters because a script read off a pipe has no argv
 # to read — `iex` runs the text, and there is nowhere to put an argument.
 #
-# It writes ~\.claude\skills\cellar\SKILL.md, one file per command in
-# ~\.claude\commands, and — only when a token is given — the cellar entry in
+# It writes ~\.claude\skills\cellar\SKILL.md and the live-view.html beside it,
+# one file per command in ~\.claude\commands, and — only when a token is given —
+# the cellar entry in
 # ~\.claude.json. The first two are overwritten, because the copy on the server
 # is the one that matches the deployed tools.
 $ErrorActionPreference = 'Stop'
@@ -25,6 +26,10 @@ New-Item -ItemType Directory -Force -Path $skills, $commands | Out-Null
 
 Invoke-WebRequest "$base/SKILL.md" -OutFile (Join-Path $skills 'SKILL.md') -UseBasicParsing
 Write-Host "skill    $(Join-Path $skills 'SKILL.md')"
+
+# The page the lookups fill and publish as one live view (SKILL.md, "The live view").
+Invoke-WebRequest "$base/live-view.html" -OutFile (Join-Path $skills 'live-view.html') -UseBasicParsing
+Write-Host "page     $(Join-Path $skills 'live-view.html')"
 
 # The list is fetched rather than hardcoded: a command added to mcp/skill/commands
 # ships with the next web deploy and installs here without this file changing.

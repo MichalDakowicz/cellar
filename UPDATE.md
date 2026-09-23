@@ -15,6 +15,7 @@
 - Entry: a link on the thought grows a card with the site, the title and what the page says
 - Projects: pin a project from its edit sheet to sort it first on its shelf and in file it
 - Entry: mark a thought low or high importance, and the row carries the mark everywhere
+- Agent tools: the lookup commands show their result as one live page, updated in place each time
 
 ### Changed
 
