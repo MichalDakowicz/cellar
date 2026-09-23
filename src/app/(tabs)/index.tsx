@@ -145,10 +145,12 @@ export default function DumpScreen() {
             </View>
             <ChipWrap
               label="project"
-              options={projectChips(dump.projectOptions, dump.projectId ?? '')}
-              selected={dump.projectId ?? ''}
-              onToggle={(value) => dump.setProject(value === '' ? null : value)}
+              options={projectChips(dump.projectOptions, dump.selectedTargets)}
+              selected={dump.selectedTargets}
+              onToggle={dump.pickProject}
+              onHold={dump.holdProject}
             />
+            <Text className="mt-2 text-xs text-muted-foreground">{dump.targetsHint}</Text>
           </SwipeShelf>
 
           <View className="mb-2 mt-5">

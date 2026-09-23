@@ -12,12 +12,12 @@ export type ProjectChoice = { value: string; label: string; pinned?: boolean };
  * glyph. The pinned chips already sit first — `pinnedFirst` ordered them as
  * they were read — so the mark only says why they are there.
  */
-export function projectChips(options: ProjectChoice[], selected: string): ChipOption<string>[] {
+export function projectChips(options: ProjectChoice[], selected: string[]): ChipOption<string>[] {
   return options.map(({ value, label, pinned }) => ({
     value,
     label,
     glyph: pinned ? (
-      <Pin size={12} color={value === selected ? COLORS.accent : COLORS.muted} strokeWidth={2.2} />
+      <Pin size={12} color={selected.includes(value) ? COLORS.accent : COLORS.muted} strokeWidth={2.2} />
     ) : undefined,
   }));
 }

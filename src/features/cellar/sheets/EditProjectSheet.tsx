@@ -28,8 +28,8 @@ export function EditProjectSheet({
 }) {
   const { shelves, projects, entries } = useCellar();
   const { editProject, linkProject, pinProject, relocateProject, removeProject } = useCellarWrites();
-  const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
-  const setLastProject = useCellarPrefs((state) => state.setLastProject);
+  const lastProjectIds = useCellarPrefs((state) => state.lastProjectIds);
+  const setLastProjects = useCellarPrefs((state) => state.setLastProjects);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
   const { values, set, confirming, setConfirming } = useSheetDraft(open, projectId, {
@@ -63,9 +63,9 @@ export function EditProjectSheet({
   };
 
   const destroy = () => {
-    // The capture screen's chip points at this project; leaving it pointed at a
-    // dead id would file the next thought nowhere.
-    if (lastProjectId === project.id) setLastProject(null);
+    // The capture screen's chips may point at this project; leaving one pointed
+    // at a dead id would file the next thought nowhere.
+    if (lastProjectIds.includes(project.id)) setLastProjects(lastProjectIds.filter((id) => id !== project.id));
     removeProject.mutate(project.id, { onSuccess: onClose });
   };
 

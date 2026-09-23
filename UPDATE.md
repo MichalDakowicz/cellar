@@ -13,6 +13,7 @@
 - Entry: a settled question keeps its options on show, with the ones the answer took ticked
 - Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
 - Entry: a link on the thought grows a card with the site, the title and what the page says
+- Dump: hold a project chip to file the thought into more than one, and it lands in each
 - Projects: pin a project from its edit sheet to sort it first on its shelf and in file it
 - Entry: mark a thought low or high importance, and the row carries the mark everywhere
 - Agent tools: the lookup commands show their result as one live page, updated in place each time
