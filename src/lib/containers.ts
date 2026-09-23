@@ -1,4 +1,4 @@
-import { plural } from '@/lib/utils';
+import { plural } from '@/lib/plural';
 import type { Entry, Project, Shelf } from '@/types/cellar';
 
 /**

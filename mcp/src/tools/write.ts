@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { canClaim, LINE_VOICE } from '@/lib/agentWork';
-import { answeredForAgent, MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
+import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { normalizeRepoPath, normalizeRepoUrl, repoLabel } from '@/lib/repoLink';
 import type { Kind } from '@/types/cellar';
@@ -10,7 +10,6 @@ import type { Kind } from '@/types/cellar';
 import {
   addAgentLine,
   answerQuestion,
-  archiveEntry,
   askQuestion,
   claimEntry,
   createEntry,
@@ -18,17 +17,17 @@ import {
   resolveEntry,
   resolveProject,
   resolveQuestion,
-  setEntryState,
-  type Cellar,
 } from '../cellar.ts';
-import { guard, text, withCellar, type CtxProvider } from '../context.ts';
-import { answeredTail, entryBrief, shortId } from '../format.ts';
+import { guard, text, withAnswered, withCellar, type CtxProvider } from '../context.ts';
+import { entryBrief, shortId } from '../format.ts';
 
 /**
  * The writes, and the shape of the loop they make:
  *
  *   claim → work → append lines → finish (done | dropped)
  *                              ↘ ask → blocked, and move to the next thing
+ *
+ * Putting a thought down — finish, unclaim, reopen, archive — is `settle.ts`.
  *
  * Three things are deliberately missing. There is no delete — nothing in this
  * app is destroyed to get it out of the way, so the strongest thing here is
@@ -38,25 +37,6 @@ import { answeredTail, entryBrief, shortId } from '../format.ts';
  * it was dumped as, forever, and everything an agent has to say about it is an
  * appended line.
  */
-
-/**
- * Every write answers the question the agent forgot to ask: did anything come
- * back?
- *
- * `cellar_check_answers` is the tool for it, and an agent that remembers to
- * call it never sees this. Forgetting to look is the failure being fixed, so
- * the answer is appended to the result of whatever the agent *did* call — it is
- * reading that text anyway. The cellar snapshot predates the write, so the
- * entry being acted on is left out: finishing a thought must not print a nudge
- * to go and pick that same thought back up.
- */
-function withAnswered(body: string, cellar: Cellar, agent: string, exceptId?: string): string {
-  const answered = answeredForAgent(
-    cellar.entries.filter((entry) => !entry.archived),
-    agent,
-  );
-  return body + answeredTail(answered, exceptId);
-}
 
 export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void {
   server.registerTool(
@@ -249,55 +229,6 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
   );
 
   server.registerTool(
-    'cellar_finish_entry',
-    {
-      title: 'Finish an entry',
-      description:
-        'Settle a claimed entry as done or dropped, with one line saying what happened. "done" means the thought ' +
-        'has been acted on; "dropped" means it should not be — it is stale, already true, or the user decided ' +
-        'against it. Never mark something done that you did not actually finish; leaving it blocked with a ' +
-        'question is always better than a done entry the user has to discover was not.',
-      inputSchema: {
-        entry: z.string().describe('Entry id, or the short id from a listing.'),
-        outcome: z.enum(['done', 'dropped']),
-        note: z.string().describe('One line: what changed, or why it was dropped.'),
-      },
-    },
-    async ({ entry, outcome, note }) =>
-      guard(async () => {
-        const { ctx, cellar } = await withCellar(getCtx);
-        const target = resolveEntry(entry, cellar.entries);
-        const written = await addAgentLine(ctx.client, ctx.userId, target.id, note);
-        // The name comes off with the claim: nobody is on it any more.
-        await setEntryState(ctx.client, target.id, outcome, null);
-        return text(withAnswered(`${shortId(target.id)} is ${outcome}:\n> ${written}`, cellar, ctx.agent, target.id));
-      }),
-  );
-
-  server.registerTool(
-    'cellar_unclaim_entry',
-    {
-      title: 'Put an entry back',
-      description:
-        'Return a claimed entry to open without settling it — you ran out of context, the user asked for something ' +
-        'else, or it turned out to be someone else\'s to do. Leaves it exactly as it was found, plus your note if ' +
-        'you give one.',
-      inputSchema: {
-        entry: z.string().describe('Entry id, or the short id from a listing.'),
-        note: z.string().optional().describe('One line: how far you got, if that is worth knowing.'),
-      },
-    },
-    async ({ entry, note }) =>
-      guard(async () => {
-        const { ctx, cellar } = await withCellar(getCtx);
-        const target = resolveEntry(entry, cellar.entries);
-        if (note?.trim()) await addAgentLine(ctx.client, ctx.userId, target.id, note);
-        await setEntryState(ctx.client, target.id, 'open', null);
-        return text(withAnswered(`${shortId(target.id)} is open again.`, cellar, ctx.agent, target.id));
-      }),
-  );
-
-  server.registerTool(
     'cellar_create_entry',
     {
       title: 'Drop a new thought',
@@ -326,30 +257,6 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           agent: ctx.agent,
         });
         return text(`Dropped ${shortId(created.id)} into ${target?.name ?? 'the inbox'}:\n${created.text}`);
-      }),
-  );
-
-  server.registerTool(
-    'cellar_archive_entry',
-    {
-      title: 'Archive an entry',
-      description:
-        'Put a thought away — it is already true, it was fixed elsewhere, or it no longer applies. It stays ' +
-        'searchable and the user can bring it back in one tap. There is deliberately no way to delete an entry. ' +
-        'The reason is required and is written onto the entry, because an entry that vanished from a list with no ' +
-        'explanation is indistinguishable from a bug.',
-      inputSchema: {
-        entry: z.string().describe('Entry id, or the short id from a listing.'),
-        reason: z.string().describe('One line: why it no longer needs to be there.'),
-      },
-    },
-    async ({ entry, reason }) =>
-      guard(async () => {
-        const { ctx, cellar } = await withCellar(getCtx);
-        const target = resolveEntry(entry, cellar.entries);
-        const written = await addAgentLine(ctx.client, ctx.userId, target.id, reason);
-        await archiveEntry(ctx.client, target.id);
-        return text(withAnswered(`${shortId(target.id)} is archived:\n> ${written}`, cellar, ctx.agent, target.id));
       }),
   );
 

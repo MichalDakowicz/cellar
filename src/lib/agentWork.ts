@@ -1,5 +1,5 @@
 import { oneLine } from '@/lib/dump';
-import type { Entry, EntryLine, Kind } from '@/types/cellar';
+import type { Entry, EntryLine, EntryState, Kind } from '@/types/cellar';
 
 /**
  * The rules an agent works a cellar entry under.
@@ -12,7 +12,7 @@ import type { Entry, EntryLine, Kind } from '@/types/cellar';
  *
  * The shape of the loop, and it is deliberately short:
  *
- *   open → claim → doing → work → done | dropped
+ *   open → claim → doing → work → done | dropped → (reopen) → open
  *                       ↘ ask → blocked → (you answer) → open
  *
  * Where the asking happens depends on how much work is on the table, and that
@@ -22,6 +22,50 @@ import type { Entry, EntryLine, Kind } from '@/types/cellar';
 /** Only an untouched, unarchived thought can be picked up. */
 export function canClaim(entry: Pick<Entry, 'state' | 'archived'>): boolean {
   return entry.state === 'open' && !entry.archived;
+}
+
+/**
+ * Putting a claim back is for a claim. Anything else sent back to open through
+ * the unclaim door is a reopen nobody asked for — a done thought quietly
+ * undone, or a question dropped on the floor.
+ */
+export function canUnclaim(entry: Pick<Entry, 'state'>): boolean {
+  return entry.state === 'doing';
+}
+
+/**
+ * What bringing a thought back writes, or why it cannot come back.
+ *
+ * Settled is the case: done or dropped goes back to open with nobody's name on
+ * it, so it can be claimed again. Archived comes back out too, and lands open if
+ * it had been settled before it was put away — an archived thought that was
+ * still open or waiting comes back exactly as it was.
+ *
+ * The three refusals each have a better tool, and naming it is the point: a
+ * blocked thought is answered, not reopened; a claimed one is someone's work;
+ * an open one is already there.
+ */
+export type ReopenPlan =
+  | { ok: true; patch: { state: EntryState; agent: string | null; archived: false } }
+  | { ok: false; why: string };
+
+const SETTLED: EntryState[] = ['done', 'dropped'];
+
+export function reopenPlan(entry: Pick<Entry, 'state' | 'archived' | 'agent'>): ReopenPlan {
+  const settled = SETTLED.includes(entry.state);
+  if (settled) return { ok: true, patch: { state: 'open', agent: null, archived: false } };
+  if (entry.archived) return { ok: true, patch: { state: entry.state, agent: entry.agent, archived: false } };
+
+  if (entry.state === 'blocked') {
+    return { ok: false, why: 'it is blocked on a question — answer it with cellar_answer_question instead' };
+  }
+  if (entry.state === 'doing') {
+    return {
+      ok: false,
+      why: `it is being worked${entry.agent ? ` by ${entry.agent}` : ''} — cellar_unclaim_entry puts a claim back`,
+    };
+  }
+  return { ok: false, why: 'it is already open' };
 }
 
 /** What is stalled on an answer from you. Newest first — it is a reply queue. */

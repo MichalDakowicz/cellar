@@ -253,7 +253,8 @@ Writes:
 | `cellar_ask`           | Question (+ a/b/c/d options) + `→ blocked`. **An outcome, not a failure**    |
 | `cellar_answer_question` | Record an answer the user gave in the chat; unblocks when it was the last  |
 | `cellar_finish_entry`  | `→ done \| dropped` with a note                                              |
-| `cellar_unclaim_entry` | `→ open`, unchanged                                                          |
+| `cellar_unclaim_entry` | `doing → open`, unchanged; refuses anything that is not a claim              |
+| `cellar_reopen_entry`  | `done \| dropped \| archived → open`, reason required                         |
 | `cellar_create_entry`  | Drop a follow-up thought found while working                                 |
 | `cellar_archive_entry` | Put a thought away, reason required                                          |
 | `cellar_link_repo`     | Point a project at a checkout, so this never has to be worked out again      |

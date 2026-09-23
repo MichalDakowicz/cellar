@@ -1,6 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { answeredForAgent } from '@/lib/entryQuestions';
+
 import { loadCellar, type Cellar } from './cellar.ts';
+import { answeredTail } from './format.ts';
 
 /**
  * What every tool needs, and the one thing that is not the same in the two
@@ -29,7 +32,26 @@ export async function withCellar(getCtx: CtxProvider): Promise<{ ctx: Ctx; cella
   return { ctx, cellar: await loadCellar(ctx.client) };
 }
 
-export type ToolResult = { content: { type: 'text'; text: string }[]; isError?: boolean };
+/**
+ * Every write answers the question the agent forgot to ask: did anything come
+ * back?
+ *
+ * `cellar_check_answers` is the tool for it, and an agent that remembers to
+ * call it never sees this. Forgetting to look is the failure being fixed, so
+ * the answer is appended to the result of whatever the agent *did* call — it is
+ * reading that text anyway. The cellar snapshot predates the write, so the
+ * entry being acted on is left out: finishing a thought must not print a nudge
+ * to go and pick that same thought back up.
+ */
+export function withAnswered(body: string, cellar: Cellar, agent: string, exceptId?: string): string {
+  const answered = answeredForAgent(
+    cellar.entries.filter((entry) => !entry.archived),
+    agent,
+  );
+  return body + answeredTail(answered, exceptId);
+}
+
+export type ToolResult ={ content: { type: 'text'; text: string }[]; isError?: boolean };
 
 export function text(body: string): ToolResult {
   return { content: [{ type: 'text', text: body }] };

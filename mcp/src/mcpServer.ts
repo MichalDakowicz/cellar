@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { CtxProvider } from './context.ts';
 import { registerReadTools } from './tools/read.ts';
+import { registerSettleTools } from './tools/settle.ts';
 import { registerStructureTools } from './tools/structure.ts';
 import { registerWriteTools } from './tools/write.ts';
 
@@ -43,6 +44,7 @@ export function createCellarServer(getCtx: CtxProvider): McpServer {
 
   registerReadTools(server, getCtx);
   registerWriteTools(server, getCtx);
+  registerSettleTools(server, getCtx);
   registerStructureTools(server, getCtx);
 
   return server;
