@@ -13,8 +13,10 @@ const EDGE = 1;
 
 /** A cell's share of the folder's outline: only the sides that face out, rounded where two meet. */
 function edgeStyle(edges: FolderEdges): ViewStyle {
+  // Outline only, no fill: a translucent ground on cells that touch doubles up
+  // along every shared edge and shows as a seam, and it also swallowed the
+  // tiles' own edges. The tab keeps its fill — it is the folder's label.
   return {
-    backgroundColor: COLORS.chipGround,
     borderColor: COLORS.islandEdge,
     borderTopWidth: edges.top ? EDGE : 0,
     borderRightWidth: edges.right ? EDGE : 0,
@@ -33,7 +35,8 @@ function edgeStyle(edges: FolderEdges): ViewStyle {
  *
  * The outline is the union of its cells — a header tab as wide as the first
  * row, then the tiles — so three projects in two columns make an L, never a
- * square with an empty corner (`lib/groups.folderEdges`). Each cell draws the
+ * square with an empty corner (`lib/groups.folderEdges`). Only the tab is
+ * filled; the tiles sit inside a line, so their own edges still read. Each cell draws the
  * sides that face out and neighbours touch, so the pieces read as one shape.
  *
  * Closed, it is just the tab, with how many projects are inside.

@@ -4,7 +4,6 @@ import { View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { KanbanBoard } from '@/components/cellar/KanbanBoard';
-import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
@@ -152,6 +151,7 @@ export default function ProjectScreen() {
                       initials={project.initials}
                       icon={project.icon}
                       large
+                      onCopy={project.project ? () => project.project && copyProjectPrompt(project.project) : undefined}
                     />
                   </View>
                   {project.repo && (
@@ -161,15 +161,6 @@ export default function ProjectScreen() {
                       path={project.repo.path}
                       align="end"
                     />
-                  )}
-                  {!!project.project && (
-                    <View className="mt-1.5">
-                      <CopyPrompt
-                        onPress={() => project.project && copyProjectPrompt(project.project)}
-                        what="this project"
-                        align="end"
-                      />
-                    </View>
                   )}
                 </View>
               </View>
@@ -240,13 +231,9 @@ function PhoneHeader({
           filtered={project.filtered}
           onArrange={project.arrange}
           onFilter={onFilter}
+          onCopy={project.project ? () => project.project && onCopyProject(project.project) : undefined}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
-        {!!project.project && (
-          <View className="mt-1.5">
-            <CopyPrompt onPress={() => project.project && onCopyProject(project.project)} what="this project" />
-          </View>
-        )}
       </View>
     </View>
   );
