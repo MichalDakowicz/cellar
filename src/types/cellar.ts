@@ -45,6 +45,21 @@ export type Shelf = {
   createdAt: string;
 };
 
+/**
+ * The level between a shelf and its projects: an ecosystem that is one thing
+ * from far away. It holds no thoughts itself — its general project does
+ * (`Project.groupHome`), so `project_id is null` stays the inbox and only that.
+ */
+export type Group = {
+  id: string;
+  shelfId: string;
+  name: string;
+  position: number;
+  /** Sorts first on its shelf, the same way a pinned project does. */
+  pinned: boolean;
+  createdAt: string;
+};
+
 export type Project = {
   id: string;
   shelfId: string;
@@ -59,6 +74,10 @@ export type Project = {
   repoPath: string | null;
   /** The remote, for opening. Never matched against — a URL is not a directory. */
   repoUrl: string | null;
+  /** The group it sits in, when it sits in one (`lib/groups.ts`). */
+  groupId?: string | null;
+  /** The group's own general project — where a thought dumped into the group lands. */
+  groupHome?: boolean;
   /**
    * A small square picture as a data URI (`lib/projectIcon.ts`). Optional,
    * because only the app selects it — the MCP server's projects never carry one.

@@ -287,6 +287,33 @@ create table if not exists public.cellar_entry_events (
 create index if not exists cellar_entry_events_entry_idx
   on public.cellar_entry_events (entry_id, at);
 
+-- ----------------------------------------------------------------------------
+-- 10. Groups — the level between a shelf and its projects
+--
+-- An ecosystem of apps that are one thing from far away: ping holds radar,
+-- lidar, sonar, pulsar and cellar. Optional — a project in no group sits on its
+-- shelf the way it always did.
+--
+-- A group holds no thoughts of its own. It owns a general project
+-- (`cellar_projects.group_home`, see COLUMN MIGRATIONS), named after it and
+-- listed first inside it, and a thought dumped into the group lands there. So
+-- `project_id is null` is still the inbox and only the inbox.
+--
+-- Cascades with its shelf, like a project does. Deleting a group sets its
+-- projects' group_id null — they fall back onto the shelf, thoughts and all.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_groups (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  shelf_id   uuid not null references public.cellar_shelves(id) on delete cascade,
+  name       text not null,
+  position   int  not null default 0,
+  pinned     boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists cellar_groups_user_idx on public.cellar_groups (user_id, shelf_id, position);
+
 -- ============================================================================
 -- Row level security
 --
@@ -301,6 +328,7 @@ alter table public.cellar_entry_lines  enable row level security;
 alter table public.cellar_entry_questions enable row level security;
 alter table public.cellar_entry_docs   enable row level security;
 alter table public.cellar_entry_events enable row level security;
+alter table public.cellar_groups       enable row level security;
 alter table public.cellar_settings     enable row level security;
 alter table public.cellar_agent_tokens enable row level security;
 
@@ -340,6 +368,11 @@ create policy cellar_entry_docs_owner_all on public.cellar_entry_docs for all
 
 drop policy if exists cellar_entry_events_owner_all on public.cellar_entry_events;
 create policy cellar_entry_events_owner_all on public.cellar_entry_events for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists cellar_groups_owner_all on public.cellar_groups;
+create policy cellar_groups_owner_all on public.cellar_groups for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -510,6 +543,7 @@ declare
 begin
   foreach t in array array[
     'cellar_shelves',
+    'cellar_groups',
     'cellar_projects',
     'cellar_entries',
     'cellar_entry_lines',
@@ -692,3 +726,15 @@ alter table public.cellar_settings add column if not exists nudges_per_day int n
 -- is past 80 000 characters (src/lib/projectIcon.ts). The MCP server never
 -- selects it — an agent has no use for a picture.
 alter table public.cellar_projects add column if not exists icon text;
+
+-- 2026-09-23 — which group a project sits in, and which project is the group's own.
+--
+-- `on delete set null`: deleting a group drops its projects back onto the
+-- shelf, never with it. `group_home` marks the general project a group owns —
+-- the place a thought dumped into the group lands (see 10. Groups). A home whose
+-- group is gone is an ordinary project again; readers only trust the flag while
+-- group_id still points somewhere.
+alter table public.cellar_projects
+  add column if not exists group_id uuid references public.cellar_groups(id) on delete set null;
+alter table public.cellar_projects
+  add column if not exists group_home boolean not null default false;

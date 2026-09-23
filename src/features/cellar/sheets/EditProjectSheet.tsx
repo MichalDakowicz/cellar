@@ -5,6 +5,7 @@ import { ProjectMark } from '@/components/cellar/ProjectMark';
 import { Field, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { pickProjectIcon } from '@/features/cellar/pickProjectIcon';
+import { ProjectGroupPicker } from '@/features/cellar/sheets/ProjectGroupPicker';
 import { useSheetDraft } from '@/features/cellar/sheets/useSheetDraft';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { checkName, deleteProjectCost, nameErrorText } from '@/lib/containers';
@@ -76,11 +77,14 @@ export function EditProjectSheet({
       <SheetDialog
         open={open && !confirming}
         title="edit project"
+        // A group's general project goes with its group, never on its own: it is
+        // where every thought about the whole group lives.
+        body={project.groupHome ? 'the general project of its group — delete the group to take it off the shelf.' : undefined}
         confirmLabel="save"
-        dismissLabel="delete it"
+        dismissLabel={project.groupHome ? 'close' : 'delete it'}
         confirmDisabledReason={nameErrorText(error, 'project')}
         onConfirm={save}
-        onDismiss={() => setConfirming(true)}
+        onDismiss={() => (project.groupHome ? onClose() : setConfirming(true))}
         onRequestClose={onClose}
       >
         <View className="mt-4">
@@ -119,6 +123,8 @@ export function EditProjectSheet({
             </Pressable>
           )}
         </View>
+
+        <ProjectGroupPicker project={project} />
 
         <View className="mt-5 gap-2">
           <Overline>where it lives</Overline>

@@ -25,7 +25,7 @@ export function checkName(name: string, siblings: string[], currentName?: string
   return siblings.some((sibling) => sibling.trim().toLowerCase() === clean.toLowerCase()) ? 'taken' : null;
 }
 
-export function nameErrorText(error: NameError, noun: 'shelf' | 'project'): string | null {
+export function nameErrorText(error: NameError, noun: 'shelf' | 'project' | 'group'): string | null {
   if (error === 'empty') return `give the ${noun} a name`;
   if (error === 'taken') return `there is already a ${noun} called that`;
   return null;

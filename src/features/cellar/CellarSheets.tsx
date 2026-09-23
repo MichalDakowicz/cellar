@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { EditGroupSheet } from '@/features/cellar/sheets/EditGroupSheet';
 import { EditProjectSheet } from '@/features/cellar/sheets/EditProjectSheet';
 import { EditShelfSheet } from '@/features/cellar/sheets/EditShelfSheet';
 import { FilterSheet } from '@/features/cellar/sheets/FilterSheet';
@@ -8,7 +9,17 @@ import { ShelfSheet } from '@/features/cellar/sheets/ShelfSheet';
 import { ScopeSheet, SortSheet } from '@/features/cellar/sheets/ViewSheets';
 import { useCellarSheets } from '@/store/cellarPrefs';
 
-type Which = 'filter' | 'shelf' | 'project' | 'file' | 'sort' | 'scope' | 'editProject' | 'editShelf' | null;
+type Which =
+  | 'filter'
+  | 'shelf'
+  | 'project'
+  | 'file'
+  | 'sort'
+  | 'scope'
+  | 'editProject'
+  | 'editShelf'
+  | 'editGroup'
+  | null;
 
 /**
  * Every sheet in the app, mounted once in the tabs layout and opened through
@@ -55,6 +66,7 @@ export function CellarSheets() {
       statsScope: () => open('scope'),
       editProject: (projectId) => open('editProject', projectId),
       editShelf: (shelfId) => open('editShelf', shelfId),
+      editGroup: (groupId) => open('editGroup', groupId),
     });
     return () =>
       register({
@@ -67,6 +79,7 @@ export function CellarSheets() {
         statsScope: null,
         editProject: null,
         editShelf: null,
+        editGroup: null,
       });
   }, [register]);
 
@@ -80,6 +93,7 @@ export function CellarSheets() {
       <ScopeSheet open={which === 'scope'} onClose={close} />
       <EditProjectSheet open={which === 'editProject'} projectId={targetId} onClose={close} />
       <EditShelfSheet open={which === 'editShelf'} shelfId={targetId} onClose={close} />
+      <EditGroupSheet open={which === 'editGroup'} groupId={targetId} onClose={close} />
     </>
   );
 }

@@ -155,7 +155,22 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
 
         const blocks = shelves.map((candidate) => {
           const projects = cellar.projects.filter((project) => project.shelfId === candidate.id);
-          const rows = projects.map((project) => `  ${projectRow(project, cellar.entries)}`);
+          // A group reads as its general project with the rest indented under
+          // it — the general project carries the group's name, so no second
+          // query is needed to print the folder.
+          const homes = projects.filter((project) => project.groupHome);
+          const inGroup = (project: (typeof projects)[number]) => homes.some((home) => home.groupId === project.groupId);
+          const rows = [
+            ...homes.flatMap((home) => [
+              `  ${projectRow(home, cellar.entries)}  (group — thoughts about the whole group)`,
+              ...projects
+                .filter((project) => !project.groupHome && project.groupId === home.groupId)
+                .map((project) => `    ${projectRow(project, cellar.entries)}`),
+            ]),
+            ...projects
+              .filter((project) => !project.groupHome && !inGroup(project))
+              .map((project) => `  ${projectRow(project, cellar.entries)}`),
+          ];
           return [`${candidate.name}:`, ...(rows.length > 0 ? rows : ['  (no projects)'])].join('\n');
         });
 
