@@ -9,7 +9,7 @@ import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
-import { answeredBlock, entryBrief, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
+import { answeredBlock, entryBrief, entryData, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
 
 /**
  * The reads. `cellar_orient` is the one that matters.
@@ -178,9 +178,13 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         search: z.string().optional().describe('Substring of the thought or any of its lines.'),
         archived: z.boolean().optional().describe('Include archived entries. Default false.'),
         limit: z.number().int().min(1).max(200).optional().describe('Default 40.'),
+        json: z
+          .boolean()
+          .optional()
+          .describe('Rows as JSON instead of text — for filling the live view page, never for reading yourself.'),
       },
     },
-    async ({ project, kinds, states, search, archived, limit }) =>
+    async ({ project, kinds, states, search, archived, limit, json }) =>
       guard(async () => {
         const { cellar } = await withCellar(getCtx);
         let rows: Entry[] = cellar.entries;
@@ -211,6 +215,10 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         }
 
         const capped = rows.slice(0, limit ?? LIMIT);
+        if (json) {
+          const data = capped.map((entry) => entryData(entry, cellar.projects));
+          return text(JSON.stringify({ rows: data, more: rows.length - capped.length }));
+        }
         const note = rows.length > capped.length ? `\n\n(${rows.length - capped.length} more not shown)` : '';
         return text(`${ROW_LEGEND}\n${entryTable(capped, cellar.projects)}${note}`);
       }),

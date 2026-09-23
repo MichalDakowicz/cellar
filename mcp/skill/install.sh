@@ -13,8 +13,9 @@
 # to read — `sh` is running the stream, and its own arguments are not the
 # script's.
 #
-# It writes ~/.claude/skills/cellar/SKILL.md, one file per command in
-# ~/.claude/commands, and — only when a token is given — the cellar entry in
+# It writes ~/.claude/skills/cellar/SKILL.md and the live-view.html beside it,
+# one file per command in ~/.claude/commands, and — only when a token is given —
+# the cellar entry in
 # ~/.claude.json. The first two are overwritten, because the copy on the server
 # is the one that matches the deployed tools.
 set -eu
@@ -27,6 +28,10 @@ mkdir -p "$skills" "$commands"
 
 curl -fsSL "$base/SKILL.md" -o "$skills/SKILL.md"
 echo "skill    $skills/SKILL.md"
+
+# The page the lookups fill and publish as one live view (SKILL.md, "The live view").
+curl -fsSL "$base/live-view.html" -o "$skills/live-view.html"
+echo "page     $skills/live-view.html"
 
 # The list is fetched rather than hardcoded: a command added to mcp/skill/commands
 # ships with the next web deploy and installs here without this file changing.

@@ -1,0 +1,340 @@
+<title>Cellar Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /*
+   * The cellar's own look, not a new one: the app's near-black ground and
+   * slate accent, its state colours, its one-line rows with a fixed gutter.
+   * Light is the app's light theme, with the slate-600 accent it uses there.
+   */
+  :root {
+    --ground: #f6f7f9;
+    --raised: #ffffff;
+    --ink: #111317;
+    --muted: #5d6573;
+    --faint: #8b93a1;
+    --hair: #e2e5ea;
+    --accent: #475569;
+    --accent-soft: rgba(71, 85, 105, 0.12);
+    --doing: #b45309;
+    --blocked: #dc2626;
+    --done: #15803d;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0a0a0a;
+      --raised: #161718;
+      --ink: #fafafa;
+      --muted: #a3a3a3;
+      --faint: #737373;
+      --hair: #262626;
+      --accent: #64748b;
+      --accent-soft: rgba(100, 116, 139, 0.16);
+      --doing: #f59e0b;
+      --blocked: #ef4444;
+      --done: #22c55e;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0a0a0a;
+    --raised: #161718;
+    --ink: #fafafa;
+    --muted: #a3a3a3;
+    --faint: #737373;
+    --hair: #262626;
+    --accent: #64748b;
+    --accent-soft: rgba(100, 116, 139, 0.16);
+    --doing: #f59e0b;
+    --blocked: #ef4444;
+    --done: #22c55e;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 15px/1.45 var(--sans);
+    padding-inline: 16px;
+    padding-block: 28px 56px;
+  }
+  main { max-width: 760px; margin: 0 auto; display: grid; gap: 28px; }
+
+  header { display: grid; gap: 6px; }
+  .eyebrow {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  h1 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; text-wrap: balance; overflow-wrap: anywhere; }
+  .sub { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+  section { display: grid; gap: 4px; }
+  h2 {
+    margin: 0 0 4px;
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* One row = one thought. The gutter is fixed so every thought starts at the same x. */
+  .row {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+  .row:hover { background: var(--raised); }
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row.settled { opacity: 0.5; }
+  .code { font: 500 12px/20px var(--mono); color: var(--muted); }
+  .text { overflow-wrap: anywhere; line-height: 20px; }
+  .text small { color: var(--faint); font-size: 12px; margin-left: 6px; }
+  .meta {
+    display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap;
+    font: 12px/20px var(--mono); color: var(--faint); font-variant-numeric: tabular-nums;
+  }
+  .where { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge {
+    font: 700 10px/1 var(--sans);
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--tone) 16%, transparent);
+    color: var(--tone);
+  }
+  .empty { color: var(--muted); padding: 10px; }
+
+  /* One entry in full. */
+  .thought { font-size: 21px; line-height: 1.35; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+  dl.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: 13px; }
+  dl.facts dt { font: 12px/1.5 var(--mono); color: var(--faint); }
+  dl.facts dd { margin: 0; overflow-wrap: anywhere; }
+  .line { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; padding: 6px 10px; font-size: 14px; }
+  .line .mark { font-family: var(--mono); color: var(--faint); }
+  .line .age { font: 12px/20px var(--mono); color: var(--faint); }
+  .q { background: var(--raised); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+  .q p { margin: 0; font-weight: 600; }
+  .q ol { margin: 0; padding-left: 22px; list-style: lower-alpha; color: var(--muted); display: grid; gap: 2px; }
+  .q li.taken { color: var(--ink); }
+  .q .answer { font-size: 13px; color: var(--muted); }
+  .q .answer b { color: var(--ink); font-weight: 600; }
+
+  footer { color: var(--faint); font-size: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  #toast { font-family: var(--mono); color: var(--accent); }
+  @media (max-width: 480px) {
+    .row { grid-template-columns: 36px minmax(0, 1fr); }
+    .meta { grid-column: 2; justify-content: flex-start; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .row { transition: background-color 120ms ease; }
+  }
+</style>
+
+<!--
+  The lookups fill this block and nothing else. Keep it valid JSON, and write
+  every "<" inside a string as < so a thought can never close the tag.
+-->
+<script type="application/json" id="cellar-data">
+{
+  "lookup": "list",
+  "heading": "cellar",
+  "sub": "example rows — the next /cellar-list replaces them",
+  "at": "2026-09-23T12:00:00Z",
+  "sections": [
+    {
+      "title": "blocked on you",
+      "rows": [
+        { "id": "8741168b", "code": "idea", "kind": "idea", "state": "blocked", "age": "1w", "project": "cellar", "text": "ask in advance for phone permission", "agent": "claude", "archived": false, "lines": 1 }
+      ]
+    },
+    {
+      "title": "open",
+      "rows": [
+        { "id": "27afefae", "code": "idea", "kind": "idea", "state": "open", "age": "13h", "project": "cellar", "text": "multi file it select on drop into project", "agent": null, "archived": false, "lines": 0 },
+        { "id": "08017b81", "code": "bug", "kind": "glitch", "state": "done", "age": "13h", "project": "cellar", "text": "mcp cant reopen", "agent": null, "archived": false, "lines": 1 }
+      ]
+    }
+  ],
+  "entry": null
+}
+</script>
+
+<main>
+  <header>
+    <div class="eyebrow"><span id="lookup"></span><span id="at"></span></div>
+    <h1 id="heading"></h1>
+    <div class="sub" id="sub"></div>
+  </header>
+  <div id="body" style="display: grid; gap: 28px;"></div>
+  <footer>
+    <span>tap a row to copy the line that picks it up</span>
+    <span id="toast" aria-live="polite"></span>
+  </footer>
+</main>
+
+<script>
+  (function () {
+    var data;
+    try {
+      data = JSON.parse(document.getElementById('cellar-data').textContent);
+    } catch (error) {
+      data = { lookup: 'list', heading: 'cellar', sub: 'the data block did not parse — run the lookup again', sections: [] };
+    }
+
+    var TONES = { doing: 'var(--doing)', blocked: 'var(--blocked)', done: 'var(--done)', dropped: 'var(--muted)' };
+    var LOOKUPS = { list: 'what is open', find: 'search', view: 'one entry' };
+
+    function el(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    function badge(state) {
+      // open is most of the cellar and is never badged, same as the app.
+      if (!TONES[state]) return null;
+      var node = el('span', 'badge', state);
+      node.style.setProperty('--tone', TONES[state]);
+      return node;
+    }
+
+    function stamp(iso) {
+      var when = new Date(iso);
+      if (isNaN(when)) return '';
+      return when.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    var toast = document.getElementById('toast');
+    function copy(line) {
+      function said(message) {
+        toast.textContent = message;
+        setTimeout(function () { if (toast.textContent === message) toast.textContent = ''; }, 2400);
+      }
+      try {
+        navigator.clipboard.writeText(line).then(
+          function () { said('copied: ' + line); },
+          function () { said(line); },
+        );
+      } catch (error) {
+        said(line);
+      }
+    }
+
+    function row(item) {
+      var settled = item.state === 'done' || item.state === 'dropped' || item.archived;
+      var node = el('button', 'row' + (settled ? ' settled' : ''));
+      node.type = 'button';
+      node.setAttribute('aria-label', item.text + ' — copy the line that picks it up');
+      node.appendChild(el('span', 'code', item.code || item.kind));
+
+      var text = el('span', 'text', item.text);
+      if (item.lines > 0) text.appendChild(el('small', null, '+' + item.lines));
+      if (item.agent) text.appendChild(el('small', null, item.agent));
+      node.appendChild(text);
+
+      var meta = el('span', 'meta');
+      var state = badge(item.state);
+      if (state) meta.appendChild(state);
+      if (item.archived) meta.appendChild(el('span', null, 'archived'));
+      meta.appendChild(el('span', null, item.age));
+      meta.appendChild(el('span', 'where', item.project));
+      node.appendChild(meta);
+
+      node.addEventListener('click', function () { copy('pick up cellar entry ' + item.id); });
+      return node;
+    }
+
+    function section(block) {
+      var node = el('section');
+      node.appendChild(el('h2', null, block.title + ' · ' + (block.rows || []).length));
+      if (!block.rows || block.rows.length === 0) node.appendChild(el('div', 'empty', 'nothing here'));
+      (block.rows || []).forEach(function (item) { node.appendChild(row(item)); });
+      return node;
+    }
+
+    function entryView(entry) {
+      var wrap = el('div');
+      wrap.style.cssText = 'display:grid;gap:24px';
+
+      var top = el('section');
+      top.appendChild(el('p', 'thought', entry.text));
+      var facts = el('dl', 'facts');
+      [['kind', entry.kind], ['state', entry.state + (entry.agent ? ' (' + entry.agent + ')' : '')],
+       ['dumped', entry.dumped], ['project', entry.project], ['repo', entry.repo]].forEach(function (pair) {
+        if (!pair[1]) return;
+        facts.appendChild(el('dt', null, pair[0]));
+        facts.appendChild(el('dd', null, pair[1]));
+      });
+      top.appendChild(facts);
+      wrap.appendChild(top);
+
+      // The two halves stay apart, the way the app keeps them.
+      [['what they added since', entry.yours, '+'], ['reported back', entry.agent_lines, '>']].forEach(function (half) {
+        if (!half[1] || half[1].length === 0) return;
+        var block = el('section');
+        block.appendChild(el('h2', null, half[0] + ' · ' + half[1].length));
+        half[1].forEach(function (line) {
+          var node = el('div', 'line');
+          node.appendChild(el('span', 'mark', half[2]));
+          node.appendChild(el('span', null, line.text));
+          node.appendChild(el('span', 'age', line.age || ''));
+          block.appendChild(node);
+        });
+        wrap.appendChild(block);
+      });
+
+      if (entry.questions && entry.questions.length > 0) {
+        var asked = el('section');
+        asked.appendChild(el('h2', null, 'questions · ' + entry.questions.length));
+        entry.questions.forEach(function (q) {
+          var card = el('div', 'q');
+          card.appendChild(el('p', null, q.question));
+          if (q.options && q.options.length) {
+            var list = el('ol');
+            q.options.forEach(function (option) {
+              var taken = (q.taken || []).indexOf(option) !== -1;
+              list.appendChild(el('li', taken ? 'taken' : null, (taken ? '✓ ' : '') + option));
+            });
+            card.appendChild(list);
+          }
+          var answer = el('div', 'answer');
+          if (q.status === 'pending') answer.textContent = 'waiting on you';
+          else if (q.status === 'dismissed') answer.textContent = 'waved off';
+          else {
+            answer.appendChild(document.createTextNode('= '));
+            answer.appendChild(el('b', null, q.answer || ''));
+          }
+          card.appendChild(answer);
+          asked.appendChild(card);
+        });
+        wrap.appendChild(asked);
+      }
+      return wrap;
+    }
+
+    document.getElementById('lookup').textContent = LOOKUPS[data.lookup] || data.lookup || 'cellar';
+    document.getElementById('at').textContent = data.at ? stamp(data.at) : '';
+    document.getElementById('heading').textContent = data.heading || 'cellar';
+    document.getElementById('sub').textContent = data.sub || '';
+
+    var body = document.getElementById('body');
+    if (data.entry) body.appendChild(entryView(data.entry));
+    (data.sections || []).forEach(function (block) { body.appendChild(section(block)); });
+  })();
+</script>

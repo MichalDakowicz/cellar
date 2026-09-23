@@ -49,6 +49,50 @@ They are read-only and they do not claim:
 They live in `mcp/skill/commands/` and install next to this file — `mcp/README.md` has the
 copy. Picking something up is still `pick up cellar entry <id>`, which lands back here.
 
+### The live view
+
+A lookup publishes a page instead of dumping rows into the terminal — **one page, reused**.
+Every lookup overwrites the same artifact, so there is always exactly one "Cellar Live" in the
+user's gallery and it always shows the last thing they asked for. Never publish a second one.
+
+1. **Get the data.** `/cellar-list` and `/cellar-find` pass `json: true` to
+   `cellar_list_entries`, which returns `{ rows, more }` — use the rows as they come, do not
+   re-parse the text listing. `/cellar-view` reads `cellar_get_entry` and fills `entry`.
+2. **Fill the template.** Read `live-view.html` — beside this file once installed
+   (`~/.claude/skills/cellar/live-view.html`), `mcp/skill/live-view.html` in the cellar repo.
+   Replace only what sits between `<script type="application/json" id="cellar-data">` and its
+   `</script>`, and write every `<` inside a JSON string as `<` so a thought can never
+   close the tag. Write the result to your scratchpad (or a temp directory) as
+   `cellar-live.html`.
+3. **Publish in place.** Already published it this session → publish the same path again.
+   Otherwise `Artifact` with `action: "list"`, find the one titled **Cellar Live**, `read` it,
+   then publish your file with its `url`. Only when none exists, publish a new one with
+   `icon: "list"`. The page carries its own `<title>`; do not rename it.
+4. **Say one line in the terminal**: the heading, the counts and the link. Not the rows —
+   the page is the list now.
+
+No `Artifact` tool in this session (another client, a bare CLI) → print the rows the way the
+server returns them, exactly as before. The page is the nicer reading, never the only one.
+
+The data block:
+
+```json
+{
+  "lookup": "list | find | view",
+  "heading": "the project name, the search text, or the entry's short id",
+  "sub": "one line of counts, e.g. 13 open · 2 doing · 1 blocked",
+  "at": "ISO timestamp of the lookup",
+  "sections": [{ "title": "blocked on you", "rows": ["…rows exactly as json: true returns them"] }],
+  "entry": null
+}
+```
+
+For `/cellar-view`, `sections` is `[]` and `entry` is the brief as data: `id`, `text`,
+`kind`, `state`, `agent`, `dumped`, `project`, `repo`, `yours` and `agent_lines` (each a list
+of `{ text, age }`, kept apart as the brief keeps them), and `questions` (each `{ question,
+options, taken, answer, status }` with `status` one of `pending | answered | dismissed` and
+`taken` the options the answer picked).
+
 ## Ask instead of guessing
 
 **This is a correct outcome**, not a failure to finish.
