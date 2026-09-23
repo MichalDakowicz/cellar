@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import type { ProjectTile } from '@/components/cellar/ProjectCard';
 import { useCellar, useCurrentShelf } from '@/features/cellar/useCellar';
 import { countLive, countLiveOfKind } from '@/lib/entryGroups';
+import { shelfSections } from '@/lib/groups';
+import { useCellarPrefs } from '@/store/cellarPrefs';
 import { plural } from '@/lib/utils';
 
 /**
@@ -17,8 +19,10 @@ import { plural } from '@/lib/utils';
  * answer "what is still owed", and a glitch you fixed is not owed.
  */
 export function useShelfScreen() {
-  const { shelves, projects, entries, loading, error, refetch } = useCellar();
+  const { shelves, groups, projects, entries, loading, error, refetch } = useCellar();
   const { shelf } = useCurrentShelf(shelves);
+  const closedGroups = useCellarPrefs((state) => state.closedGroups);
+  const toggleGroup = useCellarPrefs((state) => state.toggleGroup);
 
   const tiles = useMemo<ProjectTile[]>(() => {
     if (!shelf) return [];
@@ -35,9 +39,25 @@ export function useShelfScreen() {
           glitchCount: countLiveOfKind(mine, 'glitch'),
           pinned: project.pinned,
           icon: project.icon ?? null,
+          groupId: project.groupId ?? null,
+          groupHome: project.groupHome ?? false,
         };
       });
   }, [projects, entries, shelf]);
+
+  // Folders first, then the projects in no group (lib/groups). Each folder
+  // carries whether you closed it, so the route only lays them out.
+  const sections = useMemo(() => {
+    if (!shelf) return [];
+    return shelfSections(
+      tiles,
+      groups.filter((group) => group.shelfId === shelf.id),
+    ).map((section) =>
+      section.type === 'group'
+        ? { ...section, open: !closedGroups.includes(section.group.id) }
+        : { ...section, open: true },
+    );
+  }, [tiles, groups, shelf, closedGroups]);
 
   // The sum of the tiles, not a second sweep of the entries. The header and the
   // grid under it each worked out what was on this shelf on their own, and only
@@ -55,5 +75,7 @@ export function useShelfScreen() {
     shelfName: shelf?.name ?? 'cellar',
     meta: `${plural(tiles.length, 'project')} · ${plural(shelfEntryCount, 'entry', 'entries')}`,
     tiles,
+    sections,
+    toggleGroup,
   };
 }

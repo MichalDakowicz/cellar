@@ -4,7 +4,7 @@ import type { NewTrailEvent, TrailEvent } from '@/lib/entryTrail';
 import { importanceOf } from '@/lib/importance';
 import { isKind } from '@/lib/kinds';
 import { iconOf } from '@/lib/projectIcon';
-import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
+import type { AgentToken, Entry, EntryLine, EntryQuestion, Group, Project, Shelf } from '@/types/cellar';
 
 /**
  * The single read boundary: every `cellar_*` row becomes an app type here, and
@@ -32,7 +32,11 @@ export type ProjectRow = {
   repo_url: string | null;
   pinned?: boolean | null;
   icon?: string | null;
+  group_id?: string | null;
+  group_home?: boolean | null;
 };
+
+export type GroupRow = { id: string; shelf_id: string; name: string; position: number; pinned: boolean | null; created_at: string };
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
 
@@ -68,7 +72,8 @@ export type DocRow = { id: string; ref: string; label: string | null; created_at
 
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
-export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url, pinned';
+export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url, pinned, group_id, group_home';
+export const GROUP_COLUMNS = 'id, shelf_id, name, position, pinned, created_at';
 // `as const` on both, and the embed built as a template literal, so the select
 // string keeps its literal type: supabase-js resolves the row shape from it at
 // compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
@@ -93,6 +98,21 @@ export function normalizeProject(row: ProjectRow): Project {
     repoUrl: row.repo_url,
     pinned: row.pinned === true,
     ...(row.icon !== undefined ? { icon: iconOf(row.icon) } : null),
+    groupId: row.group_id ?? null,
+    // Only trusted while the group is still there: a home whose group was
+    // deleted is an ordinary project again.
+    groupHome: row.group_home === true && !!row.group_id,
+  };
+}
+
+export function normalizeGroup(row: GroupRow): Group {
+  return {
+    id: row.id,
+    shelfId: row.shelf_id,
+    name: row.name,
+    position: row.position,
+    pinned: row.pinned === true,
+    createdAt: row.created_at,
   };
 }
 

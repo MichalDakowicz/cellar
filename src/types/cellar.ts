@@ -48,6 +48,21 @@ export type Shelf = {
   createdAt: string;
 };
 
+/**
+ * The level between a shelf and its projects: an ecosystem that is one thing
+ * from far away. It holds no thoughts itself — its general project does
+ * (`Project.groupHome`), so `project_id is null` stays the inbox and only that.
+ */
+export type Group = {
+  id: string;
+  shelfId: string;
+  name: string;
+  position: number;
+  /** Sorts first on its shelf, the same way a pinned project does. */
+  pinned: boolean;
+  createdAt: string;
+};
+
 export type Project = {
   id: string;
   shelfId: string;
@@ -62,6 +77,10 @@ export type Project = {
   repoPath: string | null;
   /** The remote, for opening. Never matched against — a URL is not a directory. */
   repoUrl: string | null;
+  /** The group it sits in, when it sits in one (`lib/groups.ts`). */
+  groupId?: string | null;
+  /** The group's own general project — where a thought dumped into the group lands. */
+  groupHome?: boolean;
   /**
    * Sorts first inside its own shelf, and first in every list of projects that
    * spans shelves. That is all it does — there is no pinned band, so a pinned

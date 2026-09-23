@@ -26,6 +26,8 @@
 - Settings: a nudge when a thought sits untouched, with the days and how many a day yours to pick
 - Shelves, projects, project detail: hold and drag to put shelves, projects or thoughts in your order
 - Projects: give a project a picture as its icon, and its tile wears a blur of it behind
+- Projects: gather projects into a group, a folder on the shelf that opens and closes
+- Projects: every group has a general project for thoughts about the whole group
 
 ### Changed
 

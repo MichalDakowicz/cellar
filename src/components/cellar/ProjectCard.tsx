@@ -21,6 +21,9 @@ export type ProjectTile = {
   pinned: boolean;
   /** The picture, when the project has one: drawn as the mark over a blur of itself. */
   icon?: string | null;
+  groupId?: string | null;
+  /** The group's general project — where a thought dumped into the group lands. */
+  groupHome?: boolean;
 };
 
 /**
@@ -162,7 +165,9 @@ export const ProjectCard = memo(function ProjectCard({
 
 /** "12 entries · 3 glitches". The glitch half appears only while glitches are still live. */
 export function projectMeta(project: ProjectTile): string {
-  const entries = plural(project.entryCount, 'entry', 'entries');
+  const entries = project.groupHome
+    ? `${plural(project.entryCount, 'entry', 'entries')} · whole group`
+    : plural(project.entryCount, 'entry', 'entries');
   if (project.glitchCount === 0) return entries;
   return `${entries} · ${plural(project.glitchCount, 'glitch', 'glitches')}`;
 }

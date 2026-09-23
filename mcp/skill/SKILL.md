@@ -153,6 +153,16 @@ a/b/c/d taps in the app, and a question answerable in one tap gets answered.
 `design` does not mean "check it against a design system". Only reach for one if the project
 actually has one.
 
+## Groups
+
+A shelf can hold **groups** — an ecosystem of projects that are one thing from far away.
+Each group has a **general project** named after it, and a thought about the whole group
+lives there. `cellar_list_projects` prints it as `(group — …)` with the group's projects
+indented under it. If the general project is linked to the parent folder (`C:\ping`), an
+agent standing there lands on it and one standing in `C:\ping\radar` still lands on radar —
+the longest checkout wins. A follow-up that is about the ecosystem rather than one app goes
+to the general project with `cellar_create_entry`.
+
 ## Testing on their phone
 
 `cellar_orient` prints a **phone** line, read off a switch in the app's settings — *let agents

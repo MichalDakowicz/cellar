@@ -4,7 +4,7 @@ import { ProjectCard, type ProjectTile } from '@/components/cellar/ProjectCard';
 import { useMeasuredWidth } from '@/hooks/useResponsive';
 
 /** 4:3 tiles, so the columns climb a step slower than a poster grid's would. */
-function columnsFor(width: number): number {
+export function columnsFor(width: number): number {
   if (width >= 1536) return 6;
   if (width >= 1280) return 5;
   if (width >= 1024) return 4;
@@ -12,8 +12,8 @@ function columnsFor(width: number): number {
   return 2;
 }
 
-const GAP = 12;
-const HALF = GAP / 2;
+export const GAP = 12;
+export const HALF = GAP / 2;
 
 /**
  * The project grid. Not virtualized on purpose: a shelf holds a handful of
