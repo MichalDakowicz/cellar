@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { isEmptyMeta, META_BYTES, parseLinkMeta, type LinkMeta } from '@/lib/linkMeta';
+import { oembedFor, parseOembed } from '@/lib/oembed';
 import { useLinkPreviews, type LinkRecord } from '@/store/linkPreviews';
 
 /**
@@ -37,10 +38,47 @@ const retried = new Set<string>();
  */
 const TIMEOUT_MS = 15000;
 
+/**
+ * The site's own answer, for the few that publish one (`lib/oembed`).
+ *
+ * Tried before the page itself rather than after it, because the failure this
+ * fixes does not look like a failure: a consent wall is a 200 with real open
+ * graph tags on it, so a fallback that only ran on an error would never run.
+ *
+ * Null for every link with no provider, which is nearly all of them — and for a
+ * provider that will not answer for this particular url, which then goes the
+ * normal way.
+ *
+ * A *title* is the bar, not merely a non-empty answer. x.com's oEmbed carries
+ * no title field at all — the tweet is an HTML blockquote and the only plain
+ * fields are the author and the provider — so accepting anything non-empty
+ * would short-circuit the scrape and leave an X link as a card with a name on
+ * it and no title, which is worse than what it does today. Nothing to say about
+ * the title means nothing to add, and the page itself gets asked as usual.
+ */
+async function readOembed(href: string, signal: AbortSignal): Promise<LinkMeta | null> {
+  const target = oembedFor(href);
+  if (!target) return null;
+
+  try {
+    const response = await fetch(target.url, { signal, headers: { accept: 'application/json' } });
+    // 401/403 for a private video, 404 for a url the provider does not own.
+    if (!response.ok) return null;
+
+    const meta = parseOembed(await response.json(), target.site);
+    return meta.title ? meta : null;
+  } catch {
+    return null;
+  }
+}
+
 async function readMeta(href: string): Promise<LinkMeta | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
+    const published = await readOembed(href, controller.signal);
+    if (published) return published;
+
     const response = await fetch(href, {
       signal: controller.signal,
       headers: {
