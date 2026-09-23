@@ -1,8 +1,10 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
+import { ProjectMark } from '@/components/cellar/ProjectMark';
 import { Field, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
+import { pickProjectIcon } from '@/features/cellar/pickProjectIcon';
 import { useSheetDraft } from '@/features/cellar/sheets/useSheetDraft';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { checkName, deleteProjectCost, nameErrorText } from '@/lib/containers';
@@ -27,7 +29,7 @@ export function EditProjectSheet({
   onClose: () => void;
 }) {
   const { shelves, projects, entries } = useCellar();
-  const { editProject, linkProject, relocateProject, removeProject } = useCellarWrites();
+  const { editProject, linkProject, iconProject, relocateProject, removeProject } = useCellarWrites();
   const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
   const setLastProject = useCellarPrefs((state) => state.setLastProject);
 
@@ -89,6 +91,33 @@ export function EditProjectSheet({
             onSubmitEditing={save}
             error={nameErrorText(error, 'project')}
           />
+        </View>
+
+        {/* Applied as it is picked, like the shelf below: an icon is not a
+            field you type, and a save button between you and the picture you
+            just chose is a round trip for nothing. */}
+        <View className="mt-5 flex-row items-center gap-3">
+          <ProjectMark icon={project.icon} initials={project.name.trim().slice(0, 2).toLowerCase()} size={44} />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              void pickProjectIcon()
+                .then((icon) => icon && iconProject.mutate({ id: project.id, icon }))
+                .catch(() => undefined)
+            }
+            className="active:opacity-70"
+          >
+            <Text className="text-sm font-semibold text-foreground">{project.icon ? 'change the icon' : 'pick an icon'}</Text>
+          </Pressable>
+          {!!project.icon && (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => iconProject.mutate({ id: project.id, icon: null })}
+              className="active:opacity-70"
+            >
+              <Text className="text-sm text-muted-foreground">remove</Text>
+            </Pressable>
+          )}
         </View>
 
         <View className="mt-5 gap-2">

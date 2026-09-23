@@ -2,6 +2,7 @@ import { MoreHorizontal } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { IconBackdrop, ProjectMark } from '@/components/cellar/ProjectMark';
 import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
 import { showsHoverControl } from '@/lib/hoverReveal';
 import { plural } from '@/lib/utils';
@@ -15,6 +16,8 @@ export type ProjectTile = {
   liveCount: number;
   /** Live glitches only — a fixed one is history and must not keep the tile lit. */
   glitchCount: number;
+  /** The picture, when the project has one: drawn as the mark over a blur of itself. */
+  icon?: string | null;
 };
 
 /**
@@ -72,12 +75,19 @@ export const ProjectCard = memo(function ProjectCard({
         className="active:opacity-80"
       >
         <View className="aspect-[4/3] justify-end rounded-md bg-neutral-900 p-3">
-          <Text
-            className="text-3xl font-bold leading-none tracking-tight text-muted-foreground opacity-50"
-            numberOfLines={1}
-          >
-            {project.initials}
-          </Text>
+          {project.icon ? (
+            <>
+              <IconBackdrop icon={project.icon} />
+              <ProjectMark icon={project.icon} initials={project.initials} size={40} />
+            </>
+          ) : (
+            <Text
+              className="text-3xl font-bold leading-none tracking-tight text-muted-foreground opacity-50"
+              numberOfLines={1}
+            >
+              {project.initials}
+            </Text>
+          )}
           {project.liveCount > 0 && (
             <View className="absolute right-2 top-2 rounded-full bg-primary/20 px-2 py-0.5">
               <Text className="text-[10px] font-bold text-primary">{project.liveCount}</Text>

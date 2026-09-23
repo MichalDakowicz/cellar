@@ -134,6 +134,7 @@ export function useProjectScreen(projectId: string | undefined) {
     name: project?.name ?? 'project',
     /** The tile's two letters, so the detail page wears the same mark as the grid. */
     initials: (project?.name ?? '').trim().slice(0, 2).toLowerCase() || '··',
+    icon: project?.icon ?? null,
     meta,
     /** Where it lives, when it has been linked. Null is the normal case. */
     repo: project && (project.repoPath || project.repoUrl)

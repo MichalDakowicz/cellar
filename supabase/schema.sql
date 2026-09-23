@@ -682,3 +682,13 @@ alter table public.cellar_settings add column if not exists kind_order text[];
 alter table public.cellar_settings add column if not exists notify_nudges boolean not null default true;
 alter table public.cellar_settings add column if not exists nudge_days int not null default 7;
 alter table public.cellar_settings add column if not exists nudges_per_day int not null default 1;
+
+-- 2026-09-23 — a project's icon, as the image itself.
+--
+-- A data URI in a text column rather than a file in a bucket: no storage
+-- policy, nothing to clean up when the project goes, and it rides in with the
+-- row. The app crops it square and cuts it to 160px before writing, which puts
+-- a photo at 8–15 KB; readers refuse anything that is not an image data URI or
+-- is past 80 000 characters (src/lib/projectIcon.ts). The MCP server never
+-- selects it — an agent has no use for a picture.
+alter table public.cellar_projects add column if not exists icon text;

@@ -33,6 +33,7 @@ export function useShelfScreen() {
           entryCount: mine.length,
           liveCount: countLive(mine),
           glitchCount: countLiveOfKind(mine, 'glitch'),
+          icon: project.icon ?? null,
         };
       });
   }, [projects, entries, shelf]);

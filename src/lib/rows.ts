@@ -1,6 +1,7 @@
 import { normalizeOptions } from '@/lib/entryQuestions';
 import { isEntryState } from '@/lib/entryState';
 import { isKind } from '@/lib/kinds';
+import { iconOf } from '@/lib/projectIcon';
 import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
 
 /**
@@ -27,6 +28,7 @@ export type ProjectRow = {
   created_at: string;
   repo_path: string | null;
   repo_url: string | null;
+  icon?: string | null;
 };
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
@@ -82,6 +84,7 @@ export function normalizeProject(row: ProjectRow): Project {
     createdAt: row.created_at,
     repoPath: row.repo_path,
     repoUrl: row.repo_url,
+    ...(row.icon !== undefined ? { icon: iconOf(row.icon) } : null),
   };
 }
 

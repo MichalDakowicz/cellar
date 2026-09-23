@@ -59,6 +59,11 @@ export type Project = {
   repoPath: string | null;
   /** The remote, for opening. Never matched against — a URL is not a directory. */
   repoUrl: string | null;
+  /**
+   * A small square picture as a data URI (`lib/projectIcon.ts`). Optional,
+   * because only the app selects it — the MCP server's projects never carry one.
+   */
+  icon?: string | null;
 };
 
 /** One appended thought. Ordered oldest first, the way it was dumped. */

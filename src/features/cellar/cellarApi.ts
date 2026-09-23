@@ -60,7 +60,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 export async function fetchProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('cellar_projects')
-    .select(PROJECT_COLUMNS)
+    .select(`${PROJECT_COLUMNS}, icon`)
     .order('position')
     .order('created_at');
   if (error) throw error;
@@ -147,6 +147,12 @@ export async function setProjectRepo(
 }
 
 /** Moves a project to another shelf. The entries do not move — they are the project's. */
+/** A new icon, or `null` to take it off. Already cut to size (`lib/projectIcon`). */
+export async function setProjectIcon(id: string, icon: string | null): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ icon }).eq('id', id);
+  if (error) throw error;
+}
+
 export async function moveProject(id: string, shelfId: string): Promise<void> {
   const { error } = await supabase.from('cellar_projects').update({ shelf_id: shelfId }).eq('id', id);
   if (error) throw error;
