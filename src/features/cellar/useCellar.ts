@@ -23,6 +23,7 @@ import {
   moveProject,
   renameProject,
   renameShelf,
+  setProjectIcon,
   setProjectPinned,
   setProjectRepo,
 } from '@/features/cellar/structureApi';
@@ -195,6 +196,11 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
+  const iconProject = useMutation({
+    mutationFn: ({ id, icon }: { id: string; icon: string | null }) => setProjectIcon(id, icon),
+    onSuccess: () => invalidate(PROJECTS_KEY),
+  });
+
   const relocateProject = useMutation({
     mutationFn: ({ id, shelfId }: { id: string; shelfId: string }) => moveProject(id, shelfId),
     onSuccess: () => invalidate(PROJECTS_KEY),
@@ -235,6 +241,7 @@ export function useCellarWrites() {
     editProject,
     linkProject,
     pinProject,
+    iconProject,
     relocateProject,
     removeProject,
   };

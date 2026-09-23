@@ -2,6 +2,7 @@ import { MoreHorizontal, Pin } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { IconBackdrop, ProjectMark } from '@/components/cellar/ProjectMark';
 import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
 import { showsHoverControl } from '@/lib/hoverReveal';
 import { plural } from '@/lib/utils';
@@ -18,6 +19,8 @@ export type ProjectTile = {
   glitchCount: number;
   /** Already sorted first by the time it is a tile; this only draws the mark. */
   pinned: boolean;
+  /** The picture, when the project has one: drawn as the mark over a blur of itself. */
+  icon?: string | null;
 };
 
 /**
@@ -75,12 +78,19 @@ export const ProjectCard = memo(function ProjectCard({
         className="active:opacity-80"
       >
         <View className="aspect-[4/3] justify-end rounded-md bg-neutral-900 p-3">
-          <Text
-            className="text-3xl font-bold leading-none tracking-tight text-muted-foreground opacity-50"
-            numberOfLines={1}
-          >
-            {project.initials}
-          </Text>
+          {project.icon ? (
+            <>
+              <IconBackdrop icon={project.icon} />
+              <ProjectMark icon={project.icon} initials={project.initials} size={40} />
+            </>
+          ) : (
+            <Text
+              className="text-3xl font-bold leading-none tracking-tight text-muted-foreground opacity-50"
+              numberOfLines={1}
+            >
+              {project.initials}
+            </Text>
+          )}
           {project.pinned && (
             // Top-left, opposite the live count: the badge answers "how much is
             // owed", the pin answers "why is this first", and one corner each

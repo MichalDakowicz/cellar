@@ -68,6 +68,11 @@ export type Project = {
    * project is never on one screen twice (`lib/projectOrder.ts`).
    */
   pinned: boolean;
+  /**
+   * A small square picture as a data URI (`lib/projectIcon.ts`). Optional,
+   * because only the app selects it — the MCP server's projects never carry one.
+   */
+  icon?: string | null;
 };
 
 /** A link or a repo path attached to a thought. Which one it is, is read off the ref. */

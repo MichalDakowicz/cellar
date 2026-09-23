@@ -150,6 +150,7 @@ export default function ProjectScreen() {
                       name={project.name}
                       meta={project.meta}
                       initials={project.initials}
+                      icon={project.icon}
                       large
                     />
                   </View>

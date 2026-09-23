@@ -1,6 +1,7 @@
-import { Text, View } from 'react-native';
+import { Linking, Text, View } from 'react-native';
 
 import { Segmented, SwitchRow } from '@/components/ui/controls';
+import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { ensureNotificationPermission, supportsNotifications } from '@/lib/notificationSetup';
 import { NUDGE_DAYS, NUDGES_PER_DAY } from '@/lib/nudges';
@@ -13,12 +14,21 @@ import { NUDGE_DAYS, NUDGES_PER_DAY } from '@/lib/nudges';
  */
 export function NudgeSettings() {
   const { settings, updateSettings } = useCellarSettings();
+  // The OS permission, read the same way the question switch reads it: a
+  // switch that says on while Android blocks the banners is a switch that lies.
+  const { granted } = useQuestionNotices();
+  const on = settings.notifyNudges && supportsNotifications && granted !== false;
 
   const toggle = async (wanted: boolean) => {
-    // Turning it on is the moment to ask; a refusal leaves the switch off rather
-    // than on and silently doing nothing.
-    const allowed = wanted ? await ensureNotificationPermission() : false;
-    await updateSettings({ notifyNudges: wanted && allowed });
+    if (!wanted) {
+      await updateSettings({ notifyNudges: false });
+      return;
+    }
+    // Turning it on is the moment to ask; a refusal sends you to the one place
+    // the real answer lives, and leaves the switch off rather than on and silent.
+    const allowed = await ensureNotificationPermission();
+    await updateSettings({ notifyNudges: allowed });
+    if (!allowed) await Linking.openSettings().catch(() => undefined);
   };
 
   return (
@@ -26,15 +36,17 @@ export function NudgeSettings() {
       <SwitchRow
         label="nudge me about old thoughts"
         sub={
-          supportsNotifications
-            ? 'a quiet banner when something you dumped has sat untouched, unfiled ideas first'
-            : 'the browser build has no banners'
+          !supportsNotifications
+            ? 'the browser build has no banners'
+            : granted === false
+              ? 'android is blocking notifications for cellar — tap to open its settings'
+              : 'a quiet banner when something you dumped has sat untouched, unfiled ideas first'
         }
-        value={settings.notifyNudges && supportsNotifications}
+        value={on}
         onChange={(value) => void toggle(value)}
         disabled={!supportsNotifications}
       />
-      {settings.notifyNudges && supportsNotifications && (
+      {on && (
         <View className="gap-3 pb-4">
           <Text className="text-xs text-muted-foreground">untouched for</Text>
           <Segmented<string>

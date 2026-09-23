@@ -1,5 +1,7 @@
 import { Text, View } from 'react-native';
 
+import { ProjectMark } from '@/components/cellar/ProjectMark';
+
 import { ProjectViews } from '@/components/cellar/ProjectViews';
 import type { KanbanAxis } from '@/lib/kanban';
 import type { ProjectView } from '@/store/cellarPrefs';
@@ -9,6 +11,7 @@ type ProjectHeaderProps = {
   meta: string;
   /** Two letters, the same mark the tile wears on the shelf. */
   initials: string;
+  icon?: string | null;
   /** Desktop wears the mark and a bigger title; phone keeps the line it had. */
   large?: boolean;
   /**
@@ -44,6 +47,7 @@ export function ProjectHeader({
   name,
   meta,
   initials,
+  icon,
   large,
   view,
   onView,
@@ -71,13 +75,7 @@ export function ProjectHeader({
           {meta}
         </Text>
       </View>
-      {large && (
-        <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
-          <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
-            {initials}
-          </Text>
-        </View>
-      )}
+      {large && <ProjectMark icon={icon} initials={initials} size={56} />}
     </View>
   );
 

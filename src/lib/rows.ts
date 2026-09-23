@@ -3,6 +3,7 @@ import { isEntryState } from '@/lib/entryState';
 import type { NewTrailEvent, TrailEvent } from '@/lib/entryTrail';
 import { importanceOf } from '@/lib/importance';
 import { isKind } from '@/lib/kinds';
+import { iconOf } from '@/lib/projectIcon';
 import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
 
 /**
@@ -30,6 +31,7 @@ export type ProjectRow = {
   repo_path: string | null;
   repo_url: string | null;
   pinned?: boolean | null;
+  icon?: string | null;
 };
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
@@ -90,6 +92,7 @@ export function normalizeProject(row: ProjectRow): Project {
     repoPath: row.repo_path,
     repoUrl: row.repo_url,
     pinned: row.pinned === true,
+    ...(row.icon !== undefined ? { icon: iconOf(row.icon) } : null),
   };
 }
 

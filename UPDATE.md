@@ -25,6 +25,7 @@
 - Settings: pick the tab the app opens on, and which kinds come first everywhere
 - Settings: a nudge when a thought sits untouched, with the days and how many a day yours to pick
 - Shelves, projects, project detail: hold and drag to put shelves, projects or thoughts in your order
+- Projects: give a project a picture as its icon, and its tile wears a blur of it behind
 
 ### Changed
 

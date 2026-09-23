@@ -61,7 +61,7 @@ export async function fetchShelves(): Promise<Shelf[]> {
 export async function fetchProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('cellar_projects')
-    .select(PROJECT_COLUMNS)
+    .select(`${PROJECT_COLUMNS}, icon`)
     .order('position')
     .order('created_at');
   if (error) throw error;

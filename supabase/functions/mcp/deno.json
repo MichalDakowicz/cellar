@@ -14,6 +14,7 @@
     "@/lib/kinds":"../../../src/lib/kinds.ts",
     "@/lib/links": "../../../src/lib/links.ts",
     "@/lib/plural": "../../../src/lib/plural.ts",
+    "@/lib/projectIcon": "../../../src/lib/projectIcon.ts",
     "@/lib/projectOrder": "../../../src/lib/projectOrder.ts",
     "@/lib/relTime": "../../../src/lib/relTime.ts",
     "@/lib/repoLink": "../../../src/lib/repoLink.ts",

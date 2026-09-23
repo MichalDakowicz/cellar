@@ -118,11 +118,16 @@ export default function DumpScreen() {
             accessibilityLabel="what just hit you"
           />
 
+          {/* The mode never shrinks and the hint takes what is left: with both
+              free to shrink, Android re-measured the pair after a settings
+              change re-rendered the tree and clipped "one thought" to "one". */}
           <View className="mt-2.5 flex-row items-center justify-between gap-3">
-            <Text className="text-xs font-semibold text-muted-foreground">
+            <Text className="shrink-0 text-xs font-semibold text-muted-foreground">
               {dump.raw ? 'raw dump' : 'one thought'}
             </Text>
-            <Text className="text-xs text-muted-foreground">{dump.hint}</Text>
+            <Text className="min-w-0 flex-1 text-right text-xs text-muted-foreground" numberOfLines={1}>
+              {dump.hint}
+            </Text>
           </View>
 
           {/* The whole block is the shelf control, not just the pill: with two

@@ -99,3 +99,9 @@ export async function setProjectPinned(id: string, pinned: boolean): Promise<voi
   const { error } = await supabase.from('cellar_projects').update({ pinned }).eq('id', id);
   if (error) throw error;
 }
+
+/** A new icon, or `null` to take it off. Already cut to size (`lib/projectIcon`). */
+export async function setProjectIcon(id: string, icon: string | null): Promise<void> {
+  const { error } = await supabase.from('cellar_projects').update({ icon }).eq('id', id);
+  if (error) throw error;
+}
