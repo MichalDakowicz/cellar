@@ -12,6 +12,8 @@ import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
 import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
+import { DisplaySettings } from '@/features/settings/DisplaySettings';
+import { NudgeSettings } from '@/features/settings/NudgeSettings';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
@@ -92,13 +94,20 @@ export default function Settings() {
               value={settings.notifyQuestions && notifications.granted !== false}
               onChange={(value) => void notifications.set(value)}
             />
+            <NudgeSettings />
+            <SwitchRow
+              label="let agents test on my phone"
+              sub="an agent may install the app over adb, open it and drive it to check its work, without asking"
+              value={settings.agentDevice}
+              onChange={(value) => void updateSettings({ agentDevice: value })}
+            />
           </View>
 
           <View className={`gap-2 pt-7 ${gutter}`}>
             <Overline>default kind</Overline>
             <ChipWrap
               label="default kind"
-              options={kindChips(settings.defaultKind)}
+              options={kindChips(settings.defaultKind, settings.kindOrder)}
               selected={settings.defaultKind}
               onToggle={(kind) => {
                 setDraftKind(kind);
@@ -124,6 +133,8 @@ export default function Settings() {
               ]}
             />
           </View>
+
+          <DisplaySettings gutter={gutter} />
 
           <View className={`gap-3 pt-7 ${gutter}`}>
             <Overline>theme</Overline>

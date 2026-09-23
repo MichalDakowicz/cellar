@@ -7,17 +7,37 @@
 - Project detail: copy a prompt for the whole project, not just for one thought in it
 - Project detail: tap a state or kind heading to fold its entries away, and again to show them
 - Project detail: read a project as a board, with columns by state or by kind under a toggle
-- Project, inbox, search: long press a thought to hold several, then file or copy them in one go
+- Project, board, inbox, search: long press a thought to hold several, then file or copy them
 - Agent tools: an agent can now list shelves, and create, rename or move a shelf or a project
 - Entry: hold an option on a question to pick more than one, and answer with all of them
 - Entry: a settled question keeps its options on show, with the ones the answer took ticked
 - Entry, project, inbox: a link in a thought or a line is tappable and reads as the page title
 - Entry: a link on the thought grows a card with the site, the title and what the page says
+- Dump: hold a project chip to file the thought into more than one, and it lands in each
+- Projects: pin a project from its edit sheet to sort it first on its shelf and in file it
+- Entry: mark a thought low or high importance, and the row carries the mark everywhere
+- Agent tools: the lookup commands show their result as one live page, updated in place each time
+- Entry: a history of the thought to the minute — dropped, moved, claimed, asked, answered
+- Entry: attach a link or a repo path to a thought, and an agent is told to read it first
+- Settings: let agents test on your phone, and every agent is told without having to ask
+- Settings: compact or roomy rows, small to large text, and haptics on a hold and a drop
+- Settings: a project reads newest or oldest first, and can start with done and dropped folded
+- Settings: pick the tab the app opens on, and which kinds come first everywhere
+- Settings: a nudge when a thought sits untouched, with the days and how many a day yours to pick
+- Shelves, projects, project detail: hold and drag to put shelves, projects or thoughts in your order
+- Projects: give a project a picture as its icon, and its tile wears a blur of it behind
+- Projects: gather projects into a group, a folder on the shelf that opens and closes
+- Projects: every group has a general project for thoughts about the whole group
 
 ### Changed
 
 - Dump: a new line becomes a note under the thought instead of running into one long line
+- Project detail: copy a prompt is an icon beside the project name instead of a row of its own
 - Entry: the reports section reads from agent rather than naming the tool that wrote them
+
+### Fixed
+
+- Agent tools: an agent can bring a done, dropped or archived thought back to open when asked
 
 ## 1.9.0 — 2026-09-21
 

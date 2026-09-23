@@ -6,7 +6,7 @@ import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { waitingOnYou } from '@/lib/agentWork';
 import { groupByKind } from '@/lib/entryGroups';
 import { INBOX_SORTS, useCellarPrefs, type InboxSort } from '@/store/cellarPrefs';
-import type { Entry, Project } from '@/types/cellar';
+import type { Entry, Kind, Project } from '@/types/cellar';
 
 /**
  * The inbox: everything dumped without picking a project, and anything an agent
@@ -34,7 +34,10 @@ export function useInboxScreen() {
 
   const waiting = useMemo(() => waitingOnYou(entries), [entries]);
 
-  const items = useMemo(() => buildItems(unfiled, waiting, sort), [unfiled, waiting, sort]);
+  const items = useMemo(
+    () => buildItems(unfiled, waiting, sort, settings.kindOrder),
+    [unfiled, waiting, sort, settings.kindOrder],
+  );
 
   const whereFor = useMemo(() => projectNamer(projects), [projects]);
 
@@ -60,7 +63,7 @@ function projectNamer(projects: Project[]) {
   return (entry: Entry) => (entry.projectId ? byId.get(entry.projectId) : undefined);
 }
 
-function buildItems(unfiled: Entry[], waiting: Entry[], sort: InboxSort): EntryListItem[] {
+function buildItems(unfiled: Entry[], waiting: Entry[], sort: InboxSort, kindOrder: Kind[] | null): EntryListItem[] {
   const head: EntryListItem[] =
     waiting.length === 0
       ? []
@@ -71,12 +74,12 @@ function buildItems(unfiled: Entry[], waiting: Entry[], sort: InboxSort): EntryL
           { type: 'section', section: { key: 'unfiled', label: 'unfiled', meta: String(unfiled.length) } },
         ];
 
-  return [...head, ...sorted(unfiled, sort)];
+  return [...head, ...sorted(unfiled, sort, kindOrder)];
 }
 
-function sorted(entries: Entry[], sort: InboxSort): EntryListItem[] {
+function sorted(entries: Entry[], sort: InboxSort, kindOrder: Kind[] | null): EntryListItem[] {
   if (sort === 'kind') {
-    return groupByKind(entries).flatMap((group) => [
+    return groupByKind(entries, kindOrder).flatMap((group) => [
       {
         type: 'section' as const,
         section: { key: group.kind, label: group.kind, meta: String(group.entries.length), kind: group.kind },

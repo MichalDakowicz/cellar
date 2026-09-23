@@ -287,6 +287,33 @@ create table if not exists public.cellar_entry_events (
 create index if not exists cellar_entry_events_entry_idx
   on public.cellar_entry_events (entry_id, at);
 
+-- ----------------------------------------------------------------------------
+-- 10. Groups — the level between a shelf and its projects
+--
+-- An ecosystem of apps that are one thing from far away: ping holds radar,
+-- lidar, sonar, pulsar and cellar. Optional — a project in no group sits on its
+-- shelf the way it always did.
+--
+-- A group holds no thoughts of its own. It owns a general project
+-- (`cellar_projects.group_home`, see COLUMN MIGRATIONS), named after it and
+-- listed first inside it, and a thought dumped into the group lands there. So
+-- `project_id is null` is still the inbox and only the inbox.
+--
+-- Cascades with its shelf, like a project does. Deleting a group sets its
+-- projects' group_id null — they fall back onto the shelf, thoughts and all.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_groups (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  shelf_id   uuid not null references public.cellar_shelves(id) on delete cascade,
+  name       text not null,
+  position   int  not null default 0,
+  pinned     boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists cellar_groups_user_idx on public.cellar_groups (user_id, shelf_id, position);
+
 -- ============================================================================
 -- Row level security
 --
@@ -301,6 +328,7 @@ alter table public.cellar_entry_lines  enable row level security;
 alter table public.cellar_entry_questions enable row level security;
 alter table public.cellar_entry_docs   enable row level security;
 alter table public.cellar_entry_events enable row level security;
+alter table public.cellar_groups       enable row level security;
 alter table public.cellar_settings     enable row level security;
 alter table public.cellar_agent_tokens enable row level security;
 
@@ -340,6 +368,11 @@ create policy cellar_entry_docs_owner_all on public.cellar_entry_docs for all
 
 drop policy if exists cellar_entry_events_owner_all on public.cellar_entry_events;
 create policy cellar_entry_events_owner_all on public.cellar_entry_events for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists cellar_groups_owner_all on public.cellar_groups;
+create policy cellar_groups_owner_all on public.cellar_groups for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -510,6 +543,7 @@ declare
 begin
   foreach t in array array[
     'cellar_shelves',
+    'cellar_groups',
     'cellar_projects',
     'cellar_entries',
     'cellar_entry_lines',
@@ -637,3 +671,70 @@ alter table public.cellar_entries
 -- for everything untouched and puts a dragged thought exactly where it was put.
 alter table public.cellar_entries
   add column if not exists position int not null default 0;
+
+-- 2026-09-23 — whether an agent may test on your phone without asking.
+--
+-- An agent that has finished a change wants to see it run, and the phone on
+-- the desk is the real target. Installing over adb and driving the app is
+-- taking the device over, though, so it is a standing yes you give once and on
+-- purpose — not a question every session asks, and not a default. Off until
+-- you turn it on in settings; cellar_orient reads it and says so to every
+-- agent, so nobody has to ask.
+alter table public.cellar_settings
+  add column if not exists agent_device boolean not null default false;
+
+-- 2026-09-23 — how the cellar reads: seven preferences asked for at once.
+--
+-- On the account like the rest of this row, so the phone and the browser read
+-- the same. Every value is the display word, and every reader falls back to
+-- the default for a word it does not know (src/lib/displayPrefs.ts), so none
+-- of these needs a check constraint to stay safe.
+--
+--   row_density   roomy | compact        — padding on every entry row
+--   text_size     small | normal | large — the thought line
+--   haptics       a tap under the thumb on a hold and a drop
+--   project_sort  newest | oldest        — inside a project
+--   hide_settled  done and dropped start folded in a project
+--   start_tab     dump | shelf | inbox | stats — where the app opens
+--   kind_order    the kinds you put first; null is the default order, and a
+--                 kind it leaves out keeps its default place after them
+alter table public.cellar_settings add column if not exists row_density text not null default 'roomy';
+alter table public.cellar_settings add column if not exists text_size text not null default 'normal';
+alter table public.cellar_settings add column if not exists haptics boolean not null default true;
+alter table public.cellar_settings add column if not exists project_sort text not null default 'newest';
+alter table public.cellar_settings add column if not exists hide_settled boolean not null default false;
+alter table public.cellar_settings add column if not exists start_tab text not null default 'dump';
+alter table public.cellar_settings add column if not exists kind_order text[];
+
+-- 2026-09-23 — a nudge about a thought you dumped and left alone.
+--
+-- Its own switch, apart from notify_questions: turning off "an agent is waiting
+-- on you" must not also turn off "this idea has sat for a week", and the other
+-- way round. The threshold and the day's allowance are yours to pick; more
+-- stale thoughts than the allowance go out as one grouped banner rather than
+-- being cut to the first few (src/lib/nudges.ts).
+alter table public.cellar_settings add column if not exists notify_nudges boolean not null default true;
+alter table public.cellar_settings add column if not exists nudge_days int not null default 7;
+alter table public.cellar_settings add column if not exists nudges_per_day int not null default 1;
+
+-- 2026-09-23 — a project's icon, as the image itself.
+--
+-- A data URI in a text column rather than a file in a bucket: no storage
+-- policy, nothing to clean up when the project goes, and it rides in with the
+-- row. The app crops it square and cuts it to 160px before writing, which puts
+-- a photo at 8–15 KB; readers refuse anything that is not an image data URI or
+-- is past 80 000 characters (src/lib/projectIcon.ts). The MCP server never
+-- selects it — an agent has no use for a picture.
+alter table public.cellar_projects add column if not exists icon text;
+
+-- 2026-09-23 — which group a project sits in, and which project is the group's own.
+--
+-- `on delete set null`: deleting a group drops its projects back onto the
+-- shelf, never with it. `group_home` marks the general project a group owns —
+-- the place a thought dumped into the group lands (see 10. Groups). A home whose
+-- group is gone is an ordinary project again; readers only trust the flag while
+-- group_id still points somewhere.
+alter table public.cellar_projects
+  add column if not exists group_id uuid references public.cellar_groups(id) on delete set null;
+alter table public.cellar_projects
+  add column if not exists group_home boolean not null default false;

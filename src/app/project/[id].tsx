@@ -4,7 +4,6 @@ import { View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { KanbanBoard } from '@/components/cellar/KanbanBoard';
-import { CopyPrompt } from '@/components/cellar/CopyPrompt';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
@@ -104,8 +103,10 @@ export default function ProjectScreen() {
       <KanbanBoard
         columns={project.columns}
         showCode={project.showCodes}
-        onPress={(entry) => router.navigate(`/entry/${entry.id}`)}
-        onCopy={copyPrompt}
+        onPress={selection.onPress}
+        onLongPress={selection.onLongPress}
+        selectedIds={selection.selectedIds}
+        onCopy={selection.selecting ? undefined : copyPrompt}
       />
     </View>
   );
@@ -140,6 +141,7 @@ export default function ProjectScreen() {
                       axis={project.kanbanAxis}
                       onAxis={project.setKanbanAxis}
                       filtered={project.filtered}
+                      onArrange={project.arrange}
                     />
                   </View>
                   <View className="flex-row justify-end">
@@ -147,7 +149,9 @@ export default function ProjectScreen() {
                       name={project.name}
                       meta={project.meta}
                       initials={project.initials}
+                      icon={project.icon}
                       large
+                      onCopy={project.project ? () => project.project && copyProjectPrompt(project.project) : undefined}
                     />
                   </View>
                   {project.repo && (
@@ -157,15 +161,6 @@ export default function ProjectScreen() {
                       path={project.repo.path}
                       align="end"
                     />
-                  )}
-                  {!!project.project && (
-                    <View className="mt-1.5">
-                      <CopyPrompt
-                        onPress={() => project.project && copyProjectPrompt(project.project)}
-                        what="this project"
-                        align="end"
-                      />
-                    </View>
                   )}
                 </View>
               </View>
@@ -182,6 +177,7 @@ export default function ProjectScreen() {
                   <ProjectAside
                     stateSpread={project.stateSpread}
                     kindBars={project.kindBars}
+                    kindOrder={project.kindOrder}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />
                 </View>
@@ -233,14 +229,11 @@ function PhoneHeader({
           axis={project.kanbanAxis}
           onAxis={project.setKanbanAxis}
           filtered={project.filtered}
+          onArrange={project.arrange}
           onFilter={onFilter}
+          onCopy={project.project ? () => project.project && onCopyProject(project.project) : undefined}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
-        {!!project.project && (
-          <View className="mt-1.5">
-            <CopyPrompt onPress={() => project.project && onCopyProject(project.project)} what="this project" />
-          </View>
-        )}
       </View>
     </View>
   );

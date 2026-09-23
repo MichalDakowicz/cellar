@@ -12,9 +12,17 @@
 
 export const SHELVES_KEY = ['cellar', 'shelves'] as const;
 export const PROJECTS_KEY = ['cellar', 'projects'] as const;
+export const GROUPS_KEY = ['cellar', 'groups'] as const;
 export const ENTRIES_KEY = ['cellar', 'entries'] as const;
 
-export type CellarKey = typeof SHELVES_KEY | typeof PROJECTS_KEY | typeof ENTRIES_KEY;
+/**
+ * One entry's trail. Under `ENTRIES_KEY` on purpose: every write to an entry
+ * already invalidates that key, and a prefix match refreshes the trail with it,
+ * so the events table needs no live listener of its own.
+ */
+export const entryEventsKey = (entryId: string) => [...ENTRIES_KEY, 'events', entryId] as const;
+
+export type CellarKey = typeof SHELVES_KEY | typeof GROUPS_KEY | typeof PROJECTS_KEY | typeof ENTRIES_KEY;
 
 /**
  * Every table a change can arrive on, and the query that has to be re-read
@@ -32,6 +40,7 @@ export type CellarKey = typeof SHELVES_KEY | typeof PROJECTS_KEY | typeof ENTRIE
  */
 export const LIVE_TABLES: readonly { table: string; key: CellarKey }[] = [
   { table: 'cellar_shelves', key: SHELVES_KEY },
+  { table: 'cellar_groups', key: GROUPS_KEY },
   { table: 'cellar_projects', key: PROJECTS_KEY },
   { table: 'cellar_entries', key: ENTRIES_KEY },
   { table: 'cellar_entry_lines', key: ENTRIES_KEY },
@@ -39,4 +48,4 @@ export const LIVE_TABLES: readonly { table: string; key: CellarKey }[] = [
 ];
 
 /** Every key, for the catch-up read after a gap where events were missed. */
-export const ALL_CELLAR_KEYS: readonly CellarKey[] = [SHELVES_KEY, PROJECTS_KEY, ENTRIES_KEY];
+export const ALL_CELLAR_KEYS: readonly CellarKey[] = [SHELVES_KEY, GROUPS_KEY, PROJECTS_KEY, ENTRIES_KEY];

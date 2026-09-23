@@ -7,6 +7,8 @@ import {
   questionStatus,
   settledQuestions,
 } from '@/lib/entryQuestions';
+import { docKind } from '@/lib/entryDocs';
+import { importanceMeta } from '@/lib/importance';
 import { kindMeta } from '@/lib/kinds';
 import { longRel, shortRel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
@@ -52,10 +54,35 @@ export function entryRow(entry: Entry, projects: Project[], now = Date.now()): s
     pad(shortRel(entry.createdAt, now), 4),
     pad(projectName(entry, projects), 12),
   ];
-  const tail = [entry.agent ? `(${entry.agent})` : null, entry.archived ? '(archived)' : null]
+  // Only the exceptions, like the app's row: `normal` is most of the cellar.
+  const weight = importanceMeta(entry.importance).marked ? `(${entry.importance})` : null;
+  const tail = [weight, entry.agent ? `(${entry.agent})` : null, entry.archived ? '(archived)' : null]
     .filter(Boolean)
     .join(' ');
   return `${marks.join(' ')} ${entry.text}${tail ? ` ${tail}` : ''}`;
+}
+
+/**
+ * The same row as data, for a page rather than a terminal.
+ *
+ * The lookups publish a live view, and a page that re-parsed the fixed-width
+ * row would split "aetherial enchanting" into a project and half a thought —
+ * the padded project column is only as wide as a short name. Same fields as the
+ * row, same short id, nothing a row does not already show.
+ */
+export function entryData(entry: Entry, projects: Project[], now = Date.now()) {
+  return {
+    id: shortId(entry.id),
+    kind: entry.kind,
+    code: kindMeta(entry.kind).code,
+    state: entry.state,
+    age: shortRel(entry.createdAt, now),
+    project: projectName(entry, projects),
+    text: entry.text,
+    agent: entry.agent,
+    archived: entry.archived,
+    lines: entry.lines.length,
+  };
 }
 
 export function entryTable(entries: Entry[], projects: Project[], now = Date.now()): string {
@@ -92,12 +119,24 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
     `thought  ${entry.text}`,
     `kind     ${entry.kind} — ${work.brief}`,
     `state    ${entry.state}${entry.agent ? ` (${entry.agent})` : ''}${entry.archived ? ' · archived' : ''}`,
+    `matters  ${entry.importance}${entry.importance === 'high' ? ' — the user marked this one as mattering more than the rest of its kind' : ''}`,
     `dumped   ${longRel(entry.createdAt, now)}`,
     `project  ${project?.name ?? 'inbox — no project, so no repo to work in'}`,
   ];
 
   if (project?.repoPath) out.push(`repo     ${project.repoPath}`);
   if (project?.repoUrl) out.push(`remote   ${project.repoUrl}`);
+
+  // Above the thread: a doc the user hung off a thought is what they want read
+  // before anyone starts, and a path is relative to the repo just named.
+  if (entry.docs.length > 0) {
+    out.push('', 'read these first — attached to the thought:');
+    out.push(
+      ...entry.docs.map(
+        (doc) => `  ${docKind(doc.ref) === 'url' ? 'link' : 'path'}  ${doc.ref}${doc.label ? `  (${doc.label})` : ''}`,
+      ),
+    );
+  }
 
   if (yours.length > 0) {
     out.push('', 'what they added since:');

@@ -14,6 +14,9 @@
 
 export type Kind = 'idea' | 'removal' | 'glitch' | 'question' | 'research' | 'copy' | 'design';
 
+/** How much a thought matters inside its kind. A mark, never a sort (`lib/importance.ts`). */
+export type Importance = 'low' | 'normal' | 'high';
+
 /**
  * `blocked` is the agent's only way to reach you: it asked something it cannot
  * answer from the repo and moved on to its other work. It lifts on its own when
@@ -45,6 +48,21 @@ export type Shelf = {
   createdAt: string;
 };
 
+/**
+ * The level between a shelf and its projects: an ecosystem that is one thing
+ * from far away. It holds no thoughts itself — its general project does
+ * (`Project.groupHome`), so `project_id is null` stays the inbox and only that.
+ */
+export type Group = {
+  id: string;
+  shelfId: string;
+  name: string;
+  position: number;
+  /** Sorts first on its shelf, the same way a pinned project does. */
+  pinned: boolean;
+  createdAt: string;
+};
+
 export type Project = {
   id: string;
   shelfId: string;
@@ -59,6 +77,30 @@ export type Project = {
   repoPath: string | null;
   /** The remote, for opening. Never matched against — a URL is not a directory. */
   repoUrl: string | null;
+  /** The group it sits in, when it sits in one (`lib/groups.ts`). */
+  groupId?: string | null;
+  /** The group's own general project — where a thought dumped into the group lands. */
+  groupHome?: boolean;
+  /**
+   * Sorts first inside its own shelf, and first in every list of projects that
+   * spans shelves. That is all it does — there is no pinned band, so a pinned
+   * project is never on one screen twice (`lib/projectOrder.ts`).
+   */
+  pinned: boolean;
+  /**
+   * A small square picture as a data URI (`lib/projectIcon.ts`). Optional,
+   * because only the app selects it — the MCP server's projects never carry one.
+   */
+  icon?: string | null;
+};
+
+/** A link or a repo path attached to a thought. Which one it is, is read off the ref. */
+export type EntryDoc = {
+  id: string;
+  ref: string;
+  /** What to call it. Null falls back to the host, or the file name. */
+  label: string | null;
+  createdAt: string;
 };
 
 /** One appended thought. Ordered oldest first, the way it was dumped. */
@@ -99,6 +141,9 @@ export type Entry = {
   text: string;
   kind: Kind;
   state: EntryState;
+  importance: Importance;
+  /** Where you dragged it. 0 is never placed, which sorts first (`lib/arrange`). */
+  position: number;
   /**
    * Out of the project and out of the inbox, still in search, one tap from
    * coming back. Nothing in this app is deleted to get it out of the way.
@@ -110,6 +155,8 @@ export type Entry = {
   lines: EntryLine[];
   /** Oldest first. `blocked` means at least one of these is still unanswered. */
   questions: EntryQuestion[];
+  /** Links and repo paths hung off it, oldest first (`lib/entryDocs.ts`). */
+  docs: EntryDoc[];
 };
 
 /** What the capture screen holds before it becomes entries. */

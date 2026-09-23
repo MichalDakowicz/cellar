@@ -37,11 +37,14 @@ export function entry(over: Partial<Entry> = {}): Entry {
     text: 'mcp questions change',
     kind: 'idea',
     state: 'blocked',
+    importance: 'normal',
+    position: 0,
     archived: false,
     createdAt: '2026-09-14T10:00:00.000Z',
     agent: 'claude',
     lines: [],
     questions: [],
+    docs: [],
     ...over,
   };
 }
@@ -56,6 +59,7 @@ const project: Project = {
   createdAt: '2026-09-01T00:00:00.000Z',
   repoPath: 'C:/ping/cellar',
   repoUrl: 'https://github.com/MichalDakowicz/cellar',
+  pinned: false,
 };
 
 export function cellarOf(...entries: Entry[]): Cellar {

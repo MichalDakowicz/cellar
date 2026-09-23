@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { useCellar } from '@/features/cellar/useCellar';
+import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { countLive, tallyKinds, tallyStates } from '@/lib/entryGroups';
 import { stateMeta } from '@/lib/entryState';
 import { plural } from '@/lib/utils';
@@ -17,6 +18,7 @@ import { useCellarPrefs } from '@/store/cellarPrefs';
  */
 export function useStatsScreen() {
   const { shelves, projects, entries, loading, error, refetch } = useCellar();
+  const { settings } = useCellarSettings();
   const shelfId = useCellarPrefs((state) => state.statsShelfId);
   const setStatsShelf = useCellarPrefs((state) => state.setStatsShelf);
 
@@ -37,10 +39,10 @@ export function useStatsScreen() {
   );
 
   const kindBars = useMemo(() => {
-    const tallies = tallyKinds(scoped);
+    const tallies = tallyKinds(scoped, settings.kindOrder);
     const peak = Math.max(1, ...tallies.map((tally) => tally.count));
     return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / peak) * 100) }));
-  }, [scoped]);
+  }, [scoped, settings.kindOrder]);
 
   // The spread line. tallyStates already walks ENTRY_STATES, so the legend
   // under the bar reads in the same order the bar is drawn in.

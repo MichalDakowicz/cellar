@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { ChevronDown, Search } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { ProjectFolder } from '@/components/cellar/ProjectFolder';
 import { ProjectGrid } from '@/components/cellar/ProjectGrid';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -27,6 +28,7 @@ export default function ShelfScreen() {
   const openShelfPicker = useCellarSheets((state) => state.shelfPicker);
   const openNewProject = useCellarSheets((state) => state.newProject);
   const openEditProject = useCellarSheets((state) => state.editProject);
+  const openEditGroup = useCellarSheets((state) => state.editGroup);
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -95,11 +97,28 @@ export default function ShelfScreen() {
                 action={{ label: 'new project', onPress: () => openNewProject?.([]) }}
               />
             ) : (
-              <ProjectGrid
-                projects={shelf.tiles}
-                onPress={(id) => router.navigate(`/project/${id}`)}
-                onEdit={(id) => openEditProject?.(id)}
-              />
+              shelf.sections.map((section) =>
+                section.type === 'group' ? (
+                  <ProjectFolder
+                    key={section.group.id}
+                    name={section.group.name}
+                    pinned={section.group.pinned}
+                    open={section.open}
+                    tiles={section.projects}
+                    onToggle={() => shelf.toggleGroup(section.group.id)}
+                    onEditGroup={() => openEditGroup?.(section.group.id)}
+                    onPress={(id) => router.navigate(`/project/${id}`)}
+                    onEdit={(id) => openEditProject?.(id)}
+                  />
+                ) : (
+                  <ProjectGrid
+                    key="loose"
+                    projects={section.projects}
+                    onPress={(id) => router.navigate(`/project/${id}`)}
+                    onEdit={(id) => openEditProject?.(id)}
+                  />
+                ),
+              )
             )}
           </View>
         </View>

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { cellarOf, entry, NOW, question } from './fixtures.test-helpers.ts';
-import { answeredBlock, answeredTail, entryBrief } from './format.ts';
+import { answeredBlock, answeredTail, entryBrief, entryRow } from './format.ts';
 
 /**
  * The brief is the server's only real output.
@@ -82,6 +82,37 @@ describe('entryBrief — questions', () => {
  * agent that has to make a second call to read the decision will not make it,
  * which is the failure both of these exist to close.
  */
+describe('importance', () => {
+  it('tells the agent when a thought was marked as mattering more', () => {
+    assert.match(brief({ importance: 'high' }), /matters  high — the user marked this one/);
+  });
+
+  it('marks only the exceptions on a row, the way the app does', () => {
+    const projects = cellarOf().projects;
+    assert.match(entryRow(entry({ importance: 'high' }), projects, NOW), /\(high\)/);
+    assert.match(entryRow(entry({ importance: 'low' }), projects, NOW), /\(low\)/);
+    assert.ok(!entryRow(entry(), projects, NOW).includes('(normal)'));
+  });
+});
+
+describe('entryBrief — docs', () => {
+  it('lists attached docs as links or paths before the thread', () => {
+    const out = brief({
+      docs: [
+        { id: 'd1', ref: 'docs/OVERVIEW.md', label: null, createdAt: '2026-09-14T10:00:00.000Z' },
+        { id: 'd2', ref: 'https://expo.dev/x', label: 'expo notes', createdAt: '2026-09-14T10:01:00.000Z' },
+      ],
+    });
+    assert.match(out, /read these first — attached to the thought:/);
+    assert.match(out, /path {2}docs\/OVERVIEW\.md/);
+    assert.match(out, /link {2}https:\/\/expo\.dev\/x {2}\(expo notes\)/);
+  });
+
+  it('says nothing about docs when there are none', () => {
+    assert.ok(!brief().includes('read these first'));
+  });
+});
+
 describe('answeredBlock', () => {
   const answeredOn = (over = {}) => {
     const one = entry({

@@ -1,6 +1,9 @@
-import { Text, View } from 'react-native';
+import { Copy } from 'lucide-react-native';
+import { Pressable, Text, View } from 'react-native';
 
+import { ProjectMark } from '@/components/cellar/ProjectMark';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
+import { COLORS } from '@/theme/colors';
 import type { KanbanAxis } from '@/lib/kanban';
 import type { ProjectView } from '@/store/cellarPrefs';
 
@@ -9,6 +12,7 @@ type ProjectHeaderProps = {
   meta: string;
   /** Two letters, the same mark the tile wears on the shelf. */
   initials: string;
+  icon?: string | null;
   /** Desktop wears the mark and a bigger title; phone keeps the line it had. */
   large?: boolean;
   /**
@@ -24,6 +28,9 @@ type ProjectHeaderProps = {
   filtered?: boolean;
   /** Phone only — on desktop the filter is open in the rail beside the list. */
   onFilter?: () => void;
+  onArrange?: () => void;
+  /** Copies the line that starts this project in an agent. Rides the name, not a row of its own. */
+  onCopy?: () => void;
 };
 
 /**
@@ -43,6 +50,7 @@ export function ProjectHeader({
   name,
   meta,
   initials,
+  icon,
   large,
   view,
   onView,
@@ -50,32 +58,44 @@ export function ProjectHeader({
   onAxis,
   filtered = false,
   onFilter,
+  onArrange,
+  onCopy,
 }: ProjectHeaderProps) {
   const alone = !onView || !view;
 
   const identity = (
     <View className={['min-w-0 flex-row items-center gap-3.5', alone ? 'shrink' : 'flex-1'].join(' ')}>
       <View className={['min-w-0', alone ? 'shrink' : 'flex-1'].join(' ')}>
-        <Text
-          className={[
-            'font-bold leading-tight tracking-tight text-foreground',
-            large ? 'text-3xl text-right' : 'text-2xl',
-          ].join(' ')}
-          numberOfLines={2}
-        >
-          {name}
-        </Text>
+        <View className={['flex-row items-center gap-2', large ? 'justify-end' : ''].join(' ')}>
+          <Text
+            className={[
+              'min-w-0 shrink font-bold leading-tight tracking-tight text-foreground',
+              large ? 'text-3xl text-right' : 'text-2xl',
+            ].join(' ')}
+            numberOfLines={2}
+          >
+            {name}
+          </Text>
+          {onCopy && (
+            // Beside the name rather than a row under the repo line: it is a
+            // handle on this project, and a whole row for one small icon pushed
+            // the list a line further down for nothing.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="copy a prompt for this project"
+              hitSlop={10}
+              onPress={onCopy}
+              className="h-7 w-7 items-center justify-center rounded-md active:opacity-60"
+            >
+              <Copy size={large ? 16 : 14} color={COLORS.muted} strokeWidth={2} />
+            </Pressable>
+          )}
+        </View>
         <Text className="mt-1 text-xs text-muted-foreground" numberOfLines={1}>
           {meta}
         </Text>
       </View>
-      {large && (
-        <View className="h-14 w-14 items-center justify-center rounded-xl bg-neutral-900">
-          <Text className="text-xl font-bold lowercase tracking-tight text-muted-foreground opacity-60">
-            {initials}
-          </Text>
-        </View>
-      )}
+      {large && <ProjectMark icon={icon} initials={initials} size={56} />}
     </View>
   );
 
@@ -91,6 +111,7 @@ export function ProjectHeader({
         onAxis={onAxis}
         filtered={filtered}
         onFilter={onFilter}
+        onArrange={onArrange}
       />
     </View>
   );

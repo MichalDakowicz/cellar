@@ -49,6 +49,50 @@ They are read-only and they do not claim:
 They live in `mcp/skill/commands/` and install next to this file — `mcp/README.md` has the
 copy. Picking something up is still `pick up cellar entry <id>`, which lands back here.
 
+### The live view
+
+A lookup publishes a page instead of dumping rows into the terminal — **one page, reused**.
+Every lookup overwrites the same artifact, so there is always exactly one "Cellar Live" in the
+user's gallery and it always shows the last thing they asked for. Never publish a second one.
+
+1. **Get the data.** `/cellar-list` and `/cellar-find` pass `json: true` to
+   `cellar_list_entries`, which returns `{ rows, more }` — use the rows as they come, do not
+   re-parse the text listing. `/cellar-view` reads `cellar_get_entry` and fills `entry`.
+2. **Fill the template.** Read `live-view.html` — beside this file once installed
+   (`~/.claude/skills/cellar/live-view.html`), `mcp/skill/live-view.html` in the cellar repo.
+   Replace only what sits between `<script type="application/json" id="cellar-data">` and its
+   `</script>`, and write every `<` inside a JSON string as `<` so a thought can never
+   close the tag. Write the result to your scratchpad (or a temp directory) as
+   `cellar-live.html`.
+3. **Publish in place.** Already published it this session → publish the same path again.
+   Otherwise `Artifact` with `action: "list"`, find the one titled **Cellar Live**, `read` it,
+   then publish your file with its `url`. Only when none exists, publish a new one with
+   `icon: "list"`. The page carries its own `<title>`; do not rename it.
+4. **Say one line in the terminal**: the heading, the counts and the link. Not the rows —
+   the page is the list now.
+
+No `Artifact` tool in this session (another client, a bare CLI) → print the rows the way the
+server returns them, exactly as before. The page is the nicer reading, never the only one.
+
+The data block:
+
+```json
+{
+  "lookup": "list | find | view",
+  "heading": "the project name, the search text, or the entry's short id",
+  "sub": "one line of counts, e.g. 13 open · 2 doing · 1 blocked",
+  "at": "ISO timestamp of the lookup",
+  "sections": [{ "title": "blocked on you", "rows": ["…rows exactly as json: true returns them"] }],
+  "entry": null
+}
+```
+
+For `/cellar-view`, `sections` is `[]` and `entry` is the brief as data: `id`, `text`,
+`kind`, `state`, `agent`, `dumped`, `project`, `repo`, `yours` and `agent_lines` (each a list
+of `{ text, age }`, kept apart as the brief keeps them), and `questions` (each `{ question,
+options, taken, answer, status }` with `status` one of `pending | answered | dismissed` and
+`taken` the options the answer picked).
+
 ## Ask instead of guessing
 
 **This is a correct outcome**, not a failure to finish.
@@ -109,6 +153,26 @@ a/b/c/d taps in the app, and a question answerable in one tap gets answered.
 `design` does not mean "check it against a design system". Only reach for one if the project
 actually has one.
 
+## Groups
+
+A shelf can hold **groups** — an ecosystem of projects that are one thing from far away.
+Each group has a **general project** named after it, and a thought about the whole group
+lives there. `cellar_list_projects` prints it as `(group — …)` with the group's projects
+indented under it. If the general project is linked to the parent folder (`C:\ping`), an
+agent standing there lands on it and one standing in `C:\ping\radar` still lands on radar —
+the longest checkout wins. A follow-up that is about the ecosystem rather than one app goes
+to the general project with `cellar_create_entry`.
+
+## Testing on their phone
+
+`cellar_orient` prints a **phone** line, read off a switch in the app's settings — *let agents
+test on my phone*. It is the user's standing answer, given once, so never ask it again:
+
+- **yes** → you may install the app on their phone over adb, launch it and drive it to check
+  your change, the way the repo's own instructions describe. No need to ask first.
+- **no** → do not install on it or drive it. If only a device test would settle something,
+  say so and ask in the chat.
+
 ## Write like they do
 
 Your lines sit in a list directly beneath the user's own thoughts. An assistant voice there
@@ -140,7 +204,11 @@ Send the sentence worth reading in six months. One line per real finding.
   in the chat. This writes what they said back onto the question and unblocks the entry if
   it was the last one outstanding. Only ever what the user actually said — an answer you
   reasoned out yourself is a guess with their name on it.
-- **`cellar_unclaim_entry`** — you ran out of room or the user moved on. Put it back.
+- **`cellar_unclaim_entry`** — you ran out of room or the user moved on. Put it back. Only
+  for a claim: it refuses a thought that is not `doing`.
+- **`cellar_reopen_entry`** — a done, dropped or archived thought that should be on the list
+  again: the user asked, or the fix did not hold. Reason required. It lands open with nobody
+  on it — claim it if it is yours to work. Never reopen something just to take it.
 - **`cellar_link_repo`** — `cellar_orient` found no project for a repo that clearly has one.
   Linking it is the one change that stops the question recurring in every future session.
   Offer it; do not invent a new project on your own.

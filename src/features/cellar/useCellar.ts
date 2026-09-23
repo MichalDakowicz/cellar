@@ -4,30 +4,37 @@ import { useCallback, useMemo } from 'react';
 import {
   answerQuestion,
   appendLine,
-  createProject,
-  createShelf,
   deleteEntry,
   deleteLine,
-  deleteProject,
-  deleteShelf,
   dismissQuestion,
   dropEntries,
   fetchEntries,
   fetchProjects,
   fetchShelves,
-  moveProject,
   patchEntry,
-  renameProject,
-  renameShelf,
-  setProjectRepo,
   type EntryPatch,
   type NewDrop,
 } from '@/features/cellar/cellarApi';
+import {
+  createProject,
+  createShelf,
+  deleteProject,
+  deleteShelf,
+  moveProject,
+  renameProject,
+  renameShelf,
+  setProjectIcon,
+  setProjectPinned,
+  setProjectRepo,
+} from '@/features/cellar/structureApi';
+import { logEvents } from '@/features/cellar/trailApi';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { ENTRIES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
+import { fetchGroups } from '@/features/cellar/groupApi';
+import { ENTRIES_KEY, GROUPS_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
 import { unblocksEntry } from '@/lib/entryQuestions';
+import { patchEvents } from '@/lib/entryTrail';
 import { useCellarPrefs } from '@/store/cellarPrefs';
-import type { Entry, Project, Shelf } from '@/types/cellar';
+import type { Entry, Group, Project, Shelf } from '@/types/cellar';
 
 /**
  * The cellar, as three queries and the writes that invalidate them.
@@ -40,17 +47,20 @@ import type { Entry, Project, Shelf } from '@/types/cellar';
 
 export function useCellar() {
   const shelves = useQuery({ queryKey: SHELVES_KEY, queryFn: fetchShelves });
+  const groups = useQuery({ queryKey: GROUPS_KEY, queryFn: fetchGroups });
   const projects = useQuery({ queryKey: PROJECTS_KEY, queryFn: fetchProjects });
   const entries = useQuery({ queryKey: ENTRIES_KEY, queryFn: fetchEntries });
 
   return {
     shelves: shelves.data ?? EMPTY_SHELVES,
+    groups: groups.data ?? EMPTY_GROUPS,
     projects: projects.data ?? EMPTY_PROJECTS,
     entries: entries.data ?? EMPTY_ENTRIES,
     loading: shelves.isLoading || projects.isLoading || entries.isLoading,
     error: shelves.error ?? projects.error ?? entries.error ?? null,
     refetch: () => {
       void shelves.refetch();
+      void groups.refetch();
       void projects.refetch();
       void entries.refetch();
     },
@@ -60,6 +70,7 @@ export function useCellar() {
 // Stable identities: a fresh `[]` every render would re-run every useMemo
 // downstream, and every screen in this app memoises off these three lists.
 const EMPTY_SHELVES: Shelf[] = [];
+const EMPTY_GROUPS: Group[] = [];
 const EMPTY_PROJECTS: Project[] = [];
 const EMPTY_ENTRIES: Entry[] = [];
 
@@ -84,6 +95,7 @@ export function useCurrentShelf(shelves: Shelf[]) {
 
 export function useCellarWrites() {
   const { user } = useAuth();
+  const userId = user?.id;
   const client = useQueryClient();
 
   const invalidate = useCallback(
@@ -98,8 +110,14 @@ export function useCellarWrites() {
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
+  // The entry as it was is read from the cache rather than passed in, so every
+  // caller of `update` gets a trail without knowing there is one.
   const update = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: EntryPatch }) => patchEntry(id, patch),
+    mutationFn: async ({ id, patch }: { id: string; patch: EntryPatch }) => {
+      const before = client.getQueryData<Entry[]>(ENTRIES_KEY)?.find((entry) => entry.id === id);
+      await patchEntry(id, patch);
+      if (before && userId) await logEvents(userId, id, patchEvents(before, patch, BY_YOU));
+    },
     onSuccess: () => invalidate(ENTRIES_KEY),
   });
 
@@ -134,8 +152,9 @@ export function useCellarWrites() {
       if (entry.state !== 'blocked') return;
       if (!unblocksEntry(entry.questions, questionId)) return;
       await patchEntry(entry.id, { state: 'open', agent: null });
+      if (userId) await logEvents(userId, entry.id, patchEvents(entry, { state: 'open' }, BY_YOU));
     },
-    [],
+    [userId],
   );
 
   const answer = useMutation({
@@ -174,6 +193,16 @@ export function useCellarWrites() {
   const linkProject = useMutation({
     mutationFn: ({ id, ...repo }: { id: string; repoPath: string | null; repoUrl: string | null }) =>
       setProjectRepo(id, repo),
+    onSuccess: () => invalidate(PROJECTS_KEY),
+  });
+
+  const pinProject = useMutation({
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => setProjectPinned(id, pinned),
+    onSuccess: () => invalidate(PROJECTS_KEY),
+  });
+
+  const iconProject = useMutation({
+    mutationFn: ({ id, icon }: { id: string; icon: string | null }) => setProjectIcon(id, icon),
     onSuccess: () => invalidate(PROJECTS_KEY),
   });
 
@@ -216,10 +245,14 @@ export function useCellarWrites() {
     addProject,
     editProject,
     linkProject,
+    pinProject,
+    iconProject,
     relocateProject,
     removeProject,
   };
 }
+
+const BY_YOU = { source: 'user' as const, agent: null };
 
 function requireUser(id: string | undefined): string {
   if (!id) throw new Error('not signed in');

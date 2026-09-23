@@ -5,6 +5,7 @@ import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-na
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
+import { projectChips } from '@/components/cellar/projectChips';
 import { SwipeShelf } from '@/components/cellar/SwipeShelf';
 import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
@@ -117,11 +118,16 @@ export default function DumpScreen() {
             accessibilityLabel="what just hit you"
           />
 
+          {/* The mode never shrinks and the hint takes what is left: with both
+              free to shrink, Android re-measured the pair after a settings
+              change re-rendered the tree and clipped "one thought" to "one". */}
           <View className="mt-2.5 flex-row items-center justify-between gap-3">
-            <Text className="text-xs font-semibold text-muted-foreground">
+            <Text className="shrink-0 text-xs font-semibold text-muted-foreground">
               {dump.raw ? 'raw dump' : 'one thought'}
             </Text>
-            <Text className="text-xs text-muted-foreground">{dump.hint}</Text>
+            <Text className="min-w-0 flex-1 text-right text-xs text-muted-foreground" numberOfLines={1}>
+              {dump.hint}
+            </Text>
           </View>
 
           {/* The whole block is the shelf control, not just the pill: with two
@@ -144,16 +150,18 @@ export default function DumpScreen() {
             </View>
             <ChipWrap
               label="project"
-              options={dump.projectOptions}
-              selected={dump.projectId ?? ''}
-              onToggle={(value) => dump.setProject(value === '' ? null : value)}
+              options={projectChips(dump.projectOptions, dump.selectedTargets)}
+              selected={dump.selectedTargets}
+              onToggle={dump.pickProject}
+              onHold={dump.holdProject}
             />
+            <Text className="mt-2 text-xs text-muted-foreground">{dump.targetsHint}</Text>
           </SwipeShelf>
 
           <View className="mb-2 mt-5">
             <Overline>kind</Overline>
           </View>
-          <ChipWrap label="kind" options={kindChips(dump.kind)} selected={dump.kind} onToggle={dump.setKind} />
+          <ChipWrap label="kind" options={kindChips(dump.kind, dump.kindOrder)} selected={dump.kind} onToggle={dump.setKind} />
 
           <Pressable
             accessibilityRole="button"

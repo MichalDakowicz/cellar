@@ -10,11 +10,14 @@ function entry(id: string, kind: Kind, state: EntryState, archived = false): Ent
     text: id,
     kind,
     state,
+    importance: 'normal',
+    position: 0,
     archived,
     createdAt: '2026-09-20T10:00:00.000Z',
     agent: null,
     lines: [],
     questions: [],
+    docs: [],
   };
 }
 
@@ -50,6 +53,23 @@ describe('kanbanColumns', () => {
     const states = kanbanColumns([], 'state').map((column) => column.key);
     const kinds = kanbanColumns([], 'kind').map((column) => column.key);
     expect(states.some((key) => kinds.includes(key))).toBe(false);
+  });
+
+  // A multi-select resolves its held ids against the flat filtered list, not
+  // against the columns — so an entry the board drops has a tick nobody can
+  // clear, and one it shows twice is counted once in the bar and ticked in two
+  // places. Both axes have to partition what they are handed.
+  it.each(['state', 'kind'] as const)('shows each entry in exactly one column, cut by %s', (axis) => {
+    const entries = [
+      entry('a', 'idea', 'open'),
+      entry('b', 'glitch', 'doing'),
+      entry('c', 'question', 'blocked'),
+      entry('d', 'removal', 'done'),
+      entry('e', 'research', 'dropped'),
+      entry('f', 'copy', 'open', true),
+    ];
+    const drawn = kanbanColumns(entries, axis).flatMap((column) => column.entries.map((item) => item.id));
+    expect(drawn.slice().sort()).toEqual(entries.map((item) => item.id).slice().sort());
   });
 });
 

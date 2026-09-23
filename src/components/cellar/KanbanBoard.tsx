@@ -35,16 +35,26 @@ const COLUMN_W = 280;
  *
  * An empty column keeps its header and says so. The count on a board is the
  * information — an empty "doing" is the point of looking.
+ *
+ * The hold travels through it the same as it does down a list: a selection is
+ * about the rows in front of you, and which of the three readings you happen to
+ * be in is not supposed to change what a row does.
  */
 export function KanbanBoard({
   columns,
   showCode,
   onPress,
+  onLongPress,
+  selectedIds,
   onCopy,
 }: {
   columns: BoardColumn[];
   showCode: boolean;
   onPress: (entry: Entry) => void;
+  /** Starts a multi-select on a card. Leave it out and cards do not hold. */
+  onLongPress?: (entry: Entry) => void;
+  /** The ids currently held. Cards in it wear a tick in place of their glyph. */
+  selectedIds?: ReadonlySet<string>;
   onCopy?: (entry: Entry) => void;
 }) {
   return (
@@ -58,7 +68,15 @@ export function KanbanBoard({
       contentContainerStyle={{ flexGrow: 1, gap: 10, paddingHorizontal: 14 }}
     >
       {columns.map((column) => (
-        <Column key={column.key} column={column} showCode={showCode} onPress={onPress} onCopy={onCopy} />
+        <Column
+          key={column.key}
+          column={column}
+          showCode={showCode}
+          onPress={onPress}
+          onLongPress={onLongPress}
+          selectedIds={selectedIds}
+          onCopy={onCopy}
+        />
       ))}
     </ScrollView>
   );
@@ -68,11 +86,15 @@ function Column({
   column,
   showCode,
   onPress,
+  onLongPress,
+  selectedIds,
   onCopy,
 }: {
   column: BoardColumn;
   showCode: boolean;
   onPress: (entry: Entry) => void;
+  onLongPress?: (entry: Entry) => void;
+  selectedIds?: ReadonlySet<string>;
   onCopy?: (entry: Entry) => void;
 }) {
   // Settled work is history on a board too — the same dim the grouped bands
@@ -112,6 +134,8 @@ function Column({
             inset="px-3"
             showCode={showCode}
             onPress={onPress}
+            onLongPress={onLongPress}
+            selectedIds={selectedIds}
             onCopy={onCopy}
           />
         </View>

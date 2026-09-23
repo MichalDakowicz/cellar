@@ -27,16 +27,19 @@ const entry = (over: Partial<Entry> = {}): Entry => ({
   text: 'the nav island jumps on keyboard open',
   kind: 'glitch',
   state: 'blocked' as EntryState,
+  importance: 'normal',
+  position: 0,
   archived: false,
   createdAt: '2026-09-14T09:00:00.000Z',
   agent: 'claude',
   lines: [line('l1', 'which surface — dump, filter, or both?', 'agent')],
   questions: [],
+  docs: [],
   ...over,
 });
 
 const projects: Project[] = [
-  { id: 'p1', shelfId: 's1', name: 'cellar', position: 0, createdAt: '', repoPath: null, repoUrl: null },
+  { id: 'p1', shelfId: 's1', name: 'cellar', position: 0, createdAt: '', repoPath: null, repoUrl: null, pinned: false },
 ];
 
 describe('pendingNotices', () => {

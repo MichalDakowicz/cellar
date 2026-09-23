@@ -1,8 +1,11 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
-import { Field, Overline } from '@/components/ui/controls';
+import { ProjectMark } from '@/components/cellar/ProjectMark';
+import { Field, Overline, SwitchRow } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
+import { pickProjectIcon } from '@/features/cellar/pickProjectIcon';
+import { ProjectGroupPicker } from '@/features/cellar/sheets/ProjectGroupPicker';
 import { useSheetDraft } from '@/features/cellar/sheets/useSheetDraft';
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { checkName, deleteProjectCost, nameErrorText } from '@/lib/containers';
@@ -27,9 +30,9 @@ export function EditProjectSheet({
   onClose: () => void;
 }) {
   const { shelves, projects, entries } = useCellar();
-  const { editProject, linkProject, relocateProject, removeProject } = useCellarWrites();
-  const lastProjectId = useCellarPrefs((state) => state.lastProjectId);
-  const setLastProject = useCellarPrefs((state) => state.setLastProject);
+  const { editProject, linkProject, iconProject, pinProject, relocateProject, removeProject } = useCellarWrites();
+  const lastProjectIds = useCellarPrefs((state) => state.lastProjectIds);
+  const setLastProjects = useCellarPrefs((state) => state.setLastProjects);
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
   const { values, set, confirming, setConfirming } = useSheetDraft(open, projectId, {
@@ -63,9 +66,9 @@ export function EditProjectSheet({
   };
 
   const destroy = () => {
-    // The capture screen's chip points at this project; leaving it pointed at a
-    // dead id would file the next thought nowhere.
-    if (lastProjectId === project.id) setLastProject(null);
+    // The capture screen's chips may point at this project; leaving one pointed
+    // at a dead id would file the next thought nowhere.
+    if (lastProjectIds.includes(project.id)) setLastProjects(lastProjectIds.filter((id) => id !== project.id));
     removeProject.mutate(project.id, { onSuccess: onClose });
   };
 
@@ -74,11 +77,14 @@ export function EditProjectSheet({
       <SheetDialog
         open={open && !confirming}
         title="edit project"
+        // A group's general project goes with its group, never on its own: it is
+        // where every thought about the whole group lives.
+        body={project.groupHome ? 'the general project of its group — delete the group to take it off the shelf.' : undefined}
         confirmLabel="save"
-        dismissLabel="delete it"
+        dismissLabel={project.groupHome ? 'close' : 'delete it'}
         confirmDisabledReason={nameErrorText(error, 'project')}
         onConfirm={save}
-        onDismiss={() => setConfirming(true)}
+        onDismiss={() => (project.groupHome ? onClose() : setConfirming(true))}
         onRequestClose={onClose}
       >
         <View className="mt-4">
@@ -90,6 +96,44 @@ export function EditProjectSheet({
             error={nameErrorText(error, 'project')}
           />
         </View>
+
+        {/* Applied as it is flipped, like the shelf chips below: it is a sort,
+            not a field, and a save button between you and the order you just
+            asked for is a round trip for nothing. */}
+        <SwitchRow
+          label="pin it"
+          sub="sorts first on its shelf, and first when you file a thought"
+          value={project.pinned}
+          onChange={(pinned) => pinProject.mutate({ id: project.id, pinned })}
+        />
+        {/* Applied as it is picked, like the shelf below: an icon is not a
+            field you type, and a save button between you and the picture you
+            just chose is a round trip for nothing. */}
+        <View className="mt-5 flex-row items-center gap-3">
+          <ProjectMark icon={project.icon} initials={project.name.trim().slice(0, 2).toLowerCase()} size={44} />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              void pickProjectIcon()
+                .then((icon) => icon && iconProject.mutate({ id: project.id, icon }))
+                .catch(() => undefined)
+            }
+            className="active:opacity-70"
+          >
+            <Text className="text-sm font-semibold text-foreground">{project.icon ? 'change the icon' : 'pick an icon'}</Text>
+          </Pressable>
+          {!!project.icon && (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => iconProject.mutate({ id: project.id, icon: null })}
+              className="active:opacity-70"
+            >
+              <Text className="text-sm text-muted-foreground">remove</Text>
+            </Pressable>
+          )}
+        </View>
+
+        <ProjectGroupPicker project={project} />
 
         <View className="mt-5 gap-2">
           <Overline>where it lives</Overline>

@@ -44,6 +44,21 @@ export const useLinkPreviews = create<PreviewState>()(
           byHref: { ...state.byHref, [href]: { meta: EMPTY_META, fetchedAt: 0, failedAt: Date.now() } },
         })),
     }),
-    { name: 'cellar-link-previews', storage: createJSONStorage(() => mmkvStorage), version: 1 },
+    {
+      name: 'cellar-link-previews',
+      storage: createJSONStorage(() => mmkvStorage),
+      // 2 drops everything version 1 cached, once, on first launch after the
+      // update. A consent wall is a 200 with real tags on it, so its title was
+      // stored as a *success* — and a success is final here, never retried. The
+      // links that oEmbed now reads correctly are exactly the links already
+      // holding a confidently wrong answer, so without this the fix reaches
+      // only pages nobody has opened yet.
+      //
+      // Dropping rather than migrating: there is nothing to carry over, and the
+      // cost of a cold cache is one fetch per link, which is what the store
+      // does on a new device anyway.
+      version: 2,
+      migrate: () => ({ byHref: {} }),
+    },
   ),
 );

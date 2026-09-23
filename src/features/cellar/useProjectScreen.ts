@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 
 import type { EntryListItem } from '@/components/cellar/EntryList';
@@ -15,12 +16,13 @@ import {
 } from '@/lib/entryGroups';
 import { collapseItems } from '@/lib/entryCollapse';
 import { kanbanColumns } from '@/lib/kanban';
+import { effectiveCollapsed, foldedByDefault, sortForProject, type ProjectSort } from '@/lib/displayPrefs';
 import { stateMeta } from '@/lib/entryState';
 import { dayLabel } from '@/lib/relTime';
 import { repoLabel } from '@/lib/repoLink';
 import { plural } from '@/lib/utils';
 import { useCellarPrefs, useCollapsedSections, useEntryFilter } from '@/store/cellarPrefs';
-import type { Entry } from '@/types/cellar';
+import type { Entry, Kind } from '@/types/cellar';
 
 /**
  * One project, three ways to read it.
@@ -34,9 +36,10 @@ import type { Entry } from '@/types/cellar';
  * screens.
  */
 export function useProjectScreen(projectId: string | undefined) {
+  const router = useRouter();
   const { projects, entries, loading, error, refetch } = useCellar();
   const { settings } = useCellarSettings();
-  const collapsed = useCollapsedSections((state) => state.collapsed);
+  const toggled = useCollapsedSections((state) => state.collapsed);
   const toggleSection = useCollapsedSections((state) => state.toggle);
   const view = useCellarPrefs((state) => state.view);
   const setView = useCellarPrefs((state) => state.setView);
@@ -71,23 +74,28 @@ export function useProjectScreen(projectId: string | undefined) {
   );
 
   const kindBars = useMemo(() => {
-    const tallies = tallyKinds(live);
+    const tallies = tallyKinds(live, settings.kindOrder);
     const top = Math.max(1, ...tallies.map((tally) => tally.count));
     return tallies.map((tally) => ({ ...tally, pct: Math.round((tally.count / top) * 100) }));
-  }, [live]);
+  }, [live, settings.kindOrder]);
 
-  const visible = useMemo(() => applyFilter(all, filter), [all, filter]);
+  const visible = useMemo(
+    () => sortForProject(applyFilter(all, filter), settings.projectSort),
+    [all, filter, settings.projectSort],
+  );
   const grouped = useMemo(() => {
     if (view === 'kanban') return [];
-    return view === 'grouped' ? groupedItems(visible) : streamItems(visible);
-  }, [visible, view]);
+    return view === 'grouped'
+      ? groupedItems(visible, settings.kindOrder)
+      : streamItems(visible, settings.hideSettled, settings.projectSort);
+  }, [visible, view, settings.kindOrder, settings.hideSettled, settings.projectSort]);
 
   // The board's own shape. Flattened here rather than in `lib/kanban`, because
   // `EntryListItem` is the list component's type and lib stays free of both
   // React and anything that imports it.
   const columns = useMemo<BoardColumn[]>(() => {
     if (view !== 'kanban') return [];
-    return kanbanColumns(visible, kanbanAxis).map((column) => ({
+    return kanbanColumns(visible, kanbanAxis, settings.kindOrder).map((column) => ({
       key: column.key,
       label: column.label,
       band: column.band,
@@ -95,11 +103,18 @@ export function useProjectScreen(projectId: string | undefined) {
       count: column.entries.length,
       items: column.entries.map((entry) => ({ type: 'entry' as const, entry })),
     }));
-  }, [visible, view, kanbanAxis]);
+  }, [visible, view, kanbanAxis, settings.kindOrder]);
 
   // Folding is applied here rather than inside the list, so what the list is
   // handed is what it draws — a virtualizer that filters its own data is a
   // virtualizer whose item count and its rows disagree.
+  //
+  // What is folded is your taps flipped over the defaults, so "hide done and
+  // dropped" starts those headings folded and one tap still opens them.
+  const collapsed = useMemo(
+    () => effectiveCollapsed(toggled, foldedByDefault(settings.hideSettled)),
+    [toggled, settings.hideSettled],
+  );
   const items = useMemo(() => collapseItems(grouped, collapsed), [grouped, collapsed]);
 
   const filtered = hasFilter(filter);
@@ -119,6 +134,7 @@ export function useProjectScreen(projectId: string | undefined) {
     name: project?.name ?? 'project',
     /** The tile's two letters, so the detail page wears the same mark as the grid. */
     initials: (project?.name ?? '').trim().slice(0, 2).toLowerCase() || '··',
+    icon: project?.icon ?? null,
     meta,
     /** Where it lives, when it has been linked. Null is the normal case. */
     repo: project && (project.repoPath || project.repoUrl)
@@ -138,6 +154,9 @@ export function useProjectScreen(projectId: string | undefined) {
     collapsed,
     toggleSection,
     showCodes: settings.showCodes,
+    kindOrder: settings.kindOrder,
+    /** The drag-to-order screen for this project's thoughts. */
+    arrange: () => projectId && router.push({ pathname: '/arrange', params: { what: 'entries', id: projectId } }),
     filtered,
     /** Nothing matches, versus nothing here yet — two different empties (PING.md §9.9). */
     emptyKind: all.length === 0 ? ('nothing' as const) : visible.length === 0 ? ('filtered' as const) : null,
@@ -151,8 +170,8 @@ export function useProjectScreen(projectId: string | undefined) {
  * The keys are prefixed with the band: the same kind appears under several
  * states, and two sections keyed `glitch` collapse into one row.
  */
-function groupedItems(entries: Entry[]): EntryListItem[] {
-  return groupByStateAndKind(entries).flatMap((band) => [
+function groupedItems(entries: Entry[], kindOrder: Kind[] | null): EntryListItem[] {
+  return groupByStateAndKind(entries, kindOrder).flatMap((band) => [
     {
       type: 'section' as const,
       section: {
@@ -180,12 +199,34 @@ function groupedItems(entries: Entry[]): EntryListItem[] {
   ]);
 }
 
-function streamItems(entries: Entry[]): EntryListItem[] {
-  return groupByDay(entries).flatMap((group) => [
+/**
+ * Days, in the project's sort. With "hide done and dropped" on, the settled
+ * rows leave the days and wait in one band at the foot — folded by default
+ * (`foldedByDefault`), so the stream reads as what is still work.
+ */
+function streamItems(entries: Entry[], hideSettled: boolean, sort: ProjectSort): EntryListItem[] {
+  const isSettled = (entry: Entry) => stateMeta(entry.state).settled;
+  const settled = hideSettled ? entries.filter(isSettled) : [];
+  const days = hideSettled ? entries.filter((entry) => !isSettled(entry)) : entries;
+  const out: EntryListItem[] = groupByDay(days, sort).flatMap((group) => [
     {
       type: 'section' as const,
       section: { key: group.key, label: dayLabel(group.key), meta: String(group.entries.length) },
     },
     ...group.entries.map((entry) => ({ type: 'entry' as const, entry })),
   ]);
+  if (settled.length === 0) return out;
+  return [
+    ...out,
+    {
+      type: 'section' as const,
+      section: {
+        key: 's:settled',
+        label: 'done and dropped',
+        meta: String(settled.length),
+        band: { color: stateMeta('dropped').color, dim: true },
+      },
+    },
+    ...settled.map((entry) => ({ type: 'entry' as const, entry })),
+  ];
 }

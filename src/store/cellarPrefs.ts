@@ -39,20 +39,29 @@ type PrefsState = {
   kanbanAxis: KanbanAxis;
   /** Many-lines capture mode, sticky because it is a mode you work in. */
   raw: boolean;
-  /** The project chip the capture screen last dropped into. */
-  lastProjectId: string | null;
+  /**
+   * The project chips the capture screen last dropped into. Empty is the inbox;
+   * more than one files the thought into each (`lib/fileTargets`).
+   */
+  lastProjectIds: string[];
   draftKind: Kind;
   inboxSort: InboxSort;
   /** Which shelf the figures cover. `null` is every shelf, and the inbox. */
   statsShelfId: string | null;
+  /**
+   * Group folders you closed. Kept, unlike folded headings in a project: a
+   * folder is structure you chose to put away, and it should stay put away.
+   */
+  closedGroups: string[];
   setShelf: (shelfId: string | null) => void;
   setView: (view: ProjectView) => void;
   setKanbanAxis: (axis: KanbanAxis) => void;
   setRaw: (raw: boolean) => void;
-  setLastProject: (projectId: string | null) => void;
+  setLastProjects: (projectIds: string[]) => void;
   setDraftKind: (kind: Kind) => void;
   setInboxSort: (sort: InboxSort) => void;
   setStatsShelf: (shelfId: string | null) => void;
+  toggleGroup: (groupId: string) => void;
 };
 
 export const useCellarPrefs = create<PrefsState>()(
@@ -62,20 +71,42 @@ export const useCellarPrefs = create<PrefsState>()(
       view: 'grouped',
       kanbanAxis: 'state',
       raw: false,
-      lastProjectId: null,
+      lastProjectIds: [],
       draftKind: 'idea',
       inboxSort: 'newest',
       statsShelfId: null,
+      closedGroups: [],
       setShelf: (shelfId) => set({ shelfId }),
       setView: (view) => set({ view }),
       setKanbanAxis: (kanbanAxis) => set({ kanbanAxis }),
       setRaw: (raw) => set({ raw }),
-      setLastProject: (lastProjectId) => set({ lastProjectId }),
+      setLastProjects: (lastProjectIds) => set({ lastProjectIds }),
       setDraftKind: (draftKind) => set({ draftKind }),
       setInboxSort: (inboxSort) => set({ inboxSort }),
       setStatsShelf: (statsShelfId) => set({ statsShelfId }),
+      toggleGroup: (groupId) =>
+        set((state) => ({
+          closedGroups: state.closedGroups.includes(groupId)
+            ? state.closedGroups.filter((id) => id !== groupId)
+            : [...state.closedGroups, groupId],
+        })),
     }),
-    { name: 'cellar-prefs', storage: createJSONStorage(() => mmkvStorage), version: 1 },
+    {
+      name: 'cellar-prefs',
+      storage: createJSONStorage(() => mmkvStorage),
+      version: 2,
+      // v1 remembered one chip. Carried across as a set of one, so the update
+      // does not quietly send the next thought to the inbox.
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Record<string, unknown>;
+        if (version < 2) {
+          const last = state.lastProjectId;
+          state.lastProjectIds = typeof last === 'string' ? [last] : [];
+          delete state.lastProjectId;
+        }
+        return state as unknown as PrefsState;
+      },
+    },
   ),
 );
 
@@ -144,6 +175,8 @@ type SheetHandles = {
   editProject: ((projectId: string) => void) | null;
   /** Rename or delete one shelf. */
   editShelf: ((shelfId: string) => void) | null;
+  /** Rename, pin or delete one group. */
+  editGroup: ((groupId: string) => void) | null;
   register: (handles: Partial<Omit<SheetHandles, 'register'>>) => void;
 };
 
@@ -178,5 +211,6 @@ export const useCellarSheets = create<SheetHandles>((set) => ({
   statsScope: null,
   editProject: null,
   editShelf: null,
+  editGroup: null,
   register: (handles) => set(handles),
 }));

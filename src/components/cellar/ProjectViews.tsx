@@ -1,4 +1,4 @@
-import { Columns3, Funnel, List, Rows3 } from 'lucide-react-native';
+import { Columns3, Funnel, GripVertical, List, Rows3 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -27,6 +27,7 @@ export function ProjectViews({
   onAxis,
   filtered = false,
   onFilter,
+  onArrange,
 }: {
   view: ProjectView;
   onView: (view: ProjectView) => void;
@@ -36,6 +37,8 @@ export function ProjectViews({
   filtered?: boolean;
   /** Phone only — on desktop the filter is open in the rail beside the list. */
   onFilter?: () => void;
+  /** Opens the drag-to-order screen for this project's thoughts. */
+  onArrange?: () => void;
 }) {
   return (
     <View className="items-start gap-1.5">
@@ -52,6 +55,11 @@ export function ProjectViews({
         {onFilter && (
           <Segment label="filter" active={filtered} onPress={onFilter}>
             <Funnel size={16} color={filtered ? COLORS.accent : COLORS.muted} strokeWidth={2} />
+          </Segment>
+        )}
+        {onArrange && (
+          <Segment label="arrange" active={false} onPress={onArrange}>
+            <GripVertical size={16} color={COLORS.muted} strokeWidth={2} />
           </Segment>
         )}
       </View>

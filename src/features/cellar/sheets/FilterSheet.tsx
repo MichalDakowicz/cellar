@@ -4,12 +4,14 @@ import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
+import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { ENTRY_STATES } from '@/lib/entryState';
 import { useEntryFilter } from '@/store/cellarPrefs';
 import type { EntryState, Kind } from '@/types/cellar';
 
 /** Narrows one project by kind and state. Never narrows the inbox — see SortSheet. */
 export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { settings } = useCellarSettings();
   const filter = useEntryFilter((state) => state.filter);
   const setFilter = useEntryFilter((state) => state.setFilter);
   const toggleKind = useEntryFilter((state) => state.toggleKind);
@@ -34,7 +36,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
         <Overline>kind</Overline>
         <ChipWrap
           label="kind"
-          options={kindChips(filter.kinds)}
+          options={kindChips(filter.kinds, settings.kindOrder)}
           selected={filter.kinds}
           onToggle={(kind: Kind) => toggleKind(kind)}
         />

@@ -2,11 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
 import {
+  CELLAR_SETTINGS_COLUMNS,
+  type CellarSettings,
+  type CellarSettingsRow,
   cellarSettingsToRow,
   DEFAULT_CELLAR_SETTINGS,
   normalizeCellarSettings,
-  type CellarSettings,
-  type CellarSettingsRow,
 } from '@/lib/cellarSettings';
 import { supabase } from '@/lib/supabase';
 
@@ -19,7 +20,7 @@ function key(userId: string | undefined) {
 async function fetchCellarSettings(userId: string): Promise<CellarSettings> {
   const { data, error } = await supabase
     .from('cellar_settings')
-    .select('show_codes, raw_default, remember_last, default_kind, default_view, notify_questions')
+    .select(CELLAR_SETTINGS_COLUMNS)
     .eq('user_id', userId)
     .maybeSingle();
   if (error) throw error;

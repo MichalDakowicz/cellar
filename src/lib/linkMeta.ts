@@ -76,7 +76,19 @@ export function decodeEntities(value: string): string {
   return value.replace(/&(#?\w+);/g, (whole, name: string) => ENTITIES[name.toLowerCase()] ?? whole);
 }
 
-function clean(value: string | null, cap: number): string | null {
+/**
+ * How long each field is allowed to be, which is the shape of the thing it
+ * lands in rather than an arbitrary limit: a row is one line and a card is
+ * three, so a 300 character "title" is a paragraph that would push the thought
+ * itself off the screen.
+ *
+ * Exported because oEmbed fills the same three fields from a different source
+ * (`lib/oembed`), and two places deciding how long a title may be is two places
+ * that drift.
+ */
+export const CAPS = { title: 120, site: 40, description: 220 } as const;
+
+export function clean(value: string | null, cap: number): string | null {
   if (!value) return null;
   const text = oneLine(decodeEntities(value));
   if (!text) return null;
@@ -89,12 +101,9 @@ export function parseLinkMeta(document: string): LinkMeta {
   const description = metaContent(html, 'og:description') ?? metaContent(html, 'description');
 
   return {
-    // A row is one line and a card is three, so the caps are the shape of the
-    // thing rather than an arbitrary limit — a 300 character "title" is a
-    // paragraph that would push the thought itself off the screen.
-    title: clean(title, 120),
-    site: clean(metaContent(html, 'og:site_name'), 40),
-    description: clean(description, 220),
+    title: clean(title, CAPS.title),
+    site: clean(metaContent(html, 'og:site_name'), CAPS.site),
+    description: clean(description, CAPS.description),
   };
 }
 

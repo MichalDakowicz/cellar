@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { resolveProject, resolveQuestion } from './cellar.ts';
+import { resolveProject } from './cellar.ts';
+import { resolveQuestion } from './questions.ts';
 import { question } from './fixtures.test-helpers.ts';
 import type { Project } from '@/types/cellar';
 
@@ -61,6 +62,7 @@ function proj(id: string, name: string): Project {
     createdAt: '2026-09-01T00:00:00.000Z',
     repoPath: null,
     repoUrl: null,
+    pinned: false,
   };
 }
 

@@ -1,15 +1,16 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { inProgress, waitingOnYou } from '@/lib/agentWork';
+import { deviceRule, inProgress, waitingOnYou } from '@/lib/agentWork';
 import { answeredForAgent, readyToResume } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
 import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
+import { loadAgentDevice } from '../settings.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
-import { answeredBlock, entryBrief, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
+import { answeredBlock, entryBrief, entryData, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
 
 /**
  * The reads. `cellar_orient` is the one that matters.
@@ -24,7 +25,7 @@ import { answeredBlock, entryBrief, entryTable, projectRow, ROW_LEGEND, shortId 
 
 const LIMIT = 40;
 
-function orientBody(cellar: Cellar, cwd: string): string {
+function orientBody(cellar: Cellar, cwd: string, phone: boolean | null): string {
   const here = projectForPath(cwd, cellar.projects);
   const below = projectsUnderPath(cwd, cellar.projects);
   const out: string[] = [`cwd      ${cwd}`];
@@ -50,6 +51,10 @@ function orientBody(cellar: Cellar, cwd: string): string {
       'at this path — after that every session resolves it on its own.',
     );
   }
+
+  // The user's standing answer to "may I test this on your phone", from their
+  // own settings switch — so no session has to ask it.
+  out.push(`phone    ${deviceRule(phone)}`);
 
   const mine = here ? cellar.entries.filter((entry) => entry.projectId === here.id) : cellar.entries;
   const live = mine.filter((entry) => !entry.archived);
@@ -125,7 +130,7 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
               'of the directory you are working in.',
           );
         }
-        return text(orientBody(cellar, where));
+        return text(orientBody(cellar, where, await loadAgentDevice(ctx.client)));
       }),
   );
 
@@ -150,7 +155,22 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
 
         const blocks = shelves.map((candidate) => {
           const projects = cellar.projects.filter((project) => project.shelfId === candidate.id);
-          const rows = projects.map((project) => `  ${projectRow(project, cellar.entries)}`);
+          // A group reads as its general project with the rest indented under
+          // it — the general project carries the group's name, so no second
+          // query is needed to print the folder.
+          const homes = projects.filter((project) => project.groupHome);
+          const inGroup = (project: (typeof projects)[number]) => homes.some((home) => home.groupId === project.groupId);
+          const rows = [
+            ...homes.flatMap((home) => [
+              `  ${projectRow(home, cellar.entries)}  (group — thoughts about the whole group)`,
+              ...projects
+                .filter((project) => !project.groupHome && project.groupId === home.groupId)
+                .map((project) => `    ${projectRow(project, cellar.entries)}`),
+            ]),
+            ...projects
+              .filter((project) => !project.groupHome && !inGroup(project))
+              .map((project) => `  ${projectRow(project, cellar.entries)}`),
+          ];
           return [`${candidate.name}:`, ...(rows.length > 0 ? rows : ['  (no projects)'])].join('\n');
         });
 
@@ -178,9 +198,13 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         search: z.string().optional().describe('Substring of the thought or any of its lines.'),
         archived: z.boolean().optional().describe('Include archived entries. Default false.'),
         limit: z.number().int().min(1).max(200).optional().describe('Default 40.'),
+        json: z
+          .boolean()
+          .optional()
+          .describe('Rows as JSON instead of text — for filling the live view page, never for reading yourself.'),
       },
     },
-    async ({ project, kinds, states, search, archived, limit }) =>
+    async ({ project, kinds, states, search, archived, limit, json }) =>
       guard(async () => {
         const { cellar } = await withCellar(getCtx);
         let rows: Entry[] = cellar.entries;
@@ -211,6 +235,10 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         }
 
         const capped = rows.slice(0, limit ?? LIMIT);
+        if (json) {
+          const data = capped.map((entry) => entryData(entry, cellar.projects));
+          return text(JSON.stringify({ rows: data, more: rows.length - capped.length }));
+        }
         const note = rows.length > capped.length ? `\n\n(${rows.length - capped.length} more not shown)` : '';
         return text(`${ROW_LEGEND}\n${entryTable(capped, cellar.projects)}${note}`);
       }),

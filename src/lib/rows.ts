@@ -1,7 +1,10 @@
 import { normalizeOptions } from '@/lib/entryQuestions';
 import { isEntryState } from '@/lib/entryState';
+import type { NewTrailEvent, TrailEvent } from '@/lib/entryTrail';
+import { importanceOf } from '@/lib/importance';
 import { isKind } from '@/lib/kinds';
-import type { AgentToken, Entry, EntryLine, EntryQuestion, Project, Shelf } from '@/types/cellar';
+import { iconOf } from '@/lib/projectIcon';
+import type { AgentToken, Entry, EntryLine, EntryQuestion, Group, Project, Shelf } from '@/types/cellar';
 
 /**
  * The single read boundary: every `cellar_*` row becomes an app type here, and
@@ -27,7 +30,13 @@ export type ProjectRow = {
   created_at: string;
   repo_path: string | null;
   repo_url: string | null;
+  pinned?: boolean | null;
+  icon?: string | null;
+  group_id?: string | null;
+  group_home?: boolean | null;
 };
+
+export type GroupRow = { id: string; shelf_id: string; name: string; position: number; pinned: boolean | null; created_at: string };
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
 
@@ -49,16 +58,22 @@ export type EntryRow = {
   text: string;
   kind: string;
   state: string;
+  importance?: string | null;
+  position?: number | null;
   archived: boolean;
   created_at: string;
   agent: string | null;
   cellar_entry_lines: LineRow[] | null;
   cellar_entry_questions: QuestionRow[] | null;
+  cellar_entry_docs?: DocRow[] | null;
 };
+
+export type DocRow = { id: string; ref: string; label: string | null; created_at: string };
 
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
-export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url';
+export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url, pinned, group_id, group_home';
+export const GROUP_COLUMNS = 'id, shelf_id, name, position, pinned, created_at';
 // `as const` on both, and the embed built as a template literal, so the select
 // string keeps its literal type: supabase-js resolves the row shape from it at
 // compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
@@ -66,7 +81,7 @@ export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_p
 export const QUESTION_COLUMNS =
   'id, question, options, answer, answered_at, answered_via, dismissed_at, agent, created_at' as const;
 export const ENTRY_COLUMNS =
-  `id, project_id, text, kind, state, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS})` as const;
+  `id, project_id, text, kind, state, importance, position, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS}), cellar_entry_docs(id, ref, label, created_at)` as const;
 
 export function normalizeShelf(row: ShelfRow): Shelf {
   return { id: row.id, name: row.name, position: row.position, createdAt: row.created_at };
@@ -81,6 +96,23 @@ export function normalizeProject(row: ProjectRow): Project {
     createdAt: row.created_at,
     repoPath: row.repo_path,
     repoUrl: row.repo_url,
+    pinned: row.pinned === true,
+    ...(row.icon !== undefined ? { icon: iconOf(row.icon) } : null),
+    groupId: row.group_id ?? null,
+    // Only trusted while the group is still there: a home whose group was
+    // deleted is an ordinary project again.
+    groupHome: row.group_home === true && !!row.group_id,
+  };
+}
+
+export function normalizeGroup(row: GroupRow): Group {
+  return {
+    id: row.id,
+    shelfId: row.shelf_id,
+    name: row.name,
+    position: row.position,
+    pinned: row.pinned === true,
+    createdAt: row.created_at,
   };
 }
 
@@ -125,12 +157,17 @@ export function normalizeEntry(row: EntryRow): Entry {
     // before this build knows the word for it.
     kind: isKind(row.kind) ? row.kind : 'idea',
     state: isEntryState(row.state) ? row.state : 'open',
+    importance: importanceOf(row.importance),
+    position: row.position ?? 0,
     archived: row.archived,
     createdAt: row.created_at,
     agent: row.agent,
     lines: (row.cellar_entry_lines ?? []).map(normalizeLine).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     questions: (row.cellar_entry_questions ?? [])
       .map(normalizeQuestion)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    docs: (row.cellar_entry_docs ?? [])
+      .map((doc) => ({ id: doc.id, ref: doc.ref, label: doc.label, createdAt: doc.created_at }))
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }
@@ -159,5 +196,42 @@ export function normalizeAgentToken(row: AgentTokenRow): AgentToken {
     lastUsedAt: row.last_used_at,
     expiresAt: row.expires_at,
     revokedAt: row.revoked_at,
+  };
+}
+
+export type EventRow = {
+  id: string;
+  what: string;
+  from_value: string | null;
+  to_value: string | null;
+  source: string | null;
+  agent: string | null;
+  at: string;
+};
+
+export const EVENT_COLUMNS = 'id, what, from_value, to_value, source, agent, at';
+
+export function normalizeEvent(row: EventRow): TrailEvent {
+  return {
+    id: row.id,
+    what: row.what,
+    fromValue: row.from_value,
+    toValue: row.to_value,
+    source: row.source === 'agent' ? 'agent' : 'user',
+    agent: row.agent,
+    at: row.at,
+  };
+}
+
+/** A move as the insert wants it. `at` is the database's clock, never the writer's. */
+export function eventInsert(userId: string, entryId: string, event: NewTrailEvent) {
+  return {
+    user_id: userId,
+    entry_id: entryId,
+    what: event.what,
+    from_value: event.fromValue,
+    to_value: event.toValue,
+    source: event.source,
+    agent: event.agent,
   };
 }

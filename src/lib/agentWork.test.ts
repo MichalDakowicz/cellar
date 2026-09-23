@@ -1,4 +1,16 @@
-import { AGENT_LINE_MAX, agentLine, askRule, canClaim, inProgress, kindWork, splitThread, waitingOnYou } from '@/lib/agentWork';
+import {
+  AGENT_LINE_MAX,
+  agentLine,
+  askRule,
+  canClaim,
+  canUnclaim,
+  deviceRule,
+  inProgress,
+  kindWork,
+  reopenPlan,
+  splitThread,
+  waitingOnYou,
+} from '@/lib/agentWork';
 import { KINDS } from '@/lib/kinds';
 
 const entry = (over: Partial<Parameters<typeof canClaim>[0]> & Record<string, unknown> = {}) => ({
@@ -22,6 +34,60 @@ describe('canClaim', () => {
 
   it('leaves an archived thought alone — it was put away on purpose', () => {
     expect(canClaim(entry({ archived: true }))).toBe(false);
+  });
+});
+
+describe('canUnclaim', () => {
+  it('puts back a claim', () => {
+    expect(canUnclaim(entry({ state: 'doing' }))).toBe(true);
+  });
+
+  // The hole the reopen tool closes: unclaim used to write open over anything.
+  it('will not quietly reopen a settled or waiting thought', () => {
+    expect(canUnclaim(entry({ state: 'done' }))).toBe(false);
+    expect(canUnclaim(entry({ state: 'dropped' }))).toBe(false);
+    expect(canUnclaim(entry({ state: 'blocked' }))).toBe(false);
+    expect(canUnclaim(entry({ state: 'open' }))).toBe(false);
+  });
+});
+
+describe('reopenPlan', () => {
+  it('sends done and dropped back to open with nobody on them', () => {
+    for (const state of ['done', 'dropped'] as const) {
+      expect(reopenPlan(entry({ state, agent: 'claude' }))).toEqual({
+        ok: true,
+        patch: { state: 'open', agent: null, archived: false },
+      });
+    }
+  });
+
+  it('brings a settled thought out of the archive as open', () => {
+    expect(reopenPlan(entry({ state: 'done', archived: true }))).toEqual({
+      ok: true,
+      patch: { state: 'open', agent: null, archived: false },
+    });
+  });
+
+  it('brings an unsettled thought out of the archive exactly as it was', () => {
+    expect(reopenPlan(entry({ state: 'blocked', archived: true, agent: 'claude' }))).toEqual({
+      ok: true,
+      patch: { state: 'blocked', agent: 'claude', archived: false },
+    });
+  });
+
+  it('points a blocked thought at the answer rather than reopening it', () => {
+    const plan = reopenPlan(entry({ state: 'blocked' }));
+    expect(plan.ok).toBe(false);
+    expect(!plan.ok && plan.why).toMatch(/cellar_answer_question/);
+  });
+
+  it('leaves a claim to whoever holds it', () => {
+    const plan = reopenPlan(entry({ state: 'doing', agent: 'other' }));
+    expect(!plan.ok && plan.why).toMatch(/by other/);
+  });
+
+  it('says so when there is nothing to reopen', () => {
+    expect(reopenPlan(entry())).toEqual({ ok: false, why: 'it is already open' });
   });
 });
 
@@ -103,5 +169,16 @@ describe('askRule', () => {
 
   it('tells a glitch to ask only when two readings would differ', () => {
     expect(askRule('glitch')).toContain('two readings');
+  });
+});
+
+describe('deviceRule', () => {
+  it('says yes, and that there is no need to ask, when the switch is on', () => {
+    expect(deviceRule(true)).toMatch(/^yes — .*without asking first/);
+  });
+
+  it('says no when the switch is off, and when it could not be read', () => {
+    expect(deviceRule(false)).toMatch(/^no — do not install/);
+    expect(deviceRule(null)).toBe(deviceRule(false));
   });
 });

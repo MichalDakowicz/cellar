@@ -39,10 +39,18 @@ export function useQuestionTaps(ready: boolean): void {
     const id = response.notification.request.identifier;
     if (handled.current === id) return;
 
-    const entryId = response.notification.request.content.data?.entryId;
-    if (typeof entryId !== 'string' || !entryId) return;
+    // A question carries the entry it is on; a nudge carries a route — one
+    // thought, or the list a grouped nudge covers.
+    const data = response.notification.request.content.data ?? {};
+    const route =
+      typeof data.entryId === 'string' && data.entryId
+        ? `/entry/${data.entryId}`
+        : typeof data.route === 'string' && data.route.startsWith('/')
+          ? data.route
+          : null;
+    if (!route) return;
 
     handled.current = id;
-    router.navigate(`/entry/${entryId}`);
+    router.navigate(route as never);
   }, [ready, response, router]);
 }

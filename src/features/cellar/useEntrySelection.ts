@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { useCopySelection } from '@/features/cellar/useCopyPrompt';
+import { useHaptics } from '@/hooks/useHaptics';
 import { selectedEntries } from '@/lib/entrySelection';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { useSelection } from '@/store/entrySelection';
@@ -20,6 +21,7 @@ import type { Entry } from '@/types/cellar';
  * actions are identical from the project, the inbox and search.
  */
 export function useEntrySelection(entries: Entry[], open: (entry: Entry) => void) {
+  const haptics = useHaptics();
   const ids = useSelection((state) => state.ids);
   const toggle = useSelection((state) => state.toggle);
   const clear = useSelection((state) => state.clear);
@@ -42,7 +44,10 @@ export function useEntrySelection(entries: Entry[], open: (entry: Entry) => void
     clear,
     /** Hand straight to `EntryList`: picks while selecting, opens the rest of the time. */
     onPress: (entry: Entry) => (selecting ? toggle(entry.id) : open(entry)),
-    onLongPress: (entry: Entry) => toggle(entry.id),
+    onLongPress: (entry: Entry) => {
+      haptics.hold();
+      toggle(entry.id);
+    },
     copy: () => copySelection(selected),
     file: () => fileMany?.(selected.map((entry) => entry.id)),
   };
