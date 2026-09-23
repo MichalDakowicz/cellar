@@ -671,3 +671,14 @@ alter table public.cellar_settings add column if not exists project_sort text no
 alter table public.cellar_settings add column if not exists hide_settled boolean not null default false;
 alter table public.cellar_settings add column if not exists start_tab text not null default 'dump';
 alter table public.cellar_settings add column if not exists kind_order text[];
+
+-- 2026-09-23 — a nudge about a thought you dumped and left alone.
+--
+-- Its own switch, apart from notify_questions: turning off "an agent is waiting
+-- on you" must not also turn off "this idea has sat for a week", and the other
+-- way round. The threshold and the day's allowance are yours to pick; more
+-- stale thoughts than the allowance go out as one grouped banner rather than
+-- being cut to the first few (src/lib/nudges.ts).
+alter table public.cellar_settings add column if not exists notify_nudges boolean not null default true;
+alter table public.cellar_settings add column if not exists nudge_days int not null default 7;
+alter table public.cellar_settings add column if not exists nudges_per_day int not null default 1;

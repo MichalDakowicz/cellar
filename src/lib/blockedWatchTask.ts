@@ -2,6 +2,10 @@ import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { Platform } from 'react-native';
 
+import { notifyNudges } from '@/features/notifications/nudgeNotifier';
+import { normalizeCellarSettings, type CellarSettingsRow } from '@/lib/cellarSettings';
+import { isKind } from '@/lib/kinds';
+import type { NudgeCandidate } from '@/lib/nudges';
 import { notifyBlockedQuestions } from '@/lib/questionNotifier';
 import { ENTRY_COLUMNS, normalizeEntry, normalizeProject, PROJECT_COLUMNS, type EntryRow, type ProjectRow } from '@/lib/rows';
 import { supabase } from '@/lib/supabase';
@@ -51,6 +55,36 @@ async function blockedNow() {
   };
 }
 
+/**
+ * The nudge pass's own small read: open, unarchived rows and just the columns
+ * a nudge names — `updated_at` included, which is what "untouched" means.
+ */
+async function openNow(): Promise<NudgeCandidate[]> {
+  const { data, error } = await supabase
+    .from('cellar_entries')
+    .select('id, project_id, text, kind, created_at, updated_at')
+    .eq('state', 'open')
+    .eq('archived', false);
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    text: row.text as string,
+    kind: isKind(row.kind) ? row.kind : 'idea',
+    projectId: (row.project_id as string | null) ?? null,
+    createdAt: row.created_at as string,
+    updatedAt: (row.updated_at as string | null) ?? null,
+  }));
+}
+
+async function switchesNow() {
+  const { data } = await supabase
+    .from('cellar_settings')
+    .select('notify_questions, notify_nudges, nudge_days, nudges_per_day')
+    .maybeSingle();
+  // Only the four columns asked for; the rest fall back to their defaults.
+  return normalizeCellarSettings((data ?? null) as CellarSettingsRow | null);
+}
+
 if (supported) {
   TaskManager.defineTask(BLOCKED_WATCH_TASK, async () => {
     try {
@@ -59,8 +93,19 @@ if (supported) {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return BackgroundTask.BackgroundTaskResult.Success;
 
+      // One wake, two passes, each behind its own switch: turning questions off
+      // must not silence nudges, and the other way round.
+      const settings = await switchesNow();
       const { entries, projects } = await blockedNow();
-      await notifyBlockedQuestions(entries, projects);
+      if (settings.notifyQuestions) await notifyBlockedQuestions(entries, projects);
+      if (settings.notifyNudges) {
+        const names = new Map(projects.map((project) => [project.id, project.name]));
+        await notifyNudges(await openNow(), {
+          days: settings.nudgeDays,
+          perDay: settings.nudgesPerDay,
+          nameOf: (id) => (id ? (names.get(id) ?? 'a project') : 'inbox'),
+        });
+      }
       return BackgroundTask.BackgroundTaskResult.Success;
     } catch (error) {
       console.error('Blocked-question watch failed', error);

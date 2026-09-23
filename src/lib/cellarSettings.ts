@@ -10,6 +10,7 @@ import {
   type TextSize,
 } from '@/lib/displayPrefs';
 import { isKind } from '@/lib/kinds';
+import { nudgeDaysOf, nudgesPerDayOf } from '@/lib/nudges';
 import type { Kind } from '@/types/cellar';
 
 /**
@@ -57,6 +58,12 @@ export type CellarSettings = {
   startTab: StartTab;
   /** `null` is the default order. */
   kindOrder: Kind[] | null;
+  /** A banner about a thought left untouched — its own switch, apart from agent questions. */
+  notifyNudges: boolean;
+  /** How long untouched before a thought is worth a nudge. */
+  nudgeDays: number;
+  /** Banners a day; more stale thoughts than this go out as one grouped banner (`lib/nudges`). */
+  nudgesPerDay: number;
 };
 
 export type CellarSettingsRow = {
@@ -74,12 +81,16 @@ export type CellarSettingsRow = {
   hide_settled?: boolean | null;
   start_tab?: string | null;
   kind_order?: string[] | null;
+  notify_nudges?: boolean | null;
+  nudge_days?: number | null;
+  nudges_per_day?: number | null;
 };
 
 /** The one select the app makes on this row. Kept beside the mapping so a new column is one edit. */
 export const CELLAR_SETTINGS_COLUMNS =
   'show_codes, raw_default, remember_last, default_kind, default_view, notify_questions, agent_device, ' +
-  'row_density, text_size, haptics, project_sort, hide_settled, start_tab, kind_order';
+  'row_density, text_size, haptics, project_sort, hide_settled, start_tab, kind_order, ' +
+  'notify_nudges, nudge_days, nudges_per_day';
 
 export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   showCodes: true,
@@ -96,6 +107,9 @@ export const DEFAULT_CELLAR_SETTINGS: CellarSettings = {
   hideSettled: false,
   startTab: 'dump',
   kindOrder: null,
+  notifyNudges: true,
+  nudgeDays: 7,
+  nudgesPerDay: 1,
 };
 
 /** A missing row is the defaults, not an error — the row is created on first write. */
@@ -116,6 +130,9 @@ export function normalizeCellarSettings(row: CellarSettingsRow | null): CellarSe
     hideSettled: row.hide_settled ?? DEFAULT_CELLAR_SETTINGS.hideSettled,
     startTab: startTabOf(row.start_tab),
     kindOrder: kindOrderOf(row.kind_order),
+    notifyNudges: row.notify_nudges ?? DEFAULT_CELLAR_SETTINGS.notifyNudges,
+    nudgeDays: nudgeDaysOf(row.nudge_days),
+    nudgesPerDay: nudgesPerDayOf(row.nudges_per_day),
   };
 }
 
@@ -140,5 +157,8 @@ export function cellarSettingsToRow(patch: Partial<CellarSettings>): Record<stri
   if (patch.hideSettled !== undefined) row.hide_settled = patch.hideSettled;
   if (patch.startTab !== undefined) row.start_tab = startTabOf(patch.startTab);
   if (patch.kindOrder !== undefined) row.kind_order = kindOrderOf(patch.kindOrder);
+  if (patch.notifyNudges !== undefined) row.notify_nudges = patch.notifyNudges;
+  if (patch.nudgeDays !== undefined) row.nudge_days = nudgeDaysOf(patch.nudgeDays);
+  if (patch.nudgesPerDay !== undefined) row.nudges_per_day = nudgesPerDayOf(patch.nudgesPerDay);
   return row;
 }
