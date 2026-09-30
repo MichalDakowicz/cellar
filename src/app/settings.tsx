@@ -14,9 +14,7 @@ import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
 import { DisplaySettings } from '@/features/settings/DisplaySettings';
 import { NudgeSettings } from '@/features/settings/NudgeSettings';
-import { SheetDialog } from '@/components/ui/SheetDialog';
-import { useToast } from '@/components/ui/Toast';
-import { signOut } from '@/features/auth/authActions';
+import { SignOutSheet } from '@/features/settings/SignOutSheet';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
@@ -39,7 +37,6 @@ export default function Settings() {
   const setRaw = useCellarPrefs((state) => state.setRaw);
   const setDraftKind = useCellarPrefs((state) => state.setDraftKind);
   const setView = useCellarPrefs((state) => state.setView);
-  const { say } = useToast();
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -162,8 +159,8 @@ export default function Settings() {
             <Text className="mt-2 text-sm text-muted-foreground">cellar {version}</Text>
             <Text className="mt-1 text-xs text-muted-foreground">
               one account across radar, lidar, sonar, pulsar and cellar. your cellar itself is private —
-              nobody else can read it, and there is no switch that changes that. signing out here signs you
-              out of this app only.
+              nobody else can read it, and there is no switch that changes that. signing out here asks whether
+              to leave just cellar or every ping app.
             </Text>
           </View>
 
@@ -180,23 +177,7 @@ export default function Settings() {
         </ContentShell>
       </ScrollView>
 
-      <SheetDialog
-        open={signingOut}
-        title="sign out?"
-        body="every thought stays where it is. the same account signs back in."
-        confirmLabel="sign out"
-        dismissLabel="stay"
-        tone="destructive"
-        onConfirm={async () => {
-          setSigningOut(false);
-          try {
-            await signOut();
-          } catch (error) {
-            say(error instanceof Error ? error.message : 'that did not work.');
-          }
-        }}
-        onDismiss={() => setSigningOut(false)}
-      />
+      <SignOutSheet open={signingOut} onClose={() => setSigningOut(false)} />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the
           screen mounts it itself, which is also where the phone build's left

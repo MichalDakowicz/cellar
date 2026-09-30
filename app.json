@@ -38,7 +38,8 @@
           "icon": "./assets/images/notification-icon.png",
           "color": "#64748b"
         }
-      ]
+      ],
+      "./plugins/withPingSiblings"
     ],
     "experiments": {
       "typedRoutes": false,
