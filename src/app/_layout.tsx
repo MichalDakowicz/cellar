@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { UpdateNotice } from '@/features/updates/UpdateNotice';
 import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarDisplay } from '@/features/cellar/CellarDisplay';
 import { CellarLive } from '@/features/cellar/CellarLive';
@@ -68,7 +69,12 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   useWebShortcuts({ onSelectTab: selectTab, onCapture: capture, onSearch: search });
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <UpdateNotice />
+    </>
+  );
 }
 
 /**

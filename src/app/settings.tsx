@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -17,6 +16,7 @@ import { NudgeSettings } from '@/features/settings/NudgeSettings';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useToast } from '@/components/ui/Toast';
 import { signOut } from '@/features/auth/authActions';
+import { AppUpdateControl } from '@/features/settings/AppUpdateControl';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
@@ -44,8 +44,6 @@ export default function Settings() {
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const [signingOut, setSigningOut] = useState(false);
-
-  const version = Constants.expoConfig?.version ?? '1.0.0';
 
   return (
     <View className="flex-1 bg-background">
@@ -159,7 +157,9 @@ export default function Settings() {
 
           <View className={`pt-7 ${gutter}`}>
             <Overline>about</Overline>
-            <Text className="mt-2 text-sm text-muted-foreground">cellar {version}</Text>
+            <View className="mt-2">
+              <AppUpdateControl />
+            </View>
             <Text className="mt-1 text-xs text-muted-foreground">
               one account across radar, lidar, sonar, pulsar and cellar. your cellar itself is private —
               nobody else can read it, and there is no switch that changes that. signing out here signs you
