@@ -247,6 +247,12 @@ wrong project. `repo_url` exists only to be opened. If you change either side of
 matching, change it in `src/lib/repoLink.ts` only: the app and the server share that file
 and they must not disagree about which project a directory belongs to.
 
+**Two routes are exempt from the session rule.** `redirectForSession` (`src/lib/authRoute.ts`)
+sends every signed-out route to login, except login itself and the two ends of a sibling
+sign-in, `share-sign-in` and `sign-in-return` (PING.md §9.13). Drop them from that set and
+nothing errors: the returning app is bounced to login mid-`verifyOtp`, the donor answers
+before its redirect lands, and it all looks like a flaky handoff instead of a routing rule.
+
 **`project_id is null` is the inbox — it is not a missing value.** Every query that means
 "filed somewhere" has to say `projectId !== null` explicitly, and every `on delete` on a
 project has to stay `set null`. Change it to a cascade and deleting a project silently

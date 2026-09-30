@@ -69,8 +69,15 @@ export async function setPassword(password: string) {
   if (error) throw new Error(friendly(error.message));
 }
 
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+/**
+ * `local` ends cellar's session only. `global` ends every session the account
+ * has — every Ping app, on every device and on the web. The scope is always
+ * explicit because supabase-js defaults to `global`.
+ */
+export type SignOutScope = 'local' | 'global';
+
+export async function signOut(scope: SignOutScope) {
+  const { error } = await supabase.auth.signOut({ scope });
   if (error) throw new Error(error.message);
 }
 
