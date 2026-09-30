@@ -24,4 +24,9 @@ describe('redirectForSession', () => {
   it('does not bounce the login screen off itself', () => {
     expect(redirectForSession({ loading: false, signedIn: false, segment: 'login' })).toBeNull();
   });
+
+  it('lets both ends of a sibling sign-in finish while signed out', () => {
+    expect(redirectForSession({ loading: false, signedIn: false, segment: 'share-sign-in' })).toBeNull();
+    expect(redirectForSession({ loading: false, signedIn: false, segment: 'sign-in-return' })).toBeNull();
+  });
 });
