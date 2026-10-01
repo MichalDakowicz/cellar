@@ -253,9 +253,10 @@ wrong project. `repo_url` exists only to be opened. If you change either side of
 matching, change it in `src/lib/repoLink.ts` only: the app and the server share that file
 and they must not disagree about which project a directory belongs to.
 
-**Two routes are exempt from the session rule.** `redirectForSession` (`src/lib/authRoute.ts`)
-sends every signed-out route to login, except login itself and the two ends of a sibling
-sign-in, `share-sign-in` and `sign-in-return` (PING.md §9.13). Drop them from that set and
+**Three routes are exempt from the session rule.** `redirectForSession` (`src/lib/authRoute.ts`)
+sends every signed-out route to login, except login itself, the two ends of a sibling
+sign-in, `share-sign-in` and `sign-in-return` (PING.md §9.13), and the QR scanner `qr-scan`
+(§9.14), which is how a signed-out device is let in. Drop them from that set and
 nothing errors: the returning app is bounced to login mid-`verifyOtp`, the donor answers
 before its redirect lands, and it all looks like a flaky handoff instead of a routing rule.
 
@@ -264,6 +265,11 @@ before its redirect lands, and it all looks like a flaky handoff instead of a ro
 project has to stay `set null`. Change it to a cascade and deleting a project silently
 destroys every thought in it; add a real "inbox" project row and renaming or deleting that
 row breaks the one screen that must never break.
+
+**The QR scanner needs a real build.** `expo-camera`'s native module is not in the Expo Go
+binary, so a scan silently never fires there. The sign-in QR screens (`qr-scan`, `qr-show`;
+PING.md §9.14) are only verified on a dev or release build, and the approve step needs a
+signed-in session of your own.
 
 ### Then the web build, same pass
 

@@ -31,6 +31,13 @@
           "imageWidth": 76
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cellar uses the camera to scan a QR code that signs another device in.",
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-background-task",
       [
         "expo-notifications",
