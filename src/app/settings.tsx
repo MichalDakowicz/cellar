@@ -13,6 +13,7 @@ import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
 import { DisplaySettings } from '@/features/settings/DisplaySettings';
 import { NudgeSettings } from '@/features/settings/NudgeSettings';
+import { QrLoginControl } from '@/features/auth/qr/QrLoginControl';
 import { AppUpdateControl } from '@/features/settings/AppUpdateControl';
 import { SignOutSheet } from '@/features/settings/SignOutSheet';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
@@ -151,6 +152,11 @@ export default function Settings() {
           <AgentAccess gutter={gutter} />
 
           <AgentTokens gutter={gutter} />
+
+          <View className={`gap-3 pt-7 ${gutter}`}>
+            <Overline>other devices</Overline>
+            <QrLoginControl />
+          </View>
 
           <View className={`pt-7 ${gutter}`}>
             <Overline>about</Overline>

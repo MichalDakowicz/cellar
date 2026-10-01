@@ -10,13 +10,16 @@ import { RETURN_ROUTE, SHARE_ROUTE } from './pingApps';
 
 export const LOGIN_ROUTE = '/login';
 
+/** The QR scanner: how a signed-out device is let in by a signed-in phone (PING.md §9.14). */
+export const QR_SCAN_ROUTE = 'qr-scan';
+
 /**
- * Where a signed-out session may stay: the login screen, and both ends of a
+ * Where a signed-out session may stay: the login screen, the QR scanner, and both ends of a
  * sibling sign-in (lib/pingApps). Those two leave on their own once they have
  * answered — and bouncing the returning one to login would race the very
  * verifyOtp that is about to sign this session in.
  */
-const SIGNED_OUT_ROUTES = new Set<string>(['login', SHARE_ROUTE, RETURN_ROUTE]);
+const SIGNED_OUT_ROUTES = new Set<string>(['login', SHARE_ROUTE, RETURN_ROUTE, QR_SCAN_ROUTE]);
 
 type SessionRoute = {
   /** Auth has not resolved yet — nothing has mounted, so nothing moves. */

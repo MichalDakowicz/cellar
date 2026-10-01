@@ -29,4 +29,9 @@ describe('redirectForSession', () => {
     expect(redirectForSession({ loading: false, signedIn: false, segment: 'share-sign-in' })).toBeNull();
     expect(redirectForSession({ loading: false, signedIn: false, segment: 'sign-in-return' })).toBeNull();
   });
+
+  it('lets the QR scanner sign a signed-out device in, and keeps the code screen for signed-in ones', () => {
+    expect(redirectForSession({ loading: false, signedIn: false, segment: 'qr-scan' })).toBeNull();
+    expect(redirectForSession({ loading: false, signedIn: false, segment: 'qr-show' })).toBe(LOGIN_ROUTE);
+  });
 });
