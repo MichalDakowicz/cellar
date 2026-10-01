@@ -10,6 +10,7 @@
 
 ### Changed
 
+- Android: signed with a new key, so remove the old version once before installing
 - Settings: signing out asks whether to leave just Cellar or every Ping app
 
 ### Fixed
