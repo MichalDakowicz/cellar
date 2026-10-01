@@ -1,6 +1,6 @@
 # Update notes
 
-## 1.11.0 — Unreleased
+## 1.11.0 — 2026-10-01
 
 ### Added
 
