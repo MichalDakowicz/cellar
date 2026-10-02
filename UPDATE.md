@@ -2,6 +2,11 @@
 
 ## 1.12.0 — Unreleased
 
+### Changed
+
+- Projects: a group is a tile in the grid that opens in place, with one outline round its projects
+- Projects: a tile inside an open group says which group it is in
+
 ## 1.11.0 — 2026-10-01
 
 ### Added

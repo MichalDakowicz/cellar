@@ -4,6 +4,7 @@ import type { ProjectTile } from '@/components/cellar/ProjectCard';
 import { useCellar, useCurrentShelf } from '@/features/cellar/useCellar';
 import { countLive, countLiveOfKind } from '@/lib/entryGroups';
 import { shelfSections } from '@/lib/groups';
+import { shelfCells } from '@/lib/shelfGrid';
 import { useCellarPrefs } from '@/store/cellarPrefs';
 import { plural } from '@/lib/utils';
 
@@ -59,6 +60,10 @@ export function useShelfScreen() {
     );
   }, [tiles, groups, shelf, closedGroups]);
 
+  // The same sections as one flat grid: a folder is a tile, and an open one's
+  // projects follow it (lib/shelfGrid).
+  const cells = useMemo(() => shelfCells(sections), [sections]);
+
   // The sum of the tiles, not a second sweep of the entries. The header and the
   // grid under it each worked out what was on this shelf on their own, and only
   // the grid remembered the archive — so a shelf read "42 entries" above tiles
@@ -75,7 +80,7 @@ export function useShelfScreen() {
     shelfName: shelf?.name ?? 'cellar',
     meta: `${plural(tiles.length, 'project')} · ${plural(shelfEntryCount, 'entry', 'entries')}`,
     tiles,
-    sections,
+    cells,
     toggleGroup,
   };
 }

@@ -2,8 +2,7 @@ import { useRouter } from 'expo-router';
 import { ChevronDown, Search } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { ProjectFolder } from '@/components/cellar/ProjectFolder';
-import { ProjectGrid } from '@/components/cellar/ProjectGrid';
+import { ShelfGrid } from '@/components/cellar/ShelfGrid';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -97,28 +96,13 @@ export default function ShelfScreen() {
                 action={{ label: 'new project', onPress: () => openNewProject?.([]) }}
               />
             ) : (
-              shelf.sections.map((section) =>
-                section.type === 'group' ? (
-                  <ProjectFolder
-                    key={section.group.id}
-                    name={section.group.name}
-                    pinned={section.group.pinned}
-                    open={section.open}
-                    tiles={section.projects}
-                    onToggle={() => shelf.toggleGroup(section.group.id)}
-                    onEditGroup={() => openEditGroup?.(section.group.id)}
-                    onPress={(id) => router.navigate(`/project/${id}`)}
-                    onEdit={(id) => openEditProject?.(id)}
-                  />
-                ) : (
-                  <ProjectGrid
-                    key="loose"
-                    projects={section.projects}
-                    onPress={(id) => router.navigate(`/project/${id}`)}
-                    onEdit={(id) => openEditProject?.(id)}
-                  />
-                ),
-              )
+              <ShelfGrid
+                cells={shelf.cells}
+                onOpenProject={(id) => router.navigate(`/project/${id}`)}
+                onEditProject={(id) => openEditProject?.(id)}
+                onToggleGroup={shelf.toggleGroup}
+                onEditGroup={(id) => openEditGroup?.(id)}
+              />
             )}
           </View>
         </View>
