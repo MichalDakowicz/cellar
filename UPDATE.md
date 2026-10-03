@@ -6,6 +6,9 @@
 
 - Project: a dump field at the top files a thought straight into that project
 - Entry: edit rewords the thought, and the trail keeps what it said before
+- Dump: add a picture to a thought as you drop it, cropped to any shape you like
+- Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
+- Entry: tap a picture to see it full screen
 - Sign-in screen: continue with bazaar when it is installed on this phone
 
 ### Changed

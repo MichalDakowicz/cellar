@@ -7,6 +7,7 @@ import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { projectChips } from '@/components/cellar/projectChips';
 import { SwipeShelf } from '@/components/cellar/SwipeShelf';
+import { DraftPicture } from '@/components/cellar/DraftPicture';
 import { DumpAside } from '@/components/cellar/DumpAside';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { ContentShell } from '@/components/layout/ContentShell';
@@ -129,6 +130,15 @@ export default function DumpScreen() {
               {dump.hint}
             </Text>
           </View>
+
+          {dump.picture && (
+            <DraftPicture
+              thumb={dump.picture.picture?.thumb ?? null}
+              busy={dump.picture.busy}
+              onPick={dump.picture.pick}
+              onClear={dump.picture.clear}
+            />
+          )}
 
           {/* The whole block is the shelf control, not just the pill: with two
               or three shelves the picker is a sheet and a tap to move one place

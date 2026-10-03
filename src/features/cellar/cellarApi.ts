@@ -18,6 +18,8 @@ import {
   type QuestionRow,
   type ShelfRow,
 } from '@/lib/rows';
+import type { NewPicture } from '@/lib/entryPicture';
+import { addCovers } from '@/features/cellar/pictureApi';
 import { pinnedFirst } from '@/lib/projectOrder';
 import { supabase } from '@/lib/supabase';
 import type {
@@ -88,8 +90,11 @@ export async function fetchEntries(): Promise<Entry[]> {
 
 export type NewEntry = { text: string; kind: Kind; projectId: string | null };
 
-/** A thought and the notes typed under it, which is what a normal dump is now. */
-export type NewDrop = NewEntry & { lines: string[] };
+/**
+ * A thought and the notes typed under it, which is what a normal dump is now.
+ * `picture` becomes the thought's cover.
+ */
+export type NewDrop = NewEntry & { lines: string[]; picture?: NewPicture };
 
 /** One insert for a whole raw dump — many lines in, many entries out, one round trip. */
 export async function createEntries(userId: string, entries: NewEntry[]): Promise<Entry[]> {
@@ -109,13 +114,31 @@ export async function createEntries(userId: string, entries: NewEntry[]): Promis
  * so its lines can be hung off the id that comes back — there is at most one of
  * those per dump, since only normal mode makes them.
  */
-export async function dropEntries(userId: string, drops: NewDrop[]): Promise<void> {
+export async function dropEntries(userId: string, drops: NewDrop[]): Promise<{ pictureFailed: boolean }> {
+  const covers: { entryId: string; picture: NewPicture }[] = [];
+
   const plain = drops.filter((drop) => drop.lines.length === 0);
-  if (plain.length > 0) await createEntries(userId, plain);
+  if (plain.length > 0) {
+    const made = await createEntries(userId, plain);
+    plain.forEach((drop, index) => {
+      if (drop.picture && made[index]) covers.push({ entryId: made[index].id, picture: drop.picture });
+    });
+  }
 
   for (const drop of drops.filter((candidate) => candidate.lines.length > 0)) {
     const [entry] = await createEntries(userId, [drop]);
+    if (drop.picture) covers.push({ entryId: entry.id, picture: drop.picture });
     await appendNotes(userId, entry.id, drop.lines);
+  }
+
+  // The thoughts are already in by now, so a picture that will not attach must
+  // not fail the drop — the caller would keep the draft and the next try would
+  // drop every thought twice. It says so instead.
+  try {
+    await addCovers(userId, covers);
+    return { pictureFailed: false };
+  } catch {
+    return { pictureFailed: true };
   }
 }
 

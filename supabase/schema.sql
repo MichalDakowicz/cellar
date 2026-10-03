@@ -315,6 +315,44 @@ create table if not exists public.cellar_groups (
 
 create index if not exists cellar_groups_user_idx on public.cellar_groups (user_id, shelf_id, position);
 
+-- ----------------------------------------------------------------------------
+-- 11. Pictures — an image on a thought, kept as text
+--
+-- A data URI in a text column rather than a file in a bucket, for the reason a
+-- project's icon is one: no storage policy, no second thing to clean up, and a
+-- deleted thought takes its pictures with it. The person crops a picture to
+-- whatever shape they want and the app never changes it; it only compresses one
+-- that is too big, to about 1.5 megapixels, which puts a screenshot at 60-300 KB
+-- of text, plus a 160px `thumb` for lists (src/lib/entryPicture.ts).
+--
+-- Their own table, not columns on the thought or its lines: the whole cellar is
+-- read in one go and a hundred full-size pictures in that read would make every
+-- screen slow. The app reads the thumbs for everything and `data` for one
+-- picture at a time. The MCP server never selects either — an agent has no use
+-- for a picture.
+--
+-- `line_id` null is the thought's cover, and there is at most one. A line id is
+-- the picture that note carries, at most one per note.
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_entry_pictures (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  entry_id   uuid not null references public.cellar_entries(id) on delete cascade,
+  line_id    uuid references public.cellar_entry_lines(id) on delete cascade,
+  -- Pixels of `data`, so a list can reserve the right box before anything loads.
+  width      int  not null,
+  height     int  not null,
+  thumb      text not null,
+  data       text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists cellar_entry_pictures_entry_idx on public.cellar_entry_pictures (entry_id);
+create unique index if not exists cellar_entry_pictures_cover_idx
+  on public.cellar_entry_pictures (entry_id) where line_id is null;
+create unique index if not exists cellar_entry_pictures_line_idx
+  on public.cellar_entry_pictures (line_id) where line_id is not null;
+
 -- ============================================================================
 -- Row level security
 --
@@ -328,6 +366,7 @@ alter table public.cellar_entries      enable row level security;
 alter table public.cellar_entry_lines  enable row level security;
 alter table public.cellar_entry_questions enable row level security;
 alter table public.cellar_entry_docs   enable row level security;
+alter table public.cellar_entry_pictures enable row level security;
 alter table public.cellar_entry_events enable row level security;
 alter table public.cellar_groups       enable row level security;
 alter table public.cellar_settings     enable row level security;
@@ -364,6 +403,12 @@ create policy cellar_entry_questions_owner_all on public.cellar_entry_questions 
 -- Same shape again: keyed to user_id, not joined back to the entry.
 drop policy if exists cellar_entry_docs_owner_all on public.cellar_entry_docs;
 create policy cellar_entry_docs_owner_all on public.cellar_entry_docs for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Same shape again: keyed to user_id, not joined back to the entry.
+drop policy if exists cellar_entry_pictures_owner_all on public.cellar_entry_pictures;
+create policy cellar_entry_pictures_owner_all on public.cellar_entry_pictures for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 

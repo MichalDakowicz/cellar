@@ -30,7 +30,7 @@ import {
 import { logEvents } from '@/features/cellar/trailApi';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { fetchGroups } from '@/features/cellar/groupApi';
-import { ENTRIES_KEY, GROUPS_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
+import { ENTRIES_KEY, GROUPS_KEY, PICTURES_KEY, PROJECTS_KEY, SHELVES_KEY } from '@/lib/cellarKeys';
 import { unblocksEntry } from '@/lib/entryQuestions';
 import { patchEvents } from '@/lib/entryTrail';
 import { useCellarPrefs } from '@/store/cellarPrefs';
@@ -107,7 +107,10 @@ export function useCellarWrites() {
 
   const drop = useMutation({
     mutationFn: (batch: NewDrop[]) => dropEntries(requireUser(user?.id), batch),
-    onSuccess: () => invalidate(ENTRIES_KEY),
+    onSuccess: (_result, batch) => {
+      invalidate(ENTRIES_KEY);
+      if (batch.some((drop) => drop.picture)) invalidate(PICTURES_KEY);
+    },
   });
 
   // The entry as it was is read from the cache rather than passed in, so every
@@ -254,7 +257,7 @@ export function useCellarWrites() {
 
 const BY_YOU = { source: 'user' as const, agent: null };
 
-function requireUser(id: string | undefined): string {
+export function requireUser(id: string | undefined): string {
   if (!id) throw new Error('not signed in');
   return id;
 }
