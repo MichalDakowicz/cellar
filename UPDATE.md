@@ -6,6 +6,7 @@
 
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in
+- Sign-in screen: ping apps on this phone sit behind one choose an app button
 
 ### Fixed
 
