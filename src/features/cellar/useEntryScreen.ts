@@ -140,6 +140,8 @@ export function useEntryScreen(entryId: string | undefined) {
     lineToRemove: arming,
     undoneCount: removed.length,
     undoRemove,
+    /** The thought's own line; the trail keeps the wording it replaces. */
+    reword: (text: string) => patch({ text }),
     setKind: (kind: Kind) => patch({ kind }),
     importanceOptions: IMPORTANCES.map((meta) => ({ value: meta.value, label: meta.label })),
     setImportance: (importance: Importance) => patch({ importance }),

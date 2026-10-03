@@ -13,6 +13,7 @@ import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
+import { EditThought } from '@/components/cellar/EditThought';
 import { EntryActions } from '@/components/cellar/EntryActions';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { EntryDocs } from '@/components/cellar/EntryDocs';
@@ -24,6 +25,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { EmptyState } from '@/components/ui/states';
+import { EditThoughtSheet } from '@/features/cellar/sheets/EditThoughtSheet';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntryQuestions } from '@/features/cellar/useEntryQuestions';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
@@ -38,7 +40,8 @@ import { COLORS } from '@/theme/colors';
  * The thought stays one line forever; the field below it appends *another*
  * line. That is the fix for the thing a notes app gets wrong — you can come
  * back and dump more into an idea without editing what you originally thought,
- * and the two readings stay separate.
+ * and the two readings stay separate. Rewording the thought itself is its own
+ * deliberate act, and the trail keeps what it used to say.
  */
 export default function EntryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -51,6 +54,7 @@ export default function EntryScreen() {
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [rewording, setRewording] = useState(false);
   const [lineFocused, setLineFocused] = useState(false);
 
   if (!entry.entry) {
@@ -106,6 +110,7 @@ export default function EntryScreen() {
             <View className="mt-2.5 flex-row items-center gap-3">
               <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
               <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
+              <EditThought onPress={() => setRewording(true)} />
             </View>
 
             {/* Under the thought and above everything else: a link dumped with
@@ -223,6 +228,14 @@ export default function EntryScreen() {
           )}
         </ContentShell>
       </ScrollView>
+
+      <EditThoughtSheet
+        open={rewording}
+        entryId={entry.entry.id}
+        text={entry.entry.text}
+        onSave={entry.reword}
+        onClose={() => setRewording(false)}
+      />
 
       <SheetDialog
         open={questions.confirming !== null}

@@ -4,6 +4,7 @@
 
 ### Added
 
+- Entry: edit rewords the thought, and the trail keeps what it said before
 - Sign-in screen: continue with bazaar when it is installed on this phone
 
 ### Changed

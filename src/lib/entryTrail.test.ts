@@ -40,6 +40,16 @@ describe('patchEvents', () => {
   it('writes nothing for an empty patch', () => {
     expect(patchEvents(before, {}, you)).toEqual([]);
   });
+
+  it('keeps the old wording when a thought is reworded', () => {
+    expect(patchEvents({ ...before, text: 'old' }, { text: 'new' }, you)).toEqual([
+      { what: 'edited', fromValue: 'old', toValue: 'new', source: 'user', agent: null },
+    ]);
+  });
+
+  it('writes nothing for the same wording', () => {
+    expect(patchEvents({ ...before, text: 'same' }, { text: 'same' }, you)).toEqual([]);
+  });
 });
 
 const line = (id: string, text: string, createdAt: string, source: 'user' | 'agent' = 'user'): EntryLine => ({
