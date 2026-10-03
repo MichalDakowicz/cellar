@@ -2,13 +2,19 @@
 
 ## 1.12.0 — Unreleased
 
+### Added
+
+- Sign-in screen: continue with bazaar when it is installed on this phone
+
 ### Changed
 
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in
+- Sign-in screen: ping apps on this phone sit behind one choose an app button
 
 ### Fixed
 
+- Sign-in screen: continuing with an app that is already open now signs you in
 - The app icon, splash and web favicon are the same size as the other Ping apps
 
 ## 1.11.0 — 2026-10-01
