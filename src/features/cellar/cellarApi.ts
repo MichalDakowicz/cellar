@@ -142,10 +142,11 @@ async function appendNotes(userId: string, entryId: string, texts: string[]): Pr
   if (error) throw error;
 }
 
-export type EntryPatch = Partial<Pick<Entry, 'kind' | 'state' | 'importance' | 'archived' | 'projectId' | 'agent'>>;
+export type EntryPatch = Partial<Pick<Entry, 'text' | 'kind' | 'state' | 'importance' | 'archived' | 'projectId' | 'agent'>>;
 
 export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
   const row: Record<string, unknown> = {};
+  if (patch.text !== undefined) row.text = patch.text;
   if (patch.kind !== undefined) row.kind = patch.kind;
   if (patch.state !== undefined) row.state = patch.state;
   if (patch.importance !== undefined) row.importance = patch.importance;
