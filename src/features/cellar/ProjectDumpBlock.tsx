@@ -26,6 +26,7 @@ export function ProjectDumpBlock({ projectId, projectName, gutter }: { projectId
         kind={dump.kind}
         kindOptions={kindChips(dump.kind, settings.kindOrder)}
         onKind={dump.setKind}
+        picture={dump.picture}
         dropLabel={dump.dropLabel}
         canDrop={dump.canDrop}
         onDrop={dump.submit}

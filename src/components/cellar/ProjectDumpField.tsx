@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap, type ChipOption } from '@/components/cellar/ChipWrap';
+import { DraftPicture } from '@/components/cellar/DraftPicture';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { webFocusRing } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
@@ -15,6 +16,8 @@ type ProjectDumpFieldProps = {
   kind: Kind;
   kindOptions: ChipOption<Kind>[];
   onKind: (kind: Kind) => void;
+  /** The cover for the thought being typed — see `DraftPicture`. */
+  picture: { thumb: string | null; busy: boolean; onPick: () => void; onClear: () => void };
   dropLabel: string;
   canDrop: boolean;
   onDrop: () => void;
@@ -39,13 +42,16 @@ export function ProjectDumpField({
   kind,
   kindOptions,
   onKind,
+  picture,
   dropLabel,
   canDrop,
   onDrop,
   onReturn,
 }: ProjectDumpFieldProps) {
   const [focused, setFocused] = useState(false);
-  const open = focused || text.length > 0;
+  // A picture keeps it open too: the picker takes focus away, and a field that
+  // folded shut behind it would hide the thumb you just chose.
+  const open = focused || text.length > 0 || picture.thumb !== null;
 
   return (
     <View>
@@ -83,6 +89,7 @@ export function ProjectDumpField({
         <View className="mt-3">
           <ChipWrap label="kind" options={kindOptions} selected={kind} onToggle={onKind} />
           <Text className="mt-2.5 text-xs text-muted-foreground">{hint}</Text>
+          <DraftPicture thumb={picture.thumb} busy={picture.busy} onPick={picture.onPick} onClear={picture.onClear} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={dropLabel}

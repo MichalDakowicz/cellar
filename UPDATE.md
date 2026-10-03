@@ -5,6 +5,7 @@
 ### Added
 
 - Project: a dump field at the top files a thought straight into that project
+- Project: add a picture to a thought from the dump field, as its cover
 - Entry: edit rewords the thought, and the trail keeps what it said before
 - Dump: add a picture to a thought as you drop it, cropped to any shape you like
 - Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
