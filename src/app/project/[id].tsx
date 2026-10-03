@@ -14,6 +14,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
+import { ProjectDumpBlock } from '@/features/cellar/ProjectDumpBlock';
 import { useCopyPrompt, useCopyProjectPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntrySelection } from '@/features/cellar/useEntrySelection';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
@@ -172,7 +173,12 @@ export default function ProjectScreen() {
                   read as a stray line stuck to the scrollbar rather than as the
                   edge of a column. */}
               <View className="flex-1 flex-row gap-10">
-                <View className="min-w-0 flex-1">{reading}</View>
+                <View className="min-w-0 flex-1">
+                  {project.project && (
+                    <ProjectDumpBlock projectId={project.project.id} projectName={project.name} gutter={gutter} />
+                  )}
+                  <View className="flex-1">{reading}</View>
+                </View>
                 <View className="w-[300px] pr-8 pt-1">
                   <ProjectAside
                     stateSpread={project.stateSpread}
@@ -235,6 +241,9 @@ function PhoneHeader({
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
       </View>
+      {project.project && (
+        <ProjectDumpBlock projectId={project.project.id} projectName={project.name} gutter={gutter} />
+      )}
     </View>
   );
 }
