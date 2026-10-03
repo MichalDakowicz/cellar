@@ -2,9 +2,9 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 
 import {
+  fitPixels,
   fitSize,
-  PICTURE_QUALITY,
-  PICTURE_SIZE,
+  PICTURE_STEPS,
   pictureDataUri,
   THUMB_QUALITY,
   THUMB_SIZE,
@@ -13,27 +13,35 @@ import {
 } from '@/lib/entryPicture';
 
 /**
- * Pick a picture and turn it into the text a picture row holds: the full size
- * cut to `PICTURE_SIZE` on its longest side as a JPEG in base64, and a
- * `THUMB_SIZE` thumb of that. `null` when you backed out, which is not an
- * error; a picture that will not fit as text even at the lowest quality throws,
- * because "nothing happened" would read as the app ignoring you.
+ * Pick a picture, let the person crop it, and turn it into the text a picture
+ * row holds: a JPEG in base64, and a `THUMB_SIZE` thumb of it. `null` when you
+ * backed out, which is not an error; a picture that will not fit as text even
+ * at the hardest compression throws, because "nothing happened" would read as
+ * the app ignoring you.
+ *
+ * The crop is the person's: the picker's own editor, with no aspect passed, so
+ * the shape is whatever they drag it to — nothing here picks a ratio for them
+ * and nothing after changes it. What *is* done to the picture is compression,
+ * and only when it needs it: brought down to a pixel budget if it is bigger
+ * than that, kept whole if not, then re-encoded harder step by step until it
+ * fits in a column (`PICTURE_STEPS`).
+ *
+ * The editor is the Android picker's. The web file picker has no crop step, so
+ * there the picture comes back as it was chosen.
  *
  * The library picker and not the camera, the same call `pickProjectIcon` makes:
  * what you want to attach is usually a screenshot or something you already
  * took, and the camera would ask a permission for no gain.
  */
 export async function pickPicture(): Promise<NewPicture | null> {
-  const picked = await launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
+  const picked = await launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 1 });
   const asset = picked.canceled ? null : picked.assets[0];
   if (!asset) return null;
 
-  // Quality steps down only if the first cut is too big to keep. A busy
-  // screenshot is the case: it is the one that does not compress.
-  for (const quality of [PICTURE_QUALITY, 0.4, 0.25]) {
-    const resize = fitSize(asset.width, asset.height, PICTURE_SIZE);
+  for (const step of PICTURE_STEPS) {
+    const resize = fitPixels(asset.width, asset.height, step.pixels);
     const big = await manipulateAsync(asset.uri, resize ? [{ resize }] : [], {
-      compress: quality,
+      compress: step.quality,
       format: SaveFormat.JPEG,
       base64: true,
     });

@@ -6,6 +6,10 @@ import { isPictureLine, type ShownPicture } from '@/lib/entryPicture';
 import { useHover, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
+/** The thumb's longest side in the thread, so a wide one and a tall one take the same room. */
+const THUMB_BOX = 180;
+const thumbWidth = (aspect: number) => Math.round(aspect >= 1 ? THUMB_BOX : THUMB_BOX * aspect);
+
 export type ThreadLine = { id: string; text: string; rel: string };
 
 /**
@@ -116,7 +120,7 @@ function ThreadRow<T extends ThreadLine>({
           <PictureImage
             uri={picture.uri}
             aspect={picture.aspect}
-            width={180}
+            width={thumbWidth(picture.aspect)}
             label="open the picture"
             onPress={onOpenPicture ? () => onOpenPicture(picture.id) : undefined}
           />

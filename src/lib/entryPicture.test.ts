@@ -1,8 +1,10 @@
 import {
-  boxAspect,
+  aspectOf,
+  fitPixels,
   fitSize,
   isPictureLine,
   normalizeThumb,
+  PICTURE_STEPS,
   PICTURE_LINE,
   PICTURE_MAX_CHARS,
   pictureDataUri,
@@ -98,17 +100,51 @@ describe('fitSize', () => {
   });
 });
 
-describe('boxAspect', () => {
-  it('keeps a picture its own shape', () => {
-    expect(boxAspect(400, 300)).toBeCloseTo(4 / 3);
+describe('fitPixels', () => {
+  it('keeps a picture within the budget and keeps its shape', () => {
+    const resize = fitPixels(4000, 3000, 1_500_000);
+    expect(resize).not.toBeNull();
+    const width = resize!.width;
+    const height = Math.round((width * 3000) / 4000);
+    // The manipulator rounds the other side itself, so allow a row of slack.
+    expect(width * height).toBeLessThanOrEqual(1_500_000 * 1.001);
+    expect(width / height).toBeCloseTo(4 / 3, 1);
   });
 
-  it('clamps a tall screenshot and a wide strip', () => {
-    expect(boxAspect(360, 1600)).toBe(0.6);
-    expect(boxAspect(3000, 300)).toBe(2);
+  it('shrinks a tall crop by the same rule and keeps its shape', () => {
+    const resize = fitPixels(600, 6000, 1_500_000);
+    expect(resize!.width).toBe(387);
+    expect(resize!.width * 10).toBeLessThan(3880);
+  });
+
+  it('leaves a picture alone that is already within it', () => {
+    expect(fitPixels(1000, 1000, 1_500_000)).toBeNull();
+    expect(fitPixels(1500, 1000, 1_500_000)).toBeNull();
+  });
+
+  it('does nothing with a size it cannot read', () => {
+    expect(fitPixels(0, 0, 1_500_000)).toBeNull();
+  });
+});
+
+describe('PICTURE_STEPS', () => {
+  it('only ever asks for less than the step before it', () => {
+    PICTURE_STEPS.slice(1).forEach((step, index) => {
+      const before = PICTURE_STEPS[index];
+      expect(step.pixels <= before.pixels && step.quality <= before.quality).toBe(true);
+      expect(step.pixels < before.pixels || step.quality < before.quality).toBe(true);
+    });
+  });
+});
+
+describe('aspectOf', () => {
+  it('is the shape the picture has, with no clamp', () => {
+    expect(aspectOf(400, 300)).toBeCloseTo(4 / 3);
+    expect(aspectOf(360, 3600)).toBeCloseTo(0.1);
+    expect(aspectOf(3000, 300)).toBeCloseTo(10);
   });
 
   it('falls back when the size is unknown', () => {
-    expect(boxAspect(0, 0)).toBeCloseTo(4 / 3);
+    expect(aspectOf(0, 0)).toBeCloseTo(4 / 3);
   });
 });

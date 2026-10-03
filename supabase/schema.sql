@@ -319,9 +319,10 @@ create index if not exists cellar_groups_user_idx on public.cellar_groups (user_
 --
 -- A data URI in a text column rather than a file in a bucket, for the reason a
 -- project's icon is one: no storage policy, no second thing to clean up, and a
--- deleted thought takes its pictures with it. The app cuts every picture to
--- 1000px on its longest side before writing, which lands a screenshot at
--- 60-150 KB of text, plus a 160px `thumb` for lists (src/lib/entryPicture.ts).
+-- deleted thought takes its pictures with it. The person crops a picture to
+-- whatever shape they want and the app never changes it; it only compresses one
+-- that is too big, to about 1.5 megapixels, which puts a screenshot at 60-300 KB
+-- of text, plus a 160px `thumb` for lists (src/lib/entryPicture.ts).
 --
 -- Their own table, not columns on the thought or its lines: the whole cellar is
 -- read in one go and a hundred full-size pictures in that read would make every

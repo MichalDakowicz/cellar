@@ -4,7 +4,7 @@
 
 ### Added
 
-- Dump: add a picture to a thought as you drop it, kept as text so there are no files
+- Dump: add a picture to a thought as you drop it, cropped to any shape you like
 - Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
 - Entry: tap a picture to see it full screen
 - Sign-in screen: continue with bazaar when it is installed on this phone

@@ -4,9 +4,12 @@
  * The same decision a project's icon made (`lib/projectIcon.ts`): the image is
  * a data URI in a text column, so there is no bucket, no storage policy and no
  * second thing to delete when the thought goes. That only works while it stays
- * small, so it is cut down before it is written — a screenshot at 1000px on its
- * longest side is a readable 60–150 KB of text — and a 160px thumb rides with
- * it so a list never has to read the big one.
+ * small, so a picture that is too big is compressed before it is written, and a
+ * 160px thumb rides with it so a list never has to read the big one.
+ *
+ * The shape is the person's. They crop it in the picker, and nothing here
+ * limits or changes the proportions of what comes back: a tall strip of a chat
+ * stays a tall strip. Only the pixel count is bounded, never the aspect.
  *
  * Two homes. The **cover** is the thought's own picture, at most one. A **note
  * picture** hangs off a line under the thought, at most one per line, and the
@@ -14,13 +17,24 @@
  * that a picture is there instead of an empty bullet.
  */
 
-/** Longest side of the stored picture, in pixels. */
-export const PICTURE_SIZE = 1000;
 /** Longest side of the list thumb. */
 export const THUMB_SIZE = 160;
-/** JPEG quality of the stored picture and of the thumb. */
-export const PICTURE_QUALITY = 0.6;
 export const THUMB_QUALITY = 0.7;
+
+/**
+ * What the stored picture may cost, tried in order until one fits under
+ * `PICTURE_MAX_CHARS`: a pixel budget and a JPEG quality. The first step is the
+ * usual one — about 1.5 megapixels, which keeps a full phone screenshot
+ * readable — and the rest only happen for a picture that will not compress, a
+ * busy one. A picture already under the budget is not resized, only re-encoded.
+ */
+export const PICTURE_STEPS: readonly { pixels: number; quality: number }[] = [
+  { pixels: 1_500_000, quality: 0.6 },
+  { pixels: 1_500_000, quality: 0.45 },
+  { pixels: 900_000, quality: 0.45 },
+  { pixels: 450_000, quality: 0.4 },
+  { pixels: 200_000, quality: 0.35 },
+];
 /** Past these a write is refused and a read is not drawn, so one bad row cannot bloat a screen. */
 export const PICTURE_MAX_CHARS = 450_000;
 export const THUMB_MAX_CHARS = 40_000;
@@ -54,10 +68,21 @@ export function fitSize(width: number, height: number, max: number): { width: nu
   return width >= height ? { width: max } : { height: max };
 }
 
-/** The box a picture is drawn in: its own shape, but never a sliver or a wall. */
-export function boxAspect(width: number, height: number): number {
+/**
+ * The resize that brings a picture down to a pixel budget without touching its
+ * shape, or `null` when it is already within it. Pixels rather than a longest
+ * side, because a side limit would shrink a tall crop to a sliver while a wide
+ * one kept all its detail — the budget treats every shape alike.
+ */
+export function fitPixels(width: number, height: number, maxPixels: number): { width: number } | null {
+  if (!(width > 0) || !(height > 0) || width * height <= maxPixels) return null;
+  return { width: Math.max(1, Math.floor(width * Math.sqrt(maxPixels / (width * height)))) };
+}
+
+/** A picture's shape as the screen draws it: its own, with no clamp. A size that is missing reads as 4:3. */
+export function aspectOf(width: number, height: number): number {
   if (!(width > 0) || !(height > 0)) return 4 / 3;
-  return Math.min(2, Math.max(0.6, width / height));
+  return width / height;
 }
 
 /** Both halves within their caps and both real image data URIs. */

@@ -3,6 +3,9 @@ import { Pressable, Text, View } from 'react-native';
 import { PictureImage } from '@/components/cellar/PictureImage';
 import type { ShownPicture } from '@/lib/entryPicture';
 
+/** Tall enough for a phone screenshot at full width; anything taller shrinks to stay whole. */
+const COVER_MAX_HEIGHT = 560;
+
 /**
  * The thought's own picture, under its heading and above everything it grew.
  * Tap opens it full screen; the one control is taking it off, which the screen
@@ -21,7 +24,13 @@ export function EntryCover({
 
   return (
     <View className="mt-3.5">
-      <PictureImage uri={cover.uri} aspect={cover.aspect} label="open the picture" onPress={() => onOpen(cover.id)} />
+      <PictureImage
+        uri={cover.uri}
+        aspect={cover.aspect}
+        maxHeight={COVER_MAX_HEIGHT}
+        label="open the picture"
+        onPress={() => onOpen(cover.id)}
+      />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="remove the picture"

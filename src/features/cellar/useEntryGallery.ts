@@ -3,13 +3,13 @@ import { useCallback, useMemo, useState } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import { pickPicture } from '@/features/cellar/pickPicture';
 import { usePictureData, usePicturesOf, usePictureWrites } from '@/features/cellar/usePictures';
-import { boxAspect, type NewPicture, type PictureThumb, type ShownPicture } from '@/lib/entryPicture';
+import { aspectOf, type NewPicture, type PictureThumb, type ShownPicture } from '@/lib/entryPicture';
 import { readError } from '@/lib/utils';
 
 const shown = (picture: PictureThumb, uri: string = picture.thumb): ShownPicture => ({
   id: picture.id,
   uri,
-  aspect: boxAspect(picture.width, picture.height),
+  aspect: aspectOf(picture.width, picture.height),
 });
 
 /**
