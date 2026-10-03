@@ -2,7 +2,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { useCellar, useCellarWrites, useCurrentShelf } from '@/features/cellar/useCellar';
+import { useDraftPicture } from '@/features/cellar/useDraftPicture';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
+import { useToast } from '@/components/ui/Toast';
 import { useHaptics } from '@/hooks/useHaptics';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
@@ -28,6 +30,8 @@ export function useDumpScreen() {
   const { drop } = useCellarWrites();
   const { settings } = useCellarSettings();
   const haptics = useHaptics();
+  const { say } = useToast();
+  const draftPicture = useDraftPicture();
 
   const raw = useCellarPrefs((state) => state.raw);
   const kind = useCellarPrefs((state) => state.draftKind);
@@ -59,17 +63,23 @@ export function useDumpScreen() {
 
   const submit = useCallback(() => {
     if (dropPlan.empty || drop.isPending) return;
+    // The picture is the first thought's cover, and a raw dump is many thoughts
+    // with no single one for it to belong to.
+    const picture = raw ? undefined : (draftPicture.picture ?? undefined);
+    const drops = dropPlan.drops.map((entry, index) => (index === 0 && picture ? { ...entry, picture } : entry));
     void drop
-      .mutateAsync(fanOut(dropPlan.drops, targets).map((entry) => ({ ...entry, kind })))
-      .then(() => {
+      .mutateAsync(fanOut(drops, targets).map((entry) => ({ ...entry, kind })))
+      .then((result) => {
         haptics.drop();
         setText('');
+        draftPicture.clear();
+        if (result.pictureFailed) say('dropped, but the picture did not attach');
         // With "remember the last project" off, the chips snap back to the
         // inbox — otherwise the second thought of the evening silently files
         // itself under whatever the first one was about.
         if (!settings.rememberLast) setLastProjects([]);
       });
-  }, [dropPlan, drop, kind, targets, settings.rememberLast, setLastProjects, haptics]);
+  }, [dropPlan, drop, kind, targets, raw, draftPicture, say, settings.rememberLast, setLastProjects, haptics]);
 
   const onReturn = useCallback(
     (modifiers: { shift: boolean; meta: boolean }) => {
@@ -116,6 +126,8 @@ export function useDumpScreen() {
     text,
     setText,
     raw,
+    /** The cover for the thought being typed. Raw dumps have none to offer it to. */
+    picture: raw ? null : draftPicture,
     placeholder: dumpPlaceholder(raw),
     hint: dumpHint(draft),
     // Web is the only build with a shift or a ctrl to press. `lib/dump` stays

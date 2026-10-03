@@ -1,6 +1,8 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { LinkedText } from '@/components/cellar/LinkedText';
+import { PictureImage } from '@/components/cellar/PictureImage';
+import { isPictureLine, type ShownPicture } from '@/lib/entryPicture';
 import { useHover, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
@@ -26,9 +28,14 @@ export function EntryThread<T extends ThreadLine>({
   onRemove,
   undone = 0,
   onUndo,
+  pictures,
+  onOpenPicture,
 }: {
   lines: T[];
   onRemove?: (line: T) => void;
+  /** The picture a note carries, by line id. A note with one is drawn as the picture. */
+  pictures?: Record<string, ShownPicture>;
+  onOpenPicture?: (id: string) => void;
   /** How many this screen has taken off and is still holding. */
   undone?: number;
   onUndo?: () => void;
@@ -38,7 +45,13 @@ export function EntryThread<T extends ThreadLine>({
   return (
     <View className="mt-4">
       {lines.map((line) => (
-        <ThreadRow key={line.id} line={line} onRemove={onRemove} />
+        <ThreadRow
+          key={line.id}
+          line={line}
+          onRemove={onRemove}
+          picture={pictures?.[line.id]}
+          onOpenPicture={onOpenPicture}
+        />
       ))}
 
       {undone > 0 && !!onUndo && (
@@ -68,7 +81,17 @@ export function EntryThread<T extends ThreadLine>({
  * column reads as the point of the column, and this one is the rare act. The
  * press only arms it — the screen confirms, and keeps the row for undo.
  */
-function ThreadRow<T extends ThreadLine>({ line, onRemove }: { line: T; onRemove?: (line: T) => void }) {
+function ThreadRow<T extends ThreadLine>({
+  line,
+  onRemove,
+  picture,
+  onOpenPicture,
+}: {
+  line: T;
+  onRemove?: (line: T) => void;
+  picture?: ShownPicture;
+  onOpenPicture?: (id: string) => void;
+}) {
   const { hovered, bind } = useHover();
 
   return (
@@ -86,7 +109,21 @@ function ThreadRow<T extends ThreadLine>({ line, onRemove }: { line: T; onRemove
       className="flex-row items-start gap-2.5 px-1 py-2"
     >
       <Text className="w-6 pt-0.5 font-mono text-[11px] text-muted-foreground">+</Text>
-      <LinkedText text={line.text} className="min-w-0 flex-1 text-sm text-foreground" />
+      {picture && isPictureLine(line.text) ? (
+        // The thumb, not the picture: a thread of ten is ten small reads, and
+        // the tap is what fetches the big one.
+        <View className="min-w-0 flex-1 items-start">
+          <PictureImage
+            uri={picture.uri}
+            aspect={picture.aspect}
+            width={180}
+            label="open the picture"
+            onPress={onOpenPicture ? () => onOpenPicture(picture.id) : undefined}
+          />
+        </View>
+      ) : (
+        <LinkedText text={line.text} className="min-w-0 flex-1 text-sm text-foreground" />
+      )}
       <Text className="pt-0.5 text-xs text-muted-foreground">{line.rel}</Text>
     </Pressable>
   );

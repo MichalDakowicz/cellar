@@ -41,8 +41,24 @@ export function pictureOf(value: unknown, max: number = PICTURE_MAX_CHARS): stri
   return DATA_URI.test(value) ? value : null;
 }
 
-/** A picture ready to be written: the thumb and the one it stands for, both text. */
-export type NewPicture = { thumb: string; data: string };
+/** A picture ready to be written: the thumb and the one it stands for, both text, and its size. */
+export type NewPicture = { thumb: string; data: string; width: number; height: number };
+
+/**
+ * The resize that brings a picture's longest side down to `max`, in the shape
+ * `expo-image-manipulator` takes — one side only, so the other follows and the
+ * aspect is kept. `null` when it is already small enough: never upscaled.
+ */
+export function fitSize(width: number, height: number, max: number): { width: number } | { height: number } | null {
+  if (Math.max(width, height) <= max) return null;
+  return width >= height ? { width: max } : { height: max };
+}
+
+/** The box a picture is drawn in: its own shape, but never a sliver or a wall. */
+export function boxAspect(width: number, height: number): number {
+  if (!(width > 0) || !(height > 0)) return 4 / 3;
+  return Math.min(2, Math.max(0.6, width / height));
+}
 
 /** Both halves within their caps and both real image data URIs. */
 export function writablePicture(picture: NewPicture): boolean {
@@ -61,7 +77,12 @@ export type PictureThumb = {
   /** Null is the cover; otherwise the note this picture hangs off. */
   lineId: string | null;
   thumb: string;
+  width: number;
+  height: number;
 };
+
+/** A picture as the screen draws it: where it is, and the box it sits in. */
+export type ShownPicture = { id: string; uri: string; aspect: number };
 
 /** What the pictures of one thought look like, split the way the screen draws them. */
 export type EntryPictures = {
@@ -83,8 +104,12 @@ export function normalizeThumb(row: {
   id: string;
   entry_id: string;
   line_id: string | null;
+  width: number;
+  height: number;
   thumb: unknown;
 }): PictureThumb | null {
   const thumb = pictureOf(row.thumb, THUMB_MAX_CHARS);
-  return thumb ? { id: row.id, entryId: row.entry_id, lineId: row.line_id, thumb } : null;
+  return thumb
+    ? { id: row.id, entryId: row.entry_id, lineId: row.line_id, thumb, width: row.width, height: row.height }
+    : null;
 }

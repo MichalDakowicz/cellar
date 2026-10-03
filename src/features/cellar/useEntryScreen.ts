@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useCellar, useCellarWrites } from '@/features/cellar/useCellar';
 import { useEntryDocs } from '@/features/cellar/useEntryDocs';
+import { useEntryGallery } from '@/features/cellar/useEntryGallery';
 import { useEntryTrail } from '@/features/cellar/useEntryTrail';
 import { useCellarSettings } from '@/hooks/useCellarSettings';
 import { splitThread } from '@/lib/agentWork';
@@ -40,6 +41,7 @@ export function useEntryScreen(entryId: string | undefined) {
   const project = projects.find((candidate) => candidate.id === entry?.projectId) ?? null;
   const projectName = project?.name ?? 'inbox';
   const docs = useEntryDocs(entry, project);
+  const gallery = useEntryGallery(entry?.id);
   const trail = useEntryTrail(entry, projects);
 
   const siblings = useMemo(
@@ -70,9 +72,11 @@ export function useEntryScreen(entryId: string | undefined) {
     const target = arming;
     setArming(null);
     if (!target) return;
-    setRemoved((stack) => [...stack, target]);
+    // A note's picture goes with it and cannot be put back — undo would restore
+    // the words and not the picture — so it is not offered for those.
+    if (!gallery.hasLinePicture(target.id)) setRemoved((stack) => [...stack, target]);
     removeLine.mutate(target.id);
-  }, [arming, removeLine]);
+  }, [arming, removeLine, gallery]);
 
   // Puts the last one back where it was — same text, same stamp, so it lands in
   // its old place in the thread rather than at the bottom as a new thought.
@@ -138,6 +142,14 @@ export function useEntryScreen(entryId: string | undefined) {
     cancelRemoveLine: () => setArming(null),
     confirmRemoveLine,
     lineToRemove: arming,
+    /** What the remove dialog says. A note that is a picture takes the picture with it. */
+    removeLineBody: arming
+      ? gallery.hasLinePicture(arming.id)
+        ? 'the picture comes off the thought with it, and there is no undo for it.'
+        : `"${arming.text}" comes off the thought. undo is there until you leave.`
+      : undefined,
+    /** The cover, the pictures notes carry, and the viewer (`useEntryGallery`). */
+    gallery,
     undoneCount: removed.length,
     undoRemove,
     setKind: (kind: Kind) => patch({ kind }),

@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { AgentQuestion } from '@/components/cellar/AgentQuestion';
 import { CopyPrompt } from '@/components/cellar/CopyPrompt';
@@ -9,11 +8,15 @@ import { AgentThread } from '@/components/cellar/AgentThread';
 import { EntryThread } from '@/components/cellar/EntryThread';
 import { LinkedText } from '@/components/cellar/LinkedText';
 import { LinkPreviews } from '@/components/cellar/LinkPreview';
+import { PictureAction } from '@/components/cellar/PictureAction';
+import { PictureViewer } from '@/components/cellar/PictureViewer';
 import { QuestionThread } from '@/components/cellar/QuestionThread';
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { kindChips } from '@/components/cellar/kindChips';
 import { KindGlyph } from '@/components/media/Glyphs';
 import { EntryActions } from '@/components/cellar/EntryActions';
+import { EntryAppendLine } from '@/components/cellar/EntryAppendLine';
+import { EntryCover } from '@/components/cellar/EntryCover';
 import { EntryCard } from '@/components/cellar/EntryCard';
 import { EntryDocs } from '@/components/cellar/EntryDocs';
 import { EntryTrail } from '@/components/cellar/EntryTrail';
@@ -21,14 +24,14 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
-import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
+import { Overline } from '@/components/ui/controls';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { EmptyState } from '@/components/ui/states';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntryQuestions } from '@/features/cellar/useEntryQuestions';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, webFocusRing, useSidebarSpace } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 
@@ -51,7 +54,6 @@ export default function EntryScreen() {
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [lineFocused, setLineFocused] = useState(false);
 
   if (!entry.entry) {
     return (
@@ -106,7 +108,10 @@ export default function EntryScreen() {
             <View className="mt-2.5 flex-row items-center gap-3">
               <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
               <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
+              <PictureAction has={!!entry.gallery.cover} busy={entry.gallery.busy} onPress={entry.gallery.setCover} />
             </View>
+
+            <EntryCover cover={entry.gallery.cover} onOpen={entry.gallery.view} onRemove={entry.gallery.askRemoveCover} />
 
             {/* Under the thought and above everything else: a link dumped with
                 a thought is usually the thing the thought is about. */}
@@ -130,32 +135,17 @@ export default function EntryScreen() {
               onRemove={entry.armRemoveLine}
               undone={entry.undoneCount}
               onUndo={entry.undoRemove}
+              pictures={entry.gallery.lines}
+              onOpenPicture={entry.gallery.view}
             />
 
-            <View className="mt-3.5 flex-row gap-2">
-              <TextInput
-                className="h-[42px] min-w-0 flex-1 rounded-lg bg-secondary px-3.5 text-foreground"
-                style={[{ fontSize: 14, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(lineFocused)]}
-              onFocus={() => setLineFocused(true)}
-              onBlur={() => setLineFocused(false)}
-                placeholder="dump more into this"
-                placeholderTextColor={COLORS.muted}
-                value={entry.line}
-                onChangeText={entry.setLine}
-                onSubmitEditing={entry.appendLine}
-                returnKeyType="done"
-                accessibilityLabel="dump more into this"
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="add a line"
-                hitSlop={6}
-                onPress={entry.appendLine}
-                className="h-[42px] w-[42px] items-center justify-center rounded-lg bg-secondary active:opacity-70"
-              >
-                <Plus size={18} color={COLORS.foreground} strokeWidth={2} />
-              </Pressable>
-            </View>
+            <EntryAppendLine
+              value={entry.line}
+              onChangeText={entry.setLine}
+              onSubmit={entry.appendLine}
+              onPicture={entry.gallery.addNote}
+              pictureBusy={entry.gallery.busy}
+            />
 
             <AgentThread lines={entry.agentLines} />
 
@@ -262,13 +252,26 @@ export default function EntryScreen() {
       <SheetDialog
         open={!!entry.lineToRemove}
         title="remove this line?"
-        body={entry.lineToRemove ? `"${entry.lineToRemove.text}" comes off the thought. undo is there until you leave.` : undefined}
+        body={entry.removeLineBody}
         confirmLabel="remove it"
         dismissLabel="keep it"
         tone="destructive"
         onConfirm={entry.confirmRemoveLine}
         onDismiss={entry.cancelRemoveLine}
       />
+
+      <SheetDialog
+        open={entry.gallery.removing}
+        title="remove this picture?"
+        body="it is stored as text on the thought, so there is nowhere for it to come back from."
+        confirmLabel="remove it"
+        dismissLabel="keep it"
+        tone="destructive"
+        onConfirm={entry.gallery.confirmRemoveCover}
+        onDismiss={entry.gallery.cancelRemoveCover}
+      />
+
+      <PictureViewer uri={entry.gallery.viewer?.uri ?? null} onClose={entry.gallery.closeViewer} />
 
       <AppChrome />
     </View>

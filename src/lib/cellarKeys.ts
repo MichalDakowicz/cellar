@@ -16,6 +16,21 @@ export const GROUPS_KEY = ['cellar', 'groups'] as const;
 export const ENTRIES_KEY = ['cellar', 'entries'] as const;
 
 /**
+ * Every picture's thumb, read once and cut per entry on the screen. Not under
+ * `ENTRIES_KEY`: that key is invalidated by every write to a thought, and a
+ * list of thumbs is not worth re-reading each time a state chip is tapped.
+ * Picture writes invalidate it themselves.
+ */
+export const PICTURES_KEY = ['cellar', 'pictures'] as const;
+
+/**
+ * One picture's full-size data, read when it is opened and then kept — it never
+ * changes. Beside `PICTURES_KEY` rather than under it, so refreshing the thumbs
+ * does not re-read a picture that cannot have moved.
+ */
+export const pictureDataKey = (id: string) => ['cellar', 'picture-data', id] as const;
+
+/**
  * One entry's trail. Under `ENTRIES_KEY` on purpose: every write to an entry
  * already invalidates that key, and a prefix match refreshes the trail with it,
  * so the events table needs no live listener of its own.

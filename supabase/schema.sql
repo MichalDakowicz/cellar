@@ -337,6 +337,9 @@ create table if not exists public.cellar_entry_pictures (
   user_id    uuid not null references auth.users(id) on delete cascade,
   entry_id   uuid not null references public.cellar_entries(id) on delete cascade,
   line_id    uuid references public.cellar_entry_lines(id) on delete cascade,
+  -- Pixels of `data`, so a list can reserve the right box before anything loads.
+  width      int  not null,
+  height     int  not null,
   thumb      text not null,
   data       text not null,
   created_at timestamptz not null default now()
