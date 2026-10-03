@@ -4,6 +4,7 @@
 
 ### Added
 
+- Project: a dump field at the top files a thought straight into that project
 - Sign-in screen: continue with bazaar when it is installed on this phone
 
 ### Changed
