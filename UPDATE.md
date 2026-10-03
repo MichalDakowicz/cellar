@@ -4,6 +4,8 @@
 
 ### Added
 
+- Project: a dump field at the top files a thought straight into that project
+- Entry: edit rewords the thought, and the trail keeps what it said before
 - Dump: add a picture to a thought as you drop it, cropped to any shape you like
 - Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
 - Entry: tap a picture to see it full screen
@@ -11,6 +13,7 @@
 
 ### Changed
 
+- Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in
 - Sign-in screen: ping apps on this phone sit behind one choose an app button

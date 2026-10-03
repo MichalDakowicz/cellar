@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useHaptics } from '@/hooks/useHaptics';
 import { dumpHint, dumpPlaceholder, plan, returnHint, shouldSubmitOnReturn } from '@/lib/dump';
 import { recentEntries } from '@/lib/entryGroups';
+import { groupsFirst } from '@/lib/groups';
 import { fanOut, INBOX_TARGET, liveTargets, pickTarget, targetLabel, toggleTarget } from '@/lib/fileTargets';
 import { cycleShelf, type SwipeDirection } from '@/lib/shelfCycle';
 import { countToday } from '@/lib/relTime';
@@ -25,7 +26,7 @@ import type { Kind } from '@/types/cellar';
  * are sticky; the words are not.
  */
 export function useDumpScreen() {
-  const { shelves, projects, entries, loading, error, refetch } = useCellar();
+  const { shelves, projects, groups, entries, loading, error, refetch } = useCellar();
   const { shelf } = useCurrentShelf(shelves);
   const { drop } = useCellarWrites();
   const { settings } = useCellarSettings();
@@ -42,9 +43,14 @@ export function useDumpScreen() {
 
   const [text, setText] = useState('');
 
+  // Groups lead the chips, then pins, then the rest (lib/groups `groupsFirst`).
   const shelfProjects = useMemo(
-    () => projects.filter((project) => project.shelfId === shelf?.id),
-    [projects, shelf?.id],
+    () =>
+      groupsFirst(
+        projects.filter((project) => project.shelfId === shelf?.id),
+        groups,
+      ),
+    [projects, groups, shelf?.id],
   );
 
   // Cut to this shelf: a chip on another shelf would file the thought somewhere
@@ -152,7 +158,12 @@ export function useDumpScreen() {
     targetsHint: targets.length > 1 ? `lands in each of ${targets.length}` : 'hold a project to file it into more than one',
     projectOptions: [
       { value: INBOX_TARGET, label: 'inbox' },
-      ...shelfProjects.map((project) => ({ value: project.id, label: project.name, pinned: project.pinned })),
+      ...shelfProjects.map((project) => ({
+        value: project.id,
+        label: project.name,
+        pinned: project.pinned,
+        home: project.groupHome === true,
+      })),
     ],
     recent,
     latest,

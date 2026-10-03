@@ -271,7 +271,8 @@ create table if not exists public.cellar_entry_events (
   entry_id   uuid not null references public.cellar_entries(id) on delete cascade,
   -- What happened, as the display word, like `kind` and `state`:
   -- 'dropped' | 'state' | 'kind' | 'filed' | 'claimed' | 'released' |
-  -- 'line' | 'asked' | 'answered' | 'archived' | 'restored'
+  -- 'line' | 'asked' | 'answered' | 'archived' | 'restored' | 'edited'
+  -- ('edited' is a reworded thought: from_value is the old text, to_value the new)
   what       text not null,
   -- Where it went, and where it came from. Both null for an event that is not
   -- a move — a line landing, a question asked.

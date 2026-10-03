@@ -31,7 +31,7 @@ export type TrailEvent = {
 
 export type NewTrailEvent = Omit<TrailEvent, 'id' | 'at'>;
 
-type Moveable = Pick<Entry, 'state' | 'kind' | 'projectId' | 'archived'> & { importance?: string };
+type Moveable = Pick<Entry, 'state' | 'kind' | 'projectId' | 'archived'> & { importance?: string; text?: string };
 type Move = Partial<Moveable>;
 
 /**
@@ -56,6 +56,9 @@ export function patchEvents(before: Moveable, patch: Move, who: { source: LineSo
   if (patch.archived !== undefined && patch.archived !== before.archived) {
     add(patch.archived ? 'archived' : 'restored', null, null);
   }
+  // Both wordings are kept: the row now says the new one, and the trail is the
+  // only place the old one survives.
+  if (patch.text !== undefined && patch.text !== before.text) add('edited', before.text ?? null, patch.text);
   return out;
 }
 
@@ -101,6 +104,8 @@ function moveText(event: TrailEvent, projects: Pick<Project, 'id' | 'name'>[]): 
       return 'archived';
     case 'restored':
       return 'unarchived';
+    case 'edited':
+      return `reworded, it was "${clip(event.fromValue ?? '')}"`;
     default:
       return event.what;
   }

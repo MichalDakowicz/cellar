@@ -97,6 +97,9 @@ export function EntryList({
       // Anchoring is for chat. Here the data changed because the user
       // re-filtered, and holding their old offset strands them mid-list.
       maintainVisibleContentPosition={{ disabled: true }}
+      // The project page puts a field in the header, and the first tap on its
+      // drop button must drop rather than only dismiss the keyboard.
+      keyboardShouldPersistTaps="handled"
       ListHeaderComponent={header}
       ListEmptyComponent={
         empty ? <EmptyState title={empty.title} body={empty.body} action={empty.action} /> : undefined
