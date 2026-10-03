@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NAV_DESTINATIONS } from '@/components/layout/navDestinations';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { HandoffReplay } from '@/features/auth/HandoffReplay';
 import { UpdateNotice } from '@/features/updates/UpdateNotice';
 import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarDisplay } from '@/features/cellar/CellarDisplay';
@@ -73,6 +74,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <>
       {children}
       <UpdateNotice />
+      <HandoffReplay />
     </>
   );
 }
