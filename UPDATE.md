@@ -2,6 +2,10 @@
 
 ## 1.12.0 — Unreleased
 
+### Added
+
+- Sign-in screen: continue with bazaar when it is installed on this phone
+
 ### Changed
 
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
