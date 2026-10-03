@@ -14,6 +14,28 @@ import type { Group, Project } from '@/types/cellar';
  * because the longest checkout wins (`repoLink.projectForPath`).
  */
 
+/**
+ * The order the dump's file it chips read in: each group's general project
+ * first — pinned groups ahead of the rest, the way the shelf draws them —
+ * then the pinned projects, then everything else as it came.
+ *
+ * A group is a place you file into more often than any one project inside it,
+ * which is why it outranks a pin. A general project whose group is not in the
+ * list is an ordinary project again, so it falls through to the pinned and
+ * the rest rather than leading as a group nobody can see.
+ */
+export function groupsFirst<T extends Pick<Project, 'groupId' | 'groupHome' | 'pinned'>>(
+  projects: T[],
+  groups: Group[],
+): T[] {
+  const ordered = [...groups.filter((group) => group.pinned), ...groups.filter((group) => !group.pinned)];
+  const homes = ordered.flatMap((group) =>
+    projects.filter((project) => project.groupHome && project.groupId === group.id),
+  );
+  const rest = projects.filter((project) => !homes.includes(project));
+  return [...homes, ...rest.filter((project) => project.pinned), ...rest.filter((project) => !project.pinned)];
+}
+
 export type ShelfSection<T extends Pick<Project, 'id' | 'groupId' | 'groupHome'>> =
   | { type: 'group'; group: Group; projects: T[] }
   | { type: 'loose'; projects: T[] };
