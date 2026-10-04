@@ -3,6 +3,7 @@ import {
   normalizeRepoUrl,
   projectForPath,
   projectsUnderPath,
+  scopeForPath,
   repoKey,
   repoLabel,
   repoUrlLabel,
@@ -100,5 +101,21 @@ describe('projectsUnderPath', () => {
   it('does not count the directory itself', () => {
     const projects = [project('cellar', 'C:\\ping\\cellar')];
     expect(projectsUnderPath('C:\\ping\\cellar', projects)).toEqual([]);
+  });
+});
+
+describe('scopeForPath', () => {
+  const projects = [project('cellar', 'C:\\ping\\cellar'), project('radar', 'C:\\ping\\radar')];
+
+  it('is the one project when standing inside it', () => {
+    expect(Array.from(scopeForPath('C:\\ping\\cellar\\src', projects) ?? [])).toEqual(['cellar']);
+  });
+
+  it('is every checkout below a workspace directory', () => {
+    expect(Array.from(scopeForPath('C:\\ping', projects) ?? []).sort()).toEqual(['cellar', 'radar']);
+  });
+
+  it('is null for a directory no project owns', () => {
+    expect(scopeForPath('C:\\elsewhere', projects)).toBeNull();
   });
 });
