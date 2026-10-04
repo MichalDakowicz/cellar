@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { deviceRule, inProgress, waitingOnYou } from '@/lib/agentWork';
 import { answeredForAgent, readyToResume } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
-import { projectForPath, projectsUnderPath, repoLabel } from '@/lib/repoLink';
+import { projectForPath, projectsUnderPath, repoLabel, scopeForPath } from '@/lib/repoLink';
 import type { Entry } from '@/types/cellar';
 
 import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
@@ -56,7 +56,13 @@ function orientBody(cellar: Cellar, cwd: string, phone: boolean | null): string 
   // own settings switch — so no session has to ask it.
   out.push(`phone    ${deviceRule(phone)}`);
 
-  const mine = here ? cellar.entries.filter((entry) => entry.projectId === here.id) : cellar.entries;
+  // Standing in a workspace holding several checkouts is not licence to see every
+  // project's thoughts: scope to the ones below, or an unrelated project's
+  // answered questions read as decisions for this repo.
+  const scope = scopeForPath(cwd, cellar.projects);
+  const mine = scope
+    ? cellar.entries.filter((entry) => entry.projectId !== null && scope.has(entry.projectId))
+    : cellar.entries;
   const live = mine.filter((entry) => !entry.archived);
   const open = live.filter((entry) => entry.state === 'open');
   const blocked = waitingOnYou(live);
@@ -256,13 +262,24 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
         'so, which is the whole reason this tool exists. An answered entry is back to open, so claim it and carry ' +
         'on from the decision. Anything still unanswered when the work runs out is a question to ask in the chat, ' +
         'then record with cellar_answer_question.',
-      inputSchema: {},
+      inputSchema: {
+        cwd: z
+          .string()
+          .optional()
+          .describe(
+            'Absolute path you are working in. Pass it: every Claude session shares one agent name, so without it ' +
+              'you also get answers to questions other sessions asked about other projects.',
+          ),
+      },
     },
-    async () =>
+    async ({ cwd }) =>
       guard(async () => {
         const { ctx, cellar } = await withCellar(getCtx);
+        const scope = scopeForPath(cwd?.trim() || ctx.cwd, cellar.projects);
         const answered = answeredForAgent(
-          cellar.entries.filter((entry) => !entry.archived),
+          cellar.entries.filter(
+            (entry) => !entry.archived && (!scope || (entry.projectId !== null && scope.has(entry.projectId))),
+          ),
           ctx.agent,
         );
         return text(answeredBlock(answered, cellar.projects));

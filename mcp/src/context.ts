@@ -44,8 +44,11 @@ export async function withCellar(getCtx: CtxProvider): Promise<{ ctx: Ctx; cella
  * to go and pick that same thought back up.
  */
 export function withAnswered(body: string, cellar: Cellar, agent: string, exceptId?: string): string {
+  // Every Claude session is the same agent name, so the name alone pulls in
+  // questions from whatever else is open. Stay in the acted-on entry's project.
+  const projectId = exceptId ? cellar.entries.find((entry) => entry.id === exceptId)?.projectId : undefined;
   const answered = answeredForAgent(
-    cellar.entries.filter((entry) => !entry.archived),
+    cellar.entries.filter((entry) => !entry.archived && (projectId === undefined || entry.projectId === projectId)),
     agent,
   );
   return body + answeredTail(answered, exceptId);

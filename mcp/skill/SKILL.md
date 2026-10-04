@@ -126,7 +126,7 @@ thought and leaves the rest of the list workable. Then:
    answer may already be there — `cellar_orient` lists what has been answered since, above
    the open thoughts.
 3. **`cellar_check_answers` as each thought finishes, and again before you end the session.**
-   It takes no arguments and returns the questions *you* asked that have since been answered
+   Pass `cwd` (the directory you work in) so only this project is checked. It returns the questions *you* asked that have since been answered
    or waved off, with what the user said. An answer that arrived is yours to pick back up:
    the entry is `open` again, so claim it and carry on from the decision. Every write tool
    prints the same thing as a tail on its own result, so an answer will find you — but the
@@ -198,7 +198,7 @@ Send the sentence worth reading in six months. One line per real finding.
 - **`cellar_archive_entry`** — already true, fixed elsewhere, no longer applies. Reason
   required. **There is no delete**: nothing in this app is destroyed to get it out of the
   way.
-- **`cellar_check_answers`** — no arguments, scoped to your own agent name. The other end of
+- **`cellar_check_answers`** — pass `cwd`; scoped to your agent name and that project. The other end of
   `cellar_ask`: an answer lands in the database and nothing wakes you up to say so.
 - **`cellar_answer_question`** — you asked on the entry, ran out of other work, asked again
   in the chat. This writes what they said back onto the question and unblocks the entry if

@@ -127,3 +127,23 @@ export function projectsUnderPath<T extends Pick<Project, 'repoPath'>>(
     return base !== null && base !== here && base.startsWith(`${here}/`);
   });
 }
+
+/**
+ * The project ids a working directory speaks for, or null when it speaks for
+ * none and nothing should be filtered.
+ *
+ * Inside a checkout it is that one project; at the top of a workspace it is
+ * every checkout below. Anything shown to an agent that is not about the thing
+ * it was asked to work on — another project's answered questions above all —
+ * is filtered by this, because an agent handed a decision about a different
+ * repo will act on it.
+ */
+export function scopeForPath<T extends Pick<Project, 'id' | 'repoPath'>>(
+  cwd: string | null | undefined,
+  projects: T[],
+): Set<string> | null {
+  const here = projectForPath(cwd, projects);
+  if (here) return new Set([here.id]);
+  const below = projectsUnderPath(cwd, projects);
+  return below.length > 0 ? new Set(below.map((project) => project.id)) : null;
+}
