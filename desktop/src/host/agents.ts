@@ -5,8 +5,9 @@ import { runTitle } from '@/lib/deskProtocol';
  * How each agent is started from the phone, as an argument list — never a
  * shell line. The prompt is free text from another device; handed to a shell it
  * would be a command, handed to `spawn` as one argv entry it is only ever a
- * prompt. The `--` before it is the same guard for the agent's own parser: a
- * prompt that starts with a dash is still a prompt.
+ * prompt. The `--` before it (or the `=` that binds it, for antigravity) is the
+ * same guard for the agent's own parser: a prompt that starts with a dash is
+ * still a prompt.
  *
  * Permission mode is the decision on the cellar entry: auto, the same classifier
  * as a session at the desk. Each agent spells it differently and not every one
@@ -46,10 +47,13 @@ export function spawnPlan(start: DeskStart): SpawnPlan {
     case 'agy':
       // Antigravity has no classifier mode. accept-edits is the nearest: edits
       // go through, anything else it would ask about is not done unattended.
+      // Its --print takes the prompt as the flag's own value — given as the
+      // next argument it swallows whatever follows — so the prompt is attached
+      // with `=`, which also keeps a leading dash a prompt.
       return {
         agent: 'agy',
         kind: 'own',
-        args: ['--print', '--mode', 'accept-edits', '--', start.prompt],
+        args: ['--mode', 'accept-edits', `--print=${start.prompt}`],
       };
   }
 }

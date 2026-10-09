@@ -5,12 +5,14 @@ import { backgroundId, claudeProjectSlug, claudeRunState, spawnPlan, untrustedFo
 
 const start = { prompt: '-rf looks like a flag', cwd: 'C:\\ping\\cellar', name: null, entryId: null };
 
-test('every plan puts the prompt after -- so a leading dash stays a prompt', () => {
-  for (const agent of ['claude', 'codex', 'agy'] as const) {
+test('every plan keeps a leading dash a prompt', () => {
+  for (const agent of ['claude', 'codex'] as const) {
     const { args } = spawnPlan({ ...start, agent });
     assert.equal(args.at(-1), start.prompt);
     assert.equal(args.at(-2), '--');
   }
+  // antigravity's --print swallows the next argument, so the prompt is bound to it.
+  assert.equal(spawnPlan({ ...start, agent: 'agy' }).args.at(-1), `--print=${start.prompt}`);
 });
 
 test('claude runs in the background, in auto mode, with no model pinned', () => {

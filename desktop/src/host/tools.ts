@@ -1,9 +1,10 @@
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 
 import { DESK_AGENTS, type DeskAgent } from '@/lib/deskProtocol';
 
 const run = promisify(execFile);
+const OUTPUT_MAX = 16 * 1024 * 1024;
 
 /**
  * Where each agent's executable is, found once.
@@ -37,26 +38,38 @@ export async function installedAgents(): Promise<{ id: DeskAgent; installed: boo
   return Promise.all(DESK_AGENTS.map(async ({ id }) => ({ id, installed: (await toolPath(id)) !== null })));
 }
 
-/** Run a tool to completion and hand back what it printed. Never through a shell. */
-export async function runTool(
+/**
+ * Run a tool to completion and hand back what it printed. Never through a
+ * shell, and never with a stdin: `claude` reads a piped stdin as more prompt
+ * and waits for it to close, so a child whose stdin is an open pipe — what
+ * `execFile` gives it — hangs until the timeout instead of starting.
+ */
+export function runTool(
   path: string,
   args: string[],
   options: { cwd?: string; timeout?: number } = {},
 ): Promise<{ stdout: string; stderr: string; code: number }> {
-  try {
-    const { stdout, stderr } = await run(path, args, {
-      cwd: options.cwd,
-      timeout: options.timeout ?? 60_000,
-      windowsHide: true,
-      maxBuffer: 16 * 1024 * 1024,
-    });
-    return { stdout, stderr, code: 0 };
-  } catch (error) {
-    const failed = error as { stdout?: string; stderr?: string; code?: number | string };
-    return {
-      stdout: failed.stdout ?? '',
-      stderr: failed.stderr ?? String(error),
-      code: typeof failed.code === 'number' ? failed.code : 1,
+  return new Promise((resolve) => {
+    const child = spawn(path, args, { cwd: options.cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    const out: Buffer[] = [];
+    const err: Buffer[] = [];
+    let size = 0;
+    const keep = (into: Buffer[]) => (chunk: Buffer) => {
+      size += chunk.length;
+      if (size <= OUTPUT_MAX) into.push(chunk);
     };
-  }
+    child.stdout.on('data', keep(out));
+    child.stderr.on('data', keep(err));
+    const timer = setTimeout(() => child.kill(), options.timeout ?? 60_000);
+    const finish = (code: number, extra = '') => {
+      clearTimeout(timer);
+      resolve({
+        stdout: Buffer.concat(out).toString('utf8'),
+        stderr: Buffer.concat(err).toString('utf8') + extra,
+        code,
+      });
+    };
+    child.on('error', (error) => finish(1, error.message));
+    child.on('close', (code) => finish(code ?? 1));
+  });
 }
