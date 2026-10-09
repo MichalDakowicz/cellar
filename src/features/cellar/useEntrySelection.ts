@@ -1,3 +1,4 @@
+import { useRouter, type Href } from 'expo-router';
 import { useEffect, useMemo } from 'react';
 
 import { useCopySelection } from '@/features/cellar/useCopyPrompt';
@@ -8,9 +9,9 @@ import { useSelection } from '@/store/entrySelection';
 import type { Entry } from '@/types/cellar';
 
 /**
- * Holding several rows at once, and the two things that can then happen to
- * them: file them all somewhere, or copy one line that starts all of them in an
- * agent.
+ * Holding several rows at once, and what can then happen to them: file them
+ * all somewhere, copy one line that starts all of them in an agent, or hand
+ * them to the pc's new task screen — one run, or one run each.
  *
  * A long press starts it, because a long press is the only gesture free on an
  * entry row — the tap opens the thought and the buttons at its end are taken.
@@ -22,6 +23,7 @@ import type { Entry } from '@/types/cellar';
  */
 export function useEntrySelection(entries: Entry[], open: (entry: Entry) => void) {
   const haptics = useHaptics();
+  const router = useRouter();
   const ids = useSelection((state) => state.ids);
   const toggle = useSelection((state) => state.toggle);
   const clear = useSelection((state) => state.clear);
@@ -50,5 +52,10 @@ export function useEntrySelection(entries: Entry[], open: (entry: Entry) => void
     },
     copy: () => copySelection(selected),
     file: () => fileMany?.(selected.map((entry) => entry.id)),
+    handoff: () => {
+      const ids = selected.map((entry) => entry.id);
+      clear();
+      router.push(`/desk/new?entries=${ids.join(',')}` as Href);
+    },
   };
 }

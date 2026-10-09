@@ -195,3 +195,40 @@ export const SAMPLE_RAIL: Record<
     preview: 'sample',
   },
 };
+
+/** A row in the project's desk panel (`DeskProjects.dc.html`). */
+export type DeskPanelRow = { label: string; detail: string; state: 'ok' | 'busy' | 'waiting' | null };
+
+/** The project's desk panel on the sample desk: worktrees, previews, shipped, last command runs. */
+export const SAMPLE_PROJECT_DESK: { title: string; rows: DeskPanelRow[] }[] = [
+  {
+    title: 'worktrees',
+    rows: [
+      { label: 'main', detail: 'clean · 1.12.1 is live', state: null },
+      { label: 'wt/inbox-swipe', detail: 'claude · +88 −21', state: 'busy' },
+      { label: 'wt/desk-tab', detail: 'codex · waiting on you · +212 −40', state: 'waiting' },
+    ],
+  },
+  {
+    title: 'previews up',
+    rows: [
+      { label: 'wt/inbox-swipe :8081', detail: 'on the phone', state: 'ok' },
+      { label: 'wt/desk-tab :8082', detail: 'open', state: 'ok' },
+    ],
+  },
+  {
+    title: 'shipped',
+    rows: [
+      { label: 'web 1.12.1 · sample-site', detail: '2h ago', state: null },
+      { label: 'apk 1.12.1 · release', detail: '2h ago', state: null },
+    ],
+  },
+  {
+    title: 'commands · last runs',
+    rows: [
+      { label: '$apk', detail: 'running 1m 12s', state: 'busy' },
+      { label: '$deploy', detail: '52s · ok', state: 'ok' },
+      { label: '$rebuild', detail: '41s · ok', state: 'ok' },
+    ],
+  },
+];

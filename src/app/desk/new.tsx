@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { AttachedThought } from '@/components/desk/AttachedThought';
@@ -17,15 +18,20 @@ import { COLORS } from '@/theme/colors';
 /**
  * New task (docs/desk/screens.md, `NewTask.dc.html`) — the desk tab's left
  * island. Say it, pick where and who, send it to the pc. `?entry=` attaches a
- * thought for the run to pick up.
+ * thought for the run to pick up; `?entries=a,b` the thoughts held on a
+ * project and handed off together.
  *
  * A screen rather than a sheet: the form is taller than a phone once the
  * keyboard is up, and a sheet that cannot scroll hides its own send button.
  */
 export default function NewTask() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ entry?: string }>();
-  const task = useNewTask(params.entry ?? null, () => (router.canGoBack() ? router.back() : router.navigate('/desk')));
+  const params = useLocalSearchParams<{ entry?: string; entries?: string }>();
+  const ids = useMemo(
+    () => (params.entries ?? params.entry ?? '').split(',').filter(Boolean),
+    [params.entries, params.entry],
+  );
+  const task = useNewTask(ids, () => (router.canGoBack() ? router.back() : router.navigate('/desk')));
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -57,19 +63,19 @@ export default function NewTask() {
 
               <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} />
               <NewTaskChoices {...task} />
-              {task.attached && <AttachedThought {...task.attached} />}
+              <AttachedThought thoughts={task.attached} onDetach={task.onDetach} split={task.split} onSplit={task.onSplit} />
 
               <View className="gap-2">
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`send to ${task.host}`}
+                  accessibilityLabel={task.sendLabel}
                   accessibilityState={{ disabled: blocked }}
                   disabled={blocked}
                   onPress={task.send}
                   className={`h-[52px] items-center justify-center rounded-full active:opacity-80 ${blocked ? 'bg-secondary' : 'bg-foreground'}`}
                 >
                   <Text className={`text-base font-semibold ${blocked ? 'text-muted-foreground' : 'text-background'}`}>
-                    {task.busy ? 'sending…' : `send to ${task.host}`}
+                    {task.busy ? 'sending…' : task.sendLabel}
                   </Text>
                 </Pressable>
                 {!!task.blocker && !task.busy && (

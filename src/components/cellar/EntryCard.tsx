@@ -134,6 +134,13 @@ export const EntryCard = memo(function EntryCard({
 
         {grown > 0 && <Text className="pt-px text-xs text-muted-foreground">+{grown}</Text>}
         <ImportanceMark importance={entry.importance} />
+        {/* Who claimed it — set while an agent is on it, null the rest of the
+            time — so a board shows which agent has what (`DeskProjects.dc.html`). */}
+        {!!entry.agent && (
+          <Text className="max-w-[80px] pt-px font-mono text-xs text-muted-foreground" numberOfLines={1}>
+            {entry.agent}
+          </Text>
+        )}
         <StateBadge state={entry.state} />
         {variant !== 'hit' && <Text className="pt-px text-xs text-muted-foreground">{shortRel(entry.createdAt)}</Text>}
         {!!where && (

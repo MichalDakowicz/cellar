@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { KanbanBoard } from '@/components/cellar/KanbanBoard';
 import { ProjectAside } from '@/components/cellar/ProjectAside';
+import { ProjectDeskPanel } from '@/components/desk/ProjectDeskPanel';
 import { ProjectHeader } from '@/components/cellar/ProjectHeader';
 import { ProjectViews } from '@/components/cellar/ProjectViews';
 import { RepoLink } from '@/components/cellar/RepoLink';
@@ -18,6 +19,7 @@ import { ProjectDumpBlock } from '@/features/cellar/ProjectDumpBlock';
 import { useCopyPrompt, useCopyProjectPrompt } from '@/features/cellar/useCopyPrompt';
 import { StartOnPcControl } from '@/features/desk/StartOnPcControl';
 import { useEntrySelection } from '@/features/cellar/useEntrySelection';
+import { useProjectDesk } from '@/features/desk/useProjectDesk';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useWheelToList } from '@/hooks/useWheelToList';
@@ -50,6 +52,7 @@ export default function ProjectScreen() {
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
+  const desk = useProjectDesk(project.project?.repoPath ?? null);
   const selection = useEntrySelection(project.onScreen, (entry) => router.navigate(`/entry/${entry.id}`));
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -189,12 +192,15 @@ export default function ProjectScreen() {
                   <View className="flex-1">{reading}</View>
                 </View>
                 <View className="w-[300px] pr-8 pt-1">
-                  <ProjectAside
-                    stateSpread={project.stateSpread}
-                    kindBars={project.kindBars}
-                    kindOrder={project.kindOrder}
-                    onEdit={() => project.project && openEditProject?.(project.project.id)}
-                  />
+                  <View className="gap-8">
+                    <ProjectAside
+                      stateSpread={project.stateSpread}
+                      kindBars={project.kindBars}
+                      kindOrder={project.kindOrder}
+                      onEdit={() => project.project && openEditProject?.(project.project.id)}
+                    />
+                    <ProjectDeskPanel sections={desk.sections} note={desk.note} />
+                  </View>
                 </View>
               </View>
             </View>
@@ -209,6 +215,7 @@ export default function ProjectScreen() {
         onFile={selection.file}
         onCopy={selection.copy}
         onClear={selection.clear}
+        onHandoff={selection.handoff}
       />
 
       {/* Pushed out of the tabs, so the navigator's own chrome is gone — the

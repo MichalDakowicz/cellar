@@ -128,10 +128,15 @@ run screen, moved out of the route) and `RunRail`. Run cards carry their project
 (`useDeskRunCards`, shared with the desk tab). The phone in the rail is drawn until W18; files,
 checkpoints and preview come from the sample desk until W6/W14.
 
-### V13 · project board: hand off from it `[ ]`
+### V13 · project board: hand off from it `[x]`
 
 `DeskProjects.dc.html`. Badges for which agent claimed what; ticked entries → "one run" / "one
 run each" in the selection bar; the side panel: worktrees, previews, shipped, last command runs.
+`EntryCard` names the agent while one is on it (every list gets it, the board included). The
+selection bar's hand-off opens `desk/new?entries=a,b` with every held thought attached; with two or
+more, "one run · one run each" decides the starts (`taskStarts` in `lib/deskTask.ts`), sent in
+turn by `useDeskStart` — a trust refusal holds the rest. The desktop project aside gets
+`ProjectDeskPanel`: the checkout for real, the whole panel on the sample desk (W5, W11, W2).
 
 ### V14 · settings, desk half `[ ]`
 

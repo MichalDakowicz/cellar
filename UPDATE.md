@@ -30,6 +30,9 @@
 - Desk: on a wide window, waiting on you, runs, your pc, commands and today sit side by side
 - Desk: stop all agents stops every run you started from cellar
 - Desk: on a wide window, a run opens beside every run grouped by project, searchable and filtered
+- Project: hold thoughts and hand them to an agent on your pc, as one run or one run each
+- Project, inbox, search: a thought shows which agent is on it
+- Project: on a wide window, the aside shows the project's checkout on your pc
 
 ### Changed
 
