@@ -11,6 +11,9 @@
 - Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
 - Entry: tap a picture to see it full screen
 - Sign-in screen: continue with bazaar when it is installed on this phone
+- Entry, project: start on pc hands the thought to claude, codex or antigravity on your pc
+- Settings: pair with cellar on your pc by scanning its code, then send it prompts and follow its runs
+- Your pc: on the same wi-fi, open its local pages, watch its screen and install its app builds
 
 ### Changed
 
