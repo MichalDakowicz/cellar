@@ -48,6 +48,9 @@ Structure rules (they are why the siblings are maintainable):
   (`desktop/README.md`): its window loads Cellar's own web build, its main process is what a
   paired phone talks to. Like `mcp/` it imports `src/lib/*` (the `desk*.ts` protocol), has
   its own `tsc` and `npm test`, and the root checks do not see it.
+- `docs/desk/` is the **desk spec** — what the desk tab, the desktop control center and the
+  daemon do, and `TASKS.md`, the build order (screens first, then wiring, easiest first).
+  Read it and tick its task before and after any desk work.
 
 The design language is `../.design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —
