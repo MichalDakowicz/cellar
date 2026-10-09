@@ -47,9 +47,13 @@ const POLL_MS = 1500;
 
 /**
  * Wait for the pc to settle a request. A start through the cellar is a round
- * trip through realtime and then `claude --bg`, which itself takes a few
- * seconds — so the answer is polled for, and "still queued" after the wait is
- * its own outcome: the pc is off, and the request will lapse on its own.
+ * trip through realtime and then the agent's own start-up, so the answer is
+ * polled for. `taken` means the pc has it and is starting it — still waiting,
+ * not lost.
+ *
+ * A request still `queued` when the wait runs out is withdrawn — marked failed
+ * only if the pc has not claimed it in the meantime — so a pc that wakes later
+ * cannot run something this screen already called a failure.
  */
 async function settled(id: string): Promise<string | null> {
   const until = Date.now() + WAIT_MS;
@@ -59,7 +63,14 @@ async function settled(id: string): Promise<string | null> {
     if (now.state === 'failed') throw new Error(now.error ?? 'the pc could not do it');
     await new Promise((resolve) => setTimeout(resolve, POLL_MS));
   }
-  throw new Error('the pc did not pick it up — it may be asleep. it will not run later on its own.');
+  const { data } = await supabase
+    .from('cellar_desk_requests')
+    .update({ state: 'failed', error: 'withdrawn — the pc did not pick it up' })
+    .eq('id', id)
+    .eq('state', 'queued')
+    .select('id');
+  if (data?.length) throw new Error('the pc did not pick it up — it may be asleep. nothing was started.');
+  throw new Error('the pc took it but has not said how it went yet — check its runs in a moment');
 }
 
 export async function sendStart(deskId: string, start: DeskStart): Promise<string | null> {

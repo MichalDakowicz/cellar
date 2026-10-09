@@ -40,11 +40,27 @@ const KEY = /^[A-Za-z0-9_-]{32,128}$/;
 const HOSTNAME = /^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*$/;
 const NAME_MAX = 40;
 
-/** A dotted IPv4 address, each part 0–255, or a plain hostname. No IPv6: a LAN pairing never needs one. */
+/**
+ * Somewhere on a home network: a private or link-local IPv4 address (and the
+ * 100.64/10 range Tailscale hands out), or a `.local` name. Anything else is
+ * refused. A pairing is a place this phone will send prompts and its key's
+ * signatures to over plain HTTP, and a link that points it at a public address
+ * is not a pc on your desk.
+ */
 export function isDeskHost(host: string): boolean {
   const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
-  if (ipv4) return ipv4.slice(1).every((part) => Number(part) <= 255);
-  return HOSTNAME.test(host);
+  if (ipv4) {
+    const [a, b] = ipv4.slice(1, 3).map(Number);
+    if (!ipv4.slice(1).every((part) => Number(part) <= 255)) return false;
+    return (
+      a === 10 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 169 && b === 254) ||
+      (a === 100 && b >= 64 && b <= 127)
+    );
+  }
+  return HOSTNAME.test(host) && host.toLowerCase().endsWith('.local');
 }
 
 function cleanName(raw: string | undefined): string {

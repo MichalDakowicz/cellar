@@ -9,15 +9,16 @@ const PAIR = {
 };
 
 describe('isDeskHost', () => {
-  it('takes a dotted v4 address and a hostname', () => {
-    expect(isDeskHost('192.168.1.40')).toBe(true);
-    expect(isDeskHost('msi.local')).toBe(true);
+  it('takes home-network addresses and a .local name', () => {
+    for (const host of ['192.168.1.40', '10.0.0.7', '172.20.1.2', '169.254.3.3', '100.101.2.3', 'msi.local']) {
+      expect(isDeskHost(host)).toBe(true);
+    }
   });
 
-  it('refuses an out of range octet and anything with a path in it', () => {
-    expect(isDeskHost('192.168.1.400')).toBe(false);
-    expect(isDeskHost('evil.com/x')).toBe(false);
-    expect(isDeskHost('')).toBe(false);
+  it('refuses public addresses, public names, bad octets and paths', () => {
+    for (const host of ['8.8.8.8', '172.32.0.1', 'evil.com', '192.168.1.400', 'evil.com/x', '']) {
+      expect(isDeskHost(host)).toBe(false);
+    }
   });
 });
 
