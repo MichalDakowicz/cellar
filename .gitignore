@@ -53,3 +53,7 @@ public
 
 # Supabase CLI scratch — the linked project ref, written on deploy
 supabase/.temp/
+
+# Desktop app build output
+/desktop/build
+/desktop/release
