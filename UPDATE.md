@@ -29,6 +29,7 @@
 - Desk: on a wide window, a capture bar files a thought on enter and hands it off on shift+enter
 - Desk: on a wide window, waiting on you, runs, your pc, commands and today sit side by side
 - Desk: stop all agents stops every run you started from cellar
+- Desk: on a wide window, a run opens beside every run grouped by project, searchable and filtered
 
 ### Changed
 

@@ -2,6 +2,7 @@ import { GitBranch, Square } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
 import { RunChip } from '@/components/desk/RunChip';
+import { UsageMeter } from '@/components/desk/UsageMeter';
 import type { DeskRunState } from '@/lib/deskProtocol';
 import { COLORS } from '@/theme/colors';
 
@@ -17,6 +18,7 @@ export function RunHeader({
   age,
   diff,
   onStop,
+  meter = false,
 }: {
   title: string;
   meta: string;
@@ -25,6 +27,8 @@ export function RunHeader({
   age: string | null;
   diff: { added: number; removed: number; files: number } | null;
   onStop: (() => void) | null;
+  /** The desktop chat shows the usage meter's slot (W16). */
+  meter?: boolean;
 }) {
   return (
     <View className="gap-1.5">
@@ -35,6 +39,7 @@ export function RunHeader({
           {branch && meta ? ' · ' : ''}
           {meta}
         </Text>
+        {meter && <UsageMeter />}
       </View>
       <Text className="text-xl font-bold leading-tight text-foreground">{title}</Text>
       <View className="mt-1 flex-row items-center gap-2">

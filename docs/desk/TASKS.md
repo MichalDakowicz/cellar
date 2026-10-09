@@ -118,11 +118,15 @@ new task screen through `store/deskHandoff` (in memory, never a route param). Sa
 deny / allow inline; real blocked thoughts open their entry. Today counts real dumps and runs
 (`lib/deskHome.ts`); stop all stops every run this desk started.
 
-### V12 · desktop chat `[ ]`
+### V12 · desktop chat `[x]`
 
 `DeskChat.dc.html`. Runs grouped by project on the left (what needs you first), the run chat in
 the middle, the right rail: attached phone, this run's files, checkpoints, preview. Header meter
-slot for usage (drawn empty until W16).
+slot for usage (drawn empty until W16). Built as the wide shape of `desk/run/[id]`: `RunListPane`
+(`lib/deskRunList.ts` groups, filters, searches), `features/desk/RunChatPane` (the phone's whole
+run screen, moved out of the route) and `RunRail`. Run cards carry their project now
+(`useDeskRunCards`, shared with the desk tab). The phone in the rail is drawn until W18; files,
+checkpoints and preview come from the sample desk until W6/W14.
 
 ### V13 · project board: hand off from it `[ ]`
 
