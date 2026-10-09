@@ -45,7 +45,7 @@ Right nav island: the desk glyph, badge = what is waiting on you (blocked entrie
 account line, the avatar, the figures — move to settings › account. Touches: `navDestinations`,
 `DesktopSidebar`, `(tabs)/_layout`, `settings`, `(tabs)/profile` (removed).
 
-### V4 · desk tab home `[ ]`
+### V4 · desk tab home `[x]`
 
 `Main.dc.html`. Header + status line + settings button; host card (name, link, latency, cpu /
 memory / slots, see-the-screen); project chips + command tiles + the mono meta line; waiting →

@@ -83,6 +83,8 @@ export const COLORS = {
   foreground: 'hsl(0 0% 98%)',
   muted: 'hsl(0 0% 63.9%)',
   mutedDeep: 'hsl(0 0% 45%)',
+  /** A host that is awake, a check that passed. */
+  ok: '#22c55e',
   danger: '#ef4444',
   dangerSoft: 'rgba(239,68,68,0.12)',
   /** A row's ground under the mouse on web — never used on a touch build (§4.5). */

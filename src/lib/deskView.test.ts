@@ -1,4 +1,4 @@
-import { deskSections, LATELY_MAX, runChip } from './deskView';
+import { deskSections, deskSummary, hostLine, LATELY_MAX, runChip, runMeta } from './deskView';
 
 const run = (state: 'running' | 'waiting' | 'done' | 'failed' | 'stopped', startedAt: number) => ({ state, startedAt });
 
@@ -28,5 +28,31 @@ describe('deskSections', () => {
     const { lately } = deskSections(done);
     expect(lately).toHaveLength(LATELY_MAX);
     expect(lately[0].startedAt).toBe(LATELY_MAX + 2);
+  });
+});
+
+describe('deskSummary', () => {
+  it('names the host and only counts what is there', () => {
+    expect(deskSummary({ name: 'pc', online: true, running: 0, waiting: 0 })).toBe('pc is awake');
+    expect(deskSummary({ name: 'pc', online: true, running: 2, waiting: 1 })).toBe(
+      'pc is awake · 2 agents at work · 1 waiting on you',
+    );
+    expect(deskSummary({ name: 'pc', online: false, running: 1, waiting: 0 })).toBe(
+      'pc is not answering · 1 agent at work',
+    );
+  });
+});
+
+describe('runMeta', () => {
+  it('drops the parts that are not known', () => {
+    expect(runMeta(['cellar', null, 'claude', '', '6m'])).toBe('cellar · claude · 6m');
+  });
+});
+
+describe('hostLine', () => {
+  it('is offline only when nothing reaches the pc', () => {
+    expect(hostLine('lan', false).online).toBe(true);
+    expect(hostLine('cellar', false).online).toBe(true);
+    expect(hostLine('none', true)).toEqual({ online: false, line: 'looking for it…' });
   });
 });

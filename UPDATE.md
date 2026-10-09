@@ -17,11 +17,13 @@
 - Projects: a group has a folder of its own, set under where it lives on the group
 - Your pc: start in a group's folder, and trust a new folder for claude from the phone
 - Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
+- Settings: show a sample desk, to see the desk's coming screens filled in
 
 ### Changed
 
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile
+- Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in

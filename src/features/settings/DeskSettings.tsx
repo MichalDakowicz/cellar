@@ -2,9 +2,10 @@ import { useRouter, type Href } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
-import { Overline } from '@/components/ui/controls';
+import { Overline, SwitchRow } from '@/components/ui/controls';
 import { deskBridge } from '@/features/desk/bridge';
 import { useDeskPair } from '@/store/deskPair';
+import { useDeskPrefs } from '@/store/deskPrefs';
 import { COLORS } from '@/theme/colors';
 
 /**
@@ -16,6 +17,8 @@ export function DeskSettings({ gutter }: { gutter: string }) {
   const router = useRouter();
   const pair = useDeskPair((state) => state.pair);
   const here = deskBridge() !== null;
+  const sample = useDeskPrefs((state) => state.sample);
+  const setSample = useDeskPrefs((state) => state.setSample);
 
   const sub = here
     ? 'pair a phone with this pc, so it can start agents here'
@@ -38,6 +41,15 @@ export function DeskSettings({ gutter }: { gutter: string }) {
         </View>
         <ChevronRight size={16} color={COLORS.muted} strokeWidth={2} />
       </Pressable>
+      {/* The desk screens are drawn before the pc can report everything on
+          them (docs/desk/TASKS.md, pass 1). This fills the gaps with labelled
+          sample data so they can be looked at; on this device only. */}
+      <SwitchRow
+        label="show a sample desk"
+        sub="fill the desk's screens with sample runs and commands, to see what is coming. this phone only"
+        value={sample}
+        onChange={setSample}
+      />
     </View>
   );
 }

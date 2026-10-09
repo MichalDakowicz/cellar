@@ -1,32 +1,37 @@
 import { useRouter, type Href } from 'expo-router';
+import { Settings } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
+import { DeskHostCard } from '@/components/desk/DeskHostCard';
 import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
 import { DeskPromptForm } from '@/components/desk/DeskPromptForm';
-import { DeskRunRow } from '@/components/desk/DeskRunRow';
+import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { DeskStatusLine } from '@/components/desk/DeskStatusLine';
 import { ContentShell } from '@/components/layout/ContentShell';
-import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { DeskLocalSections } from '@/features/desk/DeskLocalSections';
 import { DeskLogSheet } from '@/features/desk/DeskLogSheet';
+import { useDeskHome } from '@/features/desk/useDeskHome';
 import { useDeskScreen } from '@/features/desk/useDeskScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
-import { longRel } from '@/lib/relTime';
+import { COLORS } from '@/theme/colors';
 
 /**
- * The desk tab — the right plate of the bar (docs/desk/screens.md).
+ * The desk tab — the right plate of the bar (docs/desk/screens.md, `Main.dc.html`).
  *
- * The pc. On the phone: what it is running, a prompt to send it, and — on the
- * same wi-fi — its screen, its local pages and its builds. In the desktop app's
- * own window: the code a phone scans to pair, and the same list of runs.
+ * Your desk, top down: who is awake and what is waiting, the host, the selected
+ * project's commands, then the runs — waiting, running, lately. Below them, the
+ * pc's own business: pairing, a prompt to send it, and on the same wi-fi its
+ * pages, screen and builds.
  */
 export default function Desk() {
   const router = useRouter();
   const screen = useDeskScreen();
-  const { link, runs } = screen;
+  const home = useDeskHome(screen);
+  const { link } = screen;
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -42,13 +47,23 @@ export default function Desk() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
-          <View className={`pt-4 ${gutter}`}>
-            <View className="flex-row items-center gap-3">
-              <ScreenAction />
-              <Text className="text-2xl font-bold tracking-tight text-foreground">
-                {link.bridge ? 'this pc' : link.name}
-              </Text>
+          <View className={`flex-row items-start gap-3 pt-2 ${gutter}`}>
+            <View className="min-w-0 flex-1 gap-1">
+              <Text className="text-2xl font-bold tracking-tight text-foreground">your desk</Text>
+              <Text className="text-xs text-muted-foreground">{home.summary}</Text>
             </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="settings"
+              onPress={() => router.push('/settings' as Href)}
+              className="h-11 w-11 items-center justify-center rounded-full bg-secondary active:opacity-70"
+            >
+              <Settings size={20} color={COLORS.foreground} strokeWidth={2} />
+            </Pressable>
+          </View>
+
+          <View className={`pt-5 ${gutter}`}>
+            <DeskHostCard {...home.host} />
             <DeskStatusLine
               via={link.via}
               seenAt={link.desk?.seenAt ?? null}
@@ -56,6 +71,20 @@ export default function Desk() {
               lanError={link.pair ? link.lanError : null}
             />
           </View>
+
+          {home.commands && (
+            <View className="pt-5">
+              <DeskCommandTiles {...home.commands} onRun={null} gutter={gutter} />
+            </View>
+          )}
+
+          <DeskRunSections
+            sections={home.sections}
+            gutter={gutter}
+            onOpen={home.openRun}
+            onStop={home.stopRun}
+            empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
+          />
 
           {link.bridge && (
             <DeskSection title="pair a phone" gutter={gutter}>
@@ -89,16 +118,6 @@ export default function Desk() {
               <DeskPromptForm {...screen.form} />
             </DeskSection>
           )}
-
-          <DeskSection
-            title={runs.snapshotAt ? `runs · as of ${longRel(runs.snapshotAt)}` : 'runs'}
-            gutter={gutter}
-            empty={runs.error ?? (runs.runs.length === 0 ? (runs.loading ? 'reading…' : 'nothing running') : null)}
-          >
-            {runs.runs.map((run) => (
-              <DeskRunRow key={run.id} run={run} onOpen={screen.openLog} onStop={screen.stop} />
-            ))}
-          </DeskSection>
 
           <DeskLocalSections local={screen.local} gutter={gutter} />
 
