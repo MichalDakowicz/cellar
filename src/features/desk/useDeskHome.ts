@@ -2,14 +2,11 @@ import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
-import { useCellar } from '@/features/cellar/useCellar';
-import { agentLabel, isLiveRun, RUN_STATE_LABEL, type DeskRun } from '@/lib/deskProtocol';
-import { SAMPLE_FIGURES, SAMPLE_PROJECTS, SAMPLE_RUNS } from '@/lib/deskSample';
-import { deskSections, deskSummary, hostLine, runMeta, type DeskRunCard } from '@/lib/deskView';
-import { longRel } from '@/lib/relTime';
-import { projectForPath, repoPathLabel } from '@/lib/repoLink';
+import { SAMPLE_FIGURES, SAMPLE_PROJECTS } from '@/lib/deskSample';
+import { deskSections, deskSummary, hostLine, type DeskRunCard } from '@/lib/deskView';
 import { useDeskPrefs } from '@/store/deskPrefs';
 
+import { useDeskRunCards } from './useDeskRunCards';
 import type { useDeskScreen } from './useDeskScreen';
 import { useDeskWaiting } from './useDeskWaiting';
 
@@ -24,17 +21,14 @@ import { useDeskWaiting } from './useDeskWaiting';
 export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const router = useRouter();
   const { link, runs, local } = screen;
-  const { projects } = useCellar();
   const waitingEntries = useDeskWaiting();
   const sample = useDeskPrefs((state) => state.sample);
   const picked = useDeskPrefs((state) => state.commandsProject);
   const pick = useDeskPrefs((state) => state.setCommandsProject);
   const { say } = useToast();
 
-  const cards = useMemo(() => {
-    const real = runs.runs.map((run) => runCard(run, projectForPath(run.cwd, projects)?.name ?? null));
-    return deskSections<DeskRunCard>(sample ? [...real, ...SAMPLE_RUNS] : real);
-  }, [runs.runs, projects, sample]);
+  const all = useDeskRunCards(runs.runs);
+  const cards = useMemo(() => deskSections<DeskRunCard>(all), [all]);
 
   const host = hostLine(link.via, link.checking);
   const live = cards.waiting.length + cards.running.length;
@@ -76,22 +70,5 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
       if (run) screen.stop(run);
     },
     sample,
-  };
-}
-
-function runCard(run: DeskRun, project: string | null): DeskRunCard {
-  return {
-    id: run.id,
-    title: run.name,
-    meta: runMeta([
-      project ?? repoPathLabel(run.cwd),
-      agentLabel(run.agent),
-      longRel(new Date(run.startedAt).toISOString()),
-      run.origin === 'pc' ? 'opened at the pc' : null,
-    ]),
-    detail: run.state === 'waiting' ? RUN_STATE_LABEL.waiting : null,
-    state: run.state,
-    startedAt: run.startedAt,
-    stoppable: isLiveRun(run) && run.origin === 'phone',
   };
 }

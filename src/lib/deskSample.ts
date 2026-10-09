@@ -50,6 +50,7 @@ export const SAMPLE_FIGURES: DeskHostFigures = [
 export const SAMPLE_RUNS: DeskRunCard[] = [
   {
     id: 'sample-1',
+    project: 'app',
     startedAt: 4,
     title: 'add the desk tab',
     meta: 'app · codex · wt/desk-tab · 9m',
@@ -59,6 +60,7 @@ export const SAMPLE_RUNS: DeskRunCard[] = [
   },
   {
     id: 'sample-2',
+    project: 'app',
     startedAt: 3,
     title: 'fix the sticky inbox swipe',
     meta: 'app · claude · wt/inbox-swipe · 6m',
@@ -68,6 +70,7 @@ export const SAMPLE_RUNS: DeskRunCard[] = [
   },
   {
     id: 'sample-3',
+    project: 'site',
     startedAt: 2,
     title: 'port the shelf grid to the site',
     meta: 'site · claude · merged to main · 2h ago · +142 −38',
@@ -77,6 +80,7 @@ export const SAMPLE_RUNS: DeskRunCard[] = [
   },
   {
     id: 'sample-4',
+    project: 'app',
     startedAt: 1,
     title: 'write the release notes',
     meta: 'app · codex · yesterday · 1 file',
@@ -169,4 +173,25 @@ export const SAMPLE_SKILLS: Record<string, { name: string; detail: string }[]> =
     { name: 'init', detail: 'built in' },
     { name: 'compact', detail: 'built in' },
   ],
+};
+
+/** The desktop chat's right rail for the sample runs: this run's files, checkpoints, preview. */
+export const SAMPLE_RAIL: Record<
+  string,
+  { files: { path: string; added: number; removed: number }[]; checkpoints: number; preview: string | null }
+> = {
+  'sample-1': {
+    files: [
+      { path: 'NavIslands.tsx', added: 34, removed: 12 },
+      { path: '(tabs)/_layout.tsx', added: 18, removed: 6 },
+      { path: '(tabs)/desk.tsx', added: 160, removed: 0 },
+    ],
+    checkpoints: 3,
+    preview: 'sample',
+  },
+  'sample-2': {
+    files: [{ path: 'SwipeShelf.tsx', added: 31, removed: 9 }],
+    checkpoints: 1,
+    preview: 'sample',
+  },
 };

@@ -51,6 +51,8 @@ export type DeskRunCard = {
   title: string;
   /** project · agent · branch · age — whatever of it is known. */
   meta: string;
+  /** The cellar project it works in, or its folder's name; what the desktop chat groups by. */
+  project: string;
   /** What it is doing or wants right now ("wants to run npm i expo-av"); null when unknown. */
   detail: string | null;
   state: DeskRunState;
