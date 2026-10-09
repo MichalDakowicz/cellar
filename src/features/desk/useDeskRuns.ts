@@ -50,6 +50,14 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
     onSuccess: refresh,
   });
 
+  /** Claude's trust prompt for a folder, answered yes from here. Direct wires only. */
+  const trust = useMutation({
+    mutationFn: async (cwd: string) => {
+      if (!direct) throw new Error(`trusting a folder needs the phone on ${link.name}'s wi-fi`);
+      return direct.trust(cwd);
+    },
+  });
+
   return {
     runs,
     loading: direct !== null && live.isLoading,
@@ -58,6 +66,7 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
     snapshotAt: direct ? null : (link.desk?.seenAt ?? null),
     start,
     stop,
+    trust,
   };
 }
 

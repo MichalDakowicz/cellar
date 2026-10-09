@@ -9,6 +9,7 @@ import { findApks } from './apks.ts';
 import { DeskError } from './claudeRuns.ts';
 import type { Identity } from './identity.ts';
 import { readPorts } from './ports.ts';
+import { trustFolder } from './trust.ts';
 import type { Proxies } from './proxy.ts';
 import type { Runs } from './runs.ts';
 import type { Ticket, Tickets } from './tickets.ts';
@@ -75,9 +76,23 @@ export async function startRun(deps: HostDeps, body: unknown) {
   if (!parsed.ok) throw new DeskError(parsed.error);
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
   const cwd = realFolder(parsed.value.cwd);
-  const project = await deps.account.projectFor(cwd);
-  if (!project) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
+  if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
   return deps.runs.start({ ...parsed.value, cwd });
+}
+
+/**
+ * Claude's trust prompt, answered from the phone. Only for a folder a start is
+ * allowed in, checked the same way, and only after the phone has shown what
+ * trusting means — `desktop/src/host/trust.ts`.
+ */
+async function trust(deps: HostDeps, body: unknown): Promise<string> {
+  const raw = (body ?? {}) as { cwd?: unknown };
+  if (typeof raw.cwd !== 'string' || !raw.cwd.trim()) throw new DeskError('which folder?');
+  if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
+  const cwd = realFolder(raw.cwd);
+  if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
+  trustFolder(cwd);
+  return cwd;
 }
 
 async function ticket(deps: HostDeps, body: unknown): Promise<string> {
@@ -123,11 +138,14 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
         return ok({ apks: await findApks(deps.identity().workspace) });
       case 'POST /tickets':
         return ok({ url: await ticket(deps, req.body) });
+      case 'POST /trust':
+        return ok({ trusted: await trust(deps, req.body) });
       default:
         return { status: 404, body: { error: `no ${route}` } };
     }
   } catch (error) {
     const status = error instanceof DeskError ? error.status : 500;
-    return { status, body: { error: error instanceof Error ? error.message : String(error) } };
+    const extra = error instanceof DeskError ? error.extra : {};
+    return { status, body: { error: error instanceof Error ? error.message : String(error), ...extra } };
   }
 }

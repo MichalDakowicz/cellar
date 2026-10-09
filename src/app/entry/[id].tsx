@@ -116,7 +116,7 @@ export default function EntryScreen() {
               <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
               <StartOnPcControl
                 prompt={agentPrompt(entry.entry, entry.project?.name ?? null)}
-                repoPath={entry.project?.repoPath}
+                projectId={entry.project?.id}
                 entryId={entry.entry.id}
               />
               <EditThought onPress={() => setRewording(true)} />

@@ -20,6 +20,8 @@ export class DeskError extends Error {
   constructor(
     message: string,
     readonly status = 400,
+    /** More for the phone to act on — `{ untrusted: folder }` when claude wants the folder trusted first. */
+    readonly extra: Record<string, unknown> = {},
   ) {
     super(message);
   }
@@ -37,7 +39,7 @@ export async function startClaude(args: string[], cwd: string): Promise<string> 
   if (id) return id;
   const said = `${stdout}\n${stderr}`;
   if (untrustedFolder(said)) {
-    throw new DeskError(`claude has never been opened in ${cwd} — open it there once and accept the trust prompt`, 409);
+    throw new DeskError(`claude has not been trusted in ${cwd} yet`, 409, { untrusted: cwd });
   }
   throw new DeskError(said.trim().split(/\r?\n/).at(-1) || 'claude did not start', 502);
 }

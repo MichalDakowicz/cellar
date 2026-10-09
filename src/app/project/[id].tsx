@@ -165,11 +165,11 @@ export default function ProjectScreen() {
                       align="end"
                     />
                   )}
-                  {project.project?.repoPath && (
+                  {project.project && (
                     <StartOnPcControl
                       className="mt-2 flex-row justify-end"
                       prompt={projectPrompt(project.project)}
-                      repoPath={project.project.repoPath}
+                      projectId={project.project.id}
                     />
                   )}
                 </View>
@@ -249,8 +249,8 @@ function PhoneHeader({
           onCopy={project.project ? () => project.project && onCopyProject(project.project) : undefined}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
-        {project.project?.repoPath && (
-          <StartOnPcControl className="mt-2" prompt={projectPrompt(project.project)} repoPath={project.project.repoPath} />
+        {project.project && (
+          <StartOnPcControl className="mt-2" prompt={projectPrompt(project.project)} projectId={project.project.id} />
         )}
       </View>
       {project.project && (

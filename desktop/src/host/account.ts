@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-import { projectForPath } from '@/lib/repoLink';
+import { folderAllowed } from '@/lib/deskFolders';
 
 /**
  * The account this pc acts for — borrowed from Cellar's own window.
@@ -18,14 +18,15 @@ import { projectForPath } from '@/lib/repoLink';
 
 export type DeskSession = { accessToken: string; userId: string };
 
-type ProjectRow = { id: string; name: string; repoPath: string | null };
+type ProjectRow = { id: string; name: string; repoPath: string | null; groupId: string | null; groupHome: boolean };
+type GroupRow = { id: string; repoPath: string | null };
 
 const PROJECTS_MS = 60_000;
 
 export class Account {
   private session: DeskSession | null = null;
   private supabase: SupabaseClient | null = null;
-  private projectCache: { at: number; rows: ProjectRow[] } | null = null;
+  private projectCache: { at: number; rows: ProjectRow[]; groups: GroupRow[] } | null = null;
   private readonly listeners = new Set<(session: DeskSession | null) => void>();
 
   constructor(
@@ -65,22 +66,35 @@ export class Account {
     return this.supabase;
   }
 
-  async projects(): Promise<ProjectRow[]> {
-    if (!this.session || !this.configured) return [];
-    if (this.projectCache && Date.now() - this.projectCache.at < PROJECTS_MS) return this.projectCache.rows;
-    const { data, error } = await this.client().from('cellar_projects').select('id, name, repo_path');
-    if (error) throw new Error(error.message);
-    const rows = (data ?? []).map((row) => ({ id: row.id as string, name: row.name as string, repoPath: row.repo_path as string | null }));
-    this.projectCache = { at: Date.now(), rows };
-    return rows;
+  private async places(): Promise<{ rows: ProjectRow[]; groups: GroupRow[] }> {
+    if (!this.session || !this.configured) return { rows: [], groups: [] };
+    if (this.projectCache && Date.now() - this.projectCache.at < PROJECTS_MS) return this.projectCache;
+    const [projects, groups] = await Promise.all([
+      this.client().from('cellar_projects').select('id, name, repo_path, group_id, group_home'),
+      this.client().from('cellar_groups').select('id, repo_path'),
+    ]);
+    if (projects.error) throw new Error(projects.error.message);
+    if (groups.error) throw new Error(groups.error.message);
+    const rows = (projects.data ?? []).map((row) => ({
+      id: row.id as string,
+      name: row.name as string,
+      repoPath: row.repo_path as string | null,
+      groupId: (row.group_id as string | null) ?? null,
+      groupHome: row.group_home === true,
+    }));
+    const housed = (groups.data ?? []).map((row) => ({ id: row.id as string, repoPath: row.repo_path as string | null }));
+    this.projectCache = { at: Date.now(), rows, groups: housed };
+    return this.projectCache;
   }
 
   /**
-   * The project a folder belongs to, or null. A run may only start inside a
-   * checkout the cellar knows about — the one check that keeps "start on pc"
-   * from being "run anything, anywhere" for whoever holds the key.
+   * Whether a run may start in this folder: inside a project's checkout, or
+   * exactly a group's root (`src/lib/deskFolders.ts`, the same rule the phone
+   * offers folders by). The one check that keeps "start on pc" from being "run
+   * anything, anywhere" for whoever holds the key.
    */
-  async projectFor(cwd: string): Promise<ProjectRow | null> {
-    return projectForPath(cwd, await this.projects());
+  async allows(cwd: string): Promise<boolean> {
+    const { rows, groups } = await this.places();
+    return folderAllowed(cwd, rows, groups);
   }
 }

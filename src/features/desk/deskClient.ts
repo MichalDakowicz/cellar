@@ -21,9 +21,25 @@ export class DeskUnreachable extends Error {}
 const ASK_TIMEOUT_MS = 6000;
 const START_TIMEOUT_MS = 120_000;
 
+/**
+ * The pc said no, and said why. `untrusted` is the folder claude wants trusted
+ * before it will start there — the one refusal the phone can do something about.
+ */
+export class DeskRefusal extends Error {
+  constructor(
+    message: string,
+    readonly untrusted: string | null,
+  ) {
+    super(message);
+  }
+}
+
 function refusal(status: number, body: unknown): Error {
-  const said = (body as { error?: unknown } | null)?.error;
-  return new Error(typeof said === 'string' ? said : `the pc answered ${status}`);
+  const said = body as { error?: unknown; untrusted?: unknown } | null;
+  return new DeskRefusal(
+    typeof said?.error === 'string' ? said.error : `the pc answered ${status}`,
+    typeof said?.untrusted === 'string' ? said.untrusted : null,
+  );
 }
 
 // A copy into a fresh ArrayBuffer: expo-crypto's types want an ArrayBuffer-backed view, never a shared one.
@@ -113,6 +129,7 @@ export function deskCalls(send: DeskTransport) {
     ports: async () => ((await send('GET', '/ports')) as { ports: DeskPort[] }).ports,
     apks: async () => ((await send('GET', '/apks')) as { apks: DeskApk[] }).apks,
     ticket: async (what: TicketFor) => ((await send('POST', '/tickets', what)) as { url: string }).url,
+    trust: async (cwd: string) => ((await send('POST', '/trust', { cwd })) as { trusted: string }).trusted,
   };
 }
 
