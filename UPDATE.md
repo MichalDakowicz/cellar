@@ -35,6 +35,7 @@
 - Project: on a wide window, the aside shows the project's checkout on your pc
 - Settings: desk settings pick the agent and how much it may do for every new task
 - Settings: desk settings show what is coming — keys, where pings go, usage, recipes, hosts
+- Settings: see how desk notifications will look, built from your live runs and waiting questions
 
 ### Changed
 

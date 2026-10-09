@@ -271,3 +271,41 @@ export const SAMPLE_RULES: { text: string; scope: string }[] = [
   { text: 'never add a dependency without asking', scope: 'everywhere' },
   { text: 'run the tests before saying it is done', scope: 'shelf · apps' },
 ];
+
+/** Notes with no source yet on the sample desk (`PhoneNotify.dc.html`): a filed crash (W17), a plan out (W16). */
+export const SAMPLE_NOTES = [
+  {
+    id: 'sample-crash',
+    head: 'cellar · filed for you',
+    title: 'app crashed on this phone',
+    body: ['IllegalStateException in EditorScreen — filed as a glitch with the stack, a screenshot and the last 200 log lines'],
+    mono: false,
+    progress: null,
+    actions: [
+      { id: 'handoff', label: 'hand it off' },
+      { id: 'open', label: 'open' },
+    ],
+  },
+  {
+    id: 'sample-limit',
+    head: 'cellar · paused · app',
+    title: 'claude’s week ran out on “personal”',
+    body: ['the cart run stopped between turns. carry on as:'],
+    mono: false,
+    progress: null,
+    actions: [
+      { id: 'work', label: 'work' },
+      { id: 'api', label: 'api key' },
+      { id: 'more', label: 'more…' },
+    ],
+  },
+];
+
+/** A question on the sample desk, for its notification. */
+export const SAMPLE_QUESTION = {
+  id: 'sample-q',
+  agent: 'claude',
+  where: 'app',
+  question: 'how should the cart open on phones?',
+  options: ['from the bottom — recommended', 'from the right, like desktop', 'a full screen', 'leave it'],
+};

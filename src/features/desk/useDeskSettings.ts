@@ -68,5 +68,6 @@ export function useDeskSettings() {
       rules: prefs.sample ? SAMPLE_RULES : [],
     },
     host: { name: link.name, online: host.online, line: host.line },
+    onNotify: () => router.push('/desk/notify' as Href),
   };
 }

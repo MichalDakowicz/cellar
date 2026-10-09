@@ -54,7 +54,7 @@ export default function DeskSettingsScreen() {
             <DeskKeysBlock />
           </DeskSection>
           <DeskSection title="where pings go" gutter={gutter}>
-            <DeskPingsBlock />
+            <DeskPingsBlock onPreview={desk.onNotify} />
           </DeskSection>
           <DeskSection title="usage and accounts" gutter={gutter}>
             <DeskUsageBlock agents={desk.usage} />

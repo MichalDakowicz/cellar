@@ -150,10 +150,14 @@ through `startingAgent`), pairing, and the sample desk switch, moved here. Drawn
 where pings go (W13), usage (W16; sample bars), recipes and rules (W15; sample recipes), hosts
 (this pc, add-over-ssh off).
 
-### V15 · notifications, drawn `[ ]`
+### V15 · notifications, drawn `[x]`
 
 `PhoneNotify.dc.html`. The notification layouts as in-app previews: one per run, approvals with
-up to 3 actions, questions with 2 options + more. Real presentation is W13.
+up to 3 actions, questions with 2 options + more. Real presentation is W13. Built as `desk/notify`,
+from settings › desk › where pings go. `lib/deskNotify.ts` builds every note (`runNote`,
+`approvalNote`, `questionNote`, `capActions` — Android's three) so W13 draws the same ones. Real
+notes come from live runs and thoughts waiting on you, and open them; the sample desk adds an
+approval, a question, a filed crash and a plan out, answered locally.
 
 ### V16 · the later screens `[ ]`
 
@@ -275,7 +279,7 @@ shelf of projects.
 
 ### W20 · other hosts over ssh `[-]`
 
-**Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
+**W20 · other hosts over ssh** — **Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
 cellar project. A host = user@host:port + key; cellar installs and updates the daemon over ssh; per host:
 slots, night shift, which projects; runs pick a free host. Until then, everything assumes one
 host: this pc.

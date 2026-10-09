@@ -1,14 +1,16 @@
-import { Text, View } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Chip } from '@/components/ui/controls';
 import { PING_KINDS, PING_RULES } from '@/lib/deskSettings';
+import { COLORS } from '@/theme/colors';
 
 /**
  * Settings › desk › notifications (`DeskHosts.dc.html`, "where pings go"):
  * one device at a time, first rule that fits wins. Drawn ahead of routing
  * (docs/desk/TASKS.md W13); today a ping is the question notice in settings.
  */
-export function DeskPingsBlock() {
+export function DeskPingsBlock({ onPreview }: { onPreview: () => void }) {
   return (
     <View className="gap-3">
       {PING_RULES.map((rule, index) => (
@@ -28,6 +30,13 @@ export function DeskPingsBlock() {
       <Text className="text-xs text-muted-foreground">
         routing comes with notifications that answer. until then, “tell me when an agent asks” in settings is the ping.
       </Text>
+      <Pressable accessibilityRole="button" onPress={onPreview} className="flex-row items-center gap-3 py-2 active:opacity-70">
+        <View className="min-w-0 flex-1">
+          <Text className="text-sm text-foreground">see what they look like</Text>
+          <Text className="mt-0.5 text-xs text-muted-foreground">one per run, approvals, questions — with what is real right now</Text>
+        </View>
+        <ChevronRight size={16} color={COLORS.muted} strokeWidth={2} />
+      </Pressable>
     </View>
   );
 }
