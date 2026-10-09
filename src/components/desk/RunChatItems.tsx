@@ -2,15 +2,15 @@ import { ChevronDown, ChevronRight, Wrench } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { LinkedText } from '@/components/cellar/LinkedText';
+import { Markdown } from '@/components/cellar/Markdown';
 import { toolsSummary, type ChatItem } from '@/lib/deskChat';
 import { COLORS } from '@/theme/colors';
 
 /**
  * A run's chat (`Run.dc.html`): your messages as bubbles on the right, the
  * agent's words as text, each stretch of tool steps one tile that opens to the
- * steps. Agent text goes through `LinkedText`, so links and colour codes in a
- * reply are live too.
+ * steps. Agent text is markdown and is drawn as such (`Markdown`), with links
+ * and colour codes in it live too.
  */
 export function RunChatItems({ items }: { items: ChatItem[] }) {
   return (
@@ -26,7 +26,7 @@ export function RunChatItems({ items }: { items: ChatItem[] }) {
               </View>
             );
           case 'agent':
-            return <LinkedText key={index} text={item.text} className="text-sm leading-relaxed text-foreground" />;
+            return <Markdown key={index} text={item.text} />;
           case 'tools':
             return <ToolsTile key={index} steps={item.steps} />;
           default:
