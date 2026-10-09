@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
+import { useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { ApprovalPanel } from '@/components/desk/ApprovalPanel';
@@ -27,10 +28,20 @@ export default function RunScreen() {
   const keyboard = useKeyboardHeight();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
+  // A chat is read from its newest line: open at the bottom, and stay there
+  // as lines arrive unless you have scrolled up to read.
+  const scroller = useRef<ScrollView>(null);
+  const pinned = useRef(true);
 
   return (
     <View className="flex-1 bg-background">
       <ScrollView
+        ref={scroller}
+        onContentSizeChange={() => pinned.current && scroller.current?.scrollToEnd({ animated: false })}
+        onScroll={({ nativeEvent: { contentOffset, contentSize, layoutMeasurement } }) => {
+          pinned.current = contentOffset.y + layoutMeasurement.height >= contentSize.height - 48;
+        }}
+        scrollEventThrottle={100}
         style={{ marginLeft: sidebar }}
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
