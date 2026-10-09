@@ -97,8 +97,8 @@ export function DesktopSidebar() {
       <View className="flex-row items-center gap-1 border-t border-border/60 px-3 py-3">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="profile"
-          onPress={() => router.navigate('/profile')}
+          accessibilityLabel="your account and settings"
+          onPress={() => router.navigate('/settings')}
           className="min-w-0 flex-1 flex-row items-center gap-2.5 rounded-lg px-1 py-1.5 active:opacity-80"
         >
           <Avatar profile={profile} size={30} />

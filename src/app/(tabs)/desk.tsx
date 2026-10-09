@@ -6,7 +6,6 @@ import { DeskPromptForm } from '@/components/desk/DeskPromptForm';
 import { DeskRunRow } from '@/components/desk/DeskRunRow';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { DeskStatusLine } from '@/components/desk/DeskStatusLine';
-import { AppChrome } from '@/components/layout/AppChrome';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -18,6 +17,8 @@ import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
 import { longRel } from '@/lib/relTime';
 
 /**
+ * The desk tab — the right plate of the bar (docs/desk/screens.md).
+ *
  * The pc. On the phone: what it is running, a prompt to send it, and — on the
  * same wi-fi — its screen, its local pages and its builds. In the desktop app's
  * own window: the code a phone scans to pair, and the same list of runs.
@@ -112,7 +113,6 @@ export default function Desk() {
       </ScrollView>
 
       <DeskLogSheet link={link} run={screen.logRun} onClose={screen.closeLog} />
-      <AppChrome />
     </View>
   );
 }

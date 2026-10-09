@@ -38,7 +38,7 @@ picks dark or light text for each chip; `#later`, `#12`, `#ggg` stay text. `Link
 the chips, so entries, lines and the dump preview get them at once. Tap: copy. (Nudge and
 "colours this project uses" come with the chat composer, V9.)
 
-### V3 · the desk tab replaces profile `[ ]`
+### V3 · the desk tab replaces profile `[x]`
 
 Right nav island: the desk glyph, badge = what is waiting on you (blocked entries for now).
 `(tabs)/desk` is the tab; the old `/desk` route redirects to it. Profile's leftovers — the

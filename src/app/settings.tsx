@@ -9,6 +9,7 @@ import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
+import { AccountSection } from '@/features/settings/AccountSection';
 import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
 import { DeskSettings } from '@/features/settings/DeskSettings';
@@ -62,6 +63,8 @@ export default function Settings() {
             <ScreenAction />
             <Text className="text-2xl font-bold tracking-tight text-foreground">settings</Text>
           </View>
+
+          <AccountSection gutter={gutter} />
 
           <View className={`mt-6 border-t border-border/50 ${gutter}`}>
             <SwitchRow

@@ -20,6 +20,8 @@
 
 ### Changed
 
+- Desk: the right plate of the bar is now your pc, badged with what is waiting on you
+- Settings: your account and the size of your cellar moved here from profile
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in

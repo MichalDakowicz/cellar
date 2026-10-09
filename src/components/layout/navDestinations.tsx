@@ -1,5 +1,5 @@
 import { type Href } from 'expo-router';
-import { ChartColumn, CircleUserRound, Inbox, LayoutGrid, Plus } from 'lucide-react-native';
+import { ChartColumn, Inbox, LayoutGrid, Monitor, Plus } from 'lucide-react-native';
 import { type ReactNode } from 'react';
 
 /**
@@ -15,6 +15,10 @@ import { type ReactNode } from 'react';
  * thing you publish to a friends feed (docs/shared-database.md), so the fourth
  * destination is the Inbox — the pile of thoughts that have no project yet —
  * which is the screen this app actually needs a badge on.
+ *
+ * The fifth is the desk, where every sibling has you (docs/desk/screens.md):
+ * the right plate is the pc that runs your agents, badged with what is waiting
+ * on you. Profile's leftovers — the account, the figures — live in settings.
  */
 export type NavDestination = {
   href: Href;
@@ -62,14 +66,19 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     isActive: (pathname) => pathname.startsWith('/stats'),
   },
   {
-    href: '/profile',
-    label: 'profile',
-    tabName: 'profile',
-    icon: (color, size) => <CircleUserRound color={color} size={size} />,
-    isActive: (pathname) =>
-      pathname.startsWith('/profile') || pathname.startsWith('/settings') || pathname.startsWith('/desk'),
+    href: '/desk',
+    label: 'desk',
+    tabName: 'desk',
+    icon: (color, size) => <Monitor color={color} size={size} />,
+    // A run, the pc's pairing screens and settings are all pushed from here.
+    isActive: (pathname) => pathname === '/desk' || isDeskChild(pathname) || pathname.startsWith('/settings'),
   },
 ];
+
+/** `/desk/run/…`, `/desk-scan`, `/desk-pair` — above the desk tab, not the tab itself. */
+function isDeskChild(pathname: string): boolean {
+  return pathname.startsWith('/desk/') || pathname.startsWith('/desk-');
+}
 
 /** Which destination owns the current route, or null on a route no tab claims. */
 export function activeTabFor(pathname: string): string | null {
@@ -87,7 +96,7 @@ export function isPushedRoute(pathname: string): boolean {
     pathname.startsWith('/project/') ||
     pathname.startsWith('/search') ||
     pathname.startsWith('/settings') ||
-    pathname.startsWith('/desk') ||
+    isDeskChild(pathname) ||
     pathname.startsWith('/arrange')
   );
 }

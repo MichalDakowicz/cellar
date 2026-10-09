@@ -9,11 +9,9 @@ import { LiveCue } from '@/components/layout/LiveCue';
 import { useNavAction } from '@/components/layout/navActions';
 import { DEST_HEIGHT, DEST_WIDTH, NavDestinationButton } from '@/components/layout/NavDestinationButton';
 import { activeTabFor, NAV_DESTINATIONS, type NavDestination } from '@/components/layout/navDestinations';
-import { Avatar } from '@/features/friends/Avatar';
-import { useAuth } from '@/features/auth/AuthProvider';
 import { useUnfiledCount } from '@/features/cellar/useUnfiledCount';
+import { useDeskWaiting } from '@/features/desk/useDeskWaiting';
 import { NAV_ISLAND_GAP, NAV_ISLAND_HEIGHT } from '@/hooks/useNavBarSpace';
-import { useProfile } from '@/hooks/useProfile';
 import { useHover } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
 
@@ -22,7 +20,7 @@ import { COLORS } from '@/theme/colors';
 const BLUR_METHOD = Platform.OS === 'android' ? 'dimezisBlurView' : 'none';
 
 const DESTINATIONS = NAV_DESTINATIONS.slice(0, 4);
-const PROFILE = NAV_DESTINATIONS[NAV_DESTINATIONS.length - 1];
+const DESK = NAV_DESTINATIONS[NAV_DESTINATIONS.length - 1];
 
 const DEST_GAP = 2;
 const PILL_PAD = 4;
@@ -30,8 +28,9 @@ const SLOT = DEST_WIDTH + DEST_GAP;
 
 /**
  * The bottom navigation: three floating glass plates in a 1-4-1 rhythm — the
- * current screen's one action on the left, four destinations in the middle, you
- * on the right.
+ * current screen's one action on the left, four destinations in the middle, the
+ * desk on the right — the pc that runs your agents, badged with what is waiting
+ * on you (docs/desk/screens.md).
  *
  * Route-driven rather than wired into the tab navigator, because it also mounts
  * on routes pushed out of the tabs so the bar never disappears mid-journey.
@@ -42,8 +41,7 @@ export function NavIslands() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
-  const { profile } = useProfile(user?.id);
+  const waiting = useDeskWaiting();
 
   const activeTab = activeTabFor(pathname);
   const action = useNavAction(pathname, activeTab);
@@ -66,11 +64,11 @@ export function NavIslands() {
   }));
 
   const go = useCallback((destination: NavDestination) => router.navigate(destination.href), [router]);
-  const profileActive = activeTab === PROFILE.tabName;
+  const deskActive = activeTab === DESK.tabName;
   // Web only: the round plates have no label, so hover is the only thing that
   // tells a mouse the glass is a button before it is clicked.
   const actionHover = useHover();
-  const profileHover = useHover();
+  const deskHover = useHover();
 
   return (
     <View
@@ -118,18 +116,24 @@ export function NavIslands() {
           ))}
         </Island>
 
-        {/* The plate's hairline turns accent when active — never a ring drawn
-            around the avatar itself, which reads as a notification. */}
-        <Island style={[styles.round, { borderColor: profileActive ? COLORS.accent : COLORS.islandEdge }]}>
+        {/* The plate's hairline turns accent when active — the badge is the
+            only other mark on it, so "waiting on you" is never confused with
+            "you are here". */}
+        <Island style={[styles.round, { borderColor: deskActive ? COLORS.accent : COLORS.islandEdge }]}>
           <Pressable
-            onPress={() => go(PROFILE)}
+            onPress={() => go(DESK)}
             accessibilityRole="tab"
-            accessibilityState={{ selected: profileActive }}
-            accessibilityLabel={PROFILE.label}
-            {...profileHover.bind}
-            style={[styles.roundPress, profileHover.hovered ? styles.roundHover : null]}
+            accessibilityState={{ selected: deskActive }}
+            accessibilityLabel={waiting > 0 ? `${DESK.label}, ${waiting} waiting on you` : DESK.label}
+            {...deskHover.bind}
+            style={[styles.roundPress, deskHover.hovered ? styles.roundHover : null]}
           >
-            <Avatar profile={profile} size={44} />
+            {DESK.icon(deskActive || deskHover.hovered ? COLORS.foreground : COLORS.muted, 20)}
+            {waiting > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{waiting > 9 ? '9+' : waiting}</Text>
+              </View>
+            )}
           </Pressable>
         </Island>
       </View>

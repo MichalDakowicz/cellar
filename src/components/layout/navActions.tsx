@@ -34,7 +34,7 @@ export type NavAction = {
  *   projects  new project on this shelf
  *   inbox     how the pile is sorted
  *   stats     narrow the figures to one shelf
- *   profile   settings
+ *   desk      settings
  *
  * On a route pushed out of the tabs it is Back, which is why no pushed screen
  * in this app draws a back button of its own — the bar already has one, in the
