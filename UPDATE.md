@@ -16,6 +16,7 @@
 - Your pc: on the same wi-fi, open its local pages, watch its screen and install its app builds
 - Projects: a group has a folder of its own, set under where it lives on the group
 - Your pc: start in a group's folder, and trust a new folder for claude from the phone
+- Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
 
 ### Changed
 

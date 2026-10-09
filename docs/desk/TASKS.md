@@ -26,12 +26,12 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` deferred
 
 ## Pass 1 — the screens
 
-### V1 · run state chip `[ ]`
+### V1 · run state chip `[x]`
 
 `components/desk/RunChip.tsx`: waiting (red) · doing (amber) · done (green). The one chip every
 run row, header and notification uses. Status words and colours from `lib/deskView.ts`.
 
-### V2 · hex codes paint themselves `[ ]`
+### V2 · hex codes paint themselves `[x]`
 
 `lib/hexChips.ts` splits text into plain runs and `#fff` / `#64748B` / `#64748BCC` codes, and
 picks dark or light text for each chip; `#later`, `#12`, `#ggg` stay text. `LinkedText` renders
