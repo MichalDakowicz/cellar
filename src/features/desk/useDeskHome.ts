@@ -52,7 +52,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
       name: link.name,
       ...host,
       figures: sample ? SAMPLE_FIGURES : null,
-      onScreen: local.available ? () => local.open.mutate({ kind: 'screen' }) : null,
+      onScreen: local.available ? () => router.push('/desk/screen' as Href) : null,
     },
     commands:
       commands && current

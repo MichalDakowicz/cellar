@@ -9,7 +9,8 @@ inside the app — and its main process is the half a phone talks to:
 - **open the pc's pages** — anything listening on localhost (a dev server, `expo start --web`),
   served to the phone through a per-port proxy and shown in the app's preview screen
   (`desk/preview/<port>`), sized as a phone, tablet or desktop
-- **watch the screen** — a few frames a second of the main display, view only
+- **watch the screen** — a few frames a second of the main display, view only, shown sideways
+  in the app's `desk/screen`
 - **drop builds** — the newest release APK of every app in the workspace, downloaded and
   installed on the phone without a cable
 

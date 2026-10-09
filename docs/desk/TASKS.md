@@ -98,10 +98,14 @@ composer and the new task screen. `$` commands are the sample's until W2; with t
 `@` and `/` say they are coming. Colour chips act in the plan line under the field (`nudgeHex`
 rewrites the code in the message); chips in entries still copy on tap.
 
-### V10 · live screen, landscape `[ ]`
+### V10 · live screen, landscape `[x]`
 
 `Screen.dc.html`. Restyle the existing screen view to the landscape artboard; mode chips (touch ·
-trackpad · keyboard · dictate) drawn, view-only until W18.
+trackpad · keyboard · dictate) drawn, view-only until W18. Built as `desk/screen`: the pc's MJPEG
+page in a webview, the phone locked landscape while it is open (`expo-screen-orientation`),
+host pill and mode hint over the picture, and the screen's own islands (`ScreenIslands`, not the
+shared bar). The hint says a mode is view only until W18 (`lib/deskScreen.ts`); switch display is
+drawn off. The host card and the pc's "the screen" row open it instead of the browser.
 
 ### V11 · desktop home `[ ]`
 

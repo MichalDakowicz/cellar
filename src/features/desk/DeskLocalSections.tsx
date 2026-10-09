@@ -14,7 +14,8 @@ function megabytes(bytes: number): string {
  * The LAN-only half of the pc screen: its screen, its local pages, and the
  * builds it can drop. One component so the route does not branch three times
  * on the same "are we on the same wi-fi" answer. A page opens in the preview
- * screen, sized and checked; the screen and a build still open outside the app.
+ * screen, sized and checked, and the screen turns the phone sideways; a build still
+ * opens outside the app.
  */
 export function DeskLocalSections({ local, gutter }: { local: ReturnType<typeof useDeskLocal>; gutter: string }) {
   const router = useRouter();
@@ -29,7 +30,7 @@ export function DeskLocalSections({ local, gutter }: { local: ReturnType<typeof 
           detail="a live picture of the main display, a few frames a second"
           verb="watch"
           busy={busy}
-          onPress={() => local.open.mutate({ kind: 'screen' })}
+          onPress={() => router.push('/desk/screen' as Href)}
         />
         {local.ports.map((port) => (
           <DeskLocalRow

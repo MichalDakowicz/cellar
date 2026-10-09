@@ -25,6 +25,7 @@
 - Desk: type $ in a task to pick a project, then one of its entries, from a list over the field
 - Desk: under a task, a line per $, @, / and colour says what each will do before you send
 - Desk: tap a colour under a task to copy it or nudge it lighter or darker
+- Desk: your pc's screen opens sideways in the app, edge to edge, with its control modes drawn
 
 ### Changed
 
