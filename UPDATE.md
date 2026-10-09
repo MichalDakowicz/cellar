@@ -18,9 +18,11 @@
 - Your pc: start in a group's folder, and trust a new folder for claude from the phone
 - Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
 - Settings: show a sample desk, to see the desk's coming screens filled in
+- Desk: new task — say what to do, pick the project, agent and how much it may do, send it to your pc
 
 ### Changed
 
+- Entry: start on pc opens the new task screen with the thought attached
 - Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile

@@ -60,9 +60,10 @@ agent asked for one) and "add a note". Lettered options, "recommended" only when
 answered collapses to the pick, expired greys out. The note rides in the answer text as
 "pick — note" (`composeAnswer`), so it already reaches the agent; W3 makes it a field. Applies to entry questions in the inbox and on the entry.
 
-### V6 · new task sheet `[ ]`
+### V6 · new task sheet `[x]`
 
-`NewTask.dc.html`. A sheet from the left island's + on the desk tab: the transcript field with
+`NewTask.dc.html`. Built as a screen, `desk/new`, not a sheet — taller than a phone once the
+keyboard is up. From the left island on the desk tab, and from an entry's start on pc (`?entry=`): the transcript field with
 the mic block (mic is a visual until W12 — "type instead" is the working path), project chips,
 where it works (main checkout · new worktree), agent chips, ask first · edits ok · full access
 with its hint, attached entries ("from your cellar"), send to <host>. Replaces `DeskPromptForm`

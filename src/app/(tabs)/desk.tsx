@@ -5,11 +5,11 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
 import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
-import { DeskPromptForm } from '@/components/desk/DeskPromptForm';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { DeskStatusLine } from '@/components/desk/DeskStatusLine';
 import { ContentShell } from '@/components/layout/ContentShell';
+import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { DeskLocalSections } from '@/features/desk/DeskLocalSections';
 import { DeskLogSheet } from '@/features/desk/DeskLogSheet';
@@ -24,8 +24,8 @@ import { COLORS } from '@/theme/colors';
  *
  * Your desk, top down: who is awake and what is waiting, the host, the selected
  * project's commands, then the runs — waiting, running, lately. Below them, the
- * pc's own business: pairing, a prompt to send it, and on the same wi-fi its
- * pages, screen and builds.
+ * pc's own business: pairing, and on the same wi-fi its pages, screen and
+ * builds. A new task is the left island (`desk/new`).
  */
 export default function Desk() {
   const router = useRouter();
@@ -48,6 +48,7 @@ export default function Desk() {
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
           <View className={`flex-row items-start gap-3 pt-2 ${gutter}`}>
+            <ScreenAction />
             <View className="min-w-0 flex-1 gap-1">
               <Text className="text-2xl font-bold tracking-tight text-foreground">your desk</Text>
               <Text className="text-xs text-muted-foreground">{home.summary}</Text>
@@ -110,12 +111,6 @@ export default function Desk() {
               >
                 <Text className="text-sm font-semibold text-foreground">scan the pc&apos;s code</Text>
               </Pressable>
-            </DeskSection>
-          )}
-
-          {link.can.start && (
-            <DeskSection title="send it something" gutter={gutter}>
-              <DeskPromptForm {...screen.form} />
             </DeskSection>
           )}
 

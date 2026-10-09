@@ -1,3 +1,4 @@
+import { useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
@@ -24,6 +25,11 @@ import { useDeskStart } from './useDeskStart';
  * group's own project the group's folder — and says plainly why it cannot
  * start when it cannot. Claude's trust question, when the folder is new to it,
  * is asked right here.
+ *
+ * On a thought it opens the new-task screen with the thought attached instead
+ * (docs/desk/screens.md) — the run picks it up, and you can say more, pick the
+ * agent and how much it may do. The sheet stays for a project, which has no
+ * thought to attach.
  */
 export function StartOnPcControl({
   prompt,
@@ -37,6 +43,7 @@ export function StartOnPcControl({
   /** Spacing for the row it sits in, applied only when there is a control to space. */
   className?: string;
 }) {
+  const router = useRouter();
   const link = useDeskLink();
   const runs = useDeskRuns(link, { watch: false });
   const { projects, groups } = useCellar();
@@ -70,6 +77,10 @@ export function StartOnPcControl({
       <StartOnPc
         name={link.name}
         onPress={() => {
+          if (entryId) {
+            router.push(`/desk/new?entry=${entryId}` as Href);
+            return;
+          }
           starting.reset();
           setOpen(true);
         }}

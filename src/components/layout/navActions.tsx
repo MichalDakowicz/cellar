@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   FolderPlus,
   Layers,
+  MessageSquarePlus,
   PenLine,
   Rows3,
   Settings,
@@ -34,7 +35,7 @@ export type NavAction = {
  *   projects  new project on this shelf
  *   inbox     how the pile is sorted
  *   stats     narrow the figures to one shelf
- *   desk      settings
+ *   desk      a new task for the pc
  *
  * On a route pushed out of the tabs it is Back, which is why no pushed screen
  * in this app draws a back button of its own — the bar already has one, in the
@@ -93,6 +94,14 @@ export function useNavAction(pathname: string, activeTab: string | null): NavAct
           badge: 0,
           active: false,
           onPress: () => sheets.statsScope?.(),
+        };
+      case 'desk':
+        return {
+          Icon: MessageSquarePlus,
+          label: 'new task',
+          badge: 0,
+          active: false,
+          onPress: () => router.push('/desk/new'),
         };
       default:
         return {
