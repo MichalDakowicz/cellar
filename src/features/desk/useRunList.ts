@@ -19,7 +19,7 @@ import { useDeskRuns } from './useDeskRuns';
 export function useRunList(currentId: string) {
   const router = useRouter();
   const link = useDeskLink();
-  const runs = useDeskRuns(link, { watch: false });
+  const runs = useDeskRuns(link);
   const cards = useDeskRunCards(runs.runs);
   const [filter, setFilter] = useState<RunFilter>('all');
   const [query, setQuery] = useState('');
