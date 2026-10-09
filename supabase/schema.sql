@@ -353,6 +353,59 @@ create unique index if not exists cellar_entry_pictures_cover_idx
 create unique index if not exists cellar_entry_pictures_line_idx
   on public.cellar_entry_pictures (line_id) where line_id is not null;
 
+-- ----------------------------------------------------------------------------
+-- 12. The pc — a desk, and the starts sent to it through the cellar
+--
+-- Cellar on the pc (desktop/) listens on the LAN, and a phone on the same
+-- network talks to it directly. These two tables are the way in when the phone
+-- is somewhere else: the phone writes a request, the pc hears it over realtime,
+-- claims it with a conditional update and writes back what happened.
+--
+-- `cellar_desks` is the pc's heartbeat: where it is on the LAN, which agents it
+-- has, what it is running. It is upserted every 30 s, which is how a phone away
+-- from home sees the runs and how a phone whose saved address went stale finds
+-- the new one. `id` is the pc's own id (desk.json), not a uuid — the pc made it
+-- before it knew which account it would act for, so the key is the pair.
+--
+-- A request is never deleted and never re-run: `taken` is set once, by the
+-- update that claims it, and the pc refuses a start older than ten minutes so a
+-- request sent while the pc slept does not fire hours later
+-- (src/lib/deskProtocol.ts, STALE_REQUEST_MS).
+-- ----------------------------------------------------------------------------
+create table if not exists public.cellar_desks (
+  id         text not null,
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  name       text not null,
+  host       text,
+  port       int,
+  agents     text[] not null default '{}',
+  runs       jsonb not null default '[]'::jsonb,
+  seen_at    timestamptz not null default now(),
+  primary key (user_id, id)
+);
+
+create table if not exists public.cellar_desk_requests (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  desk_id    text not null,
+  kind       text not null check (kind in ('start', 'stop')),
+  agent      text,
+  prompt     text check (char_length(prompt) <= 8000),
+  cwd        text,
+  name       text,
+  -- The thought it was started from. `set null`, not cascade: the record of
+  -- what ran on the pc outlives the thought that asked for it.
+  entry_id   uuid references public.cellar_entries(id) on delete set null,
+  run_id     text,
+  state      text not null default 'queued' check (state in ('queued', 'taken', 'done', 'failed')),
+  error      text,
+  created_at timestamptz not null default now(),
+  taken_at   timestamptz
+);
+
+create index if not exists cellar_desk_requests_queue_idx
+  on public.cellar_desk_requests (user_id, desk_id, state, created_at);
+
 -- ============================================================================
 -- Row level security
 --
@@ -371,6 +424,8 @@ alter table public.cellar_entry_events enable row level security;
 alter table public.cellar_groups       enable row level security;
 alter table public.cellar_settings     enable row level security;
 alter table public.cellar_agent_tokens enable row level security;
+alter table public.cellar_desks        enable row level security;
+alter table public.cellar_desk_requests enable row level security;
 
 drop policy if exists cellar_shelves_owner_all on public.cellar_shelves;
 create policy cellar_shelves_owner_all on public.cellar_shelves for all
@@ -433,6 +488,18 @@ create policy cellar_settings_owner_all on public.cellar_settings for all
 -- in this file, and it answers with a user id and nothing else.
 drop policy if exists cellar_agent_tokens_owner_all on public.cellar_agent_tokens;
 create policy cellar_agent_tokens_owner_all on public.cellar_agent_tokens for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Owner-only, like everything else: the pc acts as you, with your session,
+-- borrowed from Cellar's own window. Nobody else's start can reach your pc.
+drop policy if exists cellar_desks_owner_all on public.cellar_desks;
+create policy cellar_desks_owner_all on public.cellar_desks for all
+  to authenticated using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists cellar_desk_requests_owner_all on public.cellar_desk_requests;
+create policy cellar_desk_requests_owner_all on public.cellar_desk_requests for all
   to authenticated using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
@@ -593,7 +660,9 @@ begin
     'cellar_projects',
     'cellar_entries',
     'cellar_entry_lines',
-    'cellar_entry_questions'
+    'cellar_entry_questions',
+    'cellar_desks',
+    'cellar_desk_requests'
   ] loop
     execute format('alter table public.%I replica identity full', t);
 
