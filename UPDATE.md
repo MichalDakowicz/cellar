@@ -33,6 +33,8 @@
 - Project: hold thoughts and hand them to an agent on your pc, as one run or one run each
 - Project, inbox, search: a thought shows which agent is on it
 - Project: on a wide window, the aside shows the project's checkout on your pc
+- Settings: desk settings pick the agent and how much it may do for every new task
+- Settings: desk settings show what is coming — keys, where pings go, usage, recipes, hosts
 
 ### Changed
 
@@ -41,6 +43,7 @@
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile
 - Your pc: its local pages open in the desk's preview instead of the browser
+- Settings: show a sample desk moved into desk settings
 - Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects

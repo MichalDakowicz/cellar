@@ -138,12 +138,17 @@ more, "one run · one run each" decides the starts (`taskStarts` in `lib/deskTas
 turn by `useDeskStart` — a trust refusal holds the rest. The desktop project aside gets
 `ProjectDeskPanel`: the checkout for real, the whole panel on the sample desk (W5, W11, W2).
 
-### V14 · settings, desk half `[ ]`
+### V14 · settings, desk half `[x]`
 
 `DeskUsage`, `DeskRecipes`, `DeskHosts`. Settings › agents (slots, default per project, default
 mode), keys (`!` `~` `^` `%` on/off), devices and pairing, notifications (quiet hours), usage +
 accounts, recipes by kind + rules, hosts. **Hosts lists this pc only**; "add a host over ssh" is
-shown disabled with "after the server is set up" — see W20.
+shown disabled with "after the server is set up" — see W20. Built as `desk/settings`, reached from
+settings › your pc › desk settings (the desk tab's gear stays main settings — on the phone it is
+the only way there). Real: default agent and mode (`store/deskPrefs`, used by the new task screen
+through `startingAgent`), pairing, and the sample desk switch, moved here. Drawn: keys (W10),
+where pings go (W13), usage (W16; sample bars), recipes and rules (W15; sample recipes), hosts
+(this pc, add-over-ssh off).
 
 ### V15 · notifications, drawn `[ ]`
 
