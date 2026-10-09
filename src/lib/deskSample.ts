@@ -309,3 +309,61 @@ export const SAMPLE_QUESTION = {
   question: 'how should the cart open on phones?',
   options: ['from the bottom — recommended', 'from the right, like desktop', 'a full screen', 'leave it'],
 };
+
+/** Race (`PhoneRace.dc.html`, W19): one prompt, two runs, compared. */
+export const SAMPLE_RACE = {
+  project: 'app',
+  title: 'make the cart work on small phones',
+  runs: [
+    { agent: 'claude', checks: '12 of 12 pass', passed: true, added: 180, removed: 22, files: 4, took: '7m', usage: '38k tokens', approach: 'bottom sheet, total pinned' },
+    { agent: 'codex', checks: '12 of 12 pass', passed: true, added: 260, removed: 40, files: 7, took: '9m', usage: '52k tokens', approach: 'drawer from the right' },
+  ],
+};
+
+/** Night shift digest (`PhoneNight.dc.html`, W19). */
+export const SAMPLE_NIGHT = {
+  host: 'home-server',
+  window: '01:00–05:40',
+  used: '11% of this week',
+  runs: [
+    { id: 'n1', title: 'add order dates to emails', meta: 'site · claude · +64 −12 · 3 files', state: 'passed' as const, summary: "dates in the confirmation and shipping emails, in the reader's own format", second: 'follow up' },
+    { id: 'n2', title: 'tidy the product grid on tablets', meta: 'site · codex · preview ready', state: 'passed' as const, summary: '3 columns from 768px, cards no longer stretch', second: 'see preview' },
+    { id: 'n3', title: 'rename the settings keys', meta: 'app · claude · stopped at 03:12', state: 'waiting' as const, summary: 'asks: keep the old keys working for one release?', second: 'answer' },
+    { id: 'n4', title: 'update dependencies', meta: 'mod · codex · 2 checks failed', state: 'failed' as const, summary: "the date picker's new version changed its api", second: 'follow up' },
+  ],
+  tonight: [
+    { title: 'write tests for the cart total', project: 'site' },
+    { title: 'translate the empty states', project: 'app' },
+    { title: 'audit unused dependencies', project: 'mod' },
+  ],
+};
+
+/** A group run (`DeskGroupRun.dc.html`, W19): one prompt across a shelf of projects. */
+export const SAMPLE_GROUP = {
+  group: 'storefront',
+  title: 'move every button to the new radius tokens',
+  meta: 'one prompt · claude · edits ok · each project’s own rules added · started 10:02 from your phone',
+  prompt: 'move every button to --radius-control from @tokens/radius.css and remove the hard-coded radii. run each project’s checks.',
+  projects: [
+    { name: 'site', line: 'wt/radius-tokens · +40 −38 · checks 18 of 18', state: 'done' as const, ship: ['$deploy'], shipState: 'ready' },
+    { name: 'app', line: 'wt/radius-tokens · plan 3 of 4 · running checks', state: 'running' as const, ship: ['$apk', '$release'], shipState: 'after checks' },
+    { name: 'admin', line: 'asks: some links are styled as buttons — change those too?', state: 'waiting' as const, ship: ['$deploy'], shipState: 'waiting on you' },
+    { name: 'emails', line: 'nothing to change — no buttons use a radius here', state: 'stopped' as const, ship: [], shipState: 'skipped' },
+  ],
+};
+
+/** The phone over adb (`DeskPhone.dc.html`, W18). */
+export const SAMPLE_PHONE = {
+  name: 'pixel',
+  line: 'attached over usb · adb authorised · 64% · app 1.12.2-debug',
+  apk: { file: 'app-1.12.2-debug.apk', line: 'built 3m ago from wt/inbox-swipe by $apk · 38 mb' },
+  deepLink: 'cellar://entry/archive-needs-an-undo',
+  log: [
+    { at: '18:41:02.114', level: 'I', text: 'inbox: swipe start row=2' },
+    { at: '18:41:02.380', level: 'W', text: 'swipe released at 61% — threshold 66%' },
+    { at: '18:41:02.391', level: 'I', text: 'inbox: row snapped back' },
+    { at: '18:41:04.120', level: 'I', text: 'inbox: archived, undo toast shown' },
+    { at: '18:41:06.004', level: 'E', text: 'toast: undo pressed after unmount' },
+  ],
+  toggles: ['dark theme', 'show taps', 'layout bounds', 'stay awake while charging'],
+};
