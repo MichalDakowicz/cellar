@@ -22,6 +22,9 @@
 - Desk: a run opens as a chat, with its tool steps folded and stop at the top
 - Desk: an agent's replies show as formatted text — code, lists, tables, bold and links
 - Desk: preview a page from your pc at phone, tablet or desktop size, with its checks and deploy
+- Desk: type $ in a task to pick a project, then one of its entries, from a list over the field
+- Desk: under a task, a line per $, @, / and colour says what each will do before you send
+- Desk: tap a colour under a task to copy it or nudge it lighter or darker
 
 ### Changed
 

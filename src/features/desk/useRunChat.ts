@@ -10,6 +10,7 @@ import { longRel } from '@/lib/relTime';
 import { projectForPath, repoPathLabel } from '@/lib/repoLink';
 import { readError } from '@/lib/utils';
 
+import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
 import { useDeskLog, useDeskRuns } from './useDeskRuns';
 
@@ -44,6 +45,8 @@ export function useRunChat(id: string) {
   const sample = SAMPLE_RUNS.find((candidate) => candidate.id === id) ?? null;
   const chat = sample ? SAMPLE_CHATS[id] : null;
   const run = sample ? null : (runs.runs.find((candidate) => candidate.id === id) ?? null);
+
+  const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'));
 
   const lines = chat ? chat.lines : (log.data ?? []);
   const asked: DeskApproval | null = chat?.approval ?? null;
@@ -87,6 +90,7 @@ export function useRunChat(id: string) {
       onDispatch: setDispatch,
       /** Talking to a running agent waits for the pc's side (W9). */
       disabledReason: 'talking to a running agent comes soon — start a new task for now',
+      keys,
     },
   };
 }

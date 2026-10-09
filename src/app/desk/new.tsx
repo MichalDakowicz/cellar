@@ -55,7 +55,7 @@ export default function NewTask() {
                 </View>
               </View>
 
-              <NewTaskVoice text={task.text} onText={task.onText} />
+              <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} />
               <NewTaskChoices {...task} />
               {task.attached && <AttachedThought {...task.attached} />}
 

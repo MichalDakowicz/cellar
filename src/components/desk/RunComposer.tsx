@@ -2,7 +2,12 @@ import { Mic } from 'lucide-react-native';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { ANDROID_METRICS } from '@/components/ui/controls';
+import type { DeskKey, KeyPlanLine } from '@/lib/deskKeys';
 import { COLORS } from '@/theme/colors';
+
+import { KeyList, type KeyListView } from './KeyList';
+import { KeyPlan } from './KeyPlan';
+import { KeyStrip } from './KeyStrip';
 
 type Dispatch = 'steer' | 'queue';
 
@@ -11,11 +16,15 @@ const DISPATCH: { id: Dispatch; label: string }[] = [
   { id: 'queue', label: 'queue after this turn' },
 ];
 
-const KEYS: { key: string; label: string }[] = [
-  { key: '@', label: 'point at a file' },
-  { key: '$', label: 'a cellar entry or command' },
-  { key: '/', label: "one of the agent's skills" },
-];
+/** The keys behind a composer, from `features/desk/useDeskKeys`. */
+export type ComposerKeys = {
+  list: KeyListView | null;
+  plan: KeyPlanLine[];
+  onKey: (key: DeskKey) => void;
+  onSelection: (end: number) => void;
+  onCopy: (code: string) => void;
+  onNudge: (code: string, lighter: boolean) => void;
+};
 
 /**
  * Talking to a run (`Run.dc.html`): steer it now or queue after this turn, the
@@ -29,12 +38,14 @@ export function RunComposer({
   dispatch,
   onDispatch,
   disabledReason,
+  keys,
 }: {
   draft: string;
   onDraft: (text: string) => void;
   dispatch: Dispatch;
   onDispatch: (dispatch: Dispatch) => void;
   disabledReason: string | null;
+  keys: ComposerKeys;
 }) {
   return (
     <View className="gap-2.5">
@@ -55,6 +66,7 @@ export function RunComposer({
           );
         })}
       </View>
+      {keys.list && <KeyList list={keys.list} />}
       <View className="flex-row items-center gap-2">
         <TextInput
           className="h-[52px] min-w-0 flex-1 rounded-full border border-border bg-secondary px-[18px] text-foreground"
@@ -63,6 +75,7 @@ export function RunComposer({
           placeholderTextColor={COLORS.muted}
           value={draft}
           onChangeText={onDraft}
+          onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end)}
           accessibilityLabel="message for the agent"
         />
         <View
@@ -72,19 +85,8 @@ export function RunComposer({
           <Mic size={22} color={COLORS.muted} strokeWidth={2} />
         </View>
       </View>
-      <View className="flex-row gap-1.5">
-        {KEYS.map((key) => (
-          <Pressable
-            key={key.key}
-            accessibilityRole="button"
-            accessibilityLabel={key.label}
-            onPress={() => onDraft(`${draft}${draft && !draft.endsWith(' ') ? ' ' : ''}${key.key}`)}
-            className="h-10 flex-1 items-center justify-center rounded-[10px] bg-secondary active:opacity-70"
-          >
-            <Text className="font-mono text-[17px] font-semibold text-foreground">{key.key}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <KeyStrip active={keys.list?.key ?? null} onKey={keys.onKey} />
+      <KeyPlan lines={keys.plan} onCopy={keys.onCopy} onNudge={keys.onNudge} />
       {!!disabledReason && <Text className="text-xs text-muted-foreground">{disabledReason}</Text>}
     </View>
   );

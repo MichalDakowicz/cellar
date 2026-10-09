@@ -87,12 +87,16 @@ into the frame (`lib/deskPreview.ts`). The pc's port rows open it instead of the
 `desk/preview/sample` is the sample desk's, from its `preview` tile. "Tell the agent" goes to
 the page's run when there is one, else to a new task.
 
-### V9 · the keys, drawn `[ ]`
+### V9 · the keys, drawn `[x]`
 
 `Keys.dc.html`. The suggestion list above the composer (phone: above the keyboard, keys in a
 strip): `$` lists projects then entries inside one — real already, from the cellar; `@` and `/`
 from the sample desk until W10. The line under the composer that spells out what each token will
-do. Chip actions: copy, nudge lighter/darker.
+do. Chip actions: copy, nudge lighter/darker. One pure search in `lib/deskKeys.ts` (`tokenAt`,
+`keySuggestions`, `applySuggestion`, `keyPlan`) behind `features/desk/useDeskKeys`, used by the run
+composer and the new task screen. `$` commands are the sample's until W2; with the sample off,
+`@` and `/` say they are coming. Colour chips act in the plan line under the field (`nudgeHex`
+rewrites the code in the message); chips in entries still copy on tap.
 
 ### V10 · live screen, landscape `[ ]`
 

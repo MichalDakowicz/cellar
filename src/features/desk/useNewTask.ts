@@ -9,6 +9,7 @@ import { deskStartFrom, offeredAgents } from '@/lib/deskStart';
 import { DEFAULT_MODE, modeHint, taskBlocker, taskPrompt, type DeskMode, type DeskWhere } from '@/lib/deskTask';
 import { kindMeta } from '@/lib/kinds';
 
+import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
 import { useDeskRuns } from './useDeskRuns';
 import { useDeskStart } from './useDeskStart';
@@ -42,6 +43,7 @@ export function useNewTask(entryId: string | null, onSent: () => void) {
   const projectId = picked ?? entry?.projectId ?? null;
   const folder = folders.find((candidate) => candidate.projectId === projectId) ?? null;
   const pickUps = attached && entry ? [agentPrompt(entry, projects.find((p) => p.id === entry.projectId)?.name)] : [];
+  const keys = useDeskKeys(text, setText, agent);
   const prompt = taskPrompt(text, pickUps);
 
   const starting = useDeskStart(link, runs, () => {
@@ -72,6 +74,7 @@ export function useNewTask(entryId: string | null, onSent: () => void) {
     online: link.can.start,
     text,
     onText: setText,
+    keys,
     projects: folders.map((candidate) => ({ id: candidate.projectId, name: candidate.name })),
     projectId,
     onProject: (id: string) => setPicked(id),

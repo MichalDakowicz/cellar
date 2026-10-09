@@ -4,6 +4,11 @@ import { Text, TextInput, View } from 'react-native';
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { COLORS } from '@/theme/colors';
 
+import { KeyList } from './KeyList';
+import { KeyPlan } from './KeyPlan';
+import { KeyStrip } from './KeyStrip';
+import type { ComposerKeys } from './RunComposer';
+
 /**
  * The top of the new-task screen (`NewTask.dc.html`): what you want, in your
  * words, under the mic.
@@ -12,9 +17,10 @@ import { COLORS } from '@/theme/colors';
  * W12 — so it is shown quiet with a line saying so, and the field is the
  * working path. The field is the transcript either way: whatever was said
  * stays editable before it is sent. Colour codes in it reach the agent as
- * plain text.
+ * plain text. The keys sit under the field: the list for the word being typed,
+ * the `@ $ /` strip, and what each token will do.
  */
-export function NewTaskVoice({ text, onText }: { text: string; onText: (text: string) => void }) {
+export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (text: string) => void; keys: ComposerKeys }) {
   return (
     <View className="items-center gap-3.5 pb-2 pt-1">
       <View
@@ -32,10 +38,16 @@ export function NewTaskVoice({ text, onText }: { text: string; onText: (text: st
         placeholderTextColor={COLORS.muted}
         value={text}
         onChangeText={onText}
+        onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end)}
         multiline
         autoFocus
         accessibilityLabel="what the agent should do"
       />
+      <View className="w-full gap-2.5">
+        {keys.list && <KeyList list={keys.list} />}
+        <KeyStrip active={keys.list?.key ?? null} onKey={keys.onKey} />
+        <KeyPlan lines={keys.plan} onCopy={keys.onCopy} onNudge={keys.onNudge} />
+      </View>
     </View>
   );
 }
