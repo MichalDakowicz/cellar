@@ -159,11 +159,18 @@ from settings › desk › where pings go. `lib/deskNotify.ts` builds every note
 notes come from live runs and thoughts waiting on you, and open them; the sample desk adds an
 approval, a question, a filed crash and a plan out, answered locally.
 
-### V16 · the later screens `[ ]`
+### V16 · the later screens `[x]`
 
 Drawn last because they are used last: share sheet (`PhoneShare`), race compare (`PhoneRace`),
 night shift digest (`PhoneNight`), group run (`DeskGroupRun`), phone over adb panel
-(`DeskPhone`). Each behind the sample desk until its wiring task.
+(`DeskPhone`). Each behind the sample desk until its wiring task. Built as `desk/share`,
+`desk/race`, `desk/night`, `desk/group`, `desk/phone` in one frame (`features/desk/LaterScreen`),
+linked from the desk tab's "more on the desk". The share sheet files for real (kind guessed by
+`guessKind`, hand-off through `store/deskHandoff`) — only arriving from another app waits for W17;
+the other four show their body only on the sample desk and say what they wait for otherwise.
+Their small rules are `lib/deskLater.ts`.
+
+**Pass 1 is done.** Every screen is drawn; the wiring starts at W1.
 
 ---
 

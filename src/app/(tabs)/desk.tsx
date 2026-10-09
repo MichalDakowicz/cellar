@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
+import { DeskLaterLinks } from '@/components/desk/DeskLaterLinks';
 import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
@@ -125,6 +126,10 @@ export default function Desk() {
               </Pressable>
             </DeskSection>
           )}
+
+          <DeskSection title="more on the desk" gutter={gutter}>
+            <DeskLaterLinks links={home.later} />
+          </DeskSection>
 
           <DeskLocalSections local={screen.local} gutter={gutter} />
 

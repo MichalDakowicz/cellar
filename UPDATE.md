@@ -36,6 +36,8 @@
 - Settings: desk settings pick the agent and how much it may do for every new task
 - Settings: desk settings show what is coming — keys, where pings go, usage, recipes, hosts
 - Settings: see how desk notifications will look, built from your live runs and waiting questions
+- Desk: file it into cellar — type a thing, its kind is guessed, pick a project and hand it off
+- Desk: with the sample desk on, see races, the night shift, group runs and the phone over adb
 
 ### Changed
 

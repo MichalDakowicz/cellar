@@ -70,5 +70,17 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
       if (run) screen.stop(run);
     },
     sample,
+    /** File it is real; the rest are drawn on the sample desk until their wiring (V16). */
+    later: [
+      { title: 'file it into cellar', sub: 'words, kind and project — and hand it off', href: '/desk/share' },
+      ...(sample
+        ? [
+            { title: 'race', sub: 'two runs off one commit, compared', href: '/desk/race' },
+            { title: 'night shift', sub: 'what ran while you slept', href: '/desk/night' },
+            { title: 'group run', sub: 'one task across a shelf of projects', href: '/desk/group' },
+            { title: 'phone over adb', sub: 'mirror, install, logcat', href: '/desk/phone' },
+          ]
+        : []),
+    ].map((link) => ({ title: link.title, sub: link.sub, onPress: () => router.push(link.href as Href) })),
   };
 }
