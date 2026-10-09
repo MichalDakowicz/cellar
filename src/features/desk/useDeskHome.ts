@@ -1,3 +1,4 @@
+import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 
 import { useCellar } from '@/features/cellar/useCellar';
@@ -20,6 +21,7 @@ import { useDeskWaiting } from './useDeskWaiting';
  * (docs/desk/TASKS.md W2), so without the sample they are simply absent.
  */
 export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
+  const router = useRouter();
   const { link, runs, local } = screen;
   const { projects } = useCellar();
   const waitingEntries = useDeskWaiting();
@@ -52,11 +54,8 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
     },
     commands: commands && current ? { projects: commands, current, onPick: pick } : null,
     sections: cards,
-    /** Real runs open their log; a sample run has nothing behind it. */
-    openRun: (id: string) => {
-      const run = runs.runs.find((candidate) => candidate.id === id);
-      if (run && screen.openLog) screen.openLog(run);
-    },
+    /** A run opens its own screen — real or sample, the same route. */
+    openRun: (id: string) => router.push(`/desk/run/${id}` as Href),
     stopRun: (id: string) => {
       const run = runs.runs.find((candidate) => candidate.id === id);
       if (run) screen.stop(run);

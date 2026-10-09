@@ -69,7 +69,7 @@ where it works (main checkout · new worktree), agent chips, ask first · edits 
 with its hint, attached entries ("from your cellar"), send to <host>. Replaces `DeskPromptForm`
 on the phone.
 
-### V7 · run chat `[ ]`
+### V7 · run chat `[x]`
 
 `Run.dc.html`. `desk/run/[id]`: header (branch · project · agent, title, chip, age, diff pill,
 stop), your message as a bubble, agent text, tool steps folded into one tile, the approval panel

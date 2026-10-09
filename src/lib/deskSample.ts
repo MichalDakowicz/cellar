@@ -1,3 +1,5 @@
+import type { DeskApproval } from './deskChat';
+import type { DeskLogLine } from './deskProtocol';
 import type { DeskRunCard } from './deskView';
 
 /**
@@ -82,3 +84,43 @@ export const SAMPLE_RUNS: DeskRunCard[] = [
     stoppable: false,
   },
 ];
+
+/** The sample runs' chats, for the run screen. */
+export const SAMPLE_CHATS: Record<
+  string,
+  { branch: string; diff: { added: number; removed: number; files: number } | null; lines: DeskLogLine[]; approval: DeskApproval | null }
+> = {
+  'sample-1': {
+    branch: 'wt/desk-tab',
+    diff: { added: 212, removed: 40, files: 6 },
+    lines: [
+      { who: 'you', text: 'replace the profile tab with a desk tab. settings stays one tap away from it. match the nav islands' },
+      { who: 'agent', text: 'on it — reading the tabs layout and the nav islands first.' },
+      { who: 'tool', text: 'Read src/app/(tabs)/_layout.tsx' },
+      { who: 'tool', text: 'Read src/components/layout/NavIslands.tsx' },
+      { who: 'tool', text: 'Bash rg -n "profile" src' },
+      { who: 'tool', text: 'Edit src/components/layout/navDestinations.tsx' },
+      {
+        who: 'agent',
+        text: 'the right island now shows the desk glyph, with a badge for anything waiting on you. voice tasks need expo-av — ok to install it?',
+      },
+    ],
+    approval: {
+      what: 'run a command',
+      subject: 'npm install expo-av',
+      effect: 'in .worktrees/desk-tab · changes package.json and the lockfile',
+      always: 'allow installs for the rest of this run',
+    },
+  },
+  'sample-2': {
+    branch: 'wt/inbox-swipe',
+    diff: { added: 31, removed: 9, files: 2 },
+    lines: [
+      { who: 'you', text: 'inbox swipe feels sticky on android — fix it' },
+      { who: 'agent', text: 'looking at the swipe thresholds and the gesture handler.' },
+      { who: 'tool', text: 'Read src/components/cellar/SwipeShelf.tsx' },
+      { who: 'tool', text: 'Edit src/components/cellar/SwipeShelf.tsx' },
+    ],
+    approval: null,
+  },
+};

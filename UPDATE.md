@@ -19,6 +19,7 @@
 - Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
 - Settings: show a sample desk, to see the desk's coming screens filled in
 - Desk: new task — say what to do, pick the project, agent and how much it may do, send it to your pc
+- Desk: a run opens as a chat, with its tool steps folded and stop at the top
 
 ### Changed
 

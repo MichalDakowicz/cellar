@@ -12,7 +12,6 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { DeskLocalSections } from '@/features/desk/DeskLocalSections';
-import { DeskLogSheet } from '@/features/desk/DeskLogSheet';
 import { useDeskHome } from '@/features/desk/useDeskHome';
 import { useDeskScreen } from '@/features/desk/useDeskScreen';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
@@ -126,7 +125,6 @@ export default function Desk() {
         </ContentShell>
       </ScrollView>
 
-      <DeskLogSheet link={link} run={screen.logRun} onClose={screen.closeLog} />
     </View>
   );
 }

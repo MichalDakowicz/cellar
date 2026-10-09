@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import type { DeskRun } from '@/lib/deskProtocol';
@@ -20,7 +19,6 @@ export function useDeskScreen() {
   const forgetPair = useDeskPair((state) => state.forget);
   const { say } = useToast();
 
-  const [logRun, setLogRun] = useState<DeskRun | null>(null);
 
   const pairing = useQuery({
     queryKey: ['desk', 'pairing'],
@@ -51,9 +49,6 @@ export function useDeskScreen() {
       forgetPair();
       say('this phone forgot the pc');
     },
-    logRun,
-    openLog: link.can.log ? setLogRun : null,
-    closeLog: () => setLogRun(null),
     stop,
   };
 }
