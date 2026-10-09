@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { EntryList, type EntryListItem } from '@/components/cellar/EntryList';
 import { KanbanBoard } from '@/components/cellar/KanbanBoard';
@@ -191,17 +191,17 @@ export default function ProjectScreen() {
                   )}
                   <View className="flex-1">{reading}</View>
                 </View>
-                <View className="w-[300px] pr-8 pt-1">
-                  <View className="gap-8">
-                    <ProjectAside
-                      stateSpread={project.stateSpread}
-                      kindBars={project.kindBars}
-                      kindOrder={project.kindOrder}
-                      onEdit={() => project.project && openEditProject?.(project.project.id)}
-                    />
-                    <ProjectDeskPanel sections={desk.sections} note={desk.note} />
-                  </View>
-                </View>
+                {/* Scrolls on its own: the figures and the desk panel run past a
+                    laptop's window, and the list beside it scrolls separately. */}
+                <ScrollView className="w-[300px]" contentContainerClassName="gap-8 pb-8 pr-8 pt-1" showsVerticalScrollIndicator={false}>
+                  <ProjectAside
+                    stateSpread={project.stateSpread}
+                    kindBars={project.kindBars}
+                    kindOrder={project.kindOrder}
+                    onEdit={() => project.project && openEditProject?.(project.project.id)}
+                  />
+                  <ProjectDeskPanel sections={desk.sections} note={desk.note} />
+                </ScrollView>
               </View>
             </View>
           ) : (
