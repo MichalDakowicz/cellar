@@ -43,6 +43,10 @@ export async function installedAgents(): Promise<{ id: DeskAgent; installed: boo
  * shell, and never with a stdin: `claude` reads a piped stdin as more prompt
  * and waits for it to close, so a child whose stdin is an open pipe — what
  * `execFile` gives it — hangs until the timeout instead of starting.
+ *
+ * It settles on the child's own exit, not on its pipes closing: a background
+ * service it leaves behind can inherit stdout and hold the pipe open forever.
+ * The timeout settles too, after killing it, so no caller ever waits past it.
  */
 export function runTool(
   path: string,
@@ -54,22 +58,29 @@ export function runTool(
     const out: Buffer[] = [];
     const err: Buffer[] = [];
     let size = 0;
+    let settled = false;
     const keep = (into: Buffer[]) => (chunk: Buffer) => {
       size += chunk.length;
       if (size <= OUTPUT_MAX) into.push(chunk);
     };
     child.stdout.on('data', keep(out));
     child.stderr.on('data', keep(err));
-    const timer = setTimeout(() => child.kill(), options.timeout ?? 60_000);
+
     const finish = (code: number, extra = '') => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timer);
-      resolve({
-        stdout: Buffer.concat(out).toString('utf8'),
-        stderr: Buffer.concat(err).toString('utf8') + extra,
-        code,
-      });
+      child.stdout.destroy();
+      child.stderr.destroy();
+      resolve({ stdout: Buffer.concat(out).toString('utf8'), stderr: Buffer.concat(err).toString('utf8') + extra, code });
     };
+    const timer = setTimeout(() => {
+      child.kill();
+      finish(124, 'timed out');
+    }, options.timeout ?? 60_000);
+
     child.on('error', (error) => finish(1, error.message));
-    child.on('close', (code) => finish(code ?? 1));
+    // A beat after exit, for the last of the output already in the pipe.
+    child.on('exit', (code) => setTimeout(() => finish(code ?? 1), 50));
   });
 }

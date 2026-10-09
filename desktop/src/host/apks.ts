@@ -50,8 +50,12 @@ export async function findApks(workspace: string): Promise<DeskApk[]> {
         return;
       }
       for (const file of files) {
-        const info = await stat(join(dir, file));
-        found.push({ app, file, version: apkVersion(file), size: info.size, builtAt: info.mtimeMs });
+        try {
+          const info = await stat(join(dir, file));
+          found.push({ app, file, version: apkVersion(file), size: info.size, builtAt: info.mtimeMs });
+        } catch {
+          // Gone between the listing and the look — a build replacing it. Skip it, not the list.
+        }
       }
     }),
   );
@@ -62,13 +66,25 @@ export function apkPath(workspace: string, apk: Pick<DeskApk, 'app' | 'file'>): 
   return join(workspace, basename(apk.app), ...RELEASE, basename(apk.file));
 }
 
-/** The file, as something the phone's browser downloads and hands to the installer. */
-export function sendApk(res: ServerResponse, path: string, apk: Pick<DeskApk, 'file' | 'size'>): void {
+/**
+ * The file, as something the phone's browser downloads and hands to the
+ * installer. Sized at send time, not from the listing: a build may have
+ * rewritten it since, and a wrong length is a corrupt download.
+ */
+export async function sendApk(res: ServerResponse, path: string, apk: Pick<DeskApk, 'file'>): Promise<void> {
+  let size: number;
+  try {
+    size = (await stat(path)).size;
+  } catch {
+    return void res.writeHead(404).end();
+  }
+  const stream = createReadStream(path);
+  stream.on('error', () => res.destroy());
   res.writeHead(200, {
     'content-type': 'application/vnd.android.package-archive',
-    'content-length': String(apk.size),
+    'content-length': String(size),
     'content-disposition': `attachment; filename="${apk.file.replace(/"/g, '')}"`,
     'cache-control': 'no-store',
   });
-  createReadStream(path).pipe(res);
+  stream.pipe(res);
 }

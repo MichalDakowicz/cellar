@@ -1,3 +1,6 @@
+import { realpathSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import type { DeskInfo } from '@/lib/deskProtocol';
 import { parseDeskStart } from '@/lib/deskProtocol';
 
@@ -51,13 +54,30 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
   };
 }
 
+/**
+ * The folder as the filesystem has it: `..` resolved, junctions and links
+ * followed. The project check is a prefix match, and `C:\ping\cellar\..\..`
+ * starts with `C:\ping\cellar` — so the check runs on the real folder, and the
+ * agent is started in that same real folder, never in the string it was sent.
+ */
+function realFolder(cwd: string): string {
+  try {
+    const real = realpathSync.native(resolve(cwd));
+    if (!statSync(real).isDirectory()) throw new Error('not a folder');
+    return real;
+  } catch {
+    throw new DeskError(`${cwd} is not a folder on this pc`, 404);
+  }
+}
+
 export async function startRun(deps: HostDeps, body: unknown) {
   const parsed = parseDeskStart(body);
   if (!parsed.ok) throw new DeskError(parsed.error);
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
-  const project = await deps.account.projectFor(parsed.value.cwd);
-  if (!project) throw new DeskError(`${parsed.value.cwd} is not a project folder in your cellar`, 403);
-  return deps.runs.start(parsed.value);
+  const cwd = realFolder(parsed.value.cwd);
+  const project = await deps.account.projectFor(cwd);
+  if (!project) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
+  return deps.runs.start({ ...parsed.value, cwd });
 }
 
 async function ticket(deps: HostDeps, body: unknown): Promise<string> {

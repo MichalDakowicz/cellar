@@ -11,7 +11,7 @@ import { loadIdentity, rotateKey, saveIdentity, type Identity } from './identity
 import { pickLanAddress } from './network.ts';
 import { Proxies } from './proxy.ts';
 import { Runs } from './runs.ts';
-import type { FrameSource } from './screen.ts';
+import { ScreenFeed, type FrameSource } from './screen.ts';
 import { Tickets } from './tickets.ts';
 
 /**
@@ -31,7 +31,9 @@ export type HostOptions = {
 export type Pairing = { url: string; pair: DeskPair } | { url: null; reason: string };
 
 export class DeskHost {
+  /** What desk.json holds. The port actually bound can differ for this run — see `start`. */
   private identity: Identity;
+  private boundPort: number | null = null;
   private server: Server | null = null;
   readonly account: Account;
   readonly deps: HostDeps;
@@ -42,7 +44,7 @@ export class DeskHost {
     this.account = new Account(options.supabaseUrl, options.supabaseAnonKey);
     const tickets = new Tickets();
     this.deps = {
-      identity: () => this.identity,
+      identity: () => (this.boundPort ? { ...this.identity, port: this.boundPort } : this.identity),
       account: this.account,
       runs: new Runs(options.dataDir),
       tickets,
@@ -53,14 +55,13 @@ export class DeskHost {
     this.fallback = new CellarFallback(this.deps);
   }
 
-  /** Start listening. Resolves with the port actually bound, which may be one of the ten after the saved one. */
+  /** Start listening. Resolves with the port actually bound, which may be one of the ten after the configured one. */
   async start(): Promise<number> {
-    this.server = lanServer(this.deps, this.options.frames);
+    this.server = lanServer(this.deps, this.options.frames ? new ScreenFeed(this.options.frames) : null);
     const port = await listen(this.server, this.identity.port);
-    if (port !== this.identity.port) {
-      this.identity = { ...this.identity, port };
-      saveIdentity(this.options.dataDir, this.identity);
-    }
+    // Held for this run only. Saved, a port taken once by something else would
+    // become the pc's address for good, and every paired phone would lose it.
+    this.boundPort = port;
     return port;
   }
 
@@ -82,13 +83,8 @@ export class DeskHost {
   pairing(): Pairing {
     const host = this.deps.lanHost();
     if (!host) return { url: null, reason: 'this pc is not on a network a phone can reach' };
-    const pair: DeskPair = {
-      id: this.identity.id,
-      name: this.identity.name,
-      host,
-      port: this.identity.port,
-      key: this.identity.key,
-    };
+    const identity = this.deps.identity();
+    const pair: DeskPair = { id: identity.id, name: identity.name, host, port: identity.port, key: identity.key };
     return { url: deskPairUrl(pair), pair };
   }
 

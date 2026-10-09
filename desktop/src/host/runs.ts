@@ -1,14 +1,14 @@
+import { execFile, spawn, type ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { spawn, execFile } from 'node:child_process';
-import { mkdirSync, openSync, closeSync, readFileSync, writeFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { closeSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { DeskAgent, DeskLogLine, DeskRun, DeskStart } from '@/lib/deskProtocol';
+import type { DeskAgent, DeskLogLine, DeskRun, DeskRunState, DeskStart } from '@/lib/deskProtocol';
 import { runTitle, sortRuns } from '@/lib/deskProtocol';
 
-import { claudeRunState, spawnPlan } from './agents.ts';
+import { claudeRunState, spawnPlan, type ClaudeAgentRow } from './agents.ts';
 import { claudeLog, claudeRows, DeskError, startClaude, stopClaude } from './claudeRuns.ts';
+import { lastWrite, readTail } from './logTail.ts';
 import { toolPath } from './tools.ts';
 import { plainLog, tail } from './transcript.ts';
 
@@ -18,6 +18,11 @@ import { plainLog, tail } from './transcript.ts';
  * The record is a small JSON file, because a run outlives this app — a claude
  * background session by design, a codex run because it is spawned detached — and
  * the phone should still see it after the window was closed and reopened.
+ *
+ * Only a process this app spawned in this lifetime is ever killed. A pid read
+ * back from the file after a restart may belong to anything by now; a run like
+ * that is judged by whether its log is still growing, and stopping it is left to
+ * the pc.
  */
 
 type RunRecord = {
@@ -35,13 +40,21 @@ type RunRecord = {
 
 const KEEP = 60;
 const PC_RUN_MS = 24 * 60 * 60_000;
+/** A log silent this long, from a run this app no longer holds, is taken as finished. */
+const QUIET_MS = 2 * 60_000;
+const RUN_ID = /^[0-9a-f]{6,16}$/;
+
+const rowId = (row: ClaudeAgentRow) => row.id ?? row.sessionId.slice(0, 8);
 
 export class Runs {
   private records: RunRecord[];
   private readonly file: string;
   private readonly logs: string;
+  private readonly children = new Map<string, ChildProcess>();
+  /** What `claude agents` last said, for the poll where it fails to answer. */
+  private lastClaude = new Map<string, DeskRunState>();
 
-  constructor(private readonly dir: string) {
+  constructor(dir: string) {
     this.file = join(dir, 'runs.json');
     this.logs = join(dir, 'runs');
     mkdirSync(this.logs, { recursive: true });
@@ -52,9 +65,11 @@ export class Runs {
     }
   }
 
+  /** Written aside and renamed over, so a crash mid-write never leaves half a file to be read as none. */
   private save(): void {
     this.records = this.records.sort((a, b) => b.startedAt - a.startedAt).slice(0, KEEP);
-    writeFileSync(this.file, `${JSON.stringify(this.records, null, 2)}\n`);
+    writeFileSync(`${this.file}.tmp`, `${JSON.stringify(this.records, null, 2)}\n`);
+    renameSync(`${this.file}.tmp`, this.file);
   }
 
   async start(start: DeskStart): Promise<DeskRun> {
@@ -73,22 +88,19 @@ export class Runs {
     const id = randomBytes(4).toString('hex');
     const log = join(this.logs, `${id}.log`);
     const out = openSync(log, 'a');
-    const child = spawn(path, plan.args, {
-      cwd: start.cwd,
-      detached: true,
-      windowsHide: true,
-      stdio: ['ignore', out, out],
-    });
+    const child = spawn(path, plan.args, { cwd: start.cwd, detached: true, windowsHide: true, stdio: ['ignore', out, out] });
     closeSync(out);
     const record: RunRecord = { id, ...base, pid: child.pid, log, exit: undefined };
-    child.on('exit', (code) => {
-      record.exit = code ?? null;
+    this.children.set(id, child);
+    const ended = (code: number | null) => {
+      this.children.delete(id);
+      record.exit = code;
       this.save();
-    });
+    };
+    child.on('exit', (code) => ended(code ?? null));
     child.on('error', (error) => {
-      record.exit = -1;
       writeFileSync(log, `could not start: ${error.message}\n`, { flag: 'a' });
-      this.save();
+      ended(-1);
     });
     child.unref();
     this.records.unshift(record);
@@ -96,26 +108,36 @@ export class Runs {
     return { id, ...base, state: 'running', origin: 'phone' };
   }
 
-  async list(): Promise<DeskRun[]> {
-    const rows = await claudeRows();
-    const byId = new Map(rows.map((row) => [row.id ?? row.sessionId.slice(0, 8), row]));
-    const mine = new Set(this.records.map((record) => record.id));
+  private async ownState(record: RunRecord): Promise<DeskRunState> {
+    if (record.stopped) return 'stopped';
+    if (record.exit !== undefined) return record.exit === 0 ? 'done' : 'failed';
+    if (this.children.has(record.id)) return 'running';
+    const written = record.log ? await lastWrite(record.log) : null;
+    return written !== null && Date.now() - written < QUIET_MS ? 'running' : 'done';
+  }
 
-    const runs: DeskRun[] = this.records.map((record) => {
+  async list(): Promise<DeskRun[]> {
+    let rows: ClaudeAgentRow[] | null = null;
+    try {
+      rows = await claudeRows();
+      this.lastClaude = new Map(rows.map((row) => [rowId(row), claudeRunState(row)]));
+    } catch {
+      // `claude agents` did not answer this time; every claude run keeps the state it had.
+    }
+
+    const runs: DeskRun[] = [];
+    for (const record of this.records) {
       const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const };
-      if (record.agent === 'claude') {
-        const row = byId.get(record.id);
-        return { ...base, state: row ? claudeRunState(row) : 'done' };
-      }
-      if (record.stopped) return { ...base, state: 'stopped' };
-      if (record.exit === undefined) return { ...base, state: alive(record.pid) ? 'running' : 'done' };
-      return { ...base, state: record.exit === 0 ? 'done' : 'failed' };
-    });
+      const state = record.agent === 'claude' ? (this.lastClaude.get(record.id) ?? (rows ? 'done' : 'running')) : await this.ownState(record);
+      runs.push({ ...base, state });
+    }
 
     // Sessions opened at the pc, for a phone that wants to know what the pc is
     // busy with. A background one blocked for days is not "busy" — after a day
     // it is left to `claude agents` at the pc.
-    for (const [id, row] of byId) {
+    const mine = new Set(this.records.map((record) => record.id));
+    for (const row of rows ?? []) {
+      const id = rowId(row);
       if (mine.has(id)) continue;
       const state = claudeRunState(row);
       if (state === 'done' || state === 'failed' || state === 'stopped') continue;
@@ -125,36 +147,31 @@ export class Runs {
     return sortRuns(runs);
   }
 
+  /** Only what this desk started: a session someone opened at the pc is theirs to stop. */
   async stop(id: string): Promise<void> {
-    const record = this.records.find((candidate) => candidate.id === id);
-    if (!record || record.agent === 'claude') return stopClaude(id);
-    if (record.pid && alive(record.pid)) await kill(record.pid);
+    const record = RUN_ID.test(id) ? this.records.find((candidate) => candidate.id === id) : undefined;
+    if (!record) throw new DeskError('that run was not started from cellar', 403);
+    if (record.agent === 'claude') return stopClaude(id);
+    const child = this.children.get(id);
+    if (!child?.pid) throw new DeskError('it was started before cellar last restarted — stop it at the pc', 409);
+    await kill(child.pid);
     record.stopped = true;
     this.save();
   }
 
   async log(id: string): Promise<DeskLogLine[]> {
+    if (!RUN_ID.test(id)) throw new DeskError('no such run', 404);
     const record = this.records.find((candidate) => candidate.id === id);
     if (record?.log) {
       try {
-        return tail(plainLog(await readFile(record.log, 'utf8')));
+        return tail(plainLog(await readTail(record.log)));
       } catch {
         return [{ who: 'system', text: 'nothing logged yet' }];
       }
     }
-    const row = (await claudeRows()).find((candidate) => (candidate.id ?? candidate.sessionId.slice(0, 8)) === id);
+    const row = (await claudeRows()).find((candidate) => rowId(candidate) === id);
     if (!row) throw new DeskError('no such run', 404);
     return claudeLog(row);
-  }
-}
-
-function alive(pid: number | undefined): boolean {
-  if (!pid) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
   }
 }
 

@@ -1,10 +1,10 @@
-import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import type { DeskLogLine } from '@/lib/deskProtocol';
 
 import { backgroundId, claudeProjectSlug, untrustedFolder, type ClaudeAgentRow } from './agents.ts';
+import { readTail } from './logTail.ts';
 import { runTool, toolPath } from './tools.ts';
 import { claudeTranscript, tail } from './transcript.ts';
 
@@ -42,17 +42,19 @@ export async function startClaude(args: string[], cwd: string): Promise<string> 
   throw new DeskError(said.trim().split(/\r?\n/).at(-1) || 'claude did not start', 502);
 }
 
-/** Every session claude knows about, finished background ones included. */
+/**
+ * Every session claude knows about, finished background ones included. Throws
+ * when `claude agents` does not answer, rather than answering "none": an empty
+ * list would read as every run having finished.
+ */
 export async function claudeRows(): Promise<ClaudeAgentRow[]> {
   const path = await toolPath('claude');
   if (!path) return [];
-  const { stdout } = await runTool(path, ['agents', '--json', '--all'], { timeout: 20_000 });
-  try {
-    const rows = JSON.parse(stdout) as ClaudeAgentRow[];
-    return Array.isArray(rows) ? rows : [];
-  } catch {
-    return [];
-  }
+  const { stdout, code } = await runTool(path, ['agents', '--json', '--all'], { timeout: 20_000 });
+  if (code !== 0) throw new DeskError('claude agents did not answer', 502);
+  const rows = JSON.parse(stdout) as ClaudeAgentRow[];
+  if (!Array.isArray(rows)) throw new DeskError('claude agents said something else', 502);
+  return rows;
 }
 
 export async function stopClaude(id: string): Promise<void> {
@@ -63,7 +65,7 @@ export async function stopClaude(id: string): Promise<void> {
 export async function claudeLog(row: Pick<ClaudeAgentRow, 'cwd' | 'sessionId'>): Promise<DeskLogLine[]> {
   const file = join(homedir(), '.claude', 'projects', claudeProjectSlug(row.cwd), `${row.sessionId}.jsonl`);
   try {
-    return tail(claudeTranscript(await readFile(file, 'utf8')));
+    return tail(claudeTranscript(await readTail(file)));
   } catch {
     return [{ who: 'system', text: 'no transcript yet' }];
   }
