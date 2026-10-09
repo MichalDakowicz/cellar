@@ -15,14 +15,15 @@ test('a ticket redeems once and not after a minute', () => {
   assert.equal(tickets.redeem(late), null);
 });
 
-test('a session holds for hours, then lapses', () => {
+test('a session holds for hours from the address that opened it, then lapses', () => {
   let now = 0;
   const tickets = new Tickets(() => now);
-  const session = tickets.openSession();
-  assert.ok(tickets.validSession(session));
-  now = 13 * 60 * 60_000;
-  assert.equal(tickets.validSession(session), false);
-  assert.equal(tickets.validSession(null), false);
+  const session = tickets.openSession('192.168.1.7');
+  assert.ok(tickets.validSession(session, '192.168.1.7'));
+  assert.equal(tickets.validSession(session, '192.168.1.66'), false);
+  now = 5 * 60 * 60_000;
+  assert.equal(tickets.validSession(session, '192.168.1.7'), false);
+  assert.equal(tickets.validSession(null, '192.168.1.7'), false);
 });
 
 test('reads our cookie and strips it before proxying', () => {

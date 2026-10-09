@@ -24,7 +24,10 @@ let quitting = false;
 let host: DeskHost | null = null;
 let window: BrowserWindow | null = null;
 
-if (!app.requestSingleInstanceLock()) app.quit();
+// A second copy only hands focus to the first. It must not get as far as
+// building a host: it would bind the next port and confuse every phone.
+const first = app.requestSingleInstanceLock();
+if (!first) app.quit();
 
 /** A frame of the primary display, at most 1600 wide — a phone screen does not need more. */
 async function frame(): Promise<Buffer | null> {
@@ -37,9 +40,15 @@ async function frame(): Promise<Buffer | null> {
   return source ? source.thumbnail.toJPEG(70) : null;
 }
 
-/** Only Cellar's own page may reach the host; a page it navigated to must not. */
+/** Only Cellar's own page may reach the host; a page it navigated to must not. Compared by origin, never prefix. */
 function fromCellar(url: string): boolean {
-  return url.startsWith(APP_ORIGIN) || (dev && url.startsWith('http://localhost:8081'));
+  try {
+    const { origin, protocol, host } = new URL(url);
+    if (protocol === 'cellar-desk:') return `${protocol}//${host}` === APP_ORIGIN;
+    return dev && origin === 'http://localhost:8081';
+  } catch {
+    return false;
+  }
 }
 
 function registerIpc(desk: DeskHost): void {
@@ -76,6 +85,7 @@ app.on('before-quit', () => {
 });
 
 void app.whenReady().then(async () => {
+  if (!first) return;
   serveWeb(app.isPackaged);
   host = new DeskHost({
     dataDir: app.getPath('userData'),

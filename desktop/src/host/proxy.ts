@@ -41,7 +41,7 @@ export class Proxies {
 
   private listen(target: number): Promise<number> {
     const server: Server = createServer((req, res) => {
-      if (!this.tickets.validSession(viewCookie(req.headers.cookie))) {
+      if (!this.tickets.validSession(viewCookie(req.headers.cookie), req.socket.remoteAddress ?? '')) {
         res.writeHead(403, { 'content-type': 'text/plain' }).end('open this page from cellar on your phone');
         return;
       }
@@ -66,7 +66,7 @@ export class Proxies {
     });
 
     server.on('upgrade', (req: IncomingMessage, socket: Socket, head: Buffer) => {
-      if (!this.tickets.validSession(viewCookie(req.headers.cookie))) {
+      if (!this.tickets.validSession(viewCookie(req.headers.cookie), req.socket.remoteAddress ?? '')) {
         socket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
         return;
       }
@@ -85,7 +85,10 @@ export class Proxies {
 
     return new Promise((resolve, reject) => {
       server.once('error', reject);
-      server.listen(0, '0.0.0.0', () => resolve((server.address() as AddressInfo).port));
+      server.listen(0, '0.0.0.0', () => {
+        server.removeListener('error', reject);
+        resolve((server.address() as AddressInfo).port);
+      });
     });
   }
 }

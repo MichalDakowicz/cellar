@@ -11,7 +11,9 @@ import { randomBytes } from 'node:crypto';
  * download, by sending the file.
  *
  * A ticket lives a minute. A link that leaks into a history or a screenshot is
- * worth nothing by the time anyone reads it.
+ * worth nothing by the time anyone reads it. The session it opens is bound to
+ * the address that redeemed it: the LAN is plain HTTP, and a cookie lifted off
+ * the air is no use from another machine.
  */
 
 export type Ticket =
@@ -20,13 +22,13 @@ export type Ticket =
   | { kind: 'apk'; app: string };
 
 const TICKET_MS = 60_000;
-const SESSION_MS = 12 * 60 * 60_000;
+const SESSION_MS = 4 * 60 * 60_000;
 
 export const VIEW_COOKIE = '__cellar_desk';
 
 export class Tickets {
   private readonly tickets = new Map<string, { ticket: Ticket; expires: number }>();
-  private readonly sessions = new Map<string, number>();
+  private readonly sessions = new Map<string, { expires: number; from: string }>();
 
   constructor(private readonly now: () => number = Date.now) {}
 
@@ -44,21 +46,21 @@ export class Tickets {
     return found.ticket;
   }
 
-  openSession(): string {
+  openSession(from: string): string {
     const token = randomBytes(24).toString('base64url');
-    this.sessions.set(token, this.now() + SESSION_MS);
+    this.sessions.set(token, { expires: this.now() + SESSION_MS, from });
     return token;
   }
 
-  validSession(token: string | null): boolean {
+  validSession(token: string | null, from: string): boolean {
     if (!token) return false;
-    const expires = this.sessions.get(token);
-    if (!expires) return false;
-    if (expires < this.now()) {
+    const session = this.sessions.get(token);
+    if (!session) return false;
+    if (session.expires < this.now()) {
       this.sessions.delete(token);
       return false;
     }
-    return true;
+    return session.from === from;
   }
 
   /** Forget every browser at once — what "forget paired phones" also means for pages left open. */
