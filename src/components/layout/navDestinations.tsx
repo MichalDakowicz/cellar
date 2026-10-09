@@ -66,7 +66,8 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     label: 'profile',
     tabName: 'profile',
     icon: (color, size) => <CircleUserRound color={color} size={size} />,
-    isActive: (pathname) => pathname.startsWith('/profile') || pathname.startsWith('/settings'),
+    isActive: (pathname) =>
+      pathname.startsWith('/profile') || pathname.startsWith('/settings') || pathname.startsWith('/desk'),
   },
 ];
 
@@ -86,6 +87,7 @@ export function isPushedRoute(pathname: string): boolean {
     pathname.startsWith('/project/') ||
     pathname.startsWith('/search') ||
     pathname.startsWith('/settings') ||
+    pathname.startsWith('/desk') ||
     pathname.startsWith('/arrange')
   );
 }
