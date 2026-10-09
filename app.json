@@ -47,7 +47,8 @@
         }
       ],
       "./plugins/withPingSiblings",
-      "./plugins/withPingSigning"
+      "./plugins/withPingSigning",
+      "./plugins/withDeskCleartext"
     ],
     "experiments": {
       "typedRoutes": false,

@@ -32,8 +32,10 @@ import { EditThoughtSheet } from '@/features/cellar/sheets/EditThoughtSheet';
 import { useCopyPrompt } from '@/features/cellar/useCopyPrompt';
 import { useEntryQuestions } from '@/features/cellar/useEntryQuestions';
 import { useEntryScreen } from '@/features/cellar/useEntryScreen';
+import { StartOnPcControl } from '@/features/desk/StartOnPcControl';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
+import { agentPrompt } from '@/lib/agentPrompt';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 
@@ -112,6 +114,11 @@ export default function EntryScreen() {
             <View className="mt-2.5 flex-row items-center gap-3">
               <Text className="text-xs text-muted-foreground">{entry.stamp}</Text>
               <CopyPrompt onPress={() => entry.entry && copyPrompt(entry.entry)} what="this entry" />
+              <StartOnPcControl
+                prompt={agentPrompt(entry.entry, entry.project?.name ?? null)}
+                projectId={entry.project?.id}
+                entryId={entry.entry.id}
+              />
               <EditThought onPress={() => setRewording(true)} />
               <PictureAction has={!!entry.gallery.cover} busy={entry.gallery.busy} onPress={entry.gallery.setCover} />
             </View>

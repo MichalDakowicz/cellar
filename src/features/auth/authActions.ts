@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
+import { deskBridge, DESKTOP_OAUTH_CALLBACK, type DeskBridge } from '@/features/desk/bridge';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -21,6 +22,9 @@ WebBrowser.maybeCompleteAuthSession();
  * the shared Supabase project — which it is, because Radar uses it.
  */
 export async function signInWithGoogle() {
+  const desk = deskBridge();
+  if (desk) return signInFromDesktop(desk);
+
   const redirectTo = Linking.createURL('/');
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -39,6 +43,26 @@ export async function signInWithGoogle() {
   if (!code) return;
 
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  if (exchangeError) throw new Error(friendly(exchangeError.message));
+}
+
+/**
+ * Inside the desktop app the window cannot host Google's page — Google refuses
+ * embedded browsers, and Supabase will not redirect to `cellar-desk://`. So the
+ * sign-in runs in the real browser and comes back to a loopback address the
+ * desktop app listens on; the code verifier never leaves this window.
+ */
+async function signInFromDesktop(desk: DeskBridge) {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: DESKTOP_OAUTH_CALLBACK, skipBrowserRedirect: true },
+  });
+  if (error) throw new Error(friendly(error.message));
+  if (!data.url) throw new Error('google did not hand back a sign-in link.');
+
+  const result = await desk.googleSignIn(data.url);
+  if ('error' in result) throw new Error(result.error);
+  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(result.code);
   if (exchangeError) throw new Error(friendly(exchangeError.message));
 }
 

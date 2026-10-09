@@ -15,6 +15,7 @@ import { UpdateNotice } from '@/features/updates/UpdateNotice';
 import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarDisplay } from '@/features/cellar/CellarDisplay';
 import { CellarLive } from '@/features/cellar/CellarLive';
+import { DeskSessionSync } from '@/features/desk/DeskSessionSync';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
 // Imported for its side effect: the background task has to be defined at
@@ -94,6 +95,7 @@ export default function RootLayout() {
                 <AuthGate>
                   <CellarLive />
                   <QuestionSync />
+                  <DeskSessionSync />
                   <CellarDisplay>
                     <AppShell>
                       <Stack screenOptions={{ headerShown: false }} />

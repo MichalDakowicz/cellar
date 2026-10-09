@@ -44,6 +44,10 @@ Structure rules (they are why the siblings are maintainable):
 - `supabase/functions/mcp` is the **same server over HTTP**, for an agent that is not on
   this machine. It defines no tools of its own — it imports `mcp/src` — so a tool is
   written once and both transports get it.
+- `desktop/` is the **desktop app** (Electron), a third separate package
+  (`desktop/README.md`): its window loads Cellar's own web build, its main process is what a
+  paired phone talks to. Like `mcp/` it imports `src/lib/*` (the `desk*.ts` protocol), has
+  its own `tsc` and `npm test`, and the root checks do not see it.
 
 The design language is `../.design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —
@@ -270,6 +274,21 @@ row breaks the one screen that must never break.
 binary, so a scan silently never fires there. The sign-in QR screens (`qr-scan`, `qr-show`;
 PING.md §9.14) are only verified on a dev or release build, and the approve step needs a
 signed-in session of your own.
+
+**The pc side has four traps of its own** (`desktop/`, the "start on pc" feature):
+
+- `claude --bg` reads a piped stdin as more prompt and waits for it to close. Spawned from
+  node with an open stdin — which `execFile` gives it — it hangs until the timeout. `runTool`
+  spawns with stdin ignored; keep it that way. It also refuses a folder whose trust prompt was
+  never accepted, and on haiku `--permission-mode auto` silently becomes manual.
+- antigravity's `--print` takes the **next argument** as its prompt. `--print --mode x` runs
+  the prompt "--mode". The prompt is bound with `--print=`.
+- A release build blocks cleartext HTTP, and the pc's LAN server is `http://`.
+  `plugins/withDeskCleartext.js` turns it back on; without it every LAN call dies on the phone
+  and the pc screen says "not answering" while the pc is listening fine. Debug builds hide this.
+- The host acts with the **window's** session, handed over through `DeskSessionSync` on every
+  refresh. It must never hold a refresh token of its own: two holders rotate it out from under
+  each other and Supabase revokes the whole family.
 
 ### Then the web build, same pass
 

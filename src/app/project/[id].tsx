@@ -16,10 +16,12 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { ErrorState, LoadingState } from '@/components/ui/states';
 import { ProjectDumpBlock } from '@/features/cellar/ProjectDumpBlock';
 import { useCopyPrompt, useCopyProjectPrompt } from '@/features/cellar/useCopyPrompt';
+import { StartOnPcControl } from '@/features/desk/StartOnPcControl';
 import { useEntrySelection } from '@/features/cellar/useEntrySelection';
 import { useProjectScreen } from '@/features/cellar/useProjectScreen';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useWheelToList } from '@/hooks/useWheelToList';
+import { projectPrompt } from '@/lib/agentPrompt';
 import { readError } from '@/lib/utils';
 import type { Project } from '@/types/cellar';
 import { useCellarSheets } from '@/store/cellarPrefs';
@@ -163,6 +165,13 @@ export default function ProjectScreen() {
                       align="end"
                     />
                   )}
+                  {project.project && (
+                    <StartOnPcControl
+                      className="mt-2 flex-row justify-end"
+                      prompt={projectPrompt(project.project)}
+                      projectId={project.project.id}
+                    />
+                  )}
                 </View>
               </View>
 
@@ -240,6 +249,9 @@ function PhoneHeader({
           onCopy={project.project ? () => project.project && onCopyProject(project.project) : undefined}
         />
         {project.repo && <RepoLink label={project.repo.label} url={project.repo.url} path={project.repo.path} />}
+        {project.project && (
+          <StartOnPcControl className="mt-2" prompt={projectPrompt(project.project)} projectId={project.project.id} />
+        )}
       </View>
       {project.project && (
         <ProjectDumpBlock projectId={project.project.id} projectName={project.name} gutter={gutter} />

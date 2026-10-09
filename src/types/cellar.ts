@@ -61,6 +61,8 @@ export type Group = {
   /** Sorts first on its shelf, the same way a pinned project does. */
   pinned: boolean;
   createdAt: string;
+  /** The folder the group's checkouts share, where work on the whole group runs. Unset: derived (`lib/deskFolders.ts`). */
+  repoPath?: string | null;
 };
 
 export type Project = {
