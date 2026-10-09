@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>new task — cellar desk</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15);--ping-safe-top:40px;--ping-safe-bottom:16px}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+</style>
+</helmet>
+<div data-app="cellar" style="position: relative; width: 390px; height: 844px; overflow: hidden; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<div class="ping-screen-top px-4" aria-hidden="true" style="display: flex; flex-direction: column; gap: 20px; padding-top: 56px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p class="text-2xl font-bold tracking-tight">your desk</p>
+<p class="text-xs text-muted-foreground">michu-pc is awake · 2 agents at work · 1 waiting on you</p>
+</div>
+<div style="height: 120px; border-radius: 12px; background: var(--ping-row-ground)"></div>
+</div>
+<div style="position: absolute; inset: 0; background: var(--ping-backdrop-sheet)"></div>
+
+<section role="dialog" aria-label="new task" style="position: absolute; left: 0; right: 0; bottom: 0; height: 784px; box-sizing: border-box; background: hsl(var(--card)); border-top: 1px solid hsl(var(--border)); border-radius: 20px 20px 0 0; display: flex; flex-direction: column">
+<div style="height: 28px; flex: none; display: flex; align-items: center; justify-content: center"><span style="width: 36px; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.25)"></span></div>
+
+<div class="px-4" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 class="text-lg font-bold">new task</h2>
+<p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 99px; background: #22c55e"></span>to michu-pc</p>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 4px 0 8px">
+<div aria-hidden="true" style="height: 36px; display: flex; align-items: center; gap: 3px">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="32">
+<span style="width: 3px; height: {{b.h}}; border-radius: 99px; background: rgba(250,250,250,{{b.a}})"></span>
+</sc-for>
+</div>
+<p class="text-base" style="text-align: center; min-height: 72px; max-width: 330px">make inbox rows swipeable both ways — left archives, right hands it to an agent in <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; padding: 1px 7px; border-radius: 5px; background: #64748B; color: #ffffff">#64748B</span>. keep the undo toast<span style="display: inline-block; width: 2px; height: 18px; margin-left: 2px; vertical-align: -3px; background: #fafafa"></span></p>
+<div style="display: flex; align-items: center; gap: 20px">
+<button type="button" aria-label="type instead" style="width: 48px; height: 48px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 8h.01"></path><path d="M12 12h.01"></path><path d="M14 8h.01"></path><path d="M16 12h.01"></path><path d="M18 8h.01"></path><path d="M6 8h.01"></path><path d="M7 16h10"></path><path d="M8 12h.01"></path><rect width="20" height="16" x="2" y="4" rx="2"></rect></svg></button>
+<button type="button" onClick="{{toggleListen}}" aria-label="{{micLabel}}" aria-pressed="{{listening}}" style="width: 76px; height: 76px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<sc-if value="{{listening}}" hint-placeholder-val="{{true}}"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect width="12" height="12" x="6" y="6" rx="2"></rect></svg></sc-if>
+<sc-if value="{{idle}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></sc-if>
+</button>
+<button type="button" aria-label="clear and start over" style="width: 48px; height: 48px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></button>
+</div>
+<p class="text-xs text-muted-foreground">{{micHint}}</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">project</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{projects}}" as="p" hint-placeholder-count="4">
+<button type="button" class="ping-chip" aria-pressed="{{p.on}}" onClick="{{p.pick}}" style="min-height: 36px; cursor: pointer; border: 1px solid {{p.border}}; box-sizing: border-box">{{p.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">where it works</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{wheres}}" as="w" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{w.on}}" onClick="{{w.pick}}" style="border-radius: 12px; border: 2px solid {{w.border}}; background: {{w.ground}}; padding: 10px 12px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px">
+<span class="text-sm font-semibold">{{w.label}}</span>
+<span class="text-xs text-muted-foreground mono clamp1">{{w.sub}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">agent · how much it may do</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{agents}}" as="a" hint-placeholder-count="2">
+<button type="button" class="ping-chip" aria-pressed="{{a.on}}" onClick="{{a.pick}}" style="min-height: 36px; cursor: pointer; border: 1px solid {{a.border}}; box-sizing: border-box">{{a.label}}</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{m.on}}" onClick="{{m.pick}}" style="min-height: 44px; border-radius: 12px; border: 2px solid {{m.border}}; background: {{m.ground}}; padding: 8px; cursor: pointer" class="text-sm font-semibold">{{m.label}}</button>
+</sc-for>
+</div>
+<p class="text-xs text-muted-foreground">{{modeHint}}</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">from your cellar</p>
+<div class="ping-row" style="align-items: center; padding: 10px 12px">
+<span style="width: 28px; height: 28px; flex: none; border-radius: 8px; background: rgba(239,68,68,0.16); color: #ef4444; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg></span>
+<div style="flex: 1; min-width: 0">
+<p class="text-sm font-semibold clamp1">inbox swipe feels sticky on android</p>
+<p class="text-xs text-muted-foreground">glitch · the agent claims it and appends what it did</p>
+</div>
+<button type="button" aria-label="detach this thought" style="width: 32px; height: 32px; flex: none; border: 0; border-radius: 99px; background: transparent; color: #a3a3a3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+</div>
+</div>
+
+<div class="px-4" style="flex: none; padding-top: 12px; padding-bottom: 28px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<a href="Run.dc.html" style="height: 52px; border-radius: 99px; background: hsl(var(--foreground)); color: hsl(var(--background)); display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none" class="text-base font-semibold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>send to michu-pc</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const listening = s.listening !== false;
+    const pickIn = (key, def, items, kind) => items.map((it) => {
+      const on = (s[key] || def) === it.id;
+      return Object.assign({}, it, {
+        on: on,
+        border: on ? 'hsl(var(--primary))' : (kind === 'seg' ? 'hsl(0 0% 20%)' : 'transparent'),
+        ground: on ? 'hsl(var(--primary) / 0.16)' : 'transparent',
+        pick: () => this.setState({ [key]: it.id })
+      });
+    });
+    const heights = [8, 14, 22, 12, 30, 18, 26, 34, 20, 10, 24, 32, 16, 28, 36, 22, 12, 26, 18, 30, 14, 24, 8, 20, 28, 16, 10, 22, 14, 8, 12, 6];
+    const mode = s.mode || 'edits';
+    const hints = {
+      ask: 'every command and file edit pings your phone first',
+      edits: 'edits go ahead; commands and installs ping your phone first',
+      full: 'nothing pings you — it runs to the end in its own worktree'
+    };
+    return {
+      listening: listening,
+      idle: !listening,
+      micLabel: listening ? 'stop listening' : 'speak a task',
+      micHint: listening ? 'listening · 0:07 · tap to stop' : 'tap and talk — it types for you',
+      toggleListen: () => this.setState({ listening: !listening }),
+      bars: heights.map((h, i) => ({ h: (listening ? h : 4) + 'px', a: listening ? (i < 22 ? 0.85 : 0.3) : 0.3 })),
+      projects: pickIn('project', 'cellar', [
+        { id: 'cellar', label: 'cellar' }, { id: 'solar', label: 'solar' },
+        { id: 'radar', label: 'radar' }, { id: 'sonar', label: 'sonar' }
+      ], 'chip'),
+      wheres: pickIn('where', 'worktree', [
+        { id: 'main', label: 'main checkout', sub: '~/code/cellar' },
+        { id: 'worktree', label: 'new worktree', sub: 'wt/inbox-swipe-2 off main' }
+      ], 'seg'),
+      agents: pickIn('agent', 'claude', [
+        { id: 'claude', label: 'claude code' }, { id: 'codex', label: 'codex' }
+      ], 'chip'),
+      modes: pickIn('mode', 'edits', [
+        { id: 'ask', label: 'ask first' }, { id: 'edits', label: 'edits ok' }, { id: 'full', label: 'full access' }
+      ], 'seg'),
+      modeHint: hints[mode]
+    };
+  }
+}
+</script>
+</body>
+</html>

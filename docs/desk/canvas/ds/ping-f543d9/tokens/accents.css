@@ -1,0 +1,68 @@
+/**
+ * Ping — app accents. PING.md §2.1 (family table) and §4.2 (picking one).
+ *
+ * One accent per app. It marks: the active thing, the primary action, the
+ * current value, and the brand. It never decorates. Two accent-coloured things
+ * on a screen where only one is "the live one" means one of them is wrong.
+ *
+ * Set the app on the root: `data-app="radar" | "lidar" | "sonar"`. Each block
+ * rewrites `--primary` + `--ring` for dark, and the `.light` pair for light.
+ * Dark is the Tailwind **500** of the hue, light its **600** (§4.2).
+ *
+ * `--ping-accent-soft` is the selected-chip ground: the accent at 0.15 alpha,
+ * matching `COLORS.accentSoft` in §4.3.
+ */
+
+/* Radar — films & TV. blue-500 #3B82F6 */
+[data-app='radar'] {
+  --primary: 217 91% 60%;
+  --ring: 217 91% 60%;
+  --ping-accent-soft: hsl(217 91% 60% / 0.15);
+}
+[data-app='radar'].light,
+[data-app='radar'][data-theme='light'],
+.light [data-app='radar'] {
+  --primary: 221 83% 53%;             /* blue-600 #2563EB */
+  --ring: 221 83% 53%;
+}
+
+/* Lidar — books. violet-500 #8B5CF6. Also the library default. */
+[data-app='lidar'] {
+  --primary: 258 90% 66%;
+  --ring: 258 90% 66%;
+  --ping-accent-soft: hsl(258 90% 66% / 0.15);
+}
+[data-app='lidar'].light,
+[data-app='lidar'][data-theme='light'],
+.light [data-app='lidar'] {
+  --primary: 263 70% 50%;             /* violet-600 #7C3AED */
+  --ring: 263 70% 50%;
+}
+
+/* Sonar — records. emerald-500 #10B981 */
+[data-app='sonar'] {
+  --primary: 160 84% 39%;
+  --ring: 160 84% 39%;
+  --ping-accent-soft: hsl(160 84% 39% / 0.15);
+}
+[data-app='sonar'].light,
+[data-app='sonar'][data-theme='light'],
+.light [data-app='sonar'] {
+  --primary: 161 94% 30%;             /* emerald-600 #059669 */
+  --ring: 161 94% 30%;
+}
+
+/**
+ * A fourth app picks an unused hue (§4.2). Taken: blue 217, violet 258,
+ * emerald 160. Open and vetted:
+ *
+ *   amber   38 92% 50%   ·  rose   350 89% 60%  ·  cyan   189 94% 43%
+ *   orange  25 95% 53%   ·  indigo 239 84% 67%
+ *
+ * It must clear ~3:1 against #0A0A0A — the accent is also an icon and hairline
+ * colour on near-black — and must not already be a status colour in that app.
+ *
+ * Known drift, do not copy: Radar ships an emerald light `--primary`
+ * (158 64% 42%) left over from its pre-rewrite web app while its dark one is
+ * blue. Lidar and Sonar are consistent; follow them. (§4.1)
+ */

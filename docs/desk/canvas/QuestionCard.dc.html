@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>question card — states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a}
+.card{border-radius:16px;border:1px solid hsl(var(--border));background:#121212;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ask{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ef4444;display:flex;align-items:center;gap:6px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:10px;border:0;background:transparent;text-align:left;cursor:pointer;width:100%;box-sizing:border-box}
+.key{width:22px;height:22px;flex:none;border-radius:6px;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#d4d4d4;margin-top:1px}
+.btn{height:34px;padding:0 14px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer}
+</style>
+</helmet>
+<div data-app="cellar" style="width: 1280px; height: 1000px; box-sizing: border-box; padding: 48px; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display); display: flex; flex-direction: column; gap: 28px">
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="text-2xl font-bold tracking-tight">when an agent asks, you get options — not a blob</h1>
+<p class="text-sm text-muted-foreground">one question card, six states. the same component in desktop chat, the phone's run chat and notifications.</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 28px; align-items: start">
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">1 · pick one</p>
+<div class="card">
+<p class="ask"><span style="width: 7px; height: 7px; border-radius: 99px; background: #ef4444"></span>claude asks · web-shop</p>
+<p class="text-base font-bold">how should the cart open on phones?</p>
+<div role="radiogroup" aria-label="options" style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{single}}" as="o" hint-placeholder-count="4">
+<button type="button" class="opt" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="background: {{o.ground}}"><span class="key" style="background: {{o.keyGround}}; color: {{o.keyText}}; border-color: {{o.keyBorder}}">{{o.n}}</span><span style="display: flex; flex-direction: column; gap: 1px"><span class="text-sm font-semibold">{{o.label}}</span><span class="text-xs text-muted-foreground">{{o.desc}}</span></span></button>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+<span class="text-[11px]" style="color: #8a8a8a; flex: 1">1–4 or a–d picks · enter sends</span>
+<button type="button" class="btn" style="border: 0; background: transparent; color: #d4d4d4">let claude decide</button>
+<button type="button" class="btn" style="border: 0; background: hsl(var(--primary)); color: #ffffff">answer</button>
+</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">2 · pick any</p>
+<div class="card">
+<p class="ask"><span style="width: 7px; height: 7px; border-radius: 99px; background: #ef4444"></span>codex asks · notes-app</p>
+<p class="text-base font-bold">which screens get the new header?</p>
+<div role="group" aria-label="options" style="display: flex; flex-direction: column; gap: 2px">
+<button type="button" class="opt" role="checkbox" aria-checked="true" style="background: hsl(var(--primary) / 0.16)"><span class="key" style="background: hsl(var(--primary)); color: #fff; border-color: hsl(var(--primary))">✓</span><span class="text-sm font-semibold">home</span></button>
+<button type="button" class="opt" role="checkbox" aria-checked="true" style="background: hsl(var(--primary) / 0.16)"><span class="key" style="background: hsl(var(--primary)); color: #fff; border-color: hsl(var(--primary))">✓</span><span class="text-sm font-semibold">search</span></button>
+<button type="button" class="opt" role="checkbox" aria-checked="false"><span class="key"></span><span class="text-sm font-semibold">editor</span></button>
+<button type="button" class="opt" role="checkbox" aria-checked="false"><span class="key"></span><span class="text-sm font-semibold">settings</span></button>
+</div>
+<div style="display: flex; justify-content: flex-end"><button type="button" class="btn" style="border: 0; background: hsl(var(--primary)); color: #ffffff">answer · 2 picked</button></div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">3 · with previews</p>
+<div class="card">
+<p class="ask"><span style="width: 7px; height: 7px; border-radius: 99px; background: #ef4444"></span>claude asks · web-shop</p>
+<p class="text-base font-bold">how should the cart open on phones?</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" aria-pressed="true" style="border-radius: 10px; border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.16); padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; align-items: center"><span aria-hidden="true" style="width: 52px; height: 92px; border-radius: 8px; background: #262626; position: relative; overflow: hidden"><span style="position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: #d4d4d4; border-radius: 6px 6px 0 0"></span></span><span class="text-xs font-semibold">A · bottom</span></button>
+<button type="button" aria-pressed="false" style="border-radius: 10px; border: 2px solid transparent; background: #171717; padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; align-items: center"><span aria-hidden="true" style="width: 52px; height: 92px; border-radius: 8px; background: #262626; position: relative; overflow: hidden"><span style="position: absolute; top: 0; right: 0; bottom: 0; width: 40px; background: #d4d4d4"></span></span><span class="text-xs font-semibold">B · right</span></button>
+<button type="button" aria-pressed="false" style="border-radius: 10px; border: 2px solid transparent; background: #171717; padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; align-items: center"><span aria-hidden="true" style="width: 52px; height: 92px; border-radius: 8px; background: #d4d4d4"></span><span class="text-xs font-semibold">C · page</span></button>
+</div>
+<p class="text-xs text-muted-foreground">shown when the agent sends a preview with each option</p>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">4 · answered</p>
+<div class="card" style="gap: 6px">
+<p class="text-xs text-muted-foreground">claude asked · how should the cart open on phones?</p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="key" style="background: hsl(var(--primary)); color: #fff; border-color: hsl(var(--primary))">A</span><span class="font-semibold">from the bottom</span></p>
+<p class="text-xs text-muted-foreground">you, on your phone · 09:14 · <a href="#change">change</a> until claude moves on</p>
+</div>
+<p class="lbl" style="margin-top: 14px">expired</p>
+<div class="card" style="gap: 6px; opacity: 0.6">
+<p class="text-xs text-muted-foreground">codex asked · keep the old settings keys for one release?</p>
+<p class="text-sm">no answer in 30 min — codex went with its own pick: <span class="font-semibold">yes, keep them</span></p>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">5 · from plain text</p>
+<div class="card">
+<p class="text-xs text-muted-foreground">what the agent sent</p>
+<p class="mono" style="font-size: 12px; line-height: 18px; color: #a3a3a3; padding: 10px; border-radius: 8px; background: #0f0f10">Should I (A) use a bottom sheet, (B) slide it in from the right, or (C) make it a separate page? Let me know.</p>
+<p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>what you see</p>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<button type="button" class="opt"><span class="key">A</span><span class="text-sm font-semibold">use a bottom sheet</span></button>
+<button type="button" class="opt"><span class="key">B</span><span class="text-sm font-semibold">slide it in from the right</span></button>
+<button type="button" class="opt"><span class="key">C</span><span class="text-sm font-semibold">make it a separate page</span></button>
+<button type="button" class="opt"><span class="key">…</span><span class="text-sm" style="color: #a3a3a3">other — type or say it</span></button>
+</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="lbl">6 · in a notification</p>
+<div style="border-radius: 24px; background: #1c1c1c; padding: 14px 16px 10px; display: flex; flex-direction: column; gap: 6px">
+<p class="text-xs" style="color: #a3a3a3">cellar · claude asks · web-shop</p>
+<p class="text-sm font-semibold">how should the cart open on phones?</p>
+<p class="text-sm" style="color: #d4d4d4"><span class="mono" style="font-weight: 600; color: #fafafa">A</span>  from the bottom<br><span class="mono" style="font-weight: 600; color: #fafafa">B</span>  from the right<br><span style="color: #8a8a8a">+2 more · or reply in your own words</span></p>
+<div style="display: flex; gap: 4px"><button type="button" class="btn" style="border: 0; background: transparent; color: hsl(215 25% 78%); height: 40px">A</button><button type="button" class="btn" style="border: 0; background: transparent; color: hsl(215 25% 78%); height: 40px">B</button><button type="button" class="btn" style="border: 0; background: transparent; color: hsl(215 25% 78%); height: 40px">more…</button></div>
+</div>
+<p class="text-xs text-muted-foreground">android shows three buttons at most: the first two options and “more…”. replying inline sends an “other” answer.</p>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const pick = s.pick || 'A';
+    const opts = [
+      { id: 'A', n: '1', label: 'from the bottom — recommended', desc: 'a sheet with the total pinned at the bottom' },
+      { id: 'B', n: '2', label: 'from the right', desc: 'same as desktop; narrower lines' },
+      { id: 'C', n: '3', label: 'as its own page', desc: 'simplest; you lose the page behind' },
+      { id: 'D', n: '4', label: 'other', desc: 'type or say your own answer' }
+    ];
+    return {
+      single: opts.map((o) => {
+        const on = o.id === pick;
+        return {
+          n: o.n,
+          label: o.label,
+          desc: o.desc,
+          on: on,
+          ground: on ? 'hsl(var(--primary) / 0.16)' : 'transparent',
+          keyGround: on ? 'hsl(var(--primary))' : 'transparent',
+          keyBorder: on ? 'hsl(var(--primary))' : '#3a3a3a',
+          keyText: on ? '#ffffff' : '#d4d4d4',
+          pick: () => this.setState({ pick: o.id })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

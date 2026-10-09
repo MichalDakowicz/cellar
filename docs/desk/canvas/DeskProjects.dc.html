@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — project board</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.pin{width:20px;height:20px;border-radius:6px;background:#262626;color:#d4d4d4;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.pill{height:36px;padding:0 14px;border-radius:99px;border:1px solid hsl(var(--border));background:transparent;color:#fafafa;display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px}
+@media (max-width: 900px){.shell{height:auto !important}}
+</style>
+</helmet>
+<div data-app="cellar" class="shell" style="height: 100vh; min-height: 900px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px; overflow-y: auto">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<p class="text-lg font-bold">cellar</p>
+<span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span>
+</div>
+<a href="#jump" style="height: 36px; padding: 0 10px; border-radius: 8px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; gap: 8px; text-decoration: none" class="text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="flex: 1">jump to anything</span><span class="kbd">ctrl k</span></a>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>dump</a>
+<a class="side-a" href="DeskProjects.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>projects</a>
+<a class="side-a" href="#inbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>inbox<span class="side-n">4</span></a>
+<a class="side-a" href="#stats"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>home</a>
+<a class="side-a" href="DeskChat.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>chat<span class="ping-island-badge" style="margin-left: auto">2</span></a>
+<a class="side-a" href="#commands"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>commands</a>
+<a class="side-a" href="#previews"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>previews<span class="side-n">2 up</span></a>
+<a class="side-a" href="DeskPhone.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg>pixel<span class="dot" style="margin-left: auto; background: #22c55e"></span></a>
+</nav>
+<nav aria-label="pinned projects" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">pinned</p>
+<a class="side-a" href="DeskProjects.dc.html" aria-current="page"><span class="pin">c</span>cellar<span class="side-n">12</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">s</span>solar<span class="side-n">7</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">r</span>radar<span class="side-n">3</span></a>
+</nav>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px">
+<span style="width: 32px; height: 32px; border-radius: 99px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; justify-content: center; flex: none" class="text-xs font-semibold">MI</span>
+<div style="flex: 1; min-width: 0"><p class="text-sm font-semibold">michu</p><p class="text-xs text-muted-foreground clamp1">2 of 4 agent slots busy</p></div>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; height: 100%; display: flex; flex-wrap: wrap">
+<main style="flex: 999 1 560px; min-width: 0; height: 100%; overflow-y: auto; box-sizing: border-box; padding: 24px 28px 96px; position: relative; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px">
+<div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 4px">
+<p class="text-xs text-muted-foreground">apps /</p>
+<h1 class="text-2xl font-bold tracking-tight">cellar</h1>
+<p class="text-sm text-muted-foreground"><span class="mono">~/code/cellar</span> · main · 3 worktrees · 12 open · 2 agents on it</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="pill mono">$rebuild</button>
+<button type="button" class="pill mono">$preview</button>
+<button type="button" class="pill mono">$deploy</button>
+</div>
+</header>
+
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<div role="group" aria-label="how the project opens" style="display: flex; gap: 2px; padding: 3px; border-radius: 8px; border: 1px solid hsl(var(--border)); background: hsl(var(--secondary))">
+<button type="button" aria-pressed="false" style="height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #a3a3a3; cursor: pointer; font-size: 13px">by kind</button>
+<button type="button" aria-pressed="false" style="height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #a3a3a3; cursor: pointer; font-size: 13px">one stream</button>
+<button type="button" aria-pressed="true" style="height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: hsl(0 0% 20%); color: #fafafa; cursor: pointer; font-size: 13px; font-weight: 600">board</button>
+</div>
+<span style="width: 8px"></span>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">glitch <span class="text-xs" style="color: #8a8a8a">4</span></button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">idea <span class="text-xs" style="color: #8a8a8a">5</span></button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">question <span class="text-xs" style="color: #8a8a8a">1</span></button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">agent on it <span class="text-xs" style="color: #8a8a8a">3</span></button>
+<span class="text-xs text-muted-foreground" style="margin-left: auto">tick entries to hand them off together</span>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start">
+<sc-for list="{{columns}}" as="col" hint-placeholder-count="4">
+<section style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground" style="display: flex; align-items: center; gap: 8px"><span class="dot" style="background: {{col.dot}}"></span>{{col.title}} · {{col.count}}</p>
+<sc-for list="{{col.cards}}" as="c" hint-placeholder-count="3">
+<label style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: {{c.ground}}; cursor: pointer">
+<span style="display: flex; align-items: center; gap: 8px">
+<span class="text-xs text-muted-foreground" style="flex: 1">{{c.kind}} · {{c.when}}</span>
+<input type="checkbox" checked="{{c.checked}}" onChange="{{c.toggle}}" aria-label="select {{c.title}}" style="width: 16px; height: 16px; margin: 0; accent-color: hsl(215 16% 47%)">
+</span>
+<span class="text-sm font-semibold clamp2">{{c.title}}</span>
+<sc-if value="{{c.hasAgent}}" hint-placeholder-val="{{false}}">
+<span class="text-xs" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap"><span class="font-semibold" style="color: #d4d4d4">{{c.agent}}</span><span style="color: {{c.agentColor}}">{{c.agentLine}}</span></span>
+</sc-if>
+</label>
+</sc-for>
+</section>
+</sc-for>
+</div>
+
+<sc-if value="{{hasSelection}}" hint-placeholder-val="{{true}}">
+<div role="region" aria-label="hand off selected entries" style="position: sticky; bottom: 0; align-self: center; margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 18px; border-radius: 99px; background: var(--ping-glass-fill); border: 1px solid var(--ping-glass-hairline); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px)">
+<span class="text-sm font-semibold">{{selectionLabel}}</span>
+<span class="text-xs text-muted-foreground">to</span>
+<button type="button" class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box; font-size: 13px">claude</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">codex</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">one run each</button>
+<button type="button" style="height: 40px; padding: 0 18px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; cursor: pointer" class="text-sm font-semibold">hand off</button>
+<button type="button" onClick="{{clear}}" aria-label="clear the selection" style="width: 36px; height: 36px; border-radius: 99px; border: 0; background: transparent; color: #a3a3a3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+</sc-if>
+</main>
+
+<aside aria-label="repo and shipping" style="flex: 1 1 300px; height: 100%; box-sizing: border-box; border-left: 1px solid hsl(var(--border) / 0.5); padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; overflow-y: auto">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">worktrees</p>
+<div class="ping-row" style="flex-direction: column; gap: 3px; padding: 10px 12px"><p class="text-sm font-semibold mono">main</p><p class="text-xs text-muted-foreground">clean · 1.12.1 is live</p></div>
+<div class="ping-row" style="flex-direction: column; gap: 3px; padding: 10px 12px"><p class="text-sm font-semibold mono">wt/inbox-swipe</p><p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #f59e0b"></span>claude · <span class="mono" style="color: #22c55e">+88</span> <span class="mono" style="color: #ef4444">−21</span></p></div>
+<div class="ping-row" style="flex-direction: column; gap: 3px; padding: 10px 12px"><p class="text-sm font-semibold mono">wt/desk-tab</p><p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #ef4444"></span>codex · waiting on you · <span class="mono" style="color: #22c55e">+212</span> <span class="mono" style="color: #ef4444">−40</span></p></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">previews up</p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="dot" style="background: #22c55e"></span><span class="mono" style="flex: 1">wt/inbox-swipe :8081</span><a href="DeskPhone.dc.html" class="text-xs">on pixel</a></p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="dot" style="background: #22c55e"></span><span class="mono" style="flex: 1">wt/desk-tab :8082</span><a href="#open" class="text-xs">open</a></p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">shipped</p>
+<p class="text-sm" style="display: flex; gap: 8px"><span style="flex: 1">web 1.12.1 · cellar-stash</span><span class="text-xs text-muted-foreground">2h ago</span></p>
+<p class="text-sm" style="display: flex; gap: 8px"><span style="flex: 1">apk 1.12.1 · github release</span><span class="text-xs text-muted-foreground">2h ago</span></p>
+<p class="text-sm" style="display: flex; gap: 8px"><span style="flex: 1">apk 1.12.0</span><span class="text-xs text-muted-foreground">3d ago</span></p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">commands · last runs</p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="mono" style="flex: 1">$apk</span><span class="text-xs" style="color: #f59e0b">running 1m 12s</span></p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="mono" style="flex: 1">$deploy</span><span class="text-xs" style="color: #22c55e">52s · ok</span></p>
+<p class="text-sm" style="display: flex; align-items: center; gap: 8px"><span class="mono" style="flex: 1">$rebuild</span><span class="text-xs" style="color: #22c55e">41s · ok</span></p>
+<a href="#commands" class="text-xs">edit this project's commands →</a>
+</section>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const picked = s.picked || { a1: true, a2: true };
+    const cols = [
+      { title: 'open', dot: '#a3a3a3', cards: [
+        { id: 'a1', kind: 'idea', when: '3h ago', title: 'archive needs an undo' },
+        { id: 'a2', kind: 'glitch', when: 'yesterday', title: 'streak pill clips on small phones' },
+        { id: 'a3', kind: 'copy', when: '2d ago', title: 'copy for the empty desk' },
+        { id: 'a4', kind: 'idea', when: '2d ago', title: 'quiet hours for agent pings' },
+        { id: 'a5', kind: 'idea', when: 'last week', title: 'export a project as markdown' }
+      ] },
+      { title: 'doing', dot: '#f59e0b', cards: [
+        { id: 'b1', kind: 'glitch', when: '6m', title: 'inbox swipe feels sticky on android', agent: 'claude', agentLine: 'testing on the pixel', agentColor: '#f59e0b' },
+        { id: 'b2', kind: 'research', when: 'today', title: 'faster cold start', agent: 'you', agentLine: '2 lines so far', agentColor: '#a3a3a3' }
+      ] },
+      { title: 'blocked', dot: '#ef4444', cards: [
+        { id: 'c1', kind: 'design', when: '9m', title: 'desk tab on the phone', agent: 'codex', agentLine: 'waiting on you: npm i expo-av', agentColor: '#ef4444' },
+        { id: 'c2', kind: 'question', when: '1h', title: 'rename shelves to rooms?', agent: 'claude', agentLine: 'asks: rename the column too?', agentColor: '#ef4444' }
+      ] },
+      { title: 'done', dot: '#22c55e', cards: [
+        { id: 'd1', kind: 'copy', when: 'yesterday', title: '1.12 release notes', agent: 'codex', agentLine: 'from your phone', agentColor: '#a3a3a3' },
+        { id: 'd2', kind: 'idea', when: '4d ago', title: 'kind glyphs toggle' },
+        { id: 'd3', kind: 'glitch', when: 'last week', title: 'qr sign-in on web' }
+      ] }
+    ];
+    const count = Object.keys(picked).filter((k) => picked[k]).length;
+    return {
+      hasSelection: count > 0,
+      selectionLabel: count === 1 ? '1 entry' : count + ' entries',
+      clear: () => this.setState({ picked: {} }),
+      columns: cols.map((col) => ({
+        title: col.title,
+        dot: col.dot,
+        count: col.cards.length,
+        cards: col.cards.map((c) => {
+          const on = !!picked[c.id];
+          return {
+            title: c.title,
+            kind: c.kind,
+            when: c.when,
+            hasAgent: !!c.agent,
+            agent: c.agent || '',
+            agentLine: c.agentLine || '',
+            agentColor: c.agentColor || '#a3a3a3',
+            checked: on,
+            ground: on ? '#262626' : '#171717',
+            toggle: () => this.setState({ picked: Object.assign({}, picked, { [c.id]: !on }) })
+          };
+        })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

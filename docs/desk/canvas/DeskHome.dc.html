@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — home</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.pin{width:20px;height:20px;border-radius:6px;background:#262626;color:#d4d4d4;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.run-chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;flex:none}
+.run-chip[data-state='doing']{color:#f59e0b;background:rgba(245,158,11,0.16)}
+.run-chip[data-state='waiting']{color:#ef4444;background:rgba(239,68,68,0.16)}
+.run-chip[data-state='done']{color:#22c55e;background:rgba(34,197,94,0.16)}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:0 5px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+@media (max-width: 900px){.shell{height:auto !important}}
+</style>
+</helmet>
+<div data-app="cellar" class="shell" style="height: 100vh; min-height: 900px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px; overflow-y: auto">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<p class="text-lg font-bold">cellar</p>
+<span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span>
+</div>
+<a href="#jump" style="height: 36px; padding: 0 10px; border-radius: 8px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; gap: 8px; text-decoration: none" class="text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="flex: 1">jump to anything</span><span class="kbd">ctrl k</span></a>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>dump</a>
+<a class="side-a" href="DeskProjects.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>projects</a>
+<a class="side-a" href="#inbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>inbox<span class="side-n">4</span></a>
+<a class="side-a" href="#stats"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>home</a>
+<a class="side-a" href="DeskChat.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>chat<span class="ping-island-badge" style="margin-left: auto">2</span></a>
+<a class="side-a" href="#commands"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>commands</a>
+<a class="side-a" href="#previews"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>previews<span class="side-n">2 up</span></a>
+<a class="side-a" href="DeskPhone.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg>pixel<span style="margin-left: auto; width: 7px; height: 7px; border-radius: 99px; background: #22c55e"></span></a>
+</nav>
+<nav aria-label="pinned projects" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">pinned</p>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">c</span>cellar<span class="side-n">12</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">s</span>solar<span class="side-n">7</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">r</span>radar<span class="side-n">3</span></a>
+</nav>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px">
+<span style="width: 32px; height: 32px; border-radius: 99px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; justify-content: center; flex: none" class="text-xs font-semibold">MI</span>
+<div style="flex: 1; min-width: 0"><p class="text-sm font-semibold">michu</p><p class="text-xs text-muted-foreground clamp1">2 of 4 agent slots busy</p></div>
+<a href="#settings" aria-label="settings" style="width: 32px; height: 32px; border-radius: 99px; color: #a3a3a3; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg></a>
+</div>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; height: 100%; overflow-y: auto; box-sizing: border-box; padding: 28px 32px 40px">
+<div class="ping-shell-detail" style="display: flex; flex-direction: column; gap: 28px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 class="text-2xl font-bold tracking-tight">desk</h1>
+<p class="text-sm text-muted-foreground">2 agents at work · 2 things waiting on you · pixel attached over usb</p>
+</div>
+<button type="button" style="height: 40px; padding: 0 16px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; display: flex; align-items: center; gap: 8px; cursor: pointer" class="text-sm font-semibold"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect width="14" height="14" x="5" y="5" rx="2"></rect></svg>stop all agents</button>
+</header>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 8px 0 20px; border-radius: 99px; background: hsl(var(--secondary)); border: 1px solid hsl(var(--border))">
+<label for="capture" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">dump a thought or hand off a task</label>
+<input id="capture" type="text" placeholder="what just hit you? — @ a file, $ cellar or a command, / an agent skill" style="flex: 1; min-width: 0; height: 52px; border: 0; background: transparent; color: #fafafa; font-size: 16px; outline-offset: 4px">
+<span class="kbd">⏎ file it</span><span class="kbd">shift ⏎ hand it off</span>
+<button type="button" aria-label="speak it" style="width: 40px; height: 40px; flex: none; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></button>
+</div>
+<p class="text-xs text-muted-foreground" style="padding-left: 20px">same keys as the phone: <span class="tok">@</span> files, <span class="tok">$</span> cellar and its commands, <span class="tok">/</span> agent skills — and a hex code like <span class="tok" style="background: #64748B; color: #ffffff; font-weight: 600">#64748B</span> paints itself</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+<div style="flex: 2 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">waiting on you · 2</p>
+<div class="ping-row" data-selected="true" style="align-items: center">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<a href="DeskChat.dc.html" class="text-base font-bold clamp1" style="color: #fafafa; text-decoration: none">add the desk tab</a>
+<p class="text-xs text-muted-foreground clamp1"><span class="tok">$cellar</span> codex wants to run <span class="mono" style="color: #fafafa">npm i expo-av</span></p>
+</div>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">deny</button>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; cursor: pointer" class="text-sm font-semibold">allow</button>
+</div>
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<p class="text-base font-bold clamp1">rename shelves to rooms?</p>
+<p class="text-xs text-muted-foreground clamp1">claude asks: rename the database column too, or only the words in the app?</p>
+</div>
+<a href="DeskChat.dc.html" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); color: #fafafa; display: inline-flex; align-items: center; text-decoration: none; box-sizing: border-box" class="text-sm font-semibold">answer</a>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">running · 2</p>
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 8px"><a href="DeskChat.dc.html" class="text-base font-bold clamp1" style="color: #fafafa; text-decoration: none">fix the sticky inbox swipe</a><span class="run-chip" data-state="doing">doing · 6m</span></div>
+<p class="text-xs text-muted-foreground clamp1"><span class="tok">$cellar</span> claude · wt/inbox-swipe · testing on the pixel</p>
+<p class="text-xs mono clamp1" style="color: #a3a3a3">› swiping row 2 left on the pixel, then checking the undo toast</p>
+<div style="display: flex; align-items: center; gap: 8px; margin-top: 2px"><div style="flex: 1; height: 6px; border-radius: 99px; background: hsl(var(--secondary)); overflow: hidden"><div style="width: 60%; height: 100%; background: #fafafa; opacity: 0.8"></div></div><span class="text-xs text-muted-foreground">plan 3 of 5</span></div>
+</div>
+</div>
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 8px"><p class="text-base font-bold clamp1"><span class="mono">$apk</span> for cellar</p><span class="run-chip" data-state="doing">1m 12s</span></div>
+<p class="text-xs mono clamp1" style="color: #a3a3a3">gradlew assembleRelease · :app:mergeReleaseResources</p>
+<div style="display: flex; align-items: center; gap: 8px; margin-top: 2px"><div style="flex: 1; height: 6px; border-radius: 99px; background: hsl(var(--secondary)); overflow: hidden"><div style="width: 72%; height: 100%; background: #fafafa; opacity: 0.8"></div></div><span class="text-xs text-muted-foreground">then installs on pixel</span></div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">lately</p>
+<div class="ping-row" style="align-items: center"><div style="flex: 1; min-width: 0"><p class="text-sm font-semibold clamp1">port lidar's shelf grid to solar</p><p class="text-xs text-muted-foreground clamp1"><span class="tok">$solar</span> claude · pull request merged · 2h ago · <span class="mono" style="color: #22c55e">+142</span> <span class="mono" style="color: #ef4444">−38</span></p></div><span class="run-chip" data-state="done">done</span></div>
+<div class="ping-row" style="align-items: center"><div style="flex: 1; min-width: 0"><p class="text-sm font-semibold clamp1"><span class="mono">$deploy</span> cellar web</p><p class="text-xs text-muted-foreground clamp1">live on cellar-stash · after a preview on the phone · 2h ago</p></div><span class="run-chip" data-state="done">live</span></div>
+<div class="ping-row" style="align-items: center"><div style="flex: 1; min-width: 0"><p class="text-sm font-semibold clamp1">write the 1.12 release notes</p><p class="text-xs text-muted-foreground clamp1"><span class="tok">$cellar</span> codex · started from the phone · yesterday</p></div><span class="run-chip" data-state="done">done</span></div>
+</section>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">devices</p>
+<div class="ping-row" style="flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><p class="text-sm font-bold" style="flex: 1">michu-pc <span class="text-xs text-muted-foreground" style="font-weight: 400">· this pc</span></p><span style="width: 7px; height: 7px; border-radius: 99px; background: #22c55e"></span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">cpu</p><p class="text-sm font-semibold">18%</p></div>
+<div><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">memory</p><p class="text-sm font-semibold">9.4 gb</p></div>
+<div><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">phone link</p><p class="text-sm font-semibold">14 ms</p></div>
+</div>
+</div>
+<a href="DeskPhone.dc.html" class="ping-row" style="align-items: center; gap: 14px; color: inherit; text-decoration: none">
+<div aria-hidden="true" style="width: 64px; height: 132px; flex: none; border-radius: 12px; border: 3px solid #262626; background: #0a0a0a; box-sizing: border-box; padding: 8px 5px; display: flex; flex-direction: column; gap: 4px; overflow: hidden">
+<span style="height: 5px; width: 60%; border-radius: 2px; background: #fafafa"></span>
+<span style="height: 14px; border-radius: 3px; background: #262626"></span>
+<span style="height: 10px; border-radius: 3px; background: #171717"></span>
+<span style="height: 10px; border-radius: 3px; background: hsl(var(--primary))"></span>
+<span style="height: 10px; border-radius: 3px; background: #171717"></span>
+<span style="margin-top: auto; height: 8px; width: 70%; align-self: center; border-radius: 99px; background: #262626"></span>
+</div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<p class="text-sm font-bold">pixel</p>
+<p class="text-xs text-muted-foreground">usb · adb · 64% · cellar 1.12.1</p>
+<p class="text-xs" style="color: #f59e0b">claude is testing on it</p>
+<p class="text-xs" style="color: hsl(215 20% 70%); margin-top: 4px">open the phone →</p>
+</div>
+</a>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">commands · $cellar</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span class="text-xs mono">$rebuild</span></button>
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="text-xs mono">$preview</span></button>
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg><span class="text-xs mono">$deploy</span></button>
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline></svg><span class="text-xs mono">$apk</span></button>
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg><span class="text-xs mono">$install</span></button>
+<button type="button" style="height: 64px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #fafafa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg><span class="text-xs mono">$shot</span></button>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">today</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px">
+<div><p class="text-3xl font-bold tracking-tight">14</p><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">thoughts dumped</p></div>
+<div><p class="text-3xl font-bold tracking-tight">5</p><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">handed off</p></div>
+<div><p class="text-3xl font-bold tracking-tight">3</p><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">done by agents</p></div>
+<div><p class="text-3xl font-bold tracking-tight">7</p><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">answered from phone</p></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

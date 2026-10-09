@@ -1,0 +1,46 @@
+/**
+ * Ping — typography. PING.md §5 and §15 `src/global.css`.
+ *
+ * System stack, no bundled font files: an Expo app that ships a font pays for
+ * it on every cold start, and the display stack falls through to something good
+ * on all three platforms. On web, styles.css pulls Spline Sans and Inter from
+ * Google Fonts so the first two entries actually resolve; if that request is
+ * blocked the stack degrades to system-ui exactly as it does on native.
+ *
+ * `--font-display` is the only one in normal use. The others exist for a
+ * deliberate accent (a generated cover, a stat that wants tabular figures).
+ *
+ * The scale itself is Tailwind's, used through classes — the role→class table
+ * is in README.md, and _ds_bundle.css implements every class it names. These
+ * tokens are the same values for `style={{…}}` callers.
+ */
+
+:root {
+  --font-display: 'Spline Sans', Inter, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+
+  /* Sizes, paired with their line heights */
+  --ping-text-4xl: 2.25rem;   --ping-leading-4xl: 2.5rem;
+  --ping-text-3xl: 1.875rem;  --ping-leading-3xl: 2.25rem;
+  --ping-text-2xl: 1.5rem;    --ping-leading-2xl: 2rem;
+  --ping-text-xl: 1.25rem;    --ping-leading-xl: 1.75rem;
+  --ping-text-lg: 1.125rem;   --ping-leading-lg: 1.75rem;
+  --ping-text-base: 1rem;     --ping-leading-base: 1.5rem;
+  --ping-text-sm: 0.875rem;   --ping-leading-sm: 1.25rem;
+  --ping-text-xs: 0.75rem;    --ping-leading-xs: 1rem;
+  --ping-text-11: 11px;       /* stat overline, on-artwork meta */
+  --ping-text-10: 10px;       /* badges, timestamps */
+
+  /* Weights used: 500, 600, 700. No 300, no 800. (§5) */
+  --ping-font-medium: 500;
+  --ping-font-semibold: 600;
+  --ping-font-bold: 700;
+
+  --ping-tracking-tight: -0.025em;   /* only at text-2xl and above */
+  --ping-tracking-widest: 0.1em;     /* only on uppercase overlines */
+  --ping-leading-tight: 1.25;        /* any title that can wrap onto a cover */
+}

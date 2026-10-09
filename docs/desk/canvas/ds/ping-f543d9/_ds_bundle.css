@@ -1,0 +1,412 @@
+/**
+ * Ping — the class vocabulary, for the web.
+ *
+ * ── What this file is ───────────────────────────────────────────────────────
+ * The Ping apps style with NativeWind 4 + Tailwind 3. Their brand vocabulary
+ * comes from `tailwind.config.js` (PING.md §15), which maps semantic class
+ * names onto the CSS variables in tokens/: `bg-background`,
+ * `text-muted-foreground`, `border-border`, `bg-primary`, and so on. Those
+ * names are NOT stock Tailwind — without that config they resolve to nothing.
+ *
+ * So this file implements them as plain CSS, plus the handful of stock Tailwind
+ * utilities PING.md's own tables name (the type scale, the gap/radius/border
+ * vocabulary), so a web design gets the real Ping names whether or not it has a
+ * Tailwind build. Values are transcribed from Tailwind 3's defaults.
+ *
+ * Sections 1–3 are the design system's own vocabulary — the names engineers use
+ * in the apps. Section 4 is web helpers this sync adds for things the apps build
+ * with RN components (BlurView islands, LinearGradient veils); they carry a
+ * `ping-` prefix so they are never mistaken for library class names.
+ *
+ * Where an app-side truth exists, it wins: `tailwind.config.js` for the colour
+ * mapping, `theme/colors.ts` for literals, PING.md for everything else.
+ */
+
+/* ═══ 1. Semantic colours — from tailwind.config.js theme.extend.colors ═════ */
+
+.bg-background { background-color: hsl(var(--background)); }
+.bg-card { background-color: hsl(var(--card)); }
+.bg-popover { background-color: hsl(var(--popover)); }
+.bg-primary { background-color: hsl(var(--primary)); }
+.bg-secondary { background-color: hsl(var(--secondary)); }
+.bg-muted { background-color: hsl(var(--muted)); }
+.bg-accent { background-color: hsl(var(--accent)); }
+.bg-destructive { background-color: hsl(var(--destructive)); }
+.bg-input { background-color: hsl(var(--input)); }
+
+.text-foreground { color: hsl(var(--foreground)); }
+.text-card-foreground { color: hsl(var(--card-foreground)); }
+.text-popover-foreground { color: hsl(var(--popover-foreground)); }
+.text-primary { color: hsl(var(--primary)); }
+.text-primary-foreground { color: hsl(var(--primary-foreground)); }
+.text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
+.text-muted-foreground { color: hsl(var(--muted-foreground)); }
+.text-accent-foreground { color: hsl(var(--accent-foreground)); }
+.text-destructive { color: hsl(var(--destructive)); }
+.text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
+
+/* Hairlines. `.border` carries width + style + the token colour together, so no
+ * global border reset is needed. `border-border/50` is the section rule (§6). */
+.border { border: var(--ping-hairline) solid hsl(var(--border)); }
+.border-2 { border: var(--ping-border-selected) solid hsl(var(--border)); }
+.border-y {
+  border-top: var(--ping-hairline) solid hsl(var(--border));
+  border-bottom: var(--ping-hairline) solid hsl(var(--border));
+}
+.border-border { border-color: hsl(var(--border)); }
+.border-border\/50 { border-color: hsl(var(--border) / 0.5); }
+.border-y.border-border\/50 {
+  border-top-color: hsl(var(--border) / 0.5);
+  border-bottom-color: hsl(var(--border) / 0.5);
+}
+.border-primary { border-color: hsl(var(--primary)); }
+.border-input { border-color: hsl(var(--input)); }
+.border-transparent { border-color: transparent; }
+
+.ring-ring { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+
+/* ═══ 2. Media colours — fixed in every app, never themed (§4.5) ═══════════ */
+
+.bg-neutral-900 { background-color: var(--ping-artwork-ground); }
+.bg-neutral-800 { background-color: var(--ping-thumb-ground); }
+.bg-black\/45 { background-color: var(--ping-back-button); }
+.bg-black\/50 { background-color: var(--ping-badge-ground-icon); }
+.bg-black\/55 { background-color: var(--ping-badge-ground); }
+.bg-black\/60 { background-color: var(--ping-backdrop-confirm); }
+.bg-black\/65 { background-color: var(--ping-title-strip); }
+/* Everything on artwork is white/neutral, not the theme tokens — artwork is
+ * dark in both themes (§5). */
+.text-white { color: #ffffff; }
+.text-neutral-300 { color: #d4d4d4; }
+.text-neutral-400 { color: #a3a3a3; }
+.text-amber-400 { color: var(--ping-star); }
+
+/* ═══ 3. The type, space and radius vocabulary PING.md's tables name ═══════ */
+
+.text-4xl { font-size: var(--ping-text-4xl); line-height: var(--ping-leading-4xl); }
+.text-3xl { font-size: var(--ping-text-3xl); line-height: var(--ping-leading-3xl); }
+.text-2xl { font-size: var(--ping-text-2xl); line-height: var(--ping-leading-2xl); }
+.text-xl { font-size: var(--ping-text-xl); line-height: var(--ping-leading-xl); }
+.text-lg { font-size: var(--ping-text-lg); line-height: var(--ping-leading-lg); }
+.text-base { font-size: var(--ping-text-base); line-height: var(--ping-leading-base); }
+.text-sm { font-size: var(--ping-text-sm); line-height: var(--ping-leading-sm); }
+.text-xs { font-size: var(--ping-text-xs); line-height: var(--ping-leading-xs); }
+.text-\[11px\] { font-size: var(--ping-text-11); }
+.text-\[10px\] { font-size: var(--ping-text-10); }
+
+.font-medium { font-weight: var(--ping-font-medium); }
+.font-semibold { font-weight: var(--ping-font-semibold); }
+.font-bold { font-weight: var(--ping-font-bold); }
+.tracking-tight { letter-spacing: var(--ping-tracking-tight); }
+.tracking-widest { letter-spacing: var(--ping-tracking-widest); }
+.leading-tight { line-height: var(--ping-leading-tight); }
+.uppercase { text-transform: uppercase; }
+
+.gap-1 { gap: 0.25rem; }
+.gap-1\.5 { gap: 0.375rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-5 { gap: 1.25rem; }
+.gap-6 { gap: 1.5rem; }
+.px-4 { padding-left: var(--ping-gutter-phone); padding-right: var(--ping-gutter-phone); }
+.px-6 { padding-left: var(--ping-gutter-modal); padding-right: var(--ping-gutter-modal); }
+.px-8 { padding-left: var(--ping-gutter-desktop); padding-right: var(--ping-gutter-desktop); }
+.p-3 { padding: 0.75rem; }
+.pt-2 { padding-top: 0.5rem; }
+.pb-8 { padding-bottom: 2rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+
+.rounded { border-radius: var(--ping-radius-badge); }
+.rounded-md { border-radius: var(--ping-radius-tile); }
+.rounded-lg { border-radius: var(--ping-radius-control); }
+.rounded-xl { border-radius: var(--ping-radius-card); }
+.rounded-2xl { border-radius: var(--ping-radius-panel); }
+.rounded-full { border-radius: var(--ping-radius-pill); }
+
+.shadow-lg { box-shadow: var(--ping-shadow-lg); }
+.shadow-2xl { box-shadow: var(--ping-shadow-2xl); }
+
+/* Press feedback is opacity, never a scale on touch (§7). */
+.active\:opacity-80:active { opacity: 0.8; }
+.active\:opacity-70:active { opacity: 0.7; }
+
+/* ═══ 4. Web helpers — the RN-built pieces, translated ═════════════════════ */
+
+/**
+ * The nav islands (§8.3). Three floating glass plates in a 1–4–1 rhythm:
+ *
+ *   <nav class="ping-islands">
+ *     <div class="ping-island">…action…</div>
+ *     <div class="ping-island">…four destinations + one sliding marker…</div>
+ *     <div class="ping-island" data-active="true">…you…</div>
+ *   </nav>
+ *
+ * **The slots carry a glyph and nothing else.** No label under the icon, no
+ * label beside it — the destination's name exists only as its accessible name.
+ * Four words across the centre island is the one drift that makes the bar read
+ * as a stock tab bar instead of Ping's, so it is spelled out here: a slot's
+ * only child is a 20px icon (21 at strokeWidth 2.2 for the left action), plus
+ * an optional alert dot or count badge.
+ *
+ * Absolutely positioned, so it reserves no layout: pad every scrolling body by
+ * `var(--ping-nav-space)` (`.ping-nav-space`). There is no top bar anywhere in
+ * a Ping app — this is the whole chrome.
+ */
+.ping-islands {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--ping-safe-bottom, 0px) + var(--ping-island-edge-gap));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--ping-island-gap);
+  pointer-events: none;
+}
+.ping-islands > * { pointer-events: auto; }
+
+/* Every plate is the same glass. `min-width` is the height, so the two round
+ * islands come out square — 52 × 52 — without needing a modifier, and the
+ * centre one grows to the four slots it holds. Only the centre island carries
+ * the 4px pill padding, which is what the marker's `left` is measured from;
+ * a round island has none, so its single control fills the plate edge to edge
+ * exactly as `roundPress: { flex: 1 }` does in the apps. */
+.ping-island {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ping-island-height);
+  min-width: var(--ping-island-height);
+  gap: var(--ping-island-slot-gap);
+  border-radius: var(--ping-radius-pill);
+  background: var(--ping-glass-fill);
+  border: 1px solid var(--ping-glass-hairline);
+  overflow: hidden;
+  backdrop-filter: blur(var(--ping-glass-blur));
+  -webkit-backdrop-filter: blur(var(--ping-glass-blur));
+}
+.ping-island:has(.ping-island-marker),
+.ping-island:has(.ping-island-slot + .ping-island-slot) {
+  padding: 0 var(--ping-island-pill-pad);
+}
+/* The avatar island is the fifth destination, and it is the *plate* that lights
+ * up when you are on it — never a ring drawn around the avatar itself. */
+.ping-island[data-active="true"] { border-color: hsl(var(--primary)); }
+
+/* One destination slot: a 20px glyph, centred, and nothing else — no label
+ * (§8.3). The marker is slot-sized and travels between them; the slide is what
+ * tells you which way you moved, so four states must never fade in place (§7). */
+.ping-island-slot {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ping-island-slot-w);
+  height: var(--ping-island-slot-h);
+  border-radius: var(--ping-radius-pill);
+  color: var(--ping-island-icon-off);
+  transition: color var(--ping-duration-nav) linear;
+}
+.ping-island-slot[aria-current="page"] { color: var(--ping-island-icon-on); }
+/* The left action fills its round plate rather than sitting in a 46 × 42 slot,
+ * and its glyph is a size up at a heavier stroke — it is an action, not a
+ * destination, and it is always lit. */
+.ping-island-slot[data-action="true"] {
+  flex: 1;
+  align-self: stretch;
+  width: auto;
+  height: auto;
+  color: var(--ping-island-icon-on);
+}
+/* Anchored where the first slot starts, then translated a whole slot per
+ * destination: translateX(index × 48px). */
+.ping-island-marker {
+  position: absolute;
+  left: var(--ping-island-pill-pad);
+  top: calc((var(--ping-island-height) - var(--ping-island-slot-h)) / 2 - 1px);
+  width: var(--ping-island-slot-w);
+  height: var(--ping-island-slot-h);
+  border-radius: var(--ping-radius-pill);
+  background: var(--ping-marker-fill);
+  transition: transform var(--ping-duration-nav) var(--ping-ease-out);
+}
+/* Both wear the same ring: 1.5px of the opaque glass colour, so the accent
+ * reads as a dot sitting on the plate rather than a hole cut through it. */
+.ping-island-dot {
+  width: var(--ping-island-dot);
+  height: var(--ping-island-dot);
+  border-radius: var(--ping-radius-pill);
+  background: hsl(var(--primary));
+  border: 1.5px solid var(--ping-island-ring);
+}
+.ping-island-badge {
+  min-width: var(--ping-island-badge);
+  height: var(--ping-island-badge);
+  padding: 0 3px;
+  border-radius: var(--ping-radius-pill);
+  background: hsl(var(--primary));
+  border: 1.5px solid var(--ping-island-ring);
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* You, in the right island: 44 inside the plate's 50 of inner width, so 3px of
+ * glass shows all round. The accent goes on the plate, never on this. */
+.ping-island-avatar {
+  width: var(--ping-island-avatar);
+  height: var(--ping-island-avatar);
+  flex: none;
+  border-radius: var(--ping-radius-pill);
+  background: hsl(var(--secondary));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The initials fallback: two characters at size × 0.35, in muted-foreground,
+   * on bg-secondary. The avatar itself carries no border in any app. */
+  color: hsl(var(--muted-foreground));
+  font-size: calc(var(--ping-island-avatar) * 0.35);
+  font-weight: var(--ping-font-semibold);
+}
+.ping-island-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ping-nav-space { padding-bottom: var(--ping-nav-space); }
+
+/* Screens own their own top inset — there is no header to do it (§8.4). */
+.ping-screen-top { padding-top: calc(var(--ping-safe-top, 0px) + 8px); }
+
+/**
+ * Veils (§4.6). Absolute overlays inside a positioned artwork box; they exist
+ * to make white text survive on artwork, and there are only these recipes.
+ */
+.ping-veil-top,
+.ping-veil-bottom,
+.ping-veil-left,
+.ping-veil-hero {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ping-veil-top { background-image: var(--ping-veil-top); }
+.ping-veil-bottom { background-image: var(--ping-veil-bottom); }
+.ping-veil-left { background-image: var(--ping-veil-left); }
+.ping-veil-hero { background-image: var(--ping-veil-hero); }
+/* A scrollable row gets a right-edge fade instead of a scrollbar. */
+.ping-fade-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--ping-fade-right-width);
+  background-image: var(--ping-fade-right);
+  pointer-events: none;
+}
+
+/* Artwork: small radius, and dimmed while the thing is unconsumed — dimming is
+ * a status statement. Catalogue results are never dimmed, because both the
+ * badge and the dimming would be claims about a thing the shelf has never
+ * seen (§9.1). */
+.ping-artwork {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ping-radius-tile);
+}
+/* The ground is declared at zero specificity so an explicit `bg-*` on the same
+ * element wins: a missing-artwork tile is `bg-neutral-800`, and it has to read
+ * against the `bg-neutral-900` a row card or grid already puts behind it. Wrap
+ * the rule rather than reordering — the utilities ship earlier in this file, so
+ * source order alone would let the ground swallow them. */
+:where(.ping-artwork) { background-color: var(--ping-artwork-ground); }
+.ping-artwork img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ping-artwork[data-unconsumed="true"] img { opacity: 0.68; }
+
+/* The row card (§9.1) — the list row in all three apps. A *filled tile*, and
+ * that is the whole of it: the raised ground is what separates the row from the
+ * scope, and it carries **no border on any edge**. Not an outline, and not the
+ * left rule the spec used to prescribe — see §6 for why that one was fiction. */
+.ping-row {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--ping-radius-card);
+  background-color: var(--ping-row-ground);
+  transition: background-color var(--ping-duration-hover) ease;
+}
+/* Highlight is the ground, one step up. Nothing moves, nothing is drawn. */
+.ping-row[data-selected="true"] {
+  background-color: var(--ping-row-ground-selected);
+}
+@media (hover: hover) {
+  .ping-row:hover { background-color: var(--ping-row-hover); }
+}
+
+/* Hover lift is web-only (§7): the tile rises over its neighbours. */
+.ping-hover-lift { transition: transform var(--ping-duration-hover) ease; }
+@media (hover: hover) {
+  .ping-hover-lift:hover { transform: scale(var(--ping-hover-lift)); z-index: 10; }
+}
+
+/* Content caps (§8.2). Every desktop body wraps in one of these rather than a
+ * hard-coded max width. */
+.ping-shell-grid,
+.ping-shell-detail,
+.ping-shell-text,
+.ping-shell-form { margin-left: auto; margin-right: auto; width: 100%; }
+.ping-shell-grid { max-width: var(--ping-max-grid); }
+.ping-shell-detail { max-width: var(--ping-max-detail); }
+.ping-shell-text { max-width: var(--ping-max-text); }
+.ping-shell-form { max-width: var(--ping-max-form); }
+
+/* Status chip: real colour on a real 0.16 tint (§4.4). The default status is
+ * never badged — badge the exception. */
+.ping-status-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.375rem;
+  padding: 2px 8px;
+  border-radius: var(--ping-radius-pill);
+  font-size: var(--ping-text-11);
+  font-weight: var(--ping-font-semibold);
+}
+.ping-status-chip[data-status="plan"] {
+  color: var(--ping-status-plan);
+  background: var(--ping-status-plan-tint);
+}
+.ping-status-chip[data-status="active"] {
+  color: var(--ping-status-active);
+  background: var(--ping-status-active-tint);
+}
+.ping-status-chip[data-status="done"] {
+  color: var(--ping-status-done);
+  background: var(--ping-status-done-tint);
+}
+.ping-status-chip[data-status="dnf"] {
+  color: var(--ping-status-dnf);
+  background: var(--ping-status-dnf-tint);
+}
+
+/* Chips (§9.6): fully round, selected takes the accent's soft ground. */
+.ping-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.5rem;
+  padding: 6px 12px;
+  border-radius: var(--ping-radius-pill);
+  background: var(--ping-chip-unselected);
+  color: hsl(var(--foreground));
+  font-size: var(--ping-text-sm);
+}
+.ping-chip[aria-pressed="true"] {
+  background: var(--ping-accent-soft);
+  color: hsl(var(--primary));
+}

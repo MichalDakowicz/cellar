@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>notifications — cellar desk</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3{margin:0}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.note{border-radius:24px;background:#1c1c1c;padding:14px 16px 10px;display:flex;flex-direction:column;gap:6px}
+.app{display:flex;align-items:center;gap:8px;font-size:12px;color:#a3a3a3}
+.ico{width:18px;height:18px;border-radius:5px;background:hsl(215 16% 47%);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.acts{display:flex;gap:4px;margin-top:4px}
+.act{height:40px;padding:0 14px;border:0;border-radius:99px;background:transparent;color:hsl(215 25% 78%);font-size:14px;font-weight:600;cursor:pointer}
+.act:hover{background:rgba(255,255,255,0.06)}
+</style>
+</helmet>
+<div data-app="cellar" style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #101010; color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display); padding: 56px 12px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+
+<section class="note" aria-label="run in progress">
+<div class="app"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="12" x2="12" y1="17" y2="21"></line></svg></span>cellar · running · michu-pc</div>
+<p class="text-sm font-semibold">fix the cart total rounding · plan 3 of 5</p>
+<p class="text-sm" style="color: #d4d4d4">claude is running the tests in web-shop</p>
+<div style="height: 4px; border-radius: 99px; background: #333; overflow: hidden; margin-top: 4px"><div style="width: 60%; height: 100%; background: #fafafa"></div></div>
+<p class="text-xs" style="color: #8a8a8a; margin-top: 2px">pings come here — you left the desk 6 min ago</p>
+<div class="acts"><button type="button" class="act">stop</button><button type="button" class="act">open</button></div>
+</section>
+
+<section class="note" aria-label="approval">
+<div class="app"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="12" x2="12" y1="17" y2="21"></line></svg></span>cellar · waiting on you · 1m</div>
+<p class="text-sm font-semibold">codex wants to run a command</p>
+<sc-if value="{{approvalOpen}}" hint-placeholder-val="{{true}}">
+<p class="text-sm mono" style="color: #e5e5e5">npm install date-fns</p>
+<p class="text-xs" style="color: #8a8a8a">web-shop · wt/order-dates</p>
+<div class="acts"><button type="button" class="act" onClick="{{deny}}">deny</button><button type="button" class="act" onClick="{{allowRun}}">allow for this run</button><button type="button" class="act" onClick="{{allow}}">allow</button></div>
+</sc-if>
+<sc-if value="{{approvalDone}}" hint-placeholder-val="{{false}}">
+<p class="text-sm" style="color: #d4d4d4">{{approvalLine}}</p>
+<div class="acts"><button type="button" class="act" onClick="{{undoApproval}}">undo</button></div>
+</sc-if>
+</section>
+
+<section class="note" aria-label="question">
+<div class="app"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="12" x2="12" y1="17" y2="21"></line></svg></span>cellar · claude asks · web-shop</div>
+<p class="text-sm font-semibold">how should the cart open on phones?</p>
+<sc-if value="{{questionOpen}}" hint-placeholder-val="{{true}}">
+<div class="text-sm" style="display: flex; flex-direction: column; gap: 3px; color: #d4d4d4">
+<p><span class="mono" style="color: #fafafa; font-weight: 600">A</span>  from the bottom — recommended</p>
+<p><span class="mono" style="color: #fafafa; font-weight: 600">B</span>  from the right, like desktop</p>
+<p style="color: #8a8a8a">+2 more · or reply in your own words</p>
+</div>
+<div class="acts"><button type="button" class="act" onClick="{{pickA}}">A</button><button type="button" class="act" onClick="{{pickB}}">B</button><button type="button" class="act">more…</button></div>
+</sc-if>
+<sc-if value="{{questionDone}}" hint-placeholder-val="{{false}}">
+<p class="text-sm" style="color: #d4d4d4">{{answerLine}}</p>
+</sc-if>
+</section>
+
+<section class="note" aria-label="crash filed">
+<div class="app"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="12" x2="12" y1="17" y2="21"></line></svg></span>cellar · filed for you · 3m</div>
+<p class="text-sm font-semibold">notes-app crashed on this phone</p>
+<p class="text-sm" style="color: #d4d4d4">IllegalStateException in EditorScreen — filed as a glitch with the stack, a screenshot and the last 200 log lines</p>
+<div class="acts"><button type="button" class="act">hand it off</button><button type="button" class="act">open</button></div>
+</section>
+
+<section class="note" aria-label="plan ran out">
+<div class="app"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="12" x2="12" y1="17" y2="21"></line></svg></span>cellar · paused · web-shop</div>
+<p class="text-sm font-semibold">claude's week ran out on “personal”</p>
+<sc-if value="{{limitOpen}}" hint-placeholder-val="{{true}}">
+<p class="text-sm" style="color: #d4d4d4">the cart run stopped between turns. carry on as:</p>
+<div class="acts"><button type="button" class="act" onClick="{{useWork}}">work</button><button type="button" class="act" onClick="{{useApi}}">api key</button><button type="button" class="act">more…</button></div>
+</sc-if>
+<sc-if value="{{limitDone}}" hint-placeholder-val="{{false}}">
+<p class="text-sm" style="color: #d4d4d4">{{limitLine}}</p>
+</sc-if>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const lines = {
+      allow: 'allowed from the notification · installing',
+      allowRun: 'installs allowed for the rest of this run',
+      deny: 'denied · codex will go without it'
+    };
+    const answers = {
+      A: 'you picked A · from the bottom · claude carries on',
+      B: 'you picked B · from the right · claude carries on'
+    };
+    return {
+      approvalOpen: !s.approval,
+      approvalDone: !!s.approval,
+      approvalLine: s.approval ? lines[s.approval] : '',
+      allow: () => this.setState({ approval: 'allow' }),
+      allowRun: () => this.setState({ approval: 'allowRun' }),
+      deny: () => this.setState({ approval: 'deny' }),
+      undoApproval: () => this.setState({ approval: null }),
+      questionOpen: !s.answer,
+      questionDone: !!s.answer,
+      answerLine: s.answer ? answers[s.answer] : '',
+      pickA: () => this.setState({ answer: 'A' }),
+      pickB: () => this.setState({ answer: 'B' }),
+      limitOpen: !s.limit,
+      limitDone: !!s.limit,
+      limitLine: s.limit === 'work' ? 'carrying on as “work” · fresh session, same plan and diff' : (s.limit === 'api' ? 'carrying on with the api key · cost shows in the run' : ''),
+      useWork: () => this.setState({ limit: 'work' }),
+      useApi: () => this.setState({ limit: 'api' })
+    };
+  }
+}
+</script>
+</body>
+</html>

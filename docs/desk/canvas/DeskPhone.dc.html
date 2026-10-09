@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — pixel over adb</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.pin{width:20px;height:20px;border-radius:6px;background:#262626;color:#d4d4d4;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.ibtn{width:40px;height:40px;flex:none;border-radius:99px;border:1px solid hsl(var(--border));background:transparent;color:#fafafa;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ghost{height:32px;padding:0 12px;border-radius:99px;border:0;background:transparent;color:#a3a3a3;cursor:pointer;font-size:13px}
+.ghost:hover{color:#fafafa;background:hsl(0 0% 12%)}
+.seg{display:flex;gap:2px;padding:3px;border-radius:8px;border:1px solid hsl(var(--border));background:hsl(var(--secondary))}
+.seg button{height:28px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:#a3a3a3;cursor:pointer;font-size:12px}
+.seg button[aria-pressed='true']{background:hsl(0 0% 20%);color:#fafafa;font-weight:600}
+@media (max-width: 900px){.shell{height:auto !important}}
+</style>
+</helmet>
+<div data-app="cellar" class="shell" style="height: 100vh; min-height: 900px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px; overflow-y: auto">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<p class="text-lg font-bold">cellar</p>
+<span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span>
+</div>
+<a href="#jump" style="height: 36px; padding: 0 10px; border-radius: 8px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; gap: 8px; text-decoration: none" class="text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="flex: 1">jump to anything</span><span class="kbd">ctrl k</span></a>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>dump</a>
+<a class="side-a" href="DeskProjects.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>projects</a>
+<a class="side-a" href="#inbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>inbox<span class="side-n">4</span></a>
+<a class="side-a" href="#stats"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>home</a>
+<a class="side-a" href="DeskChat.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>chat<span class="ping-island-badge" style="margin-left: auto">2</span></a>
+<a class="side-a" href="#commands"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>commands</a>
+<a class="side-a" href="#previews"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>previews<span class="side-n">2 up</span></a>
+<a class="side-a" href="DeskPhone.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg>pixel<span class="dot" style="margin-left: auto; background: #22c55e"></span></a>
+</nav>
+<nav aria-label="pinned projects" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">pinned</p>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">c</span>cellar<span class="side-n">12</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">s</span>solar<span class="side-n">7</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">r</span>radar<span class="side-n">3</span></a>
+</nav>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px">
+<span style="width: 32px; height: 32px; border-radius: 99px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; justify-content: center; flex: none" class="text-xs font-semibold">MI</span>
+<div style="flex: 1; min-width: 0"><p class="text-sm font-semibold">michu</p><p class="text-xs text-muted-foreground clamp1">2 of 4 agent slots busy</p></div>
+</div>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; height: 100%; overflow-y: auto; box-sizing: border-box; padding: 24px 28px 40px; display: flex; flex-wrap: wrap; gap: 32px; align-content: flex-start">
+
+<section aria-label="pixel screen" style="flex: 1 1 360px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+<div style="align-self: stretch; display: flex; flex-direction: column; gap: 4px">
+<h1 class="text-2xl font-bold tracking-tight">pixel</h1>
+<p class="text-sm text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>attached over usb · adb authorised · 64% · cellar 1.12.2-debug</p>
+</div>
+<div class="seg" role="group" aria-label="who drives the phone" style="align-self: stretch">
+<sc-for list="{{drivers}}" as="d" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{d.on}}" onClick="{{d.pick}}" style="flex: 1">{{d.label}}</button>
+</sc-for>
+</div>
+<div aria-label="pixel screen, mirrored over adb" style="width: 300px; height: 640px; box-sizing: border-box; border-radius: 40px; border: 8px solid #1c1c1c; background: #0a0a0a; overflow: hidden; position: relative; padding: 44px 16px 0; display: flex; flex-direction: column; gap: 12px">
+<sc-if value="{{agentDriving}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; top: 10px; left: 12px; right: 12px; height: 26px; border-radius: 99px; background: rgba(245,158,11,0.18); color: #fbbf24; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 600"><span class="dot" style="background: #f59e0b"></span>claude is driving — click to take over</div>
+</sc-if>
+<p style="font-size: 22px; font-weight: 700">inbox</p>
+<p style="font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: #a3a3a3">TO FILE · 4</p>
+<div style="position: relative; height: 68px; border-radius: 12px; overflow: hidden; background: #3f4652">
+<div style="position: absolute; right: 0; top: 0; bottom: 0; width: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #ffffff; font-size: 10px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>archive</div>
+<div style="position: absolute; top: 0; bottom: 0; right: 92px; width: 100%; border-radius: 12px; background: #262626; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 2px">
+<p style="font-size: 13px; font-weight: 600; width: 170px">archive needs an undo</p>
+<p style="font-size: 10px; color: #a3a3a3; width: 170px">idea · 3h ago</p>
+</div>
+<span aria-hidden="true" style="position: absolute; left: 96px; top: 20px; width: 28px; height: 28px; border-radius: 99px; border: 2px solid #fbbf24; box-sizing: border-box"></span>
+</div>
+<div style="height: 60px; border-radius: 12px; background: #171717; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px"><p style="font-size: 13px; font-weight: 600">streak pill clips on small phones</p><p style="font-size: 10px; color: #a3a3a3">glitch · yesterday</p></div>
+<div style="height: 60px; border-radius: 12px; background: #171717; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px"><p style="font-size: 13px; font-weight: 600">rename shelves to rooms?</p><p style="font-size: 10px; color: #a3a3a3">question · 2d ago</p></div>
+<div style="height: 60px; border-radius: 12px; background: #171717; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px"><p style="font-size: 13px; font-weight: 600">copy for the empty desk</p><p style="font-size: 10px; color: #a3a3a3">copy · 2d ago</p></div>
+<div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 64px; height: 30px; padding: 0 12px; border-radius: 8px; background: #262626; display: flex; align-items: center; gap: 12px; font-size: 11px; white-space: nowrap"><span>archived</span><span style="font-weight: 700; color: #cbd5e1">undo</span></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 14px; display: flex; justify-content: center; gap: 6px">
+<span style="width: 36px; height: 36px; border-radius: 99px; background: rgba(38,38,38,0.92)"></span>
+<span style="width: 124px; height: 36px; border-radius: 99px; background: rgba(38,38,38,0.92)"></span>
+<span style="width: 36px; height: 36px; border-radius: 99px; background: rgba(38,38,38,0.92)"></span>
+</div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center">
+<button type="button" class="ibtn" aria-label="android back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 4 7 12l10 8z"></path></svg></button>
+<button type="button" class="ibtn" aria-label="android home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle></svg></button>
+<button type="button" class="ibtn" aria-label="recent apps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect width="13" height="13" x="5.5" y="5.5" rx="2"></rect></svg></button>
+<button type="button" class="ibtn" aria-label="rotate"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg></button>
+<button type="button" class="ibtn" aria-label="type on the phone from this keyboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 8h.01"></path><path d="M12 12h.01"></path><path d="M14 8h.01"></path><path d="M16 12h.01"></path><path d="M18 8h.01"></path><path d="M6 8h.01"></path><path d="M7 16h10"></path><path d="M8 12h.01"></path><rect width="20" height="16" x="2" y="4" rx="2"></rect></svg></button>
+<button type="button" class="ibtn" aria-label="screen off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v10"></path><path d="M18.4 6.6a9 9 0 1 1-12.77.04"></path></svg></button>
+</div>
+<p class="text-xs text-muted-foreground" style="text-align: center">drag on the mirror to swipe · scroll wheel scrolls · ctrl v pastes into the phone</p>
+</section>
+
+<div style="flex: 999 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">install and open</p>
+<div class="ping-row" style="align-items: center; flex-wrap: wrap">
+<span style="width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--ping-thumb-ground); color: #d4d4d4; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline></svg></span>
+<div style="flex: 1 1 220px; min-width: 0"><p class="text-sm font-semibold mono clamp1">cellar-1.12.2-debug.apk</p><p class="text-xs text-muted-foreground clamp1">built 3m ago from wt/inbox-swipe by <span class="tok">$apk</span> · 38 mb</p></div>
+<button type="button" class="ghost">clear data</button>
+<button type="button" class="ghost">uninstall</button>
+<button type="button" style="height: 40px; padding: 0 18px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; cursor: pointer" class="text-sm font-semibold">install and open</button>
+</div>
+<div style="display: flex; gap: 8px">
+<label for="deeplink" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">deep link to open on the phone</label>
+<input id="deeplink" type="text" value="cellar://entry/archive-needs-an-undo" style="flex: 1; min-width: 0; height: 40px; box-sizing: border-box; border-radius: 8px; border: 1px solid hsl(var(--border)); background: hsl(var(--secondary)); color: #fafafa; padding: 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+<button type="button" style="height: 40px; padding: 0 16px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">open on pixel</button>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">capture</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button type="button" style="border: 0; border-radius: 12px; background: var(--ping-row-ground); padding: 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px"><span class="text-sm font-semibold">screenshot</span><span class="text-xs text-muted-foreground">into the open chat, or the clipboard</span></button>
+<button type="button" style="border: 0; border-radius: 12px; background: var(--ping-row-ground); padding: 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px"><span class="text-sm font-semibold">record 30s</span><span class="text-xs text-muted-foreground">with taps shown, as a short clip</span></button>
+<button type="button" style="border: 0; border-radius: 12px; background: #262626; padding: 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px"><span class="text-sm font-semibold">file this screen</span><span class="text-xs text-muted-foreground">new glitch in <span class="tok">$cellar</span> with the screenshot and the last 200 log lines</span></button>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+<section style="flex: 3 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground" style="flex: 1">logcat · com.ping.cellar</p>
+<div class="seg" role="group" aria-label="log level"><button type="button" aria-pressed="false">all</button><button type="button" aria-pressed="true">info+</button><button type="button" aria-pressed="false">errors</button></div>
+</div>
+<div class="mono" style="border-radius: 12px; background: #0f0f10; border: 1px solid hsl(var(--border) / 0.5); padding: 12px 14px; font-size: 12px; line-height: 20px; overflow-x: auto; white-space: nowrap">
+<p><span style="color: #737373">18:41:02.114</span> <span style="color: #a3a3a3">I</span> inbox: swipe start row=2</p>
+<p><span style="color: #737373">18:41:02.380</span> <span style="color: #f59e0b">W</span> swipe released at 61% — threshold 66%</p>
+<p><span style="color: #737373">18:41:02.391</span> <span style="color: #a3a3a3">I</span> inbox: row snapped back</p>
+<p><span style="color: #737373">18:41:03.902</span> <span style="color: #a3a3a3">I</span> inbox: swipe start row=2</p>
+<p><span style="color: #737373">18:41:04.120</span> <span style="color: #a3a3a3">I</span> inbox: archived, undo toast shown</p>
+<p style="background: rgba(239,68,68,0.10)"><span style="color: #737373">18:41:06.004</span> <span style="color: #ef4444">E</span> toast: undo pressed after unmount</p>
+<p><span style="color: #737373">18:41:06.010</span> <span style="color: #f59e0b">W</span> state update on unmounted UndoToast</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">send these lines to claude</button>
+<button type="button" class="ghost">pause</button>
+<button type="button" class="ghost">clear</button>
+</div>
+</section>
+
+<section style="flex: 2 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">phone settings over adb</p>
+<sc-for list="{{switches}}" as="sw" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px">
+<span class="text-sm" style="flex: 1">{{sw.label}}</span>
+<button type="button" role="switch" aria-checked="{{sw.on}}" aria-label="{{sw.label}}" onClick="{{sw.toggle}}" style="width: 40px; height: 24px; flex: none; border-radius: 99px; border: 0; padding: 2px; background: {{sw.track}}; cursor: pointer; display: flex; justify-content: {{sw.side}}"><span style="width: 20px; height: 20px; border-radius: 99px; background: #fafafa"></span></button>
+</div>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 10px"><span class="text-sm" style="flex: 1">network</span><div class="seg" role="group" aria-label="network"><button type="button" aria-pressed="true">normal</button><button type="button" aria-pressed="false">slow</button><button type="button" aria-pressed="false">offline</button></div></div>
+<div style="display: flex; align-items: center; gap: 10px"><span class="text-sm" style="flex: 1">font size</span><div class="seg" role="group" aria-label="font size"><button type="button" aria-pressed="false">1×</button><button type="button" aria-pressed="true">1.3×</button><button type="button" aria-pressed="false">2×</button></div></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; margin-top: 4px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">agents on this phone</p>
+<p class="text-sm">agents may install, tap, swipe and take screenshots. never uninstall, or read notifications and messages.</p>
+<p class="text-xs text-muted-foreground">same switch as “let agents test on my phone” in cellar's settings</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">connection</p>
+<p class="text-sm">usb now. switch to adb over wifi and the phone stays attached when you walk away from the desk.</p>
+<button type="button" style="align-self: flex-start; height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">go wireless</button>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const driver = s.driver || 'agent';
+    const sw = s.sw || { dark: true, taps: true, bounds: false, awake: true, agents: true };
+    const list = [
+      { id: 'agents', label: 'let agents test on this phone' },
+      { id: 'dark', label: 'dark theme' },
+      { id: 'taps', label: 'show taps' },
+      { id: 'bounds', label: 'layout bounds' },
+      { id: 'awake', label: 'stay awake while charging' }
+    ];
+    return {
+      agentDriving: driver === 'agent',
+      drivers: [
+        { id: 'watch', label: 'just watch' },
+        { id: 'me', label: 'i drive' },
+        { id: 'agent', label: 'agent drives' }
+      ].map((d) => ({ label: d.label, on: d.id === driver, pick: () => this.setState({ driver: d.id }) })),
+      switches: list.map((it) => {
+        const on = !!sw[it.id];
+        return {
+          label: it.label,
+          on: on,
+          track: on ? 'hsl(215 16% 47%)' : '#404040',
+          side: on ? 'flex-end' : 'flex-start',
+          toggle: () => this.setState({ sw: Object.assign({}, sw, { [it.id]: !on }) })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

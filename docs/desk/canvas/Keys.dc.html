@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar — the keys</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.hex{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;font-weight:600;padding:1px 7px;border-radius:5px;white-space:nowrap}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.keytile{width:64px;height:64px;border-radius:12px;background:hsl(var(--secondary));display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',var(--font-mono);font-size:30px;font-weight:600;color:#fafafa;flex:none}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a}
+.col ul,.rules{padding-left:16px;display:flex;flex-direction:column;gap:5px;color:#d4d4d4;font-size:14px;line-height:20px}
+.step{flex:1 1 170px;min-width:0;border-radius:12px;background:#171717;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:19px}
+.chev{flex:none;align-self:center;color:#525252}
+.opt{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px}
+</style>
+</helmet>
+<div data-app="cellar" style="min-height: 2400px; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display); padding: 56px 32px 72px; box-sizing: border-box">
+<div style="max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px">
+
+<header style="display: flex; flex-direction: column; gap: 12px; max-width: 880px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">the keys · pc and phone</p>
+<h1 class="text-4xl font-bold tracking-tight leading-tight">three keys, and colours that paint themselves</h1>
+<p class="text-base" style="color: #d4d4d4"><span class="mono">@</span> points at files, <span class="mono">$</span> at anything in your cellar — its prepared commands too — and <span class="mono">/</span> at the agent's own skills. <span class="mono">#</span> isn't a key any more — type a hex code and it turns into a chip filled with that colour. all of it works the same in the desktop app and on the phone: the dump bar, the chat, the new-task sheet, ctrl k.</p>
+</header>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px 36px">
+<div class="col" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px"><span class="keytile">@</span><div><p class="text-xl font-bold">files</p><p class="text-sm text-muted-foreground">like everywhere else</p></div></div>
+<p class="lbl">finds</p>
+<ul><li>files changed in this run first</li><li>then the rest of the worktree, folders too</li><li><span class="mono">:42</span> after a name points at a line</li></ul>
+<p class="lbl">a new name</p>
+<p class="text-sm" style="color: #d4d4d4">nothing — agents make files, you point at them</p>
+<p class="lbl">preview</p>
+<p class="text-sm" style="color: #d4d4d4">hover on the pc, long-press on the phone, to see those lines</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="tok">@NavIslands.tsx:88</span><span class="tok">@app.json</span><span class="tok">@src/features/inbox/</span></div>
+</div>
+
+<div class="col" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px"><span class="keytile">$</span><div><p class="text-xl font-bold">cellar</p><p class="text-sm text-muted-foreground">its commands, entries and projects</p></div></div>
+<p class="lbl">finds</p>
+<ul><li>prepared commands — $rebuild, $preview, $deploy, $apk, $try-on-phone, $logcat. bare, they run in the current project; <span class="mono">$web-shop/deploy</span> runs another's</li><li>projects first, entries inside one: <span class="mono">$</span> lists projects, pick one and type <span class="mono">/</span>, then search its entries by their words — <span class="mono">$cellar/sticky</span> finds “inbox swipe feels sticky”</li></ul>
+<p class="lbl">a command</p>
+<p class="text-sm" style="color: #d4d4d4">first in the message it runs straight away as a job; inside a sentence the agent runs it when it gets there. every command is also a button on the desk tab and on home</p>
+<p class="lbl">an entry</p>
+<p class="text-sm" style="color: #d4d4d4">the agent claims it, moves it to doing and writes its lines back to it</p>
+<p class="lbl">a new name</p>
+<p class="text-sm" style="color: #d4d4d4"><span class="mono">$project/new words</span> makes an entry in that project; a new project comes from “new project” at the bottom of the list</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="tok">$deploy</span><span class="tok">$try-on-phone</span><span class="tok">$cellar/archive-needs-an-undo</span><span class="tok">$web-shop/deploy</span></div>
+</div>
+
+<div class="col" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px"><span class="keytile">/</span><div><p class="text-xl font-bold">agent skills</p><p class="text-sm text-muted-foreground">claude code, codex and the rest</p></div></div>
+<p class="lbl">finds</p>
+<ul><li>the picked agent's built-in skills — /review, /init, /compact</li><li>your own skills for that agent — /frontend-design, /release-notes</li><li>the list follows the agent picker beside the composer</li></ul>
+<p class="lbl">what it does</p>
+<p class="text-sm" style="color: #d4d4d4">the agent loads the skill and works the way it says. it's how to work, where <span class="mono">$</span> is what to run</p>
+<p class="lbl">a new name</p>
+<p class="text-sm" style="color: #d4d4d4">offers to write a new skill for that agent</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="tok">/review</span><span class="tok">/init</span><span class="tok">/frontend-design</span><span class="tok">/release-notes</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px"><span class="keytile" style="color: #737373">#</span><div><p class="text-xl font-bold">hex codes paint themselves</p><p class="text-sm text-muted-foreground"># is no longer a key — it's a colour</p></div></div>
+<ul class="rules">
+<li>type <span class="mono">#</span> and 3, 6 or 8 hex digits — <span class="mono">#fff</span>, <span class="mono">#64748B</span>, <span class="mono">#64748BCC</span></li>
+<li>the moment it's a valid code, the text becomes a chip filled with that colour</li>
+<li>the chip's text turns dark or light, whichever reads on it</li>
+<li>click or tap a chip: copy it, nudge it lighter or darker, or swap in a colour the project already uses</li>
+<li>agents get the plain code, and colours in their replies come back as chips too</li>
+<li>anything else after a <span class="mono">#</span> stays plain text — no popup, nothing to dismiss</li>
+</ul>
+</div>
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="border-radius: 16px; border: 1px solid hsl(var(--border)); background: hsl(var(--secondary)); padding: 14px 18px; font-size: 16px; line-height: 30px">make the archive action <span class="hex" style="font-size: 14px; background: #64748B; color: #ffffff">#64748B</span>, the undo text <span class="hex" style="font-size: 14px; background: #FAFAFA; color: #0a0a0a">#FAFAFA</span> and the blocked dot <span class="hex" style="font-size: 14px; background: #EF4444; color: #0a0a0a">#EF4444</span><span style="display: inline-block; width: 2px; height: 18px; margin-left: 3px; vertical-align: -3px; background: #fafafa"></span></div>
+<p class="lbl">how chips pick their text</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #0A0A0A; color: #ffffff; box-shadow: inset 0 0 0 1px #333">#0A0A0A</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #262626; color: #ffffff">#262626</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #64748B; color: #ffffff">#64748B</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #3B82F6; color: #0a0a0a">#3B82F6</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #10B981; color: #0a0a0a">#10B981</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #F59E0B; color: #0a0a0a">#F59E0B</span>
+<span class="hex" style="font-size: 13px; padding: 4px 10px; background: #FAFAFA; color: #0a0a0a">#FAFAFA</span>
+</div>
+<p class="text-sm text-muted-foreground">and what stays text: <span class="mono" style="color: #d4d4d4">#later</span>, <span class="mono" style="color: #d4d4d4">#12</span>, <span class="mono" style="color: #d4d4d4">#ggg</span></p>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 880px">
+<h2 class="text-xl font-bold">the same on the pc and the phone</h2>
+<p class="text-sm text-muted-foreground">one search behind both. the pc shows results above the composer and takes the keyboard; the phone shows them above the keyboard, with the keys in a strip so you never dig for symbols.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-end">
+<div style="flex: 1 1 520px; min-width: 0; max-width: 620px; display: flex; flex-direction: column; gap: 8px">
+<p class="lbl">desktop</p>
+<div role="listbox" aria-label="cellar results" style="border-radius: 16px; border: 1px solid hsl(var(--border)); background: #121212; padding: 8px; display: flex; flex-direction: column; gap: 2px">
+<p class="lbl" style="padding: 6px 10px 2px">entries in cellar</p>
+<div class="opt" style="background: #262626"><span class="mono text-sm" style="flex: 1">$cellar/streak-pill-clips</span><span class="text-xs text-muted-foreground">glitch · open</span></div>
+<div class="opt"><span class="mono text-sm" style="flex: 1">$cellar/inbox-swipe-feels-sticky</span><span class="text-xs text-muted-foreground">glitch · claude on it</span></div>
+<div class="opt" style="color: #d4d4d4"><span class="text-sm" style="flex: 1">+ new entry “st…” in cellar</span></div>
+<p class="text-[11px]" style="color: #8a8a8a; padding: 8px 10px 2px">↑↓ move · tab puts it in · esc closes</p>
+</div>
+<div style="border-radius: 16px; border: 1px solid hsl(var(--primary)); background: hsl(var(--secondary)); padding: 12px 16px; font-size: 14px; line-height: 24px">fix <span class="mono" style="color: #fafafa">$cellar/st</span><span style="display: inline-block; width: 2px; height: 16px; margin-left: 1px; vertical-align: -3px; background: #fafafa"></span></div>
+</div>
+
+<div style="width: 340px; max-width: 100%; display: flex; flex-direction: column; gap: 8px">
+<p class="lbl">phone</p>
+<div style="border-radius: 24px; background: #121212; border: 1px solid hsl(var(--border)); padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px">
+<div role="listbox" aria-label="cellar results on the phone" style="display: flex; flex-direction: column; gap: 2px">
+<div class="opt" style="background: #262626; min-height: 44px; box-sizing: border-box"><span class="mono text-sm" style="flex: 1">$cellar/streak-pill-clips</span></div>
+<div class="opt" style="min-height: 44px; box-sizing: border-box"><span class="mono text-sm" style="flex: 1">$cellar/inbox-swipe-feels-sticky</span></div>
+<div class="opt" style="min-height: 44px; box-sizing: border-box"><span class="text-sm" style="flex: 1; color: #d4d4d4">+ new entry in cellar</span></div>
+</div>
+<div style="min-height: 48px; border-radius: 99px; background: hsl(var(--secondary)); border: 1px solid hsl(var(--border)); padding: 0 16px; display: flex; align-items: center; font-size: 14px">fix <span class="mono" style="margin-left: 5px">$cellar/st</span><span style="display: inline-block; width: 2px; height: 16px; margin-left: 1px; background: #fafafa"></span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button type="button" class="mono" style="height: 44px; border: 0; border-radius: 10px; background: #262626; color: #fafafa; font-size: 18px; font-weight: 600; cursor: pointer">@</button>
+<button type="button" class="mono" aria-pressed="true" style="height: 44px; border: 1px solid hsl(var(--primary)); border-radius: 10px; background: hsl(var(--primary) / 0.16); color: #fafafa; font-size: 18px; font-weight: 600; cursor: pointer">$</button>
+<button type="button" class="mono" style="height: 44px; border: 0; border-radius: 10px; background: #262626; color: #fafafa; font-size: 18px; font-weight: 600; cursor: pointer">/</button>
+<button type="button" aria-label="speak" style="height: 44px; border: 0; border-radius: 10px; background: hsl(var(--primary)); color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></button>
+</div>
+<p class="text-xs text-muted-foreground" style="text-align: center">by voice: “at nav islands”, “dollar deploy”, “slash review”</p>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 880px">
+<h2 class="text-xl font-bold">one line, many things</h2>
+<p class="text-sm text-muted-foreground">before you send, the composer spells out what each token will do. which agent runs it is the picker beside the composer — or the project's default — not a key.</p>
+</div>
+<div style="border-radius: 16px; border: 1px solid hsl(var(--primary)); background: hsl(var(--secondary)); padding: 14px 18px; font-size: 16px; line-height: 30px; max-width: 980px">fix <span class="tok" style="font-size: 14px">$cellar/streak-pill-clips</span> — make the pill <span class="hex" style="font-size: 14px; background: #F59E0B; color: #0a0a0a">#F59E0B</span> in <span class="tok" style="font-size: 14px">@StreakPill.tsx</span> with <span class="tok" style="font-size: 14px">/frontend-design</span>, then <span class="tok" style="font-size: 14px">$apk</span> and <span class="tok" style="font-size: 14px">$try-on-phone</span></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch">
+<div class="step"><span class="lbl">$</span><span>claims the entry and moves it to doing</span></div>
+<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="step"><span class="lbl">#</span><span>passes the colour as plain <span class="mono">#F59E0B</span></span></div>
+<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="step"><span class="lbl">@</span><span>hands the agent that file first</span></div>
+<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="step"><span class="lbl">/</span><span>the agent loads its frontend-design skill</span></div>
+<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="step"><span class="lbl">$</span><span>when the fix is in, builds the apk</span></div>
+<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="step"><span class="lbl">$</span><span>installs it on the phone, screenshot back to the chat</span></div>
+</div>
+<p class="text-sm text-muted-foreground">save the line and it becomes a command of its own, with a button: <span class="tok">$fix-and-try</span></p>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+<div style="flex: 3 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h2 class="text-xl font-bold">your own keys</h2>
+<p class="text-sm text-muted-foreground">pick a free character and where it searches: a folder, a list, or a url that answers with json. <span class="mono">@ $ /</span> are fixed and <span class="mono">#</span> belongs to colours. these are ideas to start from.</p>
+</div>
+<div class="ping-row" style="align-items: center; gap: 14px"><span class="keytile" style="width: 44px; height: 44px; font-size: 20px; background: #262626">!</span><div style="flex: 1; min-width: 0"><p class="text-base font-bold">snippets</p><p class="text-xs text-muted-foreground">saved prompts from a notes folder · <span class="tok">!review-tone</span> <span class="tok">!no-new-deps</span></p></div><span class="text-xs" style="color: #22c55e">on</span></div>
+<div class="ping-row" style="align-items: center; gap: 14px"><span class="keytile" style="width: 44px; height: 44px; font-size: 20px; background: #262626">~</span><div style="flex: 1; min-width: 0"><p class="text-base font-bold">past runs</p><p class="text-xs text-muted-foreground">pull another run's plan and diff in as context · <span class="tok">~desk-tab</span></p></div><span class="text-xs" style="color: #22c55e">on</span></div>
+<div class="ping-row" style="align-items: center; gap: 14px"><span class="keytile" style="width: 44px; height: 44px; font-size: 20px; background: #262626">^</span><div style="flex: 1; min-width: 0"><p class="text-base font-bold">git</p><p class="text-xs text-muted-foreground">branches, worktrees, commits · <span class="tok">^main</span> <span class="tok">^wt/desk-tab</span></p></div><span class="text-xs text-muted-foreground">off</span></div>
+<div class="ping-row" style="align-items: center; gap: 14px"><span class="keytile" style="width: 44px; height: 44px; font-size: 20px; background: #262626">%</span><div style="flex: 1; min-width: 0"><p class="text-base font-bold">links</p><p class="text-xs text-muted-foreground">bookmarks: consoles, docs, dashboards · <span class="tok">%firebase</span> <span class="tok">%supabase</span></p></div><span class="text-xs text-muted-foreground">off</span></div>
+<button type="button" style="height: 48px; border-radius: 12px; border: 1px dashed #404040; background: transparent; color: #d4d4d4; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px" class="text-sm font-semibold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>add a key</button>
+</div>
+
+<div style="flex: 2 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h2 class="text-xl font-bold">ctrl k — jump anywhere</h2>
+<p class="text-sm text-muted-foreground">no key: search everything at once. on the phone it's a pull-down on the desk tab.</p>
+</div>
+<div role="dialog" aria-label="jump to anything" style="box-sizing: border-box; border-radius: 16px; border: 1px solid hsl(var(--border)); background: #121212; padding: 10px; display: flex; flex-direction: column; gap: 4px">
+<div style="height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid hsl(var(--border) / 0.5); margin-bottom: 6px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<label for="jump" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">jump to anything</label>
+<input id="jump" type="text" value="swipe" style="flex: 1; min-width: 0; border: 0; background: transparent; color: #fafafa; font-size: 16px; outline-offset: 4px">
+<span class="kbd">esc</span>
+</div>
+<div class="opt" style="background: #262626"><span class="mono text-sm" style="flex: 1">$cellar/inbox-swipe-feels-sticky</span><span class="text-xs text-muted-foreground">entry · doing</span></div>
+<div class="opt"><span class="text-sm" style="flex: 1">fix the sticky inbox swipe</span><span class="text-xs" style="color: #f59e0b">run · claude · 6m</span></div>
+<div class="opt"><span class="mono text-sm" style="flex: 1">@SwipeRow.tsx</span><span class="text-xs text-muted-foreground">file · changed</span></div>
+<div class="opt"><span class="mono text-sm" style="flex: 1">$preview</span><span class="text-xs text-muted-foreground">command · wt/inbox-swipe</span></div>
+<p class="text-[11px]" style="color: #8a8a8a; padding: 10px 12px 4px; display: flex; gap: 14px; flex-wrap: wrap"><span>⏎ open</span><span>ctrl ⏎ open it on the phone</span><span>tab narrows to @ $ or /</span></p>
+</div>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>desk — cellar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15);--ping-safe-top:40px;--ping-safe-bottom:16px}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.run-chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;flex:none}
+.run-chip[data-state='doing']{color:#f59e0b;background:rgba(245,158,11,0.16)}
+.run-chip[data-state='waiting']{color:#ef4444;background:rgba(239,68,68,0.16)}
+.run-chip[data-state='done']{color:#22c55e;background:rgba(34,197,94,0.16)}
+</style>
+</helmet>
+<div data-app="cellar" style="position: relative; width: 390px; height: 844px; overflow: hidden; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+<div class="ping-screen-top ping-nav-space" style="height: 100%; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header class="px-4" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-top: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<h1 class="text-2xl font-bold tracking-tight leading-tight">your desk</h1>
+<p class="text-xs text-muted-foreground">michu-pc is awake · 2 agents at work · 1 waiting on you</p>
+</div>
+<a href="#settings" aria-label="settings" style="width: 44px; height: 44px; flex: none; border-radius: 99px; background: hsl(var(--secondary)); color: #fafafa; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg></a>
+</header>
+
+<section class="px-4">
+<div style="padding: 14px; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 44px; height: 44px; flex: none; border-radius: 8px; background: var(--ping-thumb-ground); color: #fafafa; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg></div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-base font-bold">michu-pc</p>
+<p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 99px; background: #22c55e; flex: none"></span>awake · over tailscale · 14 ms</p>
+</div>
+<a href="Screen.dc.html" aria-label="see the pc screen" style="width: 44px; height: 44px; flex: none; border-radius: 99px; border: 1px solid hsl(var(--border)); color: #fafafa; display: flex; align-items: center; justify-content: center; box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><path d="M10 7.5v5l4-2.5z"></path><line x1="12" x2="12" y1="17" y2="21"></line><line x1="8" x2="16" y1="21" y2="21"></line></svg></a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px"><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">cpu</p><p class="text-sm font-semibold">18%</p></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">memory</p><p class="text-sm font-semibold">9.4 / 32 gb</p></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">agents</p><p class="text-sm font-semibold">2 of 4 slots</p></div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="position: relative">
+<div class="px-4" style="display: flex; gap: 8px; overflow-x: auto">
+<sc-for list="{{projects}}" as="p" hint-placeholder-count="5">
+<button type="button" class="ping-chip" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}" style="flex: none; min-height: 36px; cursor: pointer; border: 1px solid {{p.border}}; box-sizing: border-box">{{p.name}}</button>
+</sc-for>
+</div>
+</div>
+<div class="px-4" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<button type="button" style="height: 76px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fafafa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span class="text-xs font-semibold">rebuild</span></button>
+<a href="Preview.dc.html" style="height: 76px; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #fafafa; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="text-xs font-semibold">preview</span></a>
+<button type="button" style="height: 76px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fafafa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg><span class="text-xs font-semibold">deploy</span></button>
+<button type="button" style="height: 76px; border: 0; border-radius: 12px; background: var(--ping-row-ground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fafafa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg><span class="text-xs font-semibold">apk</span></button>
+</div>
+<p class="px-4 text-xs text-muted-foreground mono clamp1">{{meta}}</p>
+</section>
+
+<section class="px-4" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">waiting on you</p>
+<a href="Run.dc.html" class="ping-row" data-selected="true" style="align-items: center; color: inherit; text-decoration: none">
+<div style="width: 40px; height: 40px; flex: none; border-radius: 8px; background: hsl(0 0% 20%); color: #d4d4d4; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg></div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-base font-bold clamp1">add the desk tab</p>
+<p class="text-xs text-muted-foreground clamp1">cellar · codex · wt/desk-tab · 9m</p>
+<p class="text-sm clamp1" style="margin-top: 4px">wants to run <span class="mono">npm i expo-av</span></p>
+</div>
+<span class="run-chip" data-state="waiting">waiting</span>
+</a>
+</section>
+
+<section class="px-4" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">running</p>
+<a href="Run.dc.html" class="ping-row" style="align-items: center; color: inherit; text-decoration: none">
+<div style="width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--ping-thumb-ground); color: #d4d4d4; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg></div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-base font-bold clamp1">fix the sticky inbox swipe</p>
+<p class="text-xs text-muted-foreground clamp1">cellar · claude · wt/inbox-swipe · 6m</p>
+<p class="text-sm text-muted-foreground clamp1" style="margin-top: 4px">editing <span class="mono">src/app/(tabs)/inbox.tsx</span></p>
+</div>
+<span class="run-chip" data-state="doing">doing</span>
+</a>
+</section>
+
+<section class="px-4" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">lately</p>
+<a href="Run.dc.html" class="ping-row" style="align-items: center; color: inherit; text-decoration: none">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-base font-bold clamp1">port lidar's shelf grid to solar</p>
+<p class="text-xs text-muted-foreground clamp1">solar · claude · merged to main · 2h ago · <span class="mono" style="color: #22c55e">+142</span> <span class="mono" style="color: #ef4444">−38</span></p>
+</div>
+<span class="run-chip" data-state="done">done</span>
+</a>
+<a href="Run.dc.html" class="ping-row" style="align-items: center; color: inherit; text-decoration: none">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-base font-bold clamp1">write the 1.12 release notes</p>
+<p class="text-xs text-muted-foreground clamp1">cellar · codex · yesterday · 1 file</p>
+</div>
+<span class="run-chip" data-state="done">done</span>
+</a>
+</section>
+</div>
+
+<nav class="ping-islands" aria-label="main">
+<div class="ping-island">
+<a href="NewTask.dc.html" class="ping-island-slot" data-action="true" aria-label="new task"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a>
+</div>
+<div class="ping-island">
+<a href="#dump" class="ping-island-slot" aria-label="dump"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg></a>
+<a href="#projects" class="ping-island-slot" aria-label="projects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></a>
+<a href="#inbox" class="ping-island-slot" aria-label="inbox"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></a>
+<a href="#stats" class="ping-island-slot" aria-label="stats"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></a>
+</div>
+<div class="ping-island" data-active="true">
+<a href="Main.dc.html" class="ping-island-slot" data-action="true" aria-label="desk — 1 waiting on you" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><span class="ping-island-badge" style="position: absolute; top: 5px; right: 5px">1</span></a>
+</div>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const picked = (this.state && this.state.project) || 'cellar';
+    const all = [
+      { id: 'cellar', meta: 'cellar · ~/code/cellar · last build 41s, 12m ago' },
+      { id: 'solar', meta: 'solar · ~/code/solar · not built on this pc yet' },
+      { id: 'radar', meta: 'radar · ~/code/radar · last build 1m 02s, yesterday' },
+      { id: 'sonar', meta: 'sonar · ~/code/sonar · last build 52s, 3d ago' },
+      { id: 'lidar', meta: 'lidar · ~/code/lidar · last build 48s, last week' }
+    ];
+    const current = all.find((p) => p.id === picked) || all[0];
+    return {
+      meta: current.meta,
+      projects: all.map((p) => ({
+        name: p.id,
+        pressed: p.id === picked,
+        border: p.id === picked ? 'hsl(var(--primary))' : 'transparent',
+        pick: () => this.setState({ project: p.id })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

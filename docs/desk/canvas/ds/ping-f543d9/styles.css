@@ -1,0 +1,60 @@
+/**
+ * Ping — the stylesheet root.
+ *
+ * A rendered design receives only this file's transitive @import closure, so
+ * everything the look needs is reachable from here: the display fonts, the
+ * theme tokens, the app accents, the media palette, and the class vocabulary.
+ *
+ * Order matters. Themes first (dark on :root, light opt-in), then accents,
+ * which rewrite --primary per app, then the vocabulary that reads them.
+ */
+
+/* §5: no font files ship with the apps — the stack is a system stack. On web
+ * these two make its first two entries resolve; if the request is blocked the
+ * stack degrades to system-ui exactly as it does on native. */
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@import './tokens/theme-dark.css';
+@import './tokens/theme-light.css';
+@import './tokens/accents.css';
+@import './tokens/palette.css';
+@import './tokens/type.css';
+@import './tokens/space.css';
+
+@import './_ds_bundle.css';
+
+/**
+ * The scope. Near-black ground, light text, display stack — a Ping screen with
+ * no content in it looks almost monochrome, and that is correct: the UI
+ * contributes almost no hue, and artwork supplies every other colour.
+ */
+:root {
+  --ping-safe-top: 0px;
+  --ping-safe-bottom: 0px;
+}
+
+body {
+  margin: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: var(--ping-text-sm);
+  line-height: var(--ping-leading-sm);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Focus is the ring, which always mirrors the accent (§4.1). */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--ping-accent-soft);
+}

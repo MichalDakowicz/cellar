@@ -1,0 +1,98 @@
+/**
+ * Ping — the colours that are not theme tokens.
+ *
+ * Two groups, both from PING.md:
+ *   §4.4  domain status colours + their real translucent tints
+ *   §4.5  fixed non-token colours — properties of *media*, not of brand, so
+ *         identical in every app and never themed
+ *
+ * Tint alpha is always 0.16, written out in full. In the apps this must be a
+ * real `rgba()` and never `color + '22'` — that trick only works on hex, and
+ * concatenating onto `hsl(...)` yields an unparseable string React Native
+ * silently resolves to an opaque block, painting over the chip's own icon.
+ */
+
+:root {
+  /* ── Status (§4.4). Names mirror the four `STATUSES` slots; the labels shown
+   * here are Lidar's — each app renames the plan state (Watchlist / Readlist /
+   * Wishlist, §2.2) but keeps the colour. Truth lives in
+   * `lib/<thing>Status.ts`, reached only through `statusMeta(status)`. */
+  --ping-status-plan: #3b82f6;                    /* Readlist / Watchlist / Wishlist */
+  --ping-status-plan-tint: rgba(59, 130, 246, 0.16);
+  --ping-status-active: #22c55e;                  /* Reading / Watching / Spinning */
+  --ping-status-active-tint: rgba(34, 197, 94, 0.16);
+  --ping-status-done: #8b5cf6;                    /* Read / Watched / Collection */
+  --ping-status-done-tint: rgba(139, 92, 246, 0.16);
+  --ping-status-dnf: #a3a3a3;                     /* Did not finish */
+  --ping-status-dnf-tint: rgba(163, 163, 163, 0.16);
+
+  /* ── Literals for the places classes cannot reach (§4.3 `COLORS`): an icon's
+   * `color` prop, a StyleSheet, an inline animated style. */
+  --ping-danger: #ef4444;
+  --ping-star: #fbbf24;
+  --ping-accent-soft: hsl(var(--primary) / 0.15); /* selected-chip ground */
+
+  /* ── Fixed non-token colours (§4.5) */
+  --ping-artwork-ground: #171717;      /* card / tile ground behind artwork (neutral-900) */
+  --ping-thumb-ground: #262626;        /* thumbnail ground, artwork fallback (neutral-800) */
+  --ping-fallback-glyph: #52525b;      /* the glyph drawn when artwork is missing */
+  --ping-star-empty: #52525b;
+  --ping-star-ghost: #3f3f46;          /* the "no score" ghost row */
+  --ping-badge-ground: rgba(0, 0, 0, 0.55);       /* small badge over artwork */
+  --ping-badge-ground-icon: rgba(0, 0, 0, 0.5);   /* icon chip */
+  --ping-title-strip: rgba(0, 0, 0, 0.65);        /* compact card's bottom strip */
+  --ping-back-button: rgba(0, 0, 0, 0.45);        /* floating back button */
+  --ping-backdrop-sheet: rgba(0, 0, 0, 0.5);
+  --ping-backdrop-dialog: rgba(0, 0, 0, 0.6);
+  --ping-backdrop-confirm: rgba(0, 0, 0, 0.6);
+  --ping-chip-unselected: rgba(255, 255, 255, 0.06);
+  --ping-reaction-unselected: rgba(255, 255, 255, 0.05);
+
+  /* ── The row card's ground (§6, §9.1). A list row is a filled tile, not an
+   * outlined box: these two grounds are what separate it from the scope, and
+   * the 4px left rule is the only border it carries. Same literals as the
+   * artwork/thumbnail grounds — neutral-900 resting, neutral-800 selected —
+   * named separately because they answer a different question. */
+  --ping-row-ground: #171717;                     /* bg-neutral-900 — resting */
+  --ping-row-ground-selected: #262626;            /* bg-neutral-800 — highlighted */
+  --ping-row-hover: hsl(0 0% 16%);                /* web only */
+  --ping-segment-active: hsl(0 0% 20%);           /* toolbar segment */
+  --ping-outline-unselected: hsl(0 0% 20%);       /* segmented option, picker */
+
+  /* ── Glass (§6, §8.3). A hairline lit from above, not a border. */
+  --ping-glass-fill: rgba(22, 22, 22, 0.72);
+  --ping-glass-hairline: rgba(255, 255, 255, 0.09);
+  --ping-glass-blur: 18px;             /* web approximation of BlurView intensity={38} */
+  --ping-marker-fill: rgba(255, 255, 255, 0.12);
+
+  /* ── Veils (§4.6). Two recipes, and only two, both so white text survives on
+   * artwork; plus the banner's left veil, the hero backdrop, and the row fade.
+   * Ready-made classes: .ping-veil-top / -bottom / -left / -hero, .ping-fade-right */
+  --ping-veil-top: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.2) 25%,
+    transparent 55%
+  );
+  --ping-veil-bottom: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.9) 100%);
+  --ping-veil-left: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    transparent 100%
+  );
+  --ping-veil-banner-bottom: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.65) 100%);
+  --ping-veil-hero: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(9, 9, 11, 0.85) 60%,
+    rgb(9, 9, 11) 100%
+  );
+  --ping-fade-right: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  --ping-fade-right-width: 44px;
+}

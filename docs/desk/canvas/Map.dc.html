@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — structure</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.screen{display:flex;flex-direction:column;gap:6px}
+.screen ul{padding-left:16px;display:flex;flex-direction:column;gap:4px;color:#a3a3a3;font-size:13px;line-height:19px}
+.where{font-size:11px;font-weight:600;color:#8a8a8a}
+.feat{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:20px}
+.feat span:first-child{flex:1}
+.st{display:inline-flex;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;flex:none;margin-top:1px}
+.st[data-s='now']{color:#22c55e;background:rgba(34,197,94,0.16)}
+.st[data-s='next']{color:#f59e0b;background:rgba(245,158,11,0.16)}
+.st[data-s='later']{color:#a3a3a3;background:rgba(163,163,163,0.16)}
+</style>
+</helmet>
+<div data-app="cellar" style="min-height: 1900px; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display); padding: 56px 32px 72px; box-sizing: border-box">
+<div style="max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px">
+
+<header style="display: flex; flex-direction: column; gap: 12px; max-width: 860px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">structure</p>
+<h1 class="text-4xl font-bold tracking-tight leading-tight">cellar on the desktop is all of cellar, plus the desk</h1>
+<p class="text-base" style="color: #d4d4d4">one app, three roles. at the desk it's the control center: chat, projects, commands, the phone on the side. away from it, the phone is the remote. the part that actually runs agents is a small daemon inside the desktop app; it keeps running in the tray when the window is closed.</p>
+</header>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 8px"><p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">desktop app</p><p class="text-xl font-bold">the control center</p><p class="text-sm" style="color: #a3a3a3">cellar's four tabs, the desk sections, full chat with the keys, and the phone attached on the side over adb.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">desk daemon</p><p class="text-xl font-bold">the part that works</p><p class="text-sm" style="color: #a3a3a3">runs agents and command jobs as hidden processes, keeps the event log, serves previews, talks adb. no window needed.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">phone app</p><p class="text-xl font-bold">the remote</p><p class="text-sm" style="color: #a3a3a3">the same cellar app with the desk tab where profile was: speak a task, answer approvals, look at previews and the pc screen.</p></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 class="text-xl font-bold">sections of the desktop app</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 36px 32px">
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<p class="text-xs font-bold uppercase tracking-widest" style="color: hsl(215 20% 75%)">cellar</p>
+<div class="screen"><p class="text-base font-bold">dump</p><p class="where">phone + desktop</p><ul><li>one capture bar; ⏎ files a thought, shift ⏎ hands it to an agent</li><li>raw dump: one thought per line</li><li>the keys work here too</li></ul></div>
+<div class="screen"><p class="text-base font-bold">projects</p><p class="where">phone + desktop</p><ul><li>by kind · one stream · board</li><li>tick entries, hand them off together</li><li>worktrees, previews, shipped, commands on the side</li></ul></div>
+<div class="screen"><p class="text-base font-bold">inbox</p><p class="where">phone + desktop</p><ul><li>to file, plus “waiting on you”</li><li>agent questions and approvals in one list</li></ul></div>
+<div class="screen"><p class="text-base font-bold">stats</p><p class="where">phone + desktop</p><ul><li>what you dump, where it stands</li><li>new: runs per project, answered from the phone</li></ul></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<p class="text-xs font-bold uppercase tracking-widest" style="color: hsl(215 20% 75%)">desk</p>
+<div class="screen"><p class="text-base font-bold">home</p><p class="where">desktop · the phone's desk tab is its small version</p><ul><li>waiting on you, running, lately</li><li>devices, quick commands, today</li><li>stop all agents</li></ul></div>
+<div class="screen"><p class="text-base font-bold">chat</p><p class="where">phone + desktop</p><ul><li>runs grouped by project</li><li>plan, diffs, checkpoints, approvals inline</li><li>composer with @ $ / and voice; hex codes become colour chips</li><li>attached phone in the right rail</li></ul></div>
+<div class="screen"><p class="text-base font-bold">commands</p><p class="where">desktop to edit · both to run</p><ul><li>each project's prepared $ commands, from package.json and gradle</li><li>each one is also a button on home and the desk tab</li><li>chains saved from a chat</li></ul></div>
+<div class="screen"><p class="text-base font-bold">previews</p><p class="where">phone + desktop</p><ul><li>one dev server per worktree, on the tailnet</li><li>open on any device, then deploy</li></ul></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<p class="text-xs font-bold uppercase tracking-widest" style="color: hsl(215 20% 75%)">devices</p>
+<div class="screen"><p class="text-base font-bold">this pc</p><p class="where">desktop</p><ul><li>agent slots, load, daemon status</li><li>screen sharing to the phone — always asks first</li></ul></div>
+<div class="screen"><p class="text-base font-bold">phones over adb</p><p class="where">desktop</p><ul><li>mirror and control, or let an agent drive</li><li>install, deep links, logcat, capture</li><li>dev toggles: theme, taps, network, font size</li><li>usb or wifi</li></ul></div>
+<div class="screen"><p class="text-base font-bold">other hosts</p><p class="where">desktop · settings › hosts</p><ul><li>any machine over an ssh link — a home server, a laptop, a build box</li><li>runs pick a free host; night shift picks its own</li></ul></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<p class="text-xs font-bold uppercase tracking-widest" style="color: hsl(215 20% 75%)">settings</p>
+<div class="screen"><p class="text-base font-bold">agents</p><ul><li>claude code, codex; slots; default per project</li><li>each agent's skills — built in and yours — feed the / list</li><li>default mode: ask first · edits ok · full access</li></ul></div>
+<div class="screen"><p class="text-base font-bold">keys</p><ul><li>@ files · $ cellar and its commands · / agent skills; # belongs to colours</li><li>add your own: ! snippets, ~ past runs, ^ git</li></ul></div>
+<div class="screen"><p class="text-base font-bold">devices and pairing</p><ul><li>qr pairing, token scopes per phone</li><li>revoke, rename, wireless adb</li></ul></div>
+<div class="screen"><p class="text-base font-bold">notifications</p><ul><li>what pings the phone; quiet hours</li></ul></div>
+<div class="screen"><p class="text-base font-bold">account</p><ul><li>the profile page's leftovers: one ping account, theme, sign out</li></ul></div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 16px">
+<h2 class="text-xl font-bold">how the pieces talk</h2>
+<div style="overflow-x: auto; border-radius: 16px; border: 1px solid hsl(var(--border)); padding: 16px 8px">
+<div style="position: relative; width: 1120px; height: 432px">
+<svg width="8" height="94" viewBox="0 0 8 94" preserveAspectRatio="none" style="position: absolute; left: 156px; top: 56px; width: 8px; height: 94px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 4 0 L 4 94"></path></svg>
+<svg width="279" height="8" viewBox="0 0 279 8" preserveAspectRatio="none" style="position: absolute; left: 160px; top: 52px; width: 279px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 275 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg width="159" height="8" viewBox="0 0 159 8" preserveAspectRatio="none" style="position: absolute; left: 280px; top: 183px; width: 159px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 155 4" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg width="159" height="8" viewBox="0 0 159 8" preserveAspectRatio="none" style="position: absolute; left: 281px; top: 221px; width: 159px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 159 4 L 4 4" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg width="159" height="8" viewBox="0 0 159 8" preserveAspectRatio="none" style="position: absolute; left: 680px; top: 202px; width: 159px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 155 4" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+<svg width="8" height="53" viewBox="0 0 8 53" preserveAspectRatio="none" style="position: absolute; left: 556px; top: 97px; width: 8px; height: 53px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 4 53 L 4 4" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+<svg width="8" height="65" viewBox="0 0 8 65" preserveAspectRatio="none" style="position: absolute; left: 556px; top: 262px; width: 8px; height: 65px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 4 0 L 4 61" marker-end="url(#dc-arrow-head-filled-6)"></path></svg>
+<svg width="159" height="8" viewBox="0 0 159 8" preserveAspectRatio="none" style="position: absolute; left: 680px; top: 368px; width: 159px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 155 4" marker-end="url(#dc-arrow-head-filled-7)"></path></svg>
+<div style="position: absolute; left: 440px; top: 16px; width: 240px; height: 80px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>supabase</b><br>the shared ping database</span></div>
+<div style="position: absolute; left: 40px; top: 150px; width: 240px; height: 112px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>your phone</b><br>cellar app · desk tab</span></div>
+<div style="position: absolute; left: 440px; top: 150px; width: 240px; height: 112px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid hsl(var(--primary)); border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>cellar desktop</b><br>the ui + the desk daemon<br>event log in sqlite</span></div>
+<div style="position: absolute; left: 840px; top: 150px; width: 240px; height: 112px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>pixel over adb</b><br>usb, or wifi on the tailnet</span></div>
+<div style="position: absolute; left: 440px; top: 328px; width: 240px; height: 88px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>agents and command jobs</b><br>hidden child processes</span></div>
+<div style="position: absolute; left: 840px; top: 328px; width: 240px; height: 88px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 14px; line-height: 20px"><span><b>where you ship</b><br>hosting, stores, releases</span></div>
+<div style="position: absolute; left: 215px; top: 28px; width: 170px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">mailbox, when the pc is off</div>
+<div style="position: absolute; left: 290px; top: 159px; width: 140px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">tasks and answers</div>
+<div style="position: absolute; left: 290px; top: 237px; width: 140px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">runs, pings, screen</div>
+<div style="position: absolute; left: 690px; top: 178px; width: 140px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">install, mirror, logs</div>
+<div style="position: absolute; left: 572px; top: 116px; width: 130px; font-size: 13px; line-height: 16px; color: #a3a3a3">entries, lines</div>
+<div style="position: absolute; left: 572px; top: 286px; width: 140px; font-size: 13px; line-height: 16px; color: #a3a3a3">spawns over pipes</div>
+<div style="position: absolute; left: 700px; top: 344px; width: 120px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">$deploy, $apk</div>
+</div>
+</div>
+<p class="text-sm text-muted-foreground" style="max-width: 860px">phone ↔ desktop is a websocket over tailscale, the way t3code does it: commands up, numbered events down. the dashed line is the fallback: when the pc is asleep, the phone writes the task into supabase and the daemon picks it up when it wakes.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<h2 class="text-xl font-bold">what it can do</h2>
+<p class="text-xs text-muted-foreground" style="display: flex; gap: 8px; align-items: center"><span class="st" data-s="now">now</span>first version <span class="st" data-s="next">next</span>right after <span class="st" data-s="later">later</span>once it's lived in</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 36px 32px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">capture and hand off</p>
+<p class="feat"><span>one bar for thoughts and tasks — shift ⏎ turns a thought into a run</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>the same keys on pc and phone: <span class="tok">@</span> files, <span class="tok">$</span> cellar and commands, <span class="tok">/</span> agent skills</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>hex codes paint themselves as colour chips, both ways</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>speak a task from the phone</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>tick entries on a board, hand them off together or one run each</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>agents suggest which old open entries they could take</span><span class="st" data-s="later">later</span></p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">agents</p>
+<p class="feat"><span>4 slots; default agent and mode per project</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>steer it now, or queue after this turn</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>checkpoints with one-click roll back</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>recipes saved as commands: fix → <span class="tok">$apk</span> → <span class="tok">$try-on-phone</span> → screenshot back</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>usage meter: this chat's context, plus each agent's 5-hour and weekly use</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>accounts per agent; when a plan runs out: ask, next account, api key, other agent or wait</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>race mode and night shift</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>recipes per entry kind; rule entries synced into AGENTS.md / CLAUDE.md</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>group runs across a shelf of projects</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>time per run and answers per day in stats</span><span class="st" data-s="later">later</span></p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">devices</p>
+<p class="feat"><span>pc screen on the phone, phone screen on the pc</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>“file this screen” from either device</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>agents test on the phone, their taps drawn as rings</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>adb over wifi on the tailnet, so the phone stays attached anywhere</span><span class="st" data-s="next">next</span></p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">ship</p>
+<p class="feat"><span>a preview per worktree, opened on any device</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>deploy asks “you haven't opened the preview” first</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>builds straight to a release page your app's update check reads</span><span class="st" data-s="next">next</span></p>
+<p class="feat"><span>release notes drafted from runs merged since the last tag</span><span class="st" data-s="later">later</span></p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">safety</p>
+<p class="feat"><span>approvals: the first answer wins, phone or pc</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>stop all agents from the tray, the phone or the desktop</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>phone tokens scoped: runs, commands, previews, screen</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>screen sharing always asks on the pc</span><span class="st" data-s="now">now</span></p>
+<p class="feat"><span>quiet hours — only blockers ping you</span><span class="st" data-s="next">next</span></p>
+</div>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
