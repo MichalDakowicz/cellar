@@ -107,11 +107,16 @@ host pill and mode hint over the picture, and the screen's own islands (`ScreenI
 shared bar). The hint says a mode is view only until W18 (`lib/deskScreen.ts`); switch display is
 drawn off. The host card and the pc's "the screen" row open it instead of the browser.
 
-### V11 · desktop home `[ ]`
+### V11 · desktop home `[x]`
 
 `DeskHome.dc.html`. The wide layout of the desk tab in the desktop window and on wide web:
 capture bar (enter files, shift+enter hands off — files only until W4), waiting on you answered
-inline, devices, tiles, today, stop all.
+inline, devices, tiles, today, stop all. Built as `features/desk/DeskWide` behind `useIsDesktop`
+in the desk route; the app's own sidebar stays (shared shell), so the artboard's sidebar is not
+redrawn. Enter files into the inbox through the dump's `drop`; shift+enter hands the words to the
+new task screen through `store/deskHandoff` (in memory, never a route param). Sample approvals get
+deny / allow inline; real blocked thoughts open their entry. Today counts real dumps and runs
+(`lib/deskHome.ts`); stop all stops every run this desk started.
 
 ### V12 · desktop chat `[ ]`
 

@@ -26,6 +26,9 @@
 - Desk: under a task, a line per $, @, / and colour says what each will do before you send
 - Desk: tap a colour under a task to copy it or nudge it lighter or darker
 - Desk: your pc's screen opens sideways in the app, edge to edge, with its control modes drawn
+- Desk: on a wide window, a capture bar files a thought on enter and hands it off on shift+enter
+- Desk: on a wide window, waiting on you, runs, your pc, commands and today sit side by side
+- Desk: stop all agents stops every run you started from cellar
 
 ### Changed
 

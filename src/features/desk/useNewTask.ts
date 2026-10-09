@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
@@ -8,6 +8,7 @@ import type { DeskAgent } from '@/lib/deskProtocol';
 import { deskStartFrom, offeredAgents } from '@/lib/deskStart';
 import { DEFAULT_MODE, modeHint, taskBlocker, taskPrompt, type DeskMode, type DeskWhere } from '@/lib/deskTask';
 import { kindMeta } from '@/lib/kinds';
+import { useDeskHandoff } from '@/store/deskHandoff';
 
 import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
@@ -32,7 +33,9 @@ export function useNewTask(entryId: string | null, onSent: () => void) {
   const entry = entryId ? (entries.find((candidate) => candidate.id === entryId) ?? null) : null;
   const folders = useMemo(() => deskFolders(projects, groups), [projects, groups]);
 
-  const [text, setText] = useState('');
+  // Words handed off from the desktop's capture bar, taken once.
+  const [text, setText] = useState(() => useDeskHandoff.getState().text);
+  useEffect(() => useDeskHandoff.getState().clear(), []);
   const [picked, setPicked] = useState<string | null>(null);
   const [where, setWhere] = useState<DeskWhere>('main');
   const [agent, setAgent] = useState<DeskAgent>('claude');
