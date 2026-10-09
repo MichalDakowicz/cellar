@@ -42,7 +42,7 @@ Lan first, the cellar second — the decision on the cellar entry that asked for
 | wire | when | carries |
 | ---- | ---- | ------- |
 | bridge | Cellar's own window on the pc (`window.cellarDesk`, IPC) | everything but pairing a phone |
-| lan | the phone answered `GET /desk` with its key on this network | everything |
+| lan | the paired phone's signed `GET /desk` was answered on this network | everything |
 | cellar | the pc beat into `cellar_desks` in the last 90 s | start, stop, the run list |
 
 The cellar wire needs `supabase/schema.sql` §12 run once in the dashboard. Until then the pc
@@ -55,8 +55,11 @@ says so in `/desk` and the phone only uses the LAN.
 - **Use a shell.** Every agent is spawned with an argument list; the prompt is one argv entry.
 - **Bypass permissions.** claude runs in auto, codex with `--approve-for-me`, antigravity in
   accept-edits (it has no auto mode).
-- **Serve the key.** The pairing secret leaves the main process only through IPC to its own
-  window. Pages, the screen and builds are opened with one-minute, one-use tickets.
+- **Send the key.** The pairing secret leaves the main process only through IPC to its own
+  window. A phone proves it holds it by signing every request (HMAC over method, path, body,
+  time and a one-use nonce — `src/lib/deskSign.ts`), so the key never crosses the Wi-Fi. Pages,
+  the screen and builds open with one-minute, one-use tickets, and the session a ticket opens
+  only works from the address that redeemed it.
 
 ## First-run things only you can do
 
