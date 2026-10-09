@@ -75,6 +75,15 @@ export function waitingOnYou<T extends Pick<Entry, 'state' | 'archived' | 'creat
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+/**
+ * Which agent has this thought right now, for its badge. `agent` is also set on
+ * a thought an agent dumped, so it names the claimer only while the thought is
+ * being worked or waiting on the answer to an agent's question.
+ */
+export function claimedBy(entry: Pick<Entry, 'state' | 'agent'>): string | null {
+  return entry.state === 'doing' || entry.state === 'blocked' ? entry.agent : null;
+}
+
 /** What an agent currently has its hands on. */
 export function inProgress<T extends Pick<Entry, 'state' | 'archived' | 'agent'>>(entries: T[]): T[] {
   return entries.filter((entry) => entry.state === 'doing' && entry.agent !== null && !entry.archived);

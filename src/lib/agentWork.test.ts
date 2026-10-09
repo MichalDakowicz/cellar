@@ -4,6 +4,7 @@ import {
   askRule,
   canClaim,
   canUnclaim,
+  claimedBy,
   deviceRule,
   inProgress,
   kindWork,
@@ -106,6 +107,18 @@ describe('waitingOnYou', () => {
 
   it('skips an archived question', () => {
     expect(waitingOnYou([entry({ state: 'blocked', archived: true })])).toEqual([]);
+  });
+});
+
+describe('claimedBy', () => {
+  it('names the agent while it works or waits on an answer', () => {
+    expect(claimedBy({ state: 'doing', agent: 'claude' })).toBe('claude');
+    expect(claimedBy({ state: 'blocked', agent: 'codex' })).toBe('codex');
+  });
+
+  it('is nobody on a thought an agent only dumped, or one that is settled', () => {
+    expect(claimedBy({ state: 'open', agent: 'claude' })).toBeNull();
+    expect(claimedBy({ state: 'done', agent: 'claude' })).toBeNull();
   });
 });
 
