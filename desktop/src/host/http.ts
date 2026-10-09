@@ -64,10 +64,13 @@ async function redeem(deps: HostDeps, token: string, req: IncomingMessage, res: 
   res.writeHead(302, { 'set-cookie': cookie, location: where, 'cache-control': 'no-store' }).end();
 }
 
-export function lanServer(deps: HostDeps, screen: ScreenFeed | null): Server {
+export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line: string) => void = () => {}): Server {
   const signatures = new Signatures();
 
   return createServer((req, res) => {
+    // One line per request, after it is answered: who, what, and how it went —
+    // never a header or a body. It is how "the button did nothing" gets an answer.
+    res.on('finish', () => log(`${from(req)} ${req.method} ${(req.url ?? '/').split('?')[0]} ${res.statusCode}`));
     void (async () => {
       const url = req.url ?? '/';
       const path = url.split('?')[0];
@@ -102,7 +105,9 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null): Server {
         body: text,
         key: deps.identity().key,
       });
-      if (!signed) return send(res, 401, { error: 'not paired with this pc' });
+      // The pc's clock goes back with a refusal, so a phone whose clock has
+      // drifted can sign again against it; the time is no secret.
+      if (!signed) return send(res, 401, { error: 'not paired with this pc', now: Date.now() });
 
       let body: unknown;
       try {
@@ -111,6 +116,7 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null): Server {
         return send(res, 400, { error: 'not json' });
       }
       const answer = await handle(deps, { method, path, body });
+      if (answer.status >= 400) log(`  ${(answer.body as { error?: string } | null)?.error ?? ''}`);
       send(res, answer.status, answer.body);
     })().catch((error) => {
       if (!res.headersSent) send(res, 500, { error: String(error) });

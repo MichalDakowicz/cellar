@@ -37,6 +37,9 @@ export function StartOnPcControl({
   const { say } = useToast();
   const [open, setOpen] = useState(false);
   const [agent, setAgent] = useState<DeskAgent>('claude');
+  // Said inside the sheet: a toast draws under an open modal, which is how a
+  // refusal from the pc used to look like a button that did nothing.
+  const [error, setError] = useState<string | null>(null);
 
   if (!link.bridge && !link.pair && !link.desk) return null;
 
@@ -55,18 +58,25 @@ export function StartOnPcControl({
 
   const go = () => {
     if (!built.ok) return;
+    setError(null);
     start.mutate(built.start, {
       onSuccess: () => {
         setOpen(false);
         say(`started on ${link.name}${link.via === 'cellar' ? ' through the cellar' : ''}`);
       },
-      onError: (error) => say(readError(error)),
+      onError: (failure) => setError(readError(failure)),
     });
   };
 
   return (
     <View className={className}>
-      <StartOnPc name={link.name} onPress={() => setOpen(true)} />
+      <StartOnPc
+        name={link.name}
+        onPress={() => {
+          setError(null);
+          setOpen(true);
+        }}
+      />
       <SheetDialog
         open={open}
         title={`start on ${link.name}`}
@@ -86,6 +96,7 @@ export function StartOnPcControl({
             {prompt}
           </Text>
           {built.ok && <Text className="text-xs text-muted-foreground">in {built.start.cwd}</Text>}
+          {!!error && <Text className="text-sm text-destructive-foreground">{error}</Text>}
         </View>
       </SheetDialog>
     </View>

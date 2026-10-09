@@ -27,6 +27,7 @@ export function useDeskScreen() {
   const [agent, setAgent] = useState<DeskAgent>('claude');
   const [projectId, setProjectId] = useState<string | null>(null);
   const [logRun, setLogRun] = useState<DeskRun | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const pairing = useQuery({
     queryKey: ['desk', 'pairing'],
@@ -55,12 +56,13 @@ export function useDeskScreen() {
 
   const startTyped = () => {
     if (!built?.ok) return;
+    setFormError(null);
     runs.start.mutate(built.start, {
       onSuccess: () => {
         setText('');
         say(`started on ${link.name}`);
       },
-      onError: (error) => say(readError(error)),
+      onError: (error) => setFormError(readError(error)),
     });
   };
 
@@ -91,6 +93,7 @@ export function useDeskScreen() {
       onText: setText,
       onStart: startTyped,
       disabledReason: formReason,
+      error: formError,
       busy: runs.start.isPending,
     },
     pairing: pairing.data ?? null,

@@ -1,5 +1,7 @@
 import type { Server } from 'node:http';
+import { appendFileSync, statSync, writeFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
+import { join } from 'node:path';
 
 import { deskPairUrl, type DeskPair } from '@/lib/deskPair';
 
@@ -19,6 +21,28 @@ import { Tickets } from './tickets.ts';
  * cellar fallback. Electron's main process owns one of these; nothing in here
  * imports Electron, so the whole of it runs (and is tested) under plain node.
  */
+
+const LOG_MAX = 512 * 1024;
+
+/**
+ * `desk.log` in the app's data folder: one line per LAN request. Started over
+ * when it passes half a megabyte — it is for "what just happened", not history.
+ */
+function requestLog(file: string): (line: string) => void {
+  try {
+    if (statSync(file).size > LOG_MAX) writeFileSync(file, '');
+  } catch {
+    // Not there yet.
+  }
+  return (line) => {
+    try {
+      appendFileSync(file, `${new Date().toISOString()} ${line}
+`);
+    } catch {
+      // A log that cannot be written must never break a request.
+    }
+  };
+}
 
 export type HostOptions = {
   dataDir: string;
@@ -57,7 +81,11 @@ export class DeskHost {
 
   /** Start listening. Resolves with the port actually bound, which may be one of the ten after the configured one. */
   async start(): Promise<number> {
-    this.server = lanServer(this.deps, this.options.frames ? new ScreenFeed(this.options.frames) : null);
+    this.server = lanServer(
+      this.deps,
+      this.options.frames ? new ScreenFeed(this.options.frames) : null,
+      requestLog(join(this.options.dataDir, 'desk.log')),
+    );
     const port = await listen(this.server, this.identity.port);
     // Held for this run only. Saved, a port taken once by something else would
     // become the pc's address for good, and every paired phone would lose it.

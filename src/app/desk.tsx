@@ -48,7 +48,12 @@ export default function Desk() {
                 {link.bridge ? 'this pc' : link.name}
               </Text>
             </View>
-            <DeskStatusLine via={link.via} seenAt={link.desk?.seenAt ?? null} checking={link.checking} />
+            <DeskStatusLine
+              via={link.via}
+              seenAt={link.desk?.seenAt ?? null}
+              checking={link.checking}
+              lanError={link.pair ? link.lanError : null}
+            />
           </View>
 
           {link.bridge && (

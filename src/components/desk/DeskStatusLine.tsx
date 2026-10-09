@@ -12,10 +12,13 @@ export function DeskStatusLine({
   via,
   seenAt,
   checking,
+  lanError,
 }: {
   via: DeskVia;
   seenAt: string | null;
   checking: boolean;
+  /** What the paired pc's LAN answer was when it was not a yes. Shown, because "not answering" hides why. */
+  lanError: string | null;
 }) {
   const line =
     via === 'bridge'
@@ -29,5 +32,12 @@ export function DeskStatusLine({
             : seenAt
               ? `not answering — last heard ${longRel(seenAt)}`
               : 'not answering — is cellar open on the pc?';
-  return <Text className="mt-1 text-xs text-muted-foreground">{line}</Text>;
+  return (
+    <>
+      <Text className="mt-1 text-xs text-muted-foreground">{line}</Text>
+      {via !== 'lan' && via !== 'bridge' && !!lanError && (
+        <Text className="mt-1 text-xs text-muted-foreground">on this wi-fi: {lanError}</Text>
+      )}
+    </>
+  );
 }

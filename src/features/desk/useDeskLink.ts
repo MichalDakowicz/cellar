@@ -93,6 +93,8 @@ export function useDeskLink() {
     checking: (direct !== null && info.isLoading) || desks.isLoading,
     /** Why the cellar wire is not there, when it is because the tables are missing. */
     cellarError: desks.error ? (desks.error as Error).message : null,
+    /** Why the paired pc did not answer on this network — unreachable, refused the signature, … */
+    lanError: info.error ? (info.error as Error).message : null,
     recheck: () => {
       void info.refetch();
       void desks.refetch();

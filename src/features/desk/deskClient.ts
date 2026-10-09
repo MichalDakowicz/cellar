@@ -17,7 +17,9 @@ export type DeskTransport = (method: 'GET' | 'POST', path: string, body?: unknow
 /** The pc did not answer at all — off, asleep, or on another network. Not the same as a refusal. */
 export class DeskUnreachable extends Error {}
 
-const LAN_TIMEOUT_MS = 4000;
+/** A question gets a few seconds; a start waits for the agent to come up, which for `claude --bg` is several. */
+const ASK_TIMEOUT_MS = 6000;
+const START_TIMEOUT_MS = 120_000;
 
 function refusal(status: number, body: unknown): Error {
   const said = (body as { error?: unknown } | null)?.error;
@@ -29,6 +31,46 @@ const sha256: Sha256 = async (data) =>
   new Uint8Array(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new Uint8Array(data)));
 
 /**
+ * How far this phone's clock is from each pc's, learned from a refusal. A
+ * signature carries a timestamp the pc accepts within a minute; a phone whose
+ * clock has drifted further would be refused forever, so the pc says what time
+ * it is when it refuses and the request is signed again against that.
+ */
+const clockOffset = new Map<string, number>();
+
+type Answer = { status: number; body: unknown };
+
+async function signedFetch(pair: DeskPair, method: string, path: string, text: string): Promise<Answer> {
+  const authorization = await signDeskRequest({
+    key: pair.key,
+    method,
+    path,
+    body: text,
+    ts: Date.now() + (clockOffset.get(pair.id) ?? 0),
+    nonce: hex(Crypto.getRandomBytes(16)),
+    sha256,
+  });
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(),
+    method === 'POST' && path === '/runs' ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
+  );
+  try {
+    const response = await fetch(`http://${pair.host}:${pair.port}${path}`, {
+      method,
+      headers: { authorization, ...(text ? { 'content-type': 'application/json' } : {}) },
+      body: text || undefined,
+      signal: controller.signal,
+    });
+    return { status: response.status, body: await response.json().catch(() => null) };
+  } catch {
+    throw new DeskUnreachable(`${pair.name} is not answering on this network`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * The LAN is plain HTTP, so the key is never sent: each request carries an
  * HMAC of itself under the key, a timestamp and a one-use nonce
  * (`src/lib/deskSign.ts`). What crosses the Wi-Fi is worthless a minute later.
@@ -36,34 +78,18 @@ const sha256: Sha256 = async (data) =>
 export function lanTransport(pair: DeskPair): DeskTransport {
   return async (method, path, body) => {
     const text = body === undefined ? '' : JSON.stringify(body);
-    const authorization = await signDeskRequest({
-      key: pair.key,
-      method,
-      path,
-      body: text,
-      ts: Date.now(),
-      nonce: hex(Crypto.getRandomBytes(16)),
-      sha256,
-    });
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), LAN_TIMEOUT_MS);
-    let response: Response;
-    try {
-      response = await fetch(`http://${pair.host}:${pair.port}${path}`, {
-        method,
-        headers: { authorization, ...(text ? { 'content-type': 'application/json' } : {}) },
-        body: text || undefined,
-        signal: controller.signal,
-      });
-    } catch {
-      throw new DeskUnreachable(`${pair.name} is not answering on this network`);
-    } finally {
-      clearTimeout(timer);
+    let answer = await signedFetch(pair, method, path, text);
+    if (answer.status === 401) {
+      const pcNow = (answer.body as { now?: unknown } | null)?.now;
+      const offset = typeof pcNow === 'number' ? pcNow - Date.now() : 0;
+      if (Math.abs(offset) > 30_000) {
+        clockOffset.set(pair.id, offset);
+        answer = await signedFetch(pair, method, path, text);
+      }
     }
-    const answer: unknown = await response.json().catch(() => null);
-    if (response.status === 401) throw new Error(`${pair.name} no longer knows this phone — pair it again`);
-    if (!response.ok) throw refusal(response.status, answer);
-    return answer;
+    if (answer.status === 401) throw new Error(`${pair.name} no longer knows this phone — pair it again`);
+    if (answer.status < 200 || answer.status >= 300) throw refusal(answer.status, answer.body);
+    return answer.body;
   };
 }
 

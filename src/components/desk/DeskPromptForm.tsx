@@ -23,6 +23,7 @@ export function DeskPromptForm({
   onText,
   onStart,
   disabledReason,
+  error,
   busy,
 }: {
   agents: DeskAgent[];
@@ -35,6 +36,8 @@ export function DeskPromptForm({
   onText: (text: string) => void;
   onStart: () => void;
   disabledReason: string | null;
+  /** What the pc said when the last start failed. */
+  error: string | null;
   busy: boolean;
 }) {
   const blocked = busy || !!disabledReason;
@@ -75,6 +78,7 @@ export function DeskPromptForm({
         <Text className="text-sm font-semibold text-primary-foreground">{busy ? 'starting…' : 'start it'}</Text>
       </Pressable>
       {!!disabledReason && <Text className="text-xs text-muted-foreground">{disabledReason}</Text>}
+      {!!error && <Text className="text-sm text-destructive-foreground">{error}</Text>}
     </View>
   );
 }
