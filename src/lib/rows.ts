@@ -36,7 +36,15 @@ export type ProjectRow = {
   group_home?: boolean | null;
 };
 
-export type GroupRow = { id: string; shelf_id: string; name: string; position: number; pinned: boolean | null; created_at: string };
+export type GroupRow = {
+  id: string;
+  shelf_id: string;
+  name: string;
+  position: number;
+  pinned: boolean | null;
+  created_at: string;
+  repo_path: string | null;
+};
 
 export type LineRow = { id: string; text: string; created_at: string; source: string | null };
 
@@ -73,7 +81,7 @@ export type DocRow = { id: string; ref: string; label: string | null; created_at
 export const SHELF_COLUMNS = 'id, name, position, created_at';
 export const LINE_COLUMNS = 'id, text, created_at, source';
 export const PROJECT_COLUMNS = 'id, shelf_id, name, position, created_at, repo_path, repo_url, pinned, group_id, group_home';
-export const GROUP_COLUMNS = 'id, shelf_id, name, position, pinned, created_at';
+export const GROUP_COLUMNS = 'id, shelf_id, name, position, pinned, created_at, repo_path';
 // `as const` on both, and the embed built as a template literal, so the select
 // string keeps its literal type: supabase-js resolves the row shape from it at
 // compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
@@ -113,6 +121,7 @@ export function normalizeGroup(row: GroupRow): Group {
     position: row.position,
     pinned: row.pinned === true,
     createdAt: row.created_at,
+    repoPath: row.repo_path ?? null,
   };
 }
 

@@ -59,6 +59,12 @@ export async function renameGroup(id: string, name: string): Promise<void> {
   if (home.error) throw home.error;
 }
 
+/** Where the group lives on disk, or null to fall back to the folder its projects share. */
+export async function setGroupFolder(id: string, repoPath: string | null): Promise<void> {
+  const { error } = await supabase.from('cellar_groups').update({ repo_path: repoPath }).eq('id', id);
+  if (error) throw error;
+}
+
 export async function setGroupPinned(id: string, pinned: boolean): Promise<void> {
   const { error } = await supabase.from('cellar_groups').update({ pinned }).eq('id', id);
   if (error) throw error;

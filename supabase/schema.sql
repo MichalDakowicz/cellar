@@ -853,3 +853,13 @@ alter table public.cellar_projects
   add column if not exists group_id uuid references public.cellar_groups(id) on delete set null;
 alter table public.cellar_projects
   add column if not exists group_home boolean not null default false;
+
+-- 2026-10-09 — where a group lives on disk.
+--
+-- A group's members sit in one folder (C:\ping holds radar, lidar, cellar…), and
+-- that folder is where work on the group as a whole happens — it is where "start
+-- on pc" runs a thought filed in the group's general project. Nullable: unset,
+-- the pc screen falls back to the deepest folder the members share
+-- (src/lib/deskFolders.ts). Kept on the group, not on its general project, so
+-- an agent standing in C:\ping still resolves no project there.
+alter table public.cellar_groups add column if not exists repo_path text;
