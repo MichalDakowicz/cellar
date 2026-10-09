@@ -152,20 +152,3 @@ export function isDeskSeen(seenAt: string | null | undefined, now: number): bool
   const at = Date.parse(seenAt);
   return Number.isFinite(at) && now - at <= DESK_SEEN_MS;
 }
-
-/** `Bearer <token>` → the token, anything else → null. */
-export function bearerToken(header: string | null | undefined): string | null {
-  const match = /^Bearer\s+(\S+)$/i.exec(header?.trim() ?? '');
-  return match ? match[1] : null;
-}
-
-/**
- * Compare two secrets without leaking where they differ through timing. Node
- * has `timingSafeEqual`, but this file also runs where node does not.
- */
-export function sameSecret(given: string | null | undefined, expected: string): boolean {
-  if (typeof given !== 'string' || given.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i += 1) diff |= given.charCodeAt(i) ^ expected.charCodeAt(i);
-  return diff === 0;
-}

@@ -1,13 +1,4 @@
-import {
-  bearerToken,
-  isDeskSeen,
-  isStaleRequest,
-  parseDeskStart,
-  runTitle,
-  sameSecret,
-  sortRuns,
-  STALE_REQUEST_MS,
-} from '@/lib/deskProtocol';
+import { isDeskSeen, isStaleRequest, parseDeskStart, runTitle, sortRuns, STALE_REQUEST_MS } from '@/lib/deskProtocol';
 
 const NOW = Date.parse('2026-10-09T12:00:00.000Z');
 
@@ -63,21 +54,5 @@ describe('isStaleRequest / isDeskSeen', () => {
     expect(isDeskSeen(new Date(NOW - 60_000).toISOString(), NOW)).toBe(true);
     expect(isDeskSeen(new Date(NOW - 120_000).toISOString(), NOW)).toBe(false);
     expect(isDeskSeen(null, NOW)).toBe(false);
-  });
-});
-
-describe('bearerToken / sameSecret', () => {
-  it('reads a bearer header', () => {
-    expect(bearerToken('Bearer abc')).toBe('abc');
-    expect(bearerToken('bearer   abc ')).toBe('abc');
-    expect(bearerToken('Basic abc')).toBeNull();
-    expect(bearerToken(undefined)).toBeNull();
-  });
-
-  it('compares secrets exactly', () => {
-    expect(sameSecret('abc', 'abc')).toBe(true);
-    expect(sameSecret('abd', 'abc')).toBe(false);
-    expect(sameSecret('ab', 'abc')).toBe(false);
-    expect(sameSecret(null, 'abc')).toBe(false);
   });
 });

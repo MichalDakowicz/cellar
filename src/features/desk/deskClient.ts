@@ -1,11 +1,14 @@
+import * as Crypto from 'expo-crypto';
+
 import type { DeskPair } from '@/lib/deskPair';
 import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
+import { hex, signDeskRequest, type Sha256 } from '@/lib/deskSign';
 
 import type { DeskBridge } from './bridge';
 
 /**
- * The pc's API, over whichever wire reaches it: the LAN with the paired key,
- * or the desktop window's bridge. Both answer the same paths with the same
+ * The pc's API, over whichever wire reaches it: the LAN, signed with the
+ * paired key, or the desktop window's bridge. Both answer the same paths with the same
  * bodies, so everything above this file is written once.
  */
 
@@ -21,19 +24,35 @@ function refusal(status: number, body: unknown): Error {
   return new Error(typeof said === 'string' ? said : `the pc answered ${status}`);
 }
 
+// A copy into a fresh ArrayBuffer: expo-crypto's types want an ArrayBuffer-backed view, never a shared one.
+const sha256: Sha256 = async (data) =>
+  new Uint8Array(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new Uint8Array(data)));
+
+/**
+ * The LAN is plain HTTP, so the key is never sent: each request carries an
+ * HMAC of itself under the key, a timestamp and a one-use nonce
+ * (`src/lib/deskSign.ts`). What crosses the Wi-Fi is worthless a minute later.
+ */
 export function lanTransport(pair: DeskPair): DeskTransport {
   return async (method, path, body) => {
+    const text = body === undefined ? '' : JSON.stringify(body);
+    const authorization = await signDeskRequest({
+      key: pair.key,
+      method,
+      path,
+      body: text,
+      ts: Date.now(),
+      nonce: hex(Crypto.getRandomBytes(16)),
+      sha256,
+    });
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), LAN_TIMEOUT_MS);
     let response: Response;
     try {
       response = await fetch(`http://${pair.host}:${pair.port}${path}`, {
         method,
-        headers: {
-          authorization: `Bearer ${pair.key}`,
-          ...(body === undefined ? {} : { 'content-type': 'application/json' }),
-        },
-        body: body === undefined ? undefined : JSON.stringify(body),
+        headers: { authorization, ...(text ? { 'content-type': 'application/json' } : {}) },
+        body: text || undefined,
         signal: controller.signal,
       });
     } catch {
