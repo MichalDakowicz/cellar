@@ -232,3 +232,42 @@ export const SAMPLE_PROJECT_DESK: { title: string; rows: DeskPanelRow[] }[] = [
     ],
   },
 ];
+
+/** Plan limits on the sample desk (`DeskUsage.dc.html`), until the agents report theirs (W16). */
+export const SAMPLE_USAGE: { agent: string; windows: { label: string; used: number; resets: string }[] }[] = [
+  {
+    agent: 'claude',
+    windows: [
+      { label: '5-hour window', used: 42, resets: 'resets in 2h 14m' },
+      { label: 'this week', used: 81, resets: 'resets mon 09:00' },
+    ],
+  },
+  {
+    agent: 'codex',
+    windows: [
+      { label: '5-hour window', used: 12, resets: 'resets in 4h 02m' },
+      { label: 'this week', used: 28, resets: 'resets thu 18:00' },
+    ],
+  },
+];
+
+/** A recipe per entry kind on the sample desk (`DeskRecipes.dc.html`), until W15. */
+export const SAMPLE_RECIPES: Record<
+  string,
+  { agent: 'claude' | 'codex' | 'default'; mode: 'ask' | 'edits' | 'full'; prompt: string; after: string[]; then: string }
+> = {
+  glitch: { agent: 'claude', mode: 'edits', prompt: 'reproduce {entry} first. fix it with the smallest change and add a test that fails before the fix.', after: ['$try-on-phone'], then: 'leave the entry in doing until you look' },
+  removal: { agent: 'codex', mode: 'edits', prompt: 'remove {entry} and everything that only it used. list what you deleted.', after: ['$rebuild'], then: 'move the entry to done' },
+  idea: { agent: 'claude', mode: 'ask', prompt: 'write a short plan for {entry} in {project}. no code yet — ask me before building.', after: [], then: 'append the plan to the entry' },
+  question: { agent: 'codex', mode: 'ask', prompt: 'answer {entry} from the code in {project}. no edits. quote the files you used.', after: [], then: 'append the answer, move to done' },
+  research: { agent: 'default', mode: 'ask', prompt: 'read the links in {lines} and summarise what matters for {project} in five lines.', after: [], then: 'append the summary to the entry' },
+  copy: { agent: 'codex', mode: 'edits', prompt: 'rewrite the copy for {entry}. keep the meaning, follow the house style.', after: ['$preview'], then: 'leave in doing until you look' },
+  design: { agent: 'claude', mode: 'edits', prompt: 'design and build {entry}. reuse the existing components in {files}.', after: ['$preview', '$try-on-phone'], then: 'leave in doing until you look' },
+};
+
+/** Rules on the sample desk: what every agent has to follow, and where. */
+export const SAMPLE_RULES: { text: string; scope: string }[] = [
+  { text: 'solid colours only, no gradients', scope: 'everywhere' },
+  { text: 'never add a dependency without asking', scope: 'everywhere' },
+  { text: 'run the tests before saying it is done', scope: 'shelf · apps' },
+];

@@ -5,10 +5,12 @@ import { useCellar } from '@/features/cellar/useCellar';
 import { agentPrompt, agentPromptMany } from '@/lib/agentPrompt';
 import { deskFolders } from '@/lib/deskFolders';
 import type { DeskAgent } from '@/lib/deskProtocol';
+import { startingAgent } from '@/lib/deskSettings';
 import { deskStartFrom, offeredAgents } from '@/lib/deskStart';
-import { DEFAULT_MODE, modeHint, taskBlocker, taskStarts, type DeskMode, type DeskSplit, type DeskWhere } from '@/lib/deskTask';
+import { modeHint, taskBlocker, taskStarts, type DeskMode, type DeskSplit, type DeskWhere } from '@/lib/deskTask';
 import { kindMeta } from '@/lib/kinds';
 import { useDeskHandoff } from '@/store/deskHandoff';
+import { useDeskPrefs } from '@/store/deskPrefs';
 
 import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
@@ -47,8 +49,15 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   useEffect(() => useDeskHandoff.getState().clear(), []);
   const [picked, setPicked] = useState<string | null>(null);
   const [where, setWhere] = useState<DeskWhere>('main');
-  const [agent, setAgent] = useState<DeskAgent>('claude');
-  const [mode, setMode] = useState<DeskMode>(DEFAULT_MODE);
+  // Started from the defaults in settings › desk; the agent falls back to one
+  // the pc actually has.
+  const [chosen, setAgent] = useState<DeskAgent>(() => useDeskPrefs.getState().defaultAgent);
+  const [mode, setMode] = useState<DeskMode>(() => useDeskPrefs.getState().defaultMode);
+  const installed = link.info
+    ? link.info.agents.filter((candidate) => candidate.installed).map((candidate) => candidate.id)
+    : (link.desk?.agents ?? null);
+  const offered = offeredAgents(installed);
+  const agent = startingAgent(chosen, offered);
 
   // An attached thought brings its project with it, until you pick another.
   const projectId = picked ?? entry?.projectId ?? null;
@@ -67,10 +76,6 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     say(`sent to ${link.name}${link.via === 'cellar' ? ' through the cellar' : ''}`);
     onSent();
   });
-
-  const installed = link.info
-    ? link.info.agents.filter((candidate) => candidate.installed).map((candidate) => candidate.id)
-    : (link.desk?.agents ?? null);
 
   const blocker = taskBlocker({
     prompt,
@@ -99,7 +104,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     where,
     onWhere: setWhere,
     folder: folder?.path ?? null,
-    agents: offeredAgents(installed),
+    agents: offered,
     agent,
     onAgent: setAgent,
     mode,
