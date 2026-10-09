@@ -1,4 +1,5 @@
 import type { DeskApproval } from './deskChat';
+import type { PreviewCheck } from './deskPreview';
 import type { DeskLogLine } from './deskProtocol';
 import type { DeskRunCard } from './deskView';
 
@@ -123,4 +124,21 @@ export const SAMPLE_CHATS: Record<
     ],
     approval: null,
   },
+};
+
+/** The sample preview (`Preview.dc.html`): a page the pc is serving for a run. */
+export const SAMPLE_PREVIEW = {
+  port: 8081,
+  path: '/inbox',
+  meta: 'app · built 41s ago',
+  branch: 'wt/inbox-swipe',
+  /** The run it belongs to — where "tell the agent" goes. */
+  runId: 'sample-2',
+  checks: [
+    { label: 'expo export -p web', command: true, state: 'passed', detail: '41s' },
+    { label: 'tsc --noEmit', command: true, state: 'passed', detail: '0 errors' },
+    { label: 'bundle 2.1 mb', command: false, state: 'measure', detail: '+12 kb since live' },
+  ] satisfies PreviewCheck[],
+  deployTarget: 'to firebase hosting · sample-site',
+  deployCommand: 'firebase deploy --only hosting',
 };
