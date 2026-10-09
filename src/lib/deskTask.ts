@@ -51,3 +51,27 @@ export function taskBlocker(input: {
   if (input.busy) return `asking ${input.host}…`;
   return null;
 }
+
+/** Several thoughts handed off together: one run picks them all up, or one run each. */
+export type DeskSplit = 'one' | 'each';
+
+/**
+ * What a send starts: one prompt and the thought it is bound to, per run.
+ *
+ * One run over several thoughts gets the line that picks them all up and is
+ * bound to the first — the pc follows one entry per run, and the agent claims
+ * the rest from the line. One run each gets each thought's own line.
+ */
+export function taskStarts(input: {
+  typed: string;
+  picks: readonly { entryId: string; line: string }[];
+  /** The single line that picks up every thought at once. */
+  together: string;
+  split: DeskSplit;
+}): { prompt: string; entryId: string | null }[] {
+  const { typed, picks, together, split } = input;
+  if (picks.length === 0) return [{ prompt: taskPrompt(typed, []), entryId: null }];
+  if (picks.length === 1) return [{ prompt: taskPrompt(typed, [picks[0].line]), entryId: picks[0].entryId }];
+  if (split === 'one') return [{ prompt: taskPrompt(typed, [together]), entryId: picks[0].entryId }];
+  return picks.map((pick) => ({ prompt: taskPrompt(typed, [pick.line]), entryId: pick.entryId }));
+}

@@ -17,13 +17,13 @@ import type { useDeskRuns } from './useDeskRuns';
  */
 export function useDeskStart(link: DeskLink, runs: ReturnType<typeof useDeskRuns>, onStarted: () => void) {
   const [error, setError] = useState<string | null>(null);
-  const [held, setHeld] = useState<{ start: DeskStart; folder: string } | null>(null);
+  const [held, setHeld] = useState<{ starts: DeskStart[]; folder: string } | null>(null);
   const { start, trust } = runs;
 
   const failed = useCallback(
-    (failure: unknown, request: DeskStart) => {
+    (failure: unknown, rest: DeskStart[]) => {
       if (failure instanceof DeskRefusal && failure.untrusted) {
-        setHeld({ start: request, folder: failure.untrusted });
+        setHeld({ starts: rest, folder: failure.untrusted });
         return;
       }
       const said = readError(failure);
@@ -33,11 +33,25 @@ export function useDeskStart(link: DeskLink, runs: ReturnType<typeof useDeskRuns
     [link.via],
   );
 
+  // Several starts go one after another, so a refusal stops the rest with it:
+  // the untrusted folder is the same for all of them, and trusting it sends
+  // what was left.
   const begin = useCallback(
-    (request: DeskStart) => {
+    (request: DeskStart | DeskStart[]) => {
+      const requests = Array.isArray(request) ? request : [request];
       setError(null);
       setHeld(null);
-      start.mutate(request, { onSuccess: onStarted, onError: (failure) => failed(failure, request) });
+      void (async () => {
+        for (let at = 0; at < requests.length; at += 1) {
+          try {
+            await start.mutateAsync(requests[at]);
+          } catch (failure) {
+            failed(failure, requests.slice(at));
+            return;
+          }
+        }
+        onStarted();
+      })();
     },
     [start, onStarted, failed],
   );
@@ -45,7 +59,7 @@ export function useDeskStart(link: DeskLink, runs: ReturnType<typeof useDeskRuns
   const trustAndStart = useCallback(() => {
     if (!held) return;
     trust.mutate(held.folder, {
-      onSuccess: () => begin(held.start),
+      onSuccess: () => begin(held.starts),
       onError: (failure) => setError(readError(failure)),
     });
   }, [held, trust, begin]);

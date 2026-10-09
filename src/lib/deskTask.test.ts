@@ -1,4 +1,4 @@
-import { DEFAULT_MODE, DESK_MODES, modeHint, taskBlocker, taskPrompt } from './deskTask';
+import { DEFAULT_MODE, DESK_MODES, modeHint, taskBlocker, taskPrompt, taskStarts } from './deskTask';
 
 describe('taskPrompt', () => {
   it('puts the attached thoughts before what you said', () => {
@@ -33,5 +33,35 @@ describe('modes', () => {
   it('defaults to edits ok and has a hint for every mode', () => {
     expect(DEFAULT_MODE).toBe('edits');
     for (const mode of DESK_MODES) expect(modeHint(mode.id)).toBe(mode.hint);
+  });
+});
+
+describe('taskStarts', () => {
+  const picks = [
+    { entryId: 'a', line: 'pick up a' },
+    { entryId: 'b', line: 'pick up b' },
+  ];
+
+  it('is one unbound run with no thoughts', () => {
+    expect(taskStarts({ typed: 'do it', picks: [], together: '', split: 'each' })).toEqual([{ prompt: 'do it', entryId: null }]);
+  });
+
+  it('binds a single thought, whatever the split', () => {
+    expect(taskStarts({ typed: 'go', picks: picks.slice(0, 1), together: 'both', split: 'one' })).toEqual([
+      { prompt: 'pick up a\n\ngo', entryId: 'a' },
+    ]);
+  });
+
+  it('picks several up in one run, bound to the first', () => {
+    expect(taskStarts({ typed: 'go', picks, together: 'pick up a b', split: 'one' })).toEqual([
+      { prompt: 'pick up a b\n\ngo', entryId: 'a' },
+    ]);
+  });
+
+  it('starts one run each', () => {
+    expect(taskStarts({ typed: 'go', picks, together: 'pick up a b', split: 'each' })).toEqual([
+      { prompt: 'pick up a\n\ngo', entryId: 'a' },
+      { prompt: 'pick up b\n\ngo', entryId: 'b' },
+    ]);
   });
 });
