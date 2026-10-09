@@ -14,7 +14,10 @@ written half, moved here so they version with the code.
 | [TASKS.md](TASKS.md) | the build order: every screen drawn first, then the wiring, easiest to hardest |
 
 The canvas stays the source for **how it looks** — open an artboard before building its
-screen. These files are the source for **what it does**. When the two disagree, fix the doc
+screen. A copy lives in [`canvas/`](canvas/): one `*.dc.html` per artboard (inline styles, and its
+sample state in the `DCLogic` script at the bottom), `canvas.json` with every board's logic note,
+`Map.dc.html` (the app's sections and how the pieces talk), `Notes.dc.html` (how t3code delegates)
+and `ds/` (the Ping tokens the boards were drawn with). Re-copy it when the canvas changes. These files are the source for **what it does**. When the two disagree, fix the doc
 and say so on the canvas.
 
 Two rules from the canvas that hold for every task:
