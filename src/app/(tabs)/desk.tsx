@@ -74,7 +74,7 @@ export default function Desk() {
 
           {home.commands && (
             <View className="pt-5">
-              <DeskCommandTiles {...home.commands} onRun={null} gutter={gutter} />
+              <DeskCommandTiles {...home.commands} gutter={gutter} />
             </View>
           )}
 

@@ -21,6 +21,7 @@
 - Desk: new task — say what to do, pick the project, agent and how much it may do, send it to your pc
 - Desk: a run opens as a chat, with its tool steps folded and stop at the top
 - Desk: an agent's replies show as formatted text — code, lists, tables, bold and links
+- Desk: preview a page from your pc at phone, tablet or desktop size, with its checks and deploy
 
 ### Changed
 
@@ -28,6 +29,7 @@
 - Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile
+- Your pc: its local pages open in the desk's preview instead of the browser
 - Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects

@@ -1,6 +1,7 @@
 import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 
+import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
 import { agentLabel, isLiveRun, RUN_STATE_LABEL, type DeskRun } from '@/lib/deskProtocol';
 import { SAMPLE_FIGURES, SAMPLE_PROJECTS, SAMPLE_RUNS } from '@/lib/deskSample';
@@ -28,6 +29,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const sample = useDeskPrefs((state) => state.sample);
   const picked = useDeskPrefs((state) => state.commandsProject);
   const pick = useDeskPrefs((state) => state.setCommandsProject);
+  const { say } = useToast();
 
   const cards = useMemo(() => {
     const real = runs.runs.map((run) => runCard(run, projectForPath(run.cwd, projects)?.name ?? null));
@@ -52,7 +54,20 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
       figures: sample ? SAMPLE_FIGURES : null,
       onScreen: local.available ? () => local.open.mutate({ kind: 'screen' }) : null,
     },
-    commands: commands && current ? { projects: commands, current, onPick: pick } : null,
+    commands:
+      commands && current
+        ? {
+            projects: commands,
+            current,
+            onPick: pick,
+            // Only the sample's tiles exist yet; preview opens the sample page,
+            // the rest wait for commands to run for real (W2).
+            onRun: (_project: string, command: string) =>
+              command === 'preview'
+                ? router.push('/desk/preview/sample' as Href)
+                : say(`$${command} runs once the pc knows a project's commands`),
+          }
+        : null,
     sections: cards,
     /** A run opens its own screen — real or sample, the same route. */
     openRun: (id: string) => router.push(`/desk/run/${id}` as Href),

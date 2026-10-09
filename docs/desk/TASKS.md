@@ -77,11 +77,15 @@ pinned above the nav (deny · allow · allow for the rest of this run) that repl
 then the composer with steer it now / queue after this turn and the `@ $ /` key strip. Fed from
 today's log tail as plain agent text until W6.
 
-### V8 · preview before deploy `[ ]`
+### V8 · preview before deploy `[x]`
 
 `Preview.dc.html`. Size chips (phone · tablet · desktop) around the existing per-port page,
 reload, the host + address bar with "live", checks list, "tell the agent" and deploy with its
-meta line. Deploy is disabled with a reason until W11.
+meta line. Deploy is disabled with a reason until W11. Built as `desk/preview/[port]` in a
+`react-native-webview` (an iframe on web); the page is laid out at the picked width and scaled
+into the frame (`lib/deskPreview.ts`). The pc's port rows open it instead of the browser;
+`desk/preview/sample` is the sample desk's, from its `preview` tile. "Tell the agent" goes to
+the page's run when there is one, else to a new task.
 
 ### V9 · the keys, drawn `[ ]`
 

@@ -1,3 +1,5 @@
+import { useRouter, type Href } from 'expo-router';
+
 import { DeskLocalRow } from '@/components/desk/DeskLocalRow';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { longRel } from '@/lib/relTime';
@@ -11,9 +13,11 @@ function megabytes(bytes: number): string {
 /**
  * The LAN-only half of the pc screen: its screen, its local pages, and the
  * builds it can drop. One component so the route does not branch three times
- * on the same "are we on the same wi-fi" answer.
+ * on the same "are we on the same wi-fi" answer. A page opens in the preview
+ * screen, sized and checked; the screen and a build still open outside the app.
  */
 export function DeskLocalSections({ local, gutter }: { local: ReturnType<typeof useDeskLocal>; gutter: string }) {
+  const router = useRouter();
   if (!local.available) return null;
   const busy = local.open.isPending;
 
@@ -32,9 +36,9 @@ export function DeskLocalSections({ local, gutter }: { local: ReturnType<typeof 
             key={port.port}
             title={`localhost:${port.port}`}
             detail={port.process ?? `process ${port.pid}`}
-            verb="open"
+            verb="preview"
             busy={busy}
-            onPress={() => local.open.mutate({ kind: 'view', port: port.port })}
+            onPress={() => router.push(`/desk/preview/${port.port}` as Href)}
           />
         ))}
       </DeskSection>
