@@ -9,6 +9,9 @@ import type { DeskPair } from '@/lib/deskPair';
  * screens never care which of the two they are talking to.
  */
 
+/** Where the desktop app listens for Google's answer — desktop/src/oauth.ts. On Supabase's redirect list. */
+export const DESKTOP_OAUTH_CALLBACK = 'http://127.0.0.1:54545/callback';
+
 export type DeskPairing = { url: string; pair: DeskPair } | { url: null; reason: string };
 
 export type DeskBridge = {
@@ -19,6 +22,8 @@ export type DeskBridge = {
   forgetPhones: () => Promise<void>;
   rename: (name: string) => Promise<boolean>;
   status: () => Promise<{ fallback: 'off' | 'on' | 'missing schema' | 'signed out' }>;
+  /** Opens Google's sign-in in the real browser and resolves with the code that lands on the loopback. */
+  googleSignIn: (authorizeUrl: string) => Promise<{ code: string } | { error: string }>;
 };
 
 /** The bridge, or null anywhere but the desktop app's window. */

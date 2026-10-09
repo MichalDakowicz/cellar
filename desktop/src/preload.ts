@@ -18,4 +18,5 @@ contextBridge.exposeInMainWorld('cellarDesk', {
   forgetPhones: () => ipcRenderer.invoke('desk:forget'),
   rename: (name: string) => ipcRenderer.invoke('desk:rename', name),
   status: () => ipcRenderer.invoke('desk:status'),
+  googleSignIn: (authorizeUrl: string) => ipcRenderer.invoke('desk:oauth', authorizeUrl),
 });

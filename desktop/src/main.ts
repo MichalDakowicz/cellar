@@ -1,6 +1,7 @@
 import { app, BrowserWindow, desktopCapturer, ipcMain, screen } from 'electron';
 
 import { DeskHost } from './host/host.ts';
+import { signInInBrowser } from './oauth.ts';
 import { readSession } from './session.ts';
 import { createTray } from './tray.ts';
 import { APP_ORIGIN, registerWebScheme, serveWeb } from './web.ts';
@@ -54,6 +55,17 @@ function registerIpc(desk: DeskHost): void {
   ipcMain.handle('desk:forget', guard(() => desk.forgetPhones()));
   ipcMain.handle('desk:rename', guard((name: unknown) => typeof name === 'string' && desk.rename(name)));
   ipcMain.handle('desk:status', guard(() => ({ fallback: desk.fallback.status })));
+  ipcMain.handle(
+    'desk:oauth',
+    guard((url: unknown) =>
+      typeof url === 'string'
+        ? signInInBrowser(url, process.env.CELLAR_SUPABASE_URL ?? '').then((result) => {
+            if (window) showWindow(window);
+            return result;
+          })
+        : { error: 'no link' },
+    ),
+  );
 }
 
 app.on('second-instance', () => window && showWindow(window));
