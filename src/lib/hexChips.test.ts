@@ -1,4 +1,4 @@
-import { inkFor, parseHex, splitHex } from './hexChips';
+import { inkFor, nudgeHex, parseHex, splitHex } from './hexChips';
 
 const hexes = (text: string) => splitHex(text).filter((s) => s.type === 'hex').map((s) => s.value);
 
@@ -47,5 +47,36 @@ describe('inkFor', () => {
 
   it('judges a translucent code over the dark ground', () => {
     expect(inkFor('#FFFFFF10')).toBe('#fafafa');
+  });
+});
+
+describe('nudgeHex', () => {
+  it('goes lighter and darker by lightness', () => {
+    expect(nudgeHex('#808080', 0.1)).toBe('#9a9a9a');
+    expect(nudgeHex('#808080', -0.1)).toBe('#676767');
+  });
+
+  it('keeps the hue', () => {
+    const [r, g, b] = parseHex(nudgeHex('#3b82f6', -0.1))!;
+    expect(b).toBeGreaterThan(r);
+    expect(b).toBeGreaterThan(g);
+  });
+
+  it('keeps the case it was typed in, and the alpha', () => {
+    expect(nudgeHex('#64748BCC', 0.05)).toMatch(/^#[0-9A-F]{6}CC$/);
+    expect(nudgeHex('#64748b', 0.05)).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  it('writes a short code back long', () => {
+    expect(nudgeHex('#000', 0.1)).toBe('#1a1a1a');
+  });
+
+  it('stops at white and black', () => {
+    expect(nudgeHex('#ffffff', 0.2)).toBe('#ffffff');
+    expect(nudgeHex('#000000', -0.2)).toBe('#000000');
+  });
+
+  it('leaves a non-code alone', () => {
+    expect(nudgeHex('#ggg', 0.1)).toBe('#ggg');
   });
 });

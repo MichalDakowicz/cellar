@@ -142,3 +142,31 @@ export const SAMPLE_PREVIEW = {
   deployTarget: 'to firebase hosting · sample-site',
   deployCommand: 'firebase deploy --only hosting',
 };
+
+/** What `$` offers as commands until the pc reads a project's own (W2). */
+export const SAMPLE_COMMANDS = ['rebuild', 'preview', 'deploy', 'apk', 'try-on-phone', 'logcat'];
+
+/** What `@` finds until the pc can search a run's worktree (W10). */
+export const SAMPLE_FILES = [
+  { path: 'src/components/cellar/SwipeShelf.tsx', changed: true },
+  { path: 'src/app/(tabs)/inbox.tsx', changed: true },
+  { path: 'src/components/layout/NavIslands.tsx', changed: false },
+  { path: 'src/features/inbox/', changed: false },
+  { path: 'app.json', changed: false },
+];
+
+/** What `/` finds until the pc lists an agent's skills (W10): built in, then your own. */
+export const SAMPLE_SKILLS: Record<string, { name: string; detail: string }[]> = {
+  claude: [
+    { name: 'review', detail: 'built in' },
+    { name: 'init', detail: 'built in' },
+    { name: 'compact', detail: 'built in' },
+    { name: 'frontend-design', detail: 'yours' },
+    { name: 'release-notes', detail: 'yours' },
+  ],
+  codex: [
+    { name: 'review', detail: 'built in' },
+    { name: 'init', detail: 'built in' },
+    { name: 'compact', detail: 'built in' },
+  ],
+};

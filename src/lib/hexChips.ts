@@ -71,3 +71,45 @@ export function splitHex(text: string): HexSegment[] {
   if (cursor < text.length || out.length === 0) out.push({ type: 'text', value: text.slice(cursor) });
   return out;
 }
+
+function toHsl([r, g, b]: readonly number[]): [number, number, number] {
+  const [rr, gg, bb] = [r / 255, g / 255, b / 255];
+  const max = Math.max(rr, gg, bb);
+  const min = Math.min(rr, gg, bb);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === rr ? (gg - bb) / d + (gg < bb ? 6 : 0) : max === gg ? (bb - rr) / d + 2 : (rr - gg) / d + 4;
+  return [h / 6, s, l];
+}
+
+function fromHsl([h, s, l]: readonly number[]): [number, number, number] {
+  if (s === 0) return [l, l, l].map((c) => Math.round(c * 255)) as [number, number, number];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hue = (t: number) => {
+    const u = t < 0 ? t + 1 : t > 1 ? t - 1 : t;
+    if (u < 1 / 6) return p + (q - p) * 6 * u;
+    if (u < 1 / 2) return q;
+    if (u < 2 / 3) return p + (q - p) * (2 / 3 - u) * 6;
+    return p;
+  };
+  return [hue(h + 1 / 3), hue(h), hue(h - 1 / 3)].map((c) => Math.round(c * 255)) as [number, number, number];
+}
+
+/**
+ * The code a step lighter (`step` > 0) or darker, by lightness, keeping its hue
+ * and its alpha. Written back the way it was typed: upper or lower case, and a
+ * short `#abc` comes back long, since a nudge rarely lands on a short one.
+ */
+export function nudgeHex(code: string, step: number): string {
+  const rgba = parseHex(code);
+  if (!rgba) return code;
+  const [h, s, l] = toHsl(rgba);
+  const rgb = fromHsl([h, s, Math.min(1, Math.max(0, l + step))]);
+  const digits = code.replace(/^#/, '');
+  const alpha = digits.length === 8 ? digits.slice(6) : '';
+  const out = `${rgb.map((c) => c.toString(16).padStart(2, '0')).join('')}${alpha}`;
+  return `#${/[A-F]/.test(digits) ? out.toUpperCase() : out.toLowerCase()}`;
+}
