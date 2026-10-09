@@ -1,14 +1,16 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCellarWrites } from '@/features/cellar/useCellar';
-import { joinAnswers, pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
+import { composeAnswer, pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
 import { oneLine } from '@/lib/dump';
 import { shortRel } from '@/lib/relTime';
 import type { Entry, EntryQuestion } from '@/types/cellar';
 
 /**
- * The questions on one entry, and the four things you can do to one: tap an
- * option, hold several of them, type an answer, or wave it off.
+ * The questions on one entry, and what you can do to one: pick an option (or,
+ * with "pick more than one", several), add a note to go with the pick, type an
+ * answer in your own words, or wave it off (docs/desk/screens.md, "question
+ * card"). The pick and its note go back as one line — `composeAnswer`.
  *
  * Drafts are held per question id rather than as one field, because several
  * questions can be outstanding at once and a shared field would move whatever
@@ -25,16 +27,23 @@ export type QuestionView = {
   rel: string;
   /** What is typed against this question right now. */
   draft: string;
-  /** Options held for a multi-pick. Empty means a tap answers outright. */
-  held: string[];
+  /** The options picked so far; one at most unless `several`. */
+  picked: string[];
+  /** "pick more than one" is on — even when the agent asked for one. */
+  several: boolean;
+  /** The note going with the pick; null while "add a note" is closed. */
+  note: string | null;
 };
+
+type Pick = { picked: string[]; several: boolean; note: string | null };
+const NO_PICK: Pick = { picked: [], several: false, note: null };
 
 export function useEntryQuestions(entry: Entry | null) {
   const { answer, dismiss } = useCellarWrites();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   // Per question id, for the drafts' reason: two questions can be outstanding
-  // and a shared set would move what you held to whichever you touched last.
-  const [holds, setHolds] = useState<Record<string, string[]>>({});
+  // and a shared pick would move to whichever you touched last.
+  const [picks, setPicks] = useState<Record<string, Pick>>({});
   const [confirming, setConfirming] = useState<EntryQuestion | null>(null);
 
   const questions = entry?.questions ?? EMPTY;
@@ -45,9 +54,9 @@ export function useEntryQuestions(entry: Entry | null) {
       status: questionStatus(question),
       rel: shortRel(question.createdAt),
       draft: drafts[question.id] ?? '',
-      held: holds[question.id] ?? EMPTY_HELD,
+      ...(picks[question.id] ?? NO_PICK),
     }),
-    [drafts, holds],
+    [drafts, picks],
   );
 
   const pending = useMemo(() => pendingQuestions(questions).map(view), [questions, view]);
@@ -62,7 +71,7 @@ export function useEntryQuestions(entry: Entry | null) {
       const body = oneLine(text);
       if (!body || !entry) return;
       setDrafts((current) => ({ ...current, [questionId]: '' }));
-      setHolds((current) => ({ ...current, [questionId]: [] }));
+      setPicks((current) => ({ ...current, [questionId]: NO_PICK }));
       answer.mutate({ entry, questionId, text: body });
     },
     [entry, answer],
@@ -75,19 +84,33 @@ export function useEntryQuestions(entry: Entry | null) {
     settled,
     any: questions.length > 0,
     setDraft,
-    /** Tap an option. Stored as its text, so reading it back needs no options. */
-    pick: (questionId: string, option: string) => send(questionId, option),
-    /**
-     * Hold an option, or let one go. Holding nothing is not a state you can
-     * get stuck in — dropping the last one returns the card to one-tap.
-     */
-    hold: (questionId: string, option: string) =>
-      setHolds((current) => {
-        const was = current[questionId] ?? [];
-        return { ...current, [questionId]: was.includes(option) ? was.filter((o) => o !== option) : [...was, option] };
+    /** Pick an option, or let it go. One at a time unless "pick more than one" is on. */
+    toggle: (questionId: string, option: string) =>
+      update(setPicks, questionId, (was) => {
+        const on = was.picked.includes(option);
+        const picked = was.several
+          ? on
+            ? was.picked.filter((o) => o !== option)
+            : [...was.picked, option]
+          : on
+            ? []
+            : [option];
+        return { ...was, picked };
       }),
-    /** Answer with everything held, as prose rather than as letters. */
-    sendHeld: (questionId: string) => send(questionId, joinAnswers(holds[questionId] ?? [])),
+    /** Turning it off keeps the first pick, so nothing you chose silently goes. */
+    toggleSeveral: (questionId: string) =>
+      update(setPicks, questionId, (was) => ({
+        ...was,
+        several: !was.several,
+        picked: was.several ? was.picked.slice(0, 1) : was.picked,
+      })),
+    openNote: (questionId: string) => update(setPicks, questionId, (was) => ({ ...was, note: was.note ?? '' })),
+    setNote: (questionId: string, note: string) => update(setPicks, questionId, (was) => ({ ...was, note })),
+    /** Answer with the picks and the note, as prose rather than as letters. */
+    answerPicked: (questionId: string) => {
+      const pick = picks[questionId] ?? NO_PICK;
+      send(questionId, composeAnswer(pick.picked, pick.note));
+    },
     /** Send whatever is typed against this question. */
     submit: (questionId: string) => send(questionId, drafts[questionId] ?? ''),
     confirming,
@@ -101,4 +124,11 @@ export function useEntryQuestions(entry: Entry | null) {
 }
 
 const EMPTY: EntryQuestion[] = [];
-const EMPTY_HELD: string[] = [];
+
+function update(
+  set: (fn: (current: Record<string, Pick>) => Record<string, Pick>) => void,
+  questionId: string,
+  next: (was: Pick) => Pick,
+) {
+  set((current) => ({ ...current, [questionId]: next(current[questionId] ?? NO_PICK) }));
+}

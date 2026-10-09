@@ -59,6 +59,22 @@ export function joinAnswers(options: string[]): string {
 }
 
 /**
+ * The picks and the note that goes with them, as the one line stored as the
+ * answer (docs/desk/screens.md, "question card").
+ *
+ * "B, but keep the total visible" — the note rides after the picks, set off by
+ * a dash so it reads as a qualifier on the choice rather than as another
+ * option. A note alone is an answer in your own words. The picks stay verbatim
+ * so `pickedOptions` still ticks them when the question is read back.
+ */
+export function composeAnswer(picked: string[], note: string | null | undefined): string {
+  const choice = joinAnswers(picked);
+  const extra = (note ?? '').replace(/\s+/g, ' ').trim();
+  if (!choice) return extra;
+  return extra ? `${choice} — ${extra}` : choice;
+}
+
+/**
  * Which options an answer picked, for ticking them where the question is shown.
  *
  * Matched on the option text appearing in the answer, because that is what

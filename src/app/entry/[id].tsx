@@ -135,9 +135,11 @@ export default function EntryScreen() {
               pending={questions.pending}
               settled={questions.settled}
               onDraft={questions.setDraft}
-              onPick={questions.pick}
-              onHold={questions.hold}
-              onSendHeld={questions.sendHeld}
+              onToggle={questions.toggle}
+              onSeveral={questions.toggleSeveral}
+              onOpenNote={questions.openNote}
+              onNote={questions.setNote}
+              onAnswer={questions.answerPicked}
               onSubmit={questions.submit}
               onDismiss={(view) => questions.askDismiss(view.question)}
             />

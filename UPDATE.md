@@ -21,6 +21,7 @@
 
 ### Changed
 
+- Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile
 - Desk: your desk opens on the pc's card, then runs waiting on you, running and lately

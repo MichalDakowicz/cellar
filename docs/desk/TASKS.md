@@ -53,12 +53,12 @@ running → lately. Runs come from today's run list; everything the host cannot 
 from the sample desk or is left out. Pairing and the local sections (pages, screen, builds) stay,
 below the runs.
 
-### V5 · question card: pick several, add a note `[ ]`
+### V5 · question card: pick several, add a note `[x]`
 
 `QuestionCard.dc.html`, "change to make". Under the options: "pick more than one" (even when the
 agent asked for one) and "add a note". Lettered options, "recommended" only when marked,
-answered collapses to the pick, expired greys out. Local state only in this pass — the answer
-still goes out the old way until W3. Applies to entry questions in the inbox and on the entry.
+answered collapses to the pick, expired greys out. The note rides in the answer text as
+"pick — note" (`composeAnswer`), so it already reaches the agent; W3 makes it a field. Applies to entry questions in the inbox and on the entry.
 
 ### V6 · new task sheet `[ ]`
 

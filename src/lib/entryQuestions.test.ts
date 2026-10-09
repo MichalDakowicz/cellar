@@ -1,6 +1,7 @@
 import {
   answeredForAgent,
   isSettled,
+  composeAnswer,
   joinAnswers,
   MAX_OPTIONS,
   normalizeOptions,
@@ -216,5 +217,28 @@ describe('pickedOptions', () => {
   it('marks nothing when there is no answer', () => {
     expect(pickedOptions(null, options)).toEqual([]);
     expect(pickedOptions('', options)).toEqual([]);
+  });
+});
+
+describe('composeAnswer', () => {
+  it('is the picks alone without a note', () => {
+    expect(composeAnswer(['from the bottom'], '')).toBe('from the bottom');
+    expect(composeAnswer(['home', 'search'], null)).toBe('home and search');
+  });
+
+  it('puts the note after the picks', () => {
+    expect(composeAnswer(['from the bottom'], ' keep the  total visible ')).toBe(
+      'from the bottom — keep the total visible',
+    );
+  });
+
+  it('is the note alone when nothing is picked', () => {
+    expect(composeAnswer([], 'neither, use a page')).toBe('neither, use a page');
+    expect(composeAnswer([], '')).toBe('');
+  });
+
+  it('still ticks the picks when read back', () => {
+    const answer = composeAnswer(['home', 'search'], 'not settings');
+    expect(pickedOptions(answer, ['home', 'search', 'editor'])).toEqual(['home', 'search']);
   });
 });
