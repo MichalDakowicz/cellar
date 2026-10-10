@@ -222,6 +222,15 @@ PhoneShare (a sheet), PhoneRace, PhoneNight — each to its artboard.
 - [x] NewTask — `components/desk/DeskSheet` (backdrop, grabber, scrolling body, pinned footer) as a
   `transparentModal` route; waveform, centred transcript, type instead · mic · clear; outlined
   tiles (`COLORS.outline`); "pings your phone" mode copy; the attached thought's kind tile.
+- [x] Run — steps fold into rows by kind with their own glyphs (`stepRows`), the bubble's
+  caption, primary mic, amber/grey decided dot; Preview frame 320, no branch glyph; Screen islands
+  52 with 46×42 slots.
+- [x] PhoneNotify — the shade itself (`COLORS.shade`, `noteGround`, `noteAction`), option letters
+  bold mono.
+- [x] Question card — letters are uppercase everywhere (`optionLabel`, the mcp's text too);
+  lettered option cards with round/square tiles, "recommended" and a detail line parsed from the
+  option (`optionParts`), "other" last opening its own field, "let it decide" beside answer
+  (`letDecide`), the red "asks · pick one/any" head.
 
 ### M5 · desktop boards `[ ]`
 

@@ -14,8 +14,8 @@ import type { Entry, EntryQuestion, QuestionStatus } from '@/types/cellar';
  * entry or a question you decided was noise would block the thought forever.
  */
 
-/** a, b, c, d and on. The tap target's label, and how a question reads aloud. */
-const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+/** A, B, C, D and on — the canvas's letter tiles. The tap target's label, and how a question reads aloud. */
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function optionLabel(index: number): string {
   return LETTERS[index] ?? String(index + 1);
@@ -190,4 +190,17 @@ export function answeredForAgent<T extends Pick<Entry, 'state' | 'archived' | 'q
     if (mine.length > 0) out.push({ entry, questions: mine });
   }
   return out;
+}
+
+/**
+ * An option as the card draws it (`QuestionCard.dc.html`): its label, the
+ * line under it, and whether the agent recommended it. Agents write all three
+ * in one line — "from the bottom — a sheet with the total pinned — recommended"
+ * — so the dashes are where it splits.
+ */
+export function optionParts(text: string): { label: string; detail: string | null; recommended: boolean } {
+  const pieces = text.split(/\s+[—–-]\s+/).map((piece) => piece.trim()).filter(Boolean);
+  const recommended = pieces.length > 1 && /^\(?recommended\)?$/i.test(pieces[pieces.length - 1]);
+  const kept = recommended ? pieces.slice(0, -1) : pieces;
+  return { label: kept[0] ?? text, detail: kept.length > 1 ? kept.slice(1).join(' — ') : null, recommended };
 }

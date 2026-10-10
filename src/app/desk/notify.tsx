@@ -8,11 +8,13 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { useDeskNotify } from '@/features/desk/useDeskNotify';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
+import { COLORS } from '@/theme/colors';
 
 /**
  * Notification previews (docs/desk/screens.md, `PhoneNotify.dc.html`): one per
  * run, approvals with up to three buttons, questions with two options and
- * more — drawn here until the real ones arrive (docs/desk/TASKS.md W13).
+ * more — drawn here as the shade itself until the real ones arrive
+ * (docs/desk/TASKS.md W13).
  */
 export default function NotifyPreviews() {
   const notify = useDeskNotify();
@@ -21,7 +23,7 @@ export default function NotifyPreviews() {
   const sidebar = useSidebarSpace();
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1" style={{ backgroundColor: COLORS.shade }}>
       <ScrollView
         style={{ marginLeft: sidebar }}
         contentContainerStyle={{ paddingBottom: navBarSpace + 16 }}
@@ -30,15 +32,7 @@ export default function NotifyPreviews() {
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.form}>
           <View className={`gap-3 pt-4 ${gutter}`}>
-            <View className="flex-row items-center gap-3">
-              <ScreenAction />
-              <View className="min-w-0 flex-1 gap-1">
-                <Text className="text-2xl font-bold tracking-tight text-foreground">notifications</Text>
-                <Text className="text-xs text-muted-foreground">
-                  how they will look — they answer from the shade once they are real
-                </Text>
-              </View>
-            </View>
+            <ScreenAction />
             {notify.empty && <Text className="pt-2 text-xs text-muted-foreground">{notify.empty}</Text>}
             {notify.notes.map(({ note, done }) => (
               <NotePreview

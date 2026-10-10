@@ -42,14 +42,14 @@ describe('approvalNote', () => {
 describe('questionNote', () => {
   it('offers two options and more when there are more', () => {
     const note = questionNote({ id: 'q', agent: 'claude', where: 'shop', question: 'how?', options: ['bottom', 'right', 'top', 'none'] });
-    expect(note.body).toEqual(['a  bottom', 'b  right', '+2 more · or reply in your own words']);
-    expect(note.actions.map((action) => action.label)).toEqual(['a', 'b', 'more…']);
+    expect(note.body).toEqual(['A  bottom', 'B  right', '+2 more · or reply in your own words']);
+    expect(note.actions.map((action) => action.label)).toEqual(['A', 'B', 'more…']);
   });
 
   it('has no more with two or fewer', () => {
     const note = questionNote({ id: 'q', agent: null, where: 'inbox', question: 'which?', options: ['x', 'y'] });
     expect(note.head).toBe('cellar · an agent asks · inbox');
-    expect(note.actions.map((action) => action.label)).toEqual(['a', 'b']);
+    expect(note.actions.map((action) => action.label)).toEqual(['A', 'B']);
   });
 
   it('is a reply with no options at all', () => {

@@ -141,6 +141,7 @@ export default function EntryScreen() {
               onNote={questions.setNote}
               onAnswer={questions.answerPicked}
               onSubmit={questions.submit}
+              onLetDecide={questions.letDecide}
               onDismiss={(view) => questions.askDismiss(view.question)}
             />
 

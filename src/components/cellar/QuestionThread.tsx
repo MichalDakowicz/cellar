@@ -27,6 +27,7 @@ export type QuestionThreadProps = {
   onNote: (id: string, note: string) => void;
   onAnswer: (id: string) => void;
   onSubmit: (id: string) => void;
+  onLetDecide: (id: string) => void;
   onDismiss: (view: QuestionView) => void;
 };
 
@@ -40,6 +41,7 @@ export function QuestionThread({
   onNote,
   onAnswer,
   onSubmit,
+  onLetDecide,
   onDismiss,
 }: QuestionThreadProps) {
   if (pending.length === 0 && settled.length === 0) return null;
@@ -65,6 +67,7 @@ export function QuestionThread({
       onNote={(text) => onNote(view.question.id, text)}
       onAnswer={() => onAnswer(view.question.id)}
       onSubmit={() => onSubmit(view.question.id)}
+      onLetDecide={() => onLetDecide(view.question.id)}
       onDismiss={() => onDismiss(view)}
     />
   );

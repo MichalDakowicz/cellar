@@ -31,12 +31,12 @@ describe('entryBrief — questions', () => {
     assert.match(out, /\? q1000000 one table or two columns\?/);
   });
 
-  it('prints the options as a, b, c so the agent knows what it offered', () => {
+  it('prints the options as A, B, C so the agent knows what it offered', () => {
     const out = brief({
       questions: [question('q1', 'which shape?', { options: ['a new table', 'columns on the line'] })],
     });
-    assert.match(out, /a\) a new table/);
-    assert.match(out, /b\) columns on the line/);
+    assert.match(out, /A\) a new table/);
+    assert.match(out, /B\) columns on the line/);
   });
 
   it('hands over the answer, not the question, once one is settled', () => {

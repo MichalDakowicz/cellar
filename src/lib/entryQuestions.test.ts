@@ -1,19 +1,4 @@
-import {
-  answeredForAgent,
-  isSettled,
-  composeAnswer,
-  joinAnswers,
-  MAX_OPTIONS,
-  normalizeOptions,
-  optionLabel,
-  pendingQuestions,
-  pendingSummary,
-  pickedOptions,
-  questionStatus,
-  readyToResume,
-  settledQuestions,
-  unblocksEntry,
-} from '@/lib/entryQuestions';
+import { answeredForAgent, composeAnswer, isSettled, joinAnswers, MAX_OPTIONS, normalizeOptions, optionLabel, optionParts, pendingQuestions, pendingSummary, pickedOptions, questionStatus, readyToResume, settledQuestions, unblocksEntry } from '@/lib/entryQuestions';
 
 type Q = {
   id: string;
@@ -32,8 +17,8 @@ const q = (id: string, over: Partial<Q> = {}): Q => ({
 });
 
 describe('optionLabel', () => {
-  it('reads a, b, c', () => {
-    expect([0, 1, 2, 3].map(optionLabel)).toEqual(['a', 'b', 'c', 'd']);
+  it('reads A, B, C', () => {
+    expect([0, 1, 2, 3].map(optionLabel)).toEqual(['A', 'B', 'C', 'D']);
   });
 
   it('falls back to a number past the alphabet rather than undefined', () => {
@@ -240,5 +225,27 @@ describe('composeAnswer', () => {
   it('still ticks the picks when read back', () => {
     const answer = composeAnswer(['home', 'search'], 'not settings');
     expect(pickedOptions(answer, ['home', 'search', 'editor'])).toEqual(['home', 'search']);
+  });
+});
+
+describe('optionParts', () => {
+  it('splits label, detail and recommended', () => {
+    expect(optionParts('from the bottom — a sheet with the total pinned — recommended')).toEqual({
+      label: 'from the bottom',
+      detail: 'a sheet with the total pinned',
+      recommended: true,
+    });
+  });
+
+  it('keeps a plain option whole', () => {
+    expect(optionParts('a new table')).toEqual({ label: 'a new table', detail: null, recommended: false });
+  });
+
+  it('takes a detail without a recommendation', () => {
+    expect(optionParts('from the right - same as desktop')).toEqual({ label: 'from the right', detail: 'same as desktop', recommended: false });
+  });
+
+  it('does not take a lone word as the recommendation', () => {
+    expect(optionParts('recommended').recommended).toBe(false);
   });
 });

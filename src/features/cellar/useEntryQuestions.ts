@@ -113,6 +113,8 @@ export function useEntryQuestions(entry: Entry | null) {
     },
     /** Send whatever is typed against this question. */
     submit: (questionId: string) => send(questionId, drafts[questionId] ?? ''),
+    /** "let it decide": the agent gets your go-ahead to pick for itself. */
+    letDecide: (questionId: string) => send(questionId, 'your call — go with what you think is best'),
     confirming,
     askDismiss: (question: EntryQuestion) => setConfirming(question),
     cancelDismiss: () => setConfirming(null),

@@ -90,6 +90,10 @@ export const COLORS = {
   foregroundSoft: 'hsl(0 0% 83%)',
   /** An unpicked tile's outline (where it works, how much it may do). */
   outline: 'hsl(0 0% 20%)',
+  /** The notification shade and a note on it (`PhoneNotify.dc.html`). */
+  shade: 'hsl(0 0% 6%)',
+  noteGround: 'hsl(0 0% 11%)',
+  noteAction: 'hsl(215 25% 78%)',
   /** What sits behind a sheet. */
   backdrop: 'rgba(0,0,0,0.5)',
   mutedDeep: 'hsl(0 0% 45%)',
