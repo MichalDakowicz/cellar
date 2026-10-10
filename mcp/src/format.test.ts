@@ -19,6 +19,17 @@ const brief = (over: Parameters<typeof entry>[0] = {}) => {
 };
 
 describe('entryBrief — questions', () => {
+  it('returns exact multi-picks and a separate note through both read tools', () => {
+    const q = question('q1', 'which shape?', { options: ['Alpha', 'Alpha beta', 'Gamma'], answer: 'Alpha beta and Gamma — exclude Alpha',
+      answerPicks: ['Alpha beta', 'Gamma'], answerNote: 'exclude Alpha', answeredAt: '2026-09-14T11:30:00.000Z' });
+    const one = entry({ questions: [q] });
+    for (const out of [entryBrief(one, cellarOf(one), NOW), answeredBlock([{ entry: one, questions: [q] }], [], NOW)]) {
+      assert.match(out, /user chose several options \(2\)/);
+      assert.match(out, /note: exclude Alpha/);
+      assert.match(out, /✓ B\) Alpha beta/);
+      assert.ok(!out.includes('✓ A) Alpha\n'));
+    }
+  });
   it('says nothing about questions when there are none', () => {
     const out = brief();
     assert.ok(!out.includes('still waiting on an answer'));

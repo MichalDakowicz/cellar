@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCellarWrites } from '@/features/cellar/useCellar';
-import { composeAnswer, pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
-import { oneLine } from '@/lib/dump';
+import { pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
+import type { QuestionAnswer } from '@/lib/questionAnswer';
+import { readError } from '@/lib/utils';
 import { shortRel } from '@/lib/relTime';
 import type { Entry, EntryQuestion } from '@/types/cellar';
 
@@ -33,6 +34,8 @@ export type QuestionView = {
   several: boolean;
   /** The note going with the pick; null while "add a note" is closed. */
   note: string | null;
+  sending: boolean;
+  error: string | null;
 };
 
 type Pick = { picked: string[]; several: boolean; note: string | null };
@@ -55,8 +58,10 @@ export function useEntryQuestions(entry: Entry | null) {
       rel: shortRel(question.createdAt),
       draft: drafts[question.id] ?? '',
       ...(picks[question.id] ?? NO_PICK),
+      sending: answer.isPending,
+      error: answer.variables?.questionId === question.id && answer.error ? readError(answer.error) : null,
     }),
-    [drafts, picks],
+    [drafts, picks, answer.isPending, answer.variables, answer.error],
   );
 
   const pending = useMemo(() => pendingQuestions(questions).map(view), [questions, view]);
@@ -67,12 +72,12 @@ export function useEntryQuestions(entry: Entry | null) {
   }, []);
 
   const send = useCallback(
-    (questionId: string, text: string) => {
-      const body = oneLine(text);
-      if (!body || !entry) return;
-      setDrafts((current) => ({ ...current, [questionId]: '' }));
-      setPicks((current) => ({ ...current, [questionId]: NO_PICK }));
-      answer.mutate({ entry, questionId, text: body });
+    (questionId: string, text: QuestionAnswer) => {
+      if ((!text.picks.length && !text.note.trim()) || !entry || answer.isPending) return;
+      answer.mutate({ entry, questionId, text }, { onSuccess: () => {
+        setDrafts((current) => ({ ...current, [questionId]: '' }));
+        setPicks((current) => ({ ...current, [questionId]: NO_PICK }));
+      } });
     },
     [entry, answer],
   );
@@ -109,12 +114,12 @@ export function useEntryQuestions(entry: Entry | null) {
     /** Answer with the picks and the note, as prose rather than as letters. */
     answerPicked: (questionId: string) => {
       const pick = picks[questionId] ?? NO_PICK;
-      send(questionId, composeAnswer(pick.picked, pick.note));
+      send(questionId, { picks: pick.picked, note: pick.note ?? '' });
     },
     /** Send whatever is typed against this question. */
-    submit: (questionId: string) => send(questionId, drafts[questionId] ?? ''),
+    submit: (questionId: string) => send(questionId, { picks: [], note: drafts[questionId] ?? '' }),
     /** "let it decide": the agent gets your go-ahead to pick for itself. */
-    letDecide: (questionId: string) => send(questionId, 'your call — go with what you think is best'),
+    letDecide: (questionId: string) => send(questionId, { picks: [], note: 'your call — go with what you think is best' }),
     confirming,
     askDismiss: (question: EntryQuestion) => setConfirming(question),
     cancelDismiss: () => setConfirming(null),

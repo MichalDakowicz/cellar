@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { agentLine } from '@/lib/agentWork';
+import { questionAnswer, type QuestionAnswer } from '@/lib/questionAnswer';
 import { normalizeOptions, unblocksEntry } from '@/lib/entryQuestions';
 import { patchEvents } from '@/lib/entryTrail';
 import { normalizeQuestion, QUESTION_COLUMNS, type QuestionRow } from '@/lib/rows';
@@ -80,14 +81,15 @@ export async function answerQuestion(
   who: { userId: string; agent: string },
   entry: Entry,
   questionId: string,
-  answer: string,
+  answer: string | QuestionAnswer,
 ): Promise<EntryQuestion> {
-  const body = agentLine(answer);
-  if (!body) throw new Error('Nothing to record — the answer was empty once collapsed.');
+  const question = entry.questions.find((one) => one.id === questionId);
+  if (!question) throw new Error('Question is no longer on this entry.');
+  const body = questionAnswer(typeof answer === 'string' ? agentLine(answer) : answer, question.options);
 
   const { data, error } = await client
     .from('cellar_entry_questions')
-    .update({ answer: body, answered_at: new Date().toISOString(), answered_via: 'chat' })
+    .update({ ...body, answered_at: new Date().toISOString(), answered_via: 'chat' })
     .eq('id', questionId)
     .select(QUESTION_COLUMNS)
     .single();

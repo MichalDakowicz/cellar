@@ -196,10 +196,12 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           .string()
           .optional()
           .describe('Question id, from the entry brief. Omit when only one question is outstanding.'),
-        answer: z.string().describe('One line: what the user chose, in their words.'),
+        answer: z.string().optional().describe('Legacy prose answer. For exact choices use picks and note instead.'),
+        picks: z.array(z.string()).max(8).optional().describe('Exact offered option texts selected by the user; several choices are allowed.'),
+        note: z.string().max(8000).optional().describe('The user’s note, separate from their selected options.'),
       },
     },
-    async ({ entry, question, answer }) =>
+    async ({ entry, question, answer, picks, note }) =>
       guard(async () => {
         const { ctx, cellar } = await withCellar(getCtx);
         const target = resolveEntry(entry, cellar.entries);
@@ -222,7 +224,8 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           );
         }
 
-        const written = await answerQuestion(ctx.client, ctx, target, chosen.id, answer);
+        if (answer !== undefined && (picks !== undefined || note !== undefined)) throw new Error('Pass answer or picks/note, not both.');
+        const written = await answerQuestion(ctx.client, ctx, target, chosen.id, answer ?? { picks: picks ?? [], note: note ?? '' });
         const left = pending.filter((one) => one.id !== chosen.id).length;
         return text(
           `Recorded on ${shortId(target.id)}:\n  ? ${written.question}\n  = ${written.answer}\n\n` +

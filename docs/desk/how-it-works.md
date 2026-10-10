@@ -106,3 +106,20 @@ settings loaded that saved override. A phone `$apk` attempt exposed Windows quot
 the app displayed failed, the launcher was fixed and a wrapper-with-spaces regression
 passes. The repeated phone APK build remains under verification; W2 stays in progress.
 QA uses a separate host and account fixture, actual scripts, and no production DB writes.
+
+## W3 — exact choices and note
+
+`answer_picks` stores exact option texts; `answer_note` stores free text. Null picks
+mean a legacy prose answer; an empty list means a new free-text answer, so mentioning
+an option in a note cannot silently select it. The readable `answer` remains for old
+clients. Invalid/empty writes fail; app drafts clear only after a confirmed save.
+The existing `unblocksEntry` rule is unchanged.
+
+The user applied `supabase/desk-w3.sql`. Physical phone saved B+C with the note
+"exclude Alpha" and showed B/C checked with A unselected. Shared new MCP formatting
+returns exact choices, the separate note and an explicit several-options line in
+both entry briefs and answer checks. App tests: 849; MCP tests: 37; types/lint and
+the exact Deno edge bundle pass. Temporary QA question archived after verification.
+
+Hosted MCP has not been deployed: its current formatter still infers extra choices
+from prose. W3 stays in progress until hosted deployment and live tool verification.

@@ -4,7 +4,8 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { runChip } from '@/lib/deskView';
-import { optionLabel, optionParts, pickedOptions } from '@/lib/entryQuestions';
+import { optionLabel, optionParts } from '@/lib/entryQuestions';
+import { answerPicks } from '@/lib/questionAnswer';
 import type { QuestionStatus } from '@/types/cellar';
 import { COLORS } from '@/theme/colors';
 
@@ -31,6 +32,9 @@ export type QuestionCardProps = {
   question: string;
   options: string[];
   answer: string | null;
+  answerPicks?: string[] | null;
+  sending?: boolean;
+  error?: string | null;
   answeredVia: 'app' | 'chat' | null;
   status: QuestionStatus;
   agent: string | null;
@@ -66,7 +70,7 @@ export function QuestionCard(props: QuestionCardProps) {
       </View>
       <Text className="font-sans text-sm font-semibold text-foreground">{question}</Text>
       {options.map((option, index) => {
-        const taken = pickedOptions(answer, options).includes(option);
+        const taken = answerPicks({ answer, options, answerPicks: props.answerPicks }).includes(option);
         return (
           <Text key={option} className={`font-sans text-sm ${taken ? 'text-foreground' : 'text-muted-foreground'}`}>
             <Text className="font-mono font-semibold">{optionLabel(index)}</Text>
@@ -87,10 +91,11 @@ function OpenCard(props: QuestionCardProps) {
   const { question, options, agent, rel, draft, picked, several, note } = props;
   const [other, setOther] = useState(options.length === 0);
   const who = agent ?? 'the agent';
-  const ready = picked.length > 0 || (other && draft.trim().length > 0);
+  const ready = !props.sending && (picked.length > 0 || (other && draft.trim().length > 0));
 
   return (
     <View className="mt-2.5 gap-2.5 border-t border-border/50 pt-3.5">
+      {(props.sending || props.error) && <Text className="font-sans text-xs text-muted-foreground">{props.sending ? 'Saving answer…' : props.error}</Text>}
       <View className="flex-row items-center gap-1.5">
         <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: COLORS.danger }} />
         <Text className="font-sans min-w-0 flex-1 text-xs font-bold uppercase tracking-widest" style={{ color: COLORS.danger }}>

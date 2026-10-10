@@ -863,3 +863,8 @@ alter table public.cellar_projects
 -- (src/lib/deskFolders.ts). Kept on the group, not on its general project, so
 -- an agent standing in C:\ping still resolves no project there.
 alter table public.cellar_groups add column if not exists repo_path text;
+
+-- 2026-10-10 — exact question choices, separate from the user's note.
+-- Null picks preserve legacy prose; an empty array is an explicit free-text answer.
+alter table public.cellar_entry_questions add column if not exists answer_picks text[];
+alter table public.cellar_entry_questions add column if not exists answer_note text;

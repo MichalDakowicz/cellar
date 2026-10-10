@@ -53,6 +53,8 @@ export type QuestionRow = {
   question: string;
   options: unknown;
   answer: string | null;
+  answer_picks?: string[] | null;
+  answer_note?: string | null;
   answered_at: string | null;
   answered_via: string | null;
   dismissed_at: string | null;
@@ -86,8 +88,9 @@ export const GROUP_COLUMNS = 'id, shelf_id, name, position, pinned, created_at, 
 // string keeps its literal type: supabase-js resolves the row shape from it at
 // compile time, and a widened `string` makes every `.select(ENTRY_COLUMNS)` in
 // the app infer `GenericStringError[]` instead.
-export const QUESTION_COLUMNS =
-  'id, question, options, answer, answered_at, answered_via, dismissed_at, agent, created_at' as const;
+// Read legacy databases during rollout too. Structured writes still require the
+// migration and fail visibly rather than silently flattening a multi-pick answer.
+export const QUESTION_COLUMNS = '*' as const;
 export const ENTRY_COLUMNS =
   `id, project_id, text, kind, state, importance, position, archived, created_at, agent, cellar_entry_lines(id, text, created_at, source), cellar_entry_questions(${QUESTION_COLUMNS}), cellar_entry_docs(id, ref, label, created_at)` as const;
 
@@ -148,6 +151,8 @@ export function normalizeQuestion(row: QuestionRow): EntryQuestion {
     question: row.question,
     options: normalizeOptions(row.options),
     answer: row.answer,
+    answerPicks: Array.isArray(row.answer_picks) ? row.answer_picks.filter((pick) => typeof pick === 'string') : null,
+    answerNote: row.answer_note ?? null,
     answeredAt: row.answered_at,
     answeredVia: row.answered_via === 'chat' ? 'chat' : row.answered_via ? 'app' : null,
     dismissedAt: row.dismissed_at,

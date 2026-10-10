@@ -127,6 +127,9 @@ export type EntryQuestion = {
   /** The choices offered, in order. Empty means free text only. */
   options: string[];
   answer: string | null;
+  /** Null/absent means legacy prose; an empty list means an explicit free-text answer. */
+  answerPicks?: string[] | null;
+  answerNote?: string | null;
   answeredAt: string | null;
   answeredVia: AnsweredVia | null;
   /** Waved off rather than answered. Stops holding the entry blocked either way. */
