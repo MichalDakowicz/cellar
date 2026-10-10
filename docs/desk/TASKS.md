@@ -250,6 +250,20 @@ limits side by side, accounts, policies, by day and the limits (`USAGE_LIMITS`,
 `PLAN_OUT_POLICIES`); keys as tiles; the keys list headed by group; the wide desk's commands as `$`
 buttons. Checked in the desktop window over CDP, phone views by emulating 390×844.
 
+### M6 · clone the current canvas, visuals only `[x]`
+
+User instruction on 2026-10-10 replaces the sequential canvas review with a visual clone of
+all current boards. Main revision 5, NewTask revision 2 and Run R1b/R1c are the latest targets.
+Match shared typography and grounds, phone layouts, desktop layouts and sample previews.
+Keep all W tasks unchecked: new model, attachment, queue, voice and host controls are drawn
+only. Record the visual coverage and verification in `canvas/updates.md`.
+
+Implemented shared canvas fonts/grounds, revised Main/NewTask/Run layouts, sample previews,
+phone and group panels, desktop sidebar and settings typography. Validation: 811 tests,
+types, lint, web export and Android release build pass; APK installed and launched on the
+connected phone. Main and NewTask keyboard layout checked on-device. New host behavior
+remains in Pass 2. See `visual-clone.md` for coverage and review entry.
+
 ## Pass 2 — the wiring
 
 ### W1 · real counts on the desk `[ ]`

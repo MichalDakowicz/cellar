@@ -42,6 +42,8 @@
 
 ### Changed
 
+- Desk: match canvas layouts, typography, task sheet, chat composer and desktop sample panels
+
 - Entry: start on pc opens the new task screen with the thought attached
 - Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you

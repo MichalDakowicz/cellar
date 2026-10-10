@@ -34,6 +34,21 @@ Three levels, and they are the whole idea: **shelf → project → entry.**
   inbox, search still finds it, and one tap brings it back. Delete exists, is small, red,
   and asks.
 
+## Desk visual pass
+
+Desk UI follows the boards in `docs/desk/canvas/`, including Main revision 5,
+NewTask revision 2 and the Run R1b/R1c composer. Spline Sans and IBM Plex Mono
+are bundled with their OFL licenses under `assets/fonts/`. Host features still
+follow the unchecked wiring tasks in `docs/desk/TASKS.md`; new controls and
+mirrors are presentation only, with sample content explicitly labelled.
+
+For isolated visual QA, start `npx expo start --web --port 8088` and
+`node scripts/serve-desk-preview.cjs`, then open `http://127.0.0.1:8134`.
+The `page` query selects a board (`main`, `new`, `run`, `approval`, `queue`,
+`phone`, `group`, `race`, `night`, `preview`, `home`, `chat`, `hosts`, `keys`,
+`usage`, `recipes`, `notify`, `question`, `share`); `theme=light` checks light
+mode. This entry mounts no authentication, database or host clients.
+
 ## Setup
 
 1. Run Radar's `supabase/schema.sql` first — it owns the shared tables.
