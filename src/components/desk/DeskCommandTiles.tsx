@@ -25,6 +25,7 @@ export function DeskCommandTiles({
   onPick,
   onRun,
   gutter,
+  mono = false,
 }: {
   projects: DeskProjectCommands[];
   current: DeskProjectCommands;
@@ -32,6 +33,8 @@ export function DeskCommandTiles({
   /** Null until commands run for real (docs/desk/TASKS.md W2). */
   onRun: ((projectId: string, commandId: string) => void) | null;
   gutter: string;
+  /** The desktop home's `$name` buttons (`DeskHome.dc.html`) instead of the phone's icon tiles. */
+  mono?: boolean;
 }) {
   return (
     <View className="gap-2.5">
@@ -52,9 +55,23 @@ export function DeskCommandTiles({
           );
         })}
       </ScrollView>
-      <View className={`flex-row gap-2 ${gutter}`}>
+      <View className={`flex-row gap-2 ${mono ? 'flex-wrap' : ''} ${gutter}`}>
         {current.commands.map((command) => {
           const Icon = ICONS[command.icon];
+          if (mono) {
+            return (
+              <Pressable
+                key={command.id}
+                accessibilityRole="button"
+                accessibilityLabel={`$${command.label} in ${current.name}`}
+                disabled={!onRun}
+                onPress={() => onRun?.(current.id, command.id)}
+                className="h-10 min-w-[30%] flex-1 items-center justify-center rounded-xl bg-secondary/60 px-3 active:opacity-70"
+              >
+                <Text className="font-mono text-xs text-foreground">{`$${command.label}`}</Text>
+              </Pressable>
+            );
+          }
           return (
             <Pressable
               key={command.id}

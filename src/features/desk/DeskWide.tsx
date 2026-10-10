@@ -67,7 +67,7 @@ export function DeskWide({
           {home.commands && (
             <View className="gap-2">
               <Overline>{`commands · $${home.commands.current.name}`}</Overline>
-              <DeskCommandTiles {...home.commands} gutter="" />
+              <DeskCommandTiles {...home.commands} gutter="" mono />
             </View>
           )}
           <DeskTodayFigures figures={wide.today} />
