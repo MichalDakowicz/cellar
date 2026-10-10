@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Overline } from '@/components/ui/controls';
 import type { SAMPLE_NIGHT } from '@/lib/deskSample';
 import { runChip } from '@/lib/deskView';
+import { COLORS } from '@/theme/colors';
 
 type Night = typeof SAMPLE_NIGHT;
 
@@ -24,11 +25,11 @@ const DONE: Record<string, string> = {
  * follow up, then tonight's queue. Answered here, locally, until the night
  * shift runs for real (docs/desk/TASKS.md W19).
  */
-export function NightBody({ night }: { night: Night }) {
+export function NightBody({ night, onAdd }: { night: Night; onAdd: () => void }) {
   const [done, setDone] = useState<Record<string, string>>({});
 
   return (
-    <View className="gap-3">
+    <View className="gap-4">
       {night.runs.map((run) => {
         const chip = runChip(CHIP[run.state].state);
         const settled = done[run.id];
@@ -49,7 +50,9 @@ export function NightBody({ night }: { night: Night }) {
               <Text className="text-sm text-muted-foreground">{DONE[settled]}</Text>
             ) : (
               <>
-                <Text className="text-sm text-foreground">{run.summary}</Text>
+                <Text className="text-sm" style={{ color: COLORS.foregroundSoft }}>
+                  {run.summary}
+                </Text>
                 <View className="mt-1 flex-row gap-1.5">
                   <Act label="toss" onPress={() => setDone((now) => ({ ...now, [run.id]: 'toss' }))} />
                   <Act label={run.second} outlined onPress={() => setDone((now) => ({ ...now, [run.id]: 'follow' }))} />
@@ -72,6 +75,16 @@ export function NightBody({ night }: { night: Night }) {
             <Text className="text-xs text-muted-foreground">{task.project}</Text>
           </View>
         ))}
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAdd}
+          className="mt-1 h-11 items-center justify-center rounded-full border border-dashed active:opacity-70"
+          style={{ borderColor: COLORS.outline }}
+        >
+          <Text className="text-sm font-semibold" style={{ color: COLORS.foregroundSoft }}>
+            add something for tonight
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

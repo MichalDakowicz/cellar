@@ -53,6 +53,9 @@ export function useDeskShare() {
             if (handoff) {
               hand(text.trim());
               router.replace('/desk/new' as Href);
+            } else if (router.canGoBack()) {
+              // A sheet: filed is done, back to what you were looking at.
+              router.back();
             } else {
               setText('');
               setPicked(null);

@@ -9,7 +9,8 @@ export default function RaceScreen() {
       name="race"
       overline={`${SAMPLE_RACE.project} · race · same prompt, two runs`}
       title={SAMPLE_RACE.title}
-      sub="look at each, compare them, keep one"
+      sub=""
+      plainOverline
       sampleOnly
       waitsOn="two agents off one commit, compared and one kept — comes with races on the pc"
     >

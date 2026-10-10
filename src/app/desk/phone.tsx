@@ -13,6 +13,7 @@ export default function PhoneScreen() {
       sampleOnly
       waitsOn="a phone on the pc's usb, mirrored and driven — comes once the pc talks adb"
       wide
+      bigTitle
     >
       <PhoneBody phone={SAMPLE_PHONE} />
     </LaterScreen>

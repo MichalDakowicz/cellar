@@ -13,6 +13,7 @@ export default function GroupRunScreen() {
       sampleOnly
       waitsOn="one prompt across every project in a group — comes with group runs on the pc"
       wide
+      bigTitle
     >
       <GroupBody group={SAMPLE_GROUP} />
     </LaterScreen>

@@ -1,20 +1,38 @@
+import { useRouter, type Href } from 'expo-router';
+import { Pressable, Text } from 'react-native';
+
+import { DeskSheet } from '@/components/desk/DeskSheet';
 import { ShareBody } from '@/components/desk/later/ShareBody';
-import { LaterScreen } from '@/features/desk/LaterScreen';
 import { useDeskShare } from '@/features/desk/useDeskShare';
 
-/** File it into cellar (docs/desk/screens.md, `PhoneShare.dc.html`). Filing is real; the share target is W17. */
-export default function ShareScreen() {
+/**
+ * File it into cellar (docs/desk/screens.md, `PhoneShare.dc.html`): a sheet
+ * over what you were looking at. Filing is real; arriving here from another
+ * app's share sheet is W17.
+ */
+export default function ShareSheet() {
+  const router = useRouter();
   const share = useDeskShare();
+  const close = () => (router.canGoBack() ? router.back() : router.navigate('/desk' as Href));
+
   return (
-    <LaterScreen
-      name="share into cellar"
-      overline="share into cellar"
-      title="file it into cellar"
-      sub="what other apps will hand to cellar from their share sheet — for now, type it here"
-      sampleOnly={false}
-      waitsOn=""
+    <DeskSheet
+      onClose={close}
+      height="76%"
+      footer={
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={share.label}
+          accessibilityState={{ disabled: !share.canFile }}
+          disabled={!share.canFile}
+          onPress={share.file}
+          className={`h-[52px] items-center justify-center rounded-full bg-foreground active:opacity-80 ${share.canFile ? '' : 'opacity-40'}`}
+        >
+          <Text className="text-base font-semibold text-background">{share.label}</Text>
+        </Pressable>
+      }
     >
-      <ShareBody {...share} />
-    </LaterScreen>
+      <ShareBody {...share} onCancel={close} />
+    </DeskSheet>
   );
 }

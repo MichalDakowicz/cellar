@@ -209,7 +209,7 @@ projects. Adds `desk/chat` (the run list with nothing open), `desk/commands` (ea
 commands — sample until W2) and `desk/previews` (the pc's pages, real). Rows and pinned
 projects come from `lib/sidebar.ts`; chat is badged with what is waiting on you.
 
-### M4 · phone boards `[ ]`
+### M4 · phone boards `[x]`
 
 Main, NewTask (a sheet over the desk: waveform, 76px primary mic between "type instead" and
 "clear", sticky send with an arrow), Run (step tiles with their own glyphs, the bubble's caption,
@@ -231,6 +231,11 @@ PhoneShare (a sheet), PhoneRace, PhoneNight — each to its artboard.
   lettered option cards with round/square tiles, "recommended" and a detail line parsed from the
   option (`optionParts`), "other" last opening its own field, "let it decide" beside answer
   (`letDecide`), the red "asks · pick one/any" head.
+- [x] PhoneShare — a `DeskSheet` (76%), cancel, plain "in your words", the guessed-kind suffix in
+  normal case, inbox last, hand-off as a tile with a switch; filing closes the sheet.
+- [x] PhoneRace — quiet overline, 300px preview, the compare grid at 13/18 with green checks and a
+  coloured diff. PhoneNight — `text-2xl` title, 16px between cards, soft summaries, "add something
+  for tonight".
 
 ### M5 · desktop boards `[ ]`
 

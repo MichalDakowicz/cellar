@@ -24,6 +24,8 @@ export function LaterScreen({
   sampleOnly,
   waitsOn,
   wide = false,
+  plainOverline = false,
+  bigTitle = false,
   children,
 }: {
   /** What it is, said plainly — the heading while the sample desk is off. */
@@ -36,6 +38,10 @@ export function LaterScreen({
   /** What it waits for, said when the sample desk is off. */
   waitsOn: string;
   wide?: boolean;
+  /** The race board's quiet "project · race · …" line instead of the uppercase overline. */
+  plainOverline?: boolean;
+  /** The night shift's and the desktop boards' `text-2xl` heading. */
+  bigTitle?: boolean;
   children: ReactNode;
 }) {
   const sample = useDeskPrefs((state) => state.sample);
@@ -60,9 +66,13 @@ export function LaterScreen({
             <View className="flex-row items-start gap-3">
               {!isDesktop && <ScreenAction />}
               <View className="min-w-0 flex-1 gap-1">
-                <Overline>{shown ? overline : 'coming'}</Overline>
-                <Text className="text-xl font-bold leading-tight text-foreground">{shown ? title : name}</Text>
-                <Text className="text-xs text-muted-foreground">{shown ? sub : waitsOn}</Text>
+                {plainOverline && shown ? (
+                  <Text className="text-xs text-muted-foreground">{overline}</Text>
+                ) : (
+                  <Overline>{shown ? overline : 'coming'}</Overline>
+                )}
+                <Text className={`font-bold leading-tight text-foreground ${bigTitle ? 'text-2xl tracking-tight' : 'text-xl'}`}>{shown ? title : name}</Text>
+                {!!(shown ? sub : waitsOn) && <Text className="text-xs text-muted-foreground">{shown ? sub : waitsOn}</Text>}
               </View>
             </View>
             {shown ? children : <Text className="text-xs text-muted-foreground">turn on the sample desk in settings › devices and pairing to see it filled in.</Text>}

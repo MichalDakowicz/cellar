@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Segmented } from '@/components/ui/controls';
+import { TextParts } from '@/components/desk/TextParts';
 import { raceRows } from '@/lib/deskLater';
 import type { SAMPLE_RACE } from '@/lib/deskSample';
+import { metaParts } from '@/lib/deskView';
+import { COLORS } from '@/theme/colors';
 
 type Race = typeof SAMPLE_RACE;
 
@@ -25,7 +28,7 @@ export function RaceBody({ race }: { race: Race }) {
         onChange={setPick}
         options={race.runs.map((candidate) => ({ value: candidate.agent, label: candidate.agent }))}
       />
-      <View className="h-[200px] items-center justify-center rounded-xl border border-border bg-secondary/60 px-6">
+      <View className="h-[300px] items-center justify-center rounded-xl border border-border bg-secondary/60 px-6">
         <Text className="text-center text-sm text-muted-foreground">{`${run.agent}'s preview · ${run.approach}`}</Text>
       </View>
       <View className="gap-2">
@@ -42,10 +45,14 @@ export function RaceBody({ race }: { race: Race }) {
         </View>
         {raceRows(race.runs).map((row) => (
           <View key={row.label} className="flex-row gap-2">
-            <Text className="w-20 text-sm text-muted-foreground">{row.label}</Text>
+            <Text className="w-20 text-[13px] leading-[18px] text-muted-foreground">{row.label}</Text>
             {row.values.map((value, index) => (
-              <Text key={`${row.label}:${index}`} className="min-w-0 flex-1 text-sm text-foreground">
-                {value}
+              <Text
+                key={`${row.label}:${index}`}
+                className="min-w-0 flex-1 text-[13px] leading-[18px] text-foreground"
+                style={row.label === 'checks' ? { color: COLORS.ok } : undefined}
+              >
+                <TextParts parts={metaParts(value)} />
               </Text>
             ))}
           </View>
