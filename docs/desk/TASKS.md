@@ -286,7 +286,7 @@ The host reads each project's `package.json` scripts (and gradle tasks for `$apk
 tiles and `$` run them as **jobs**, not agent turns, streamed back like any run. Per-project
 overrides and chains saved from a chat live in settings.
 
-### W3 · questions carry several picks and a note `[~]`
+### W3 · questions carry several picks and a note `[x]`
 
 Schema: the answer may be a list and carry a note (`supabase/schema.sql` column migrations).
 `cellar_check_answers` / `cellar_get_entry` return both, with a line saying the user chose
@@ -295,10 +295,10 @@ several. App, mcp and the edge function in the same change; `unblocksEntry` unch
 2026-10-10: app/MCP implementation, additive SQL and edge import map are ready. Migration
 applied by the user; phone saved B+C plus a note excluding A and rendered exact choices.
 849 app tests, 37 MCP tests, both type checks, lint and Deno edge check pass. Hosted MCP
-deployment remains pending authorization/access; its old formatter still infers A from
-the note. Keep this task in progress until the hosted read tools are verified too.
+function deployed with explicit authorization. Live `cellar_get_entry` verifies exact B+C,
+explicit several-options line and separate note; `cellar_check_answers` responds successfully.
 
-### W4 · send a task for real `[ ]`
+### W4 · send a task for real `[~]`
 
 The new task sheet and the capture bar's shift+enter start a run with project, where, agent,
 mode and attached entries; the send carries a `commandId` and the host stores receipts, so a

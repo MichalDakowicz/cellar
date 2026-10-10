@@ -121,5 +121,6 @@ returns exact choices, the separate note and an explicit several-options line in
 both entry briefs and answer checks. App tests: 849; MCP tests: 37; types/lint and
 the exact Deno edge bundle pass. Temporary QA question archived after verification.
 
-Hosted MCP has not been deployed: its current formatter still infers extra choices
-from prose. W3 stays in progress until hosted deployment and live tool verification.
+Hosted MCP function deployed with explicit authorization. Live `cellar_get_entry`
+returns exact B+C, the separate note and several-options line. `cellar_check_answers`
+also responds successfully. W3 is verified; website deployment and GitHub remain pending.
