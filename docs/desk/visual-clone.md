@@ -37,8 +37,9 @@ visual selectors do not send host requests.
 - Browser inspected the phone and desktop boards listed in the README QA entry, including
   Run's model popout. Run also checked at 320px with no horizontal overflow. Isolated QA
   entry uses sample props and mounts no auth/database/host clients; see README commands.
-- Firebase deployment was rejected by automatic approval review because destination and
-  publication payload need explicit user authorization. The web build remains local.
+- Firebase deployment and GitHub branch push were rejected by automatic approval review
+  because destination and publication payload need explicit user authorization. Commits,
+  PR description and web build remain local; no review PR was created.
 
 This is the visual checkpoint before behavior work. Native speech, upload, host delivery,
 receipt recovery and agent permissions have not been implemented or validated here.
