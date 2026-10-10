@@ -25,27 +25,30 @@ export function DeskRunCardRow({ run, onOpen }: { run: DeskRunCard; onOpen: ((id
       accessibilityLabel={`${run.title}, ${run.state}`}
       disabled={!onOpen}
       onPress={() => onOpen?.(run.id)}
-      className={`flex-row items-center gap-3 rounded-xl p-3 active:opacity-80 ${waiting ? 'bg-secondary' : 'bg-secondary/60'}`}
+      className={`flex-row items-start gap-3 rounded-xl p-3 active:opacity-80 ${waiting ? 'bg-secondary' : 'bg-row'}`}
     >
       {live && (
         <View className={`h-10 w-10 items-center justify-center rounded-lg ${waiting ? 'bg-white/10' : 'bg-secondary'}`}>
           <Bot size={20} color={COLORS.foregroundSoft} strokeWidth={2} />
         </View>
       )}
-      <View className="min-w-0 flex-1 gap-0.5">
-        <Text className="text-base font-bold text-foreground" numberOfLines={1}>
+      <View className="min-w-0 flex-1 gap-1">
+        <View className="flex-row items-center justify-between gap-2">
+          <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>{waiting ? 'approval' : run.project}</Text>
+          <RunChip state={run.state} />
+        </View>
+        <Text className="font-sans text-base font-bold text-foreground" numberOfLines={1}>
           {run.title}
         </Text>
-        <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+        <Text className="font-sans text-xs text-muted-foreground" numberOfLines={1}>
           <TextParts parts={metaParts(run.meta)} />
         </Text>
         {run.detail && (
-          <Text className={`mt-1 text-sm ${waiting ? 'text-foreground' : 'text-muted-foreground'}`} numberOfLines={1}>
+          <Text className={`font-sans mt-1 text-sm ${waiting ? 'text-foreground' : 'text-muted-foreground'}`} numberOfLines={2}>
             <TextParts parts={detailParts(run.detail)} />
           </Text>
         )}
       </View>
-      <RunChip state={run.state} />
     </Pressable>
   );
 }

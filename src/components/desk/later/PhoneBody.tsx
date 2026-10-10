@@ -1,66 +1,47 @@
+import { Circle, Keyboard, Power, RotateCw, Square, Triangle, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
+import { SamplePhoneMirror } from '@/components/desk/SamplePhoneMirror';
 import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
+import { useIsDesktop } from '@/hooks/useResponsive';
 import type { SAMPLE_PHONE } from '@/lib/deskSample';
 import { COLORS } from '@/theme/colors';
 
-type Phone = typeof SAMPLE_PHONE;
-type Driver = 'watch' | 'me' | 'agent';
+import { PhoneTools, Pill } from './PhoneTools';
 
-const LEVEL: Record<string, string> = { E: COLORS.danger, W: COLORS.muted, I: COLORS.mutedDeep };
+const LEVEL: Record<string, string> = { E: COLORS.danger, W: '#f59e0b', I: COLORS.muted };
+const CONTROLS: [string, LucideIcon][] = [['android back', Triangle], ['android home', Circle], ['recent apps', Square], ['rotate', RotateCw], ['type on the phone', Keyboard], ['screen off', Power]];
 
-/**
- * The phone on the pc over adb (`DeskPhone.dc.html`): who drives, the mirror,
- * install and deep links, logcat and the dev toggles. Drawn until the pc
- * attaches a phone (docs/desk/TASKS.md W18); the agent-access switch is the
- * one in cellar's settings, so it is not repeated here.
- */
-export function PhoneBody({ phone }: { phone: Phone }) {
-  const [driver, setDriver] = useState<Driver>('agent');
-
+/** DeskPhone's two-column sample layout. No ADB commands are sent in the visual pass. */
+export function PhoneBody({ phone }: { phone: typeof SAMPLE_PHONE }) {
+  const [driver, setDriver] = useState<'watch' | 'me' | 'agent'>('agent');
+  const isDesktop = useIsDesktop();
   return (
-    <View className="gap-6">
-      <Segmented<Driver>
-        label="who drives the phone"
-        value={driver}
-        onChange={setDriver}
-        options={[
-          { value: 'watch', label: 'just watch' },
-          { value: 'me', label: 'i drive' },
-          { value: 'agent', label: 'agent drives' },
-        ]}
-      />
-      <View className="aspect-[9/16] w-[180px] items-center justify-center gap-2 self-center rounded-[26px] border-2 border-border bg-secondary/60 px-4">
-        <Text className="text-center text-xs text-muted-foreground">
-          {driver === 'agent' ? 'the agent is driving — its taps show as rings' : driver === 'me' ? 'click to tap, drag to swipe' : 'watching only'}
-        </Text>
+    <View className={`gap-8 ${isDesktop ? 'flex-row items-start' : ''}`}>
+      <View className={`items-center gap-3.5 ${isDesktop ? 'w-[360px]' : ''}`}>
+        <View className="w-full"><Segmented label="who drives the phone" value={driver} onChange={setDriver} options={[{ value: 'watch', label: 'just watch' }, { value: 'me', label: 'i drive' }, { value: 'agent', label: 'agent drives' }]} /></View>
+        <SamplePhoneMirror width={isDesktop ? 300 : 280} driving={driver === 'agent'} />
+        <View className="flex-row flex-wrap justify-center gap-2">{CONTROLS.map(([label, Icon]) => <View key={label} accessibilityLabel={`${label} · visual only`} className="h-9 w-9 items-center justify-center rounded-full border border-border"><Icon size={16} color={COLORS.foreground} /></View>)}</View>
+        <Text className="font-sans text-center text-xs text-muted-foreground">drag on the mirror to swipe · scroll wheel scrolls · ctrl v pastes into the phone</Text>
       </View>
-
-      <View className="gap-2">
-        <Overline>install and open</Overline>
-        <Text className="font-mono text-sm text-foreground">{phone.apk.file}</Text>
-        <Text className="text-xs text-muted-foreground">{phone.apk.line}</Text>
-        <Text className="pt-1 text-xs text-muted-foreground">deep link</Text>
-        <Text className="rounded-lg bg-secondary px-3 py-2 font-mono text-xs text-foreground">{phone.deepLink}</Text>
-      </View>
-
-      <View className="gap-1.5">
-        <Overline>logcat</Overline>
-        {phone.log.map((line) => (
-          <Text key={line.at} className="font-mono text-xs text-foreground" numberOfLines={1}>
-            <Text className="text-muted-foreground">{line.at} </Text>
-            <Text style={{ color: LEVEL[line.level] }}>{line.level} </Text>
-            {line.text}
-          </Text>
-        ))}
-      </View>
-
-      <View>
-        <Overline>phone settings over adb</Overline>
-        {phone.toggles.map((toggle) => (
-          <SwitchRow key={toggle} label={toggle} value={false} onChange={() => {}} disabled />
-        ))}
+      <View className="min-w-0 flex-1 gap-7">
+        <PhoneTools phone={phone} />
+        <View className="flex-row flex-wrap items-start gap-7">
+          <View className="min-w-[240px] flex-[3] gap-2.5">
+            <View className="flex-row items-center gap-2"><Overline className="flex-1">logcat · com.ping.cellar</Overline><Text className="font-sans text-xs text-muted-foreground">all · info+ · errors</Text></View>
+            <ScrollView horizontal className="rounded-xl border border-border/50 bg-background" contentContainerClassName="p-3.5"><View>{phone.log.map((line) => <Text key={line.at} className="font-mono text-xs leading-5 text-foreground"><Text className="font-sans text-muted-foreground">{line.at} </Text><Text style={{ color: LEVEL[line.level] }}>{line.level} </Text>{line.text}</Text>)}</View></ScrollView>
+            <View className="flex-row flex-wrap items-center gap-2"><Pill label="send these lines to claude" /><Text className="font-sans text-sm text-muted-foreground">pause · clear</Text></View>
+          </View>
+          <View className="min-w-[240px] flex-[2] gap-3">
+            <Overline>phone settings over adb</Overline>
+            {phone.toggles.map((label) => <SwitchRow key={label} label={label} value={false} onChange={() => {}} disabled />)}
+            <Text className="font-sans text-sm text-foreground">network · normal / slow / offline</Text>
+            <Text className="font-sans text-sm text-foreground">font size · 1× / 1.3× / 2×</Text>
+            <View className="gap-1.5 border-t border-border/50 pt-3"><Overline>agents on this phone</Overline><Text className="font-sans text-sm text-foreground">agents may install, tap, swipe and take screenshots. never uninstall, or read notifications and messages.</Text><Text className="font-sans text-xs text-muted-foreground">same switch as “let agents test on my phone” in settings</Text></View>
+          </View>
+        </View>
+        <Text className="font-sans text-xs text-muted-foreground">Sample phone · mirror and controls are drawn until the PC talks ADB.</Text>
       </View>
     </View>
   );

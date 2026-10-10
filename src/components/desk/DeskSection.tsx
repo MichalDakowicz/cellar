@@ -19,7 +19,7 @@ export function DeskSection({
   return (
     <View className={`gap-1 pt-7 ${gutter}`}>
       <Overline>{title}</Overline>
-      {empty ? <Text className="pt-1 text-xs text-muted-foreground">{empty}</Text> : <View>{children}</View>}
+      {empty ? <Text className="font-sans pt-1 text-xs text-muted-foreground">{empty}</Text> : <View>{children}</View>}
     </View>
   );
 }

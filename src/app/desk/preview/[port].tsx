@@ -39,13 +39,13 @@ export default function PreviewScreen() {
               <ScreenAction />
               <View className="min-w-0 flex-1 gap-1">
                 <View className="flex-row items-center gap-1.5">
-                  <Text className="min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
+                  <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
                     {preview.branch ? <Text className="font-mono">{preview.branch}</Text> : null}
                     {preview.branch ? ' · ' : ''}
                     {preview.meta}
                   </Text>
                 </View>
-                <Text className="text-xl font-bold leading-tight text-foreground">{preview.title}</Text>
+                <Text className="font-sans text-xl font-bold leading-tight text-foreground">{preview.title}</Text>
               </View>
             </View>
 
@@ -55,6 +55,7 @@ export default function PreviewScreen() {
               onReload={preview.sample ? null : preview.reload}
             />
             <PreviewFrame
+              sample={preview.sample}
               address={preview.address}
               load={preview.load}
               size={preview.size}

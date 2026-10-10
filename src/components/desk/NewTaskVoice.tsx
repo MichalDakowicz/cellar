@@ -11,9 +11,6 @@ import type { ComposerKeys } from './RunComposer';
 /** The field is the sheet's whole point; a browser's focus ring around it is noise. */
 const NO_OUTLINE = Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null;
 
-// The waveform's resting shape (`NewTask.dc.html`); it moves once the mic listens (W12).
-const BARS = [8, 14, 22, 12, 30, 18, 26, 34, 20, 10, 24, 32, 16, 28, 36, 22, 12, 26, 18, 30, 14, 24, 8, 20, 28, 16, 10, 22, 14, 8, 12, 6];
-
 /**
  * The top of the new-task sheet (`NewTask.dc.html`): the waveform, what you
  * said as the transcript — editable, centred, a colour code painted as it is
@@ -25,16 +22,11 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
 
   return (
     <View className="items-center gap-3.5 pb-2 pt-1">
-      <View accessibilityElementsHidden className="h-9 flex-row items-center gap-[3px]">
-        {BARS.map((height, index) => (
-          <View key={index} className="w-[3px] rounded-full bg-white/30" style={{ height }} />
-        ))}
-      </View>
       <TextInput
         ref={field}
-        className="min-h-[72px] w-full max-w-[330px] text-center text-base text-foreground"
+        className="font-sans max-h-[192px] min-h-[72px] w-full max-w-[330px] text-center text-base leading-6 text-foreground"
         style={[{ textAlignVertical: 'center', lineHeight: undefined }, ANDROID_METRICS, NO_OUTLINE]}
-        placeholder="what should it do?"
+        placeholder="Describe a task…"
         placeholderTextColor={COLORS.muted}
         value={text}
         onChangeText={onText}
@@ -49,21 +41,21 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
         </View>
       )}
       <View className="flex-row items-center gap-5">
-        <Round label="type instead" onPress={() => field.current?.focus()}>
-          <Keyboard size={20} color={COLORS.foreground} strokeWidth={2} />
-        </Round>
         <View
           accessibilityRole="image"
           accessibilityLabel="speaking a task comes soon — type it for now"
-          className="h-[76px] w-[76px] items-center justify-center rounded-full bg-primary"
+          className="h-12 w-12 items-center justify-center rounded-full border border-border"
         >
-          <Mic size={28} color={COLORS.accentInk} strokeWidth={2} />
+          <Mic size={20} color={COLORS.foreground} strokeWidth={2} />
         </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="type task" onPress={() => field.current?.focus()} className="h-[76px] w-[76px] items-center justify-center rounded-full bg-primary">
+          <Keyboard size={28} color={COLORS.accentInk} strokeWidth={2} />
+        </Pressable>
         <Round label="clear and start over" onPress={() => onText('')}>
           <RotateCcw size={20} color={COLORS.foreground} strokeWidth={2} />
         </Round>
       </View>
-      <Text className="text-xs text-muted-foreground">speaking it comes soon — type it for now</Text>
+      <Text className="font-sans text-xs text-muted-foreground">keyboard · voice comes soon</Text>
     </View>
   );
 }

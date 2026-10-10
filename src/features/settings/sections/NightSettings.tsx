@@ -16,7 +16,7 @@ export function NightSettings() {
       <SettingsGroup>
         {NIGHT_SHIFT.map((row) => (
           <View key={row.label} className="flex-row items-start gap-4 py-1">
-            <Text className="w-[140px] text-sm text-muted-foreground">{row.label}</Text>
+            <Text className="font-sans w-[140px] text-sm text-muted-foreground">{row.label}</Text>
             <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-1.5">
               {row.tokens?.map((token) => (
                 <Text key={token} className="rounded-md bg-secondary px-2 py-0.5 font-mono text-xs text-foreground">
@@ -27,7 +27,7 @@ export function NightSettings() {
             </View>
           </View>
         ))}
-        <Text className="pt-2 text-xs text-muted-foreground">these are the night shift’s defaults — changing them comes with the night shift itself.</Text>
+        <Text className="font-sans pt-2 text-xs text-muted-foreground">these are the night shift’s defaults — changing them comes with the night shift itself.</Text>
       </SettingsGroup>
     </SettingsPage>
   );

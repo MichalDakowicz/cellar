@@ -6,6 +6,7 @@ import { PREVIEW_LOAD_LABEL, previewFrame, type PreviewLoad, type PreviewSize } 
 import { COLORS } from '@/theme/colors';
 
 import { PreviewPage, type PreviewPageProps } from './PreviewPage';
+import { SampleInboxPreview } from './SampleInboxPreview';
 
 const FRAME_HEIGHT = 320;
 
@@ -27,6 +28,7 @@ export function PreviewFrame({
   url,
   unreachable,
   page,
+  sample = false,
 }: {
   address: string;
   load: PreviewLoad;
@@ -34,18 +36,19 @@ export function PreviewFrame({
   url: string | null;
   unreachable: string | null;
   page: Omit<PreviewPageProps, 'url'>;
+  sample?: boolean;
 }) {
   const [room, setRoom] = useState(0);
   const frame = previewFrame(size, room, FRAME_HEIGHT);
 
   return (
     <View className="overflow-hidden rounded-xl border border-border">
-      <View className="h-10 flex-row items-center gap-2 bg-secondary/60 px-3">
+      <View className="h-10 flex-row items-center gap-2 bg-row px-3">
         <Lock size={14} color={COLORS.muted} strokeWidth={2} />
         <Text className="min-w-0 flex-1 font-mono text-xs text-muted-foreground" numberOfLines={1}>
           {address}
         </Text>
-        <Text className="text-[11px] font-semibold" style={{ color: LOAD_COLOR[load] }}>
+        <Text className="font-sans text-[11px] font-semibold" style={{ color: LOAD_COLOR[load] }}>
           {PREVIEW_LOAD_LABEL[load]}
         </Text>
       </View>
@@ -54,7 +57,7 @@ export function PreviewFrame({
         className="items-center overflow-hidden bg-background"
         style={{ height: FRAME_HEIGHT }}
       >
-        {url && room > 0 && !unreachable ? (
+        {sample ? <SampleInboxPreview /> : url && room > 0 && !unreachable ? (
           <View
             style={{
               width: frame.width,
@@ -69,7 +72,7 @@ export function PreviewFrame({
           </View>
         ) : (
           <View className="flex-1 items-center justify-center px-8">
-            <Text className="text-center text-xs text-muted-foreground">
+            <Text className="font-sans text-center text-xs text-muted-foreground">
               {unreachable ?? 'asking the pc for the page…'}
             </Text>
           </View>

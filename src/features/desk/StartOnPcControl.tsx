@@ -103,11 +103,11 @@ export function StartOnPcControl({
           <Text className="font-mono text-xs text-foreground" numberOfLines={4}>
             {prompt}
           </Text>
-          {built.ok && <Text className="text-xs text-muted-foreground">in {built.start.cwd}</Text>}
+          {built.ok && <Text className="font-sans text-xs text-muted-foreground">in {built.start.cwd}</Text>}
           {!!starting.untrusted && (
             <TrustAsk folder={starting.untrusted} busy={starting.trusting} onTrust={starting.trustAndStart} />
           )}
-          {!!starting.error && <Text className="text-sm text-destructive-foreground">{starting.error}</Text>}
+          {!!starting.error && <Text className="font-sans text-sm text-destructive-foreground">{starting.error}</Text>}
         </View>
       </SheetDialog>
     </View>

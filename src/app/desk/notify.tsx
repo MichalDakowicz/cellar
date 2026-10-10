@@ -33,7 +33,7 @@ export default function NotifyPreviews() {
         <ContentShell maxWidth={MAX_W.form}>
           <View className={`gap-3 pt-4 ${gutter}`}>
             <ScreenAction />
-            {notify.empty && <Text className="pt-2 text-xs text-muted-foreground">{notify.empty}</Text>}
+            {notify.empty && <Text className="font-sans pt-2 text-xs text-muted-foreground">{notify.empty}</Text>}
             {notify.notes.map(({ note, done }) => (
               <NotePreview
                 key={note.id}

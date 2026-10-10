@@ -21,18 +21,18 @@ export function RunChatItems({ items, youCaption }: { items: ChatItem[]; youCapt
             return (
               <View key={index} className="items-end gap-1">
                 <View className="max-w-[300px] rounded-2xl bg-secondary px-3.5 py-2.5">
-                  <Text className="text-sm text-foreground">{item.text}</Text>
+                  <Text className="font-sans text-sm text-foreground">{item.text}</Text>
                 </View>
-                <Text className="text-[11px] text-muted-foreground">{youCaption}</Text>
+                <Text className="font-sans text-[11px] text-muted-foreground">{youCaption}</Text>
               </View>
             );
           case 'agent':
-            return <Markdown key={index} text={item.text} />;
+            return <Markdown key={index} text={item.text} className="font-sans text-sm leading-relaxed text-foreground" />;
           case 'tools':
             return <ToolsTile key={index} steps={item.steps} />;
           default:
             return (
-              <Text key={index} className="text-xs italic text-muted-foreground">
+              <Text key={index} className="font-sans text-xs italic text-muted-foreground">
                 {item.text}
               </Text>
             );
@@ -51,7 +51,7 @@ const STEP_ICONS: Record<StepKind, LucideIcon> = { read: FileText, command: Squa
  */
 function ToolsTile({ steps }: { steps: string[] }) {
   return (
-    <View className="rounded-xl bg-secondary/60 px-3 py-1">
+    <View className="rounded-xl bg-row px-3 py-1">
       {stepRows(steps).map((row, index) => (
         <StepRowView key={`${index}:${row.label}`} row={row} />
       ))}
@@ -70,10 +70,10 @@ function StepRowView({ row }: { row: StepRow }) {
         accessibilityState={{ expanded: open }}
         accessibilityLabel={`${row.label}, ${open ? 'hide' : 'show'} the steps`}
         onPress={() => setOpen(!open)}
-        className="h-9 flex-row items-center gap-2.5 active:opacity-70"
+        className="min-h-11 flex-row items-center gap-2 active:opacity-70"
       >
         <Icon size={15} color={COLORS.foregroundSoft} strokeWidth={2} />
-        <Text className={`min-w-0 flex-1 text-sm ${row.mono ? 'font-mono' : ''}`} style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>
+        <Text className={`min-w-0 flex-1 text-[13px] text-foreground ${row.mono ? 'font-mono' : 'font-sans'}`} numberOfLines={1}>
           {row.label}
         </Text>
         <Chevron size={16} color={COLORS.muted} strokeWidth={2} />

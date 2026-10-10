@@ -67,15 +67,15 @@ export function LaterScreen({
               {!isDesktop && <ScreenAction />}
               <View className="min-w-0 flex-1 gap-1">
                 {plainOverline && shown ? (
-                  <Text className="text-xs text-muted-foreground">{overline}</Text>
+                  <Text className="font-sans text-xs text-muted-foreground">{overline}</Text>
                 ) : (
                   <Overline>{shown ? overline : 'coming'}</Overline>
                 )}
-                <Text className={`font-bold leading-tight text-foreground ${bigTitle ? 'text-2xl tracking-tight' : 'text-xl'}`}>{shown ? title : name}</Text>
-                {!!(shown ? sub : waitsOn) && <Text className="text-xs text-muted-foreground">{shown ? sub : waitsOn}</Text>}
+                <Text className={`font-sans font-bold leading-tight text-foreground ${bigTitle ? 'text-2xl tracking-tight' : 'text-xl'}`}>{shown ? title : name}</Text>
+                {!!(shown ? sub : waitsOn) && <Text className="font-sans text-xs text-muted-foreground">{shown ? sub : waitsOn}</Text>}
               </View>
             </View>
-            {shown ? children : <Text className="text-xs text-muted-foreground">turn on the sample desk in settings › devices and pairing to see it filled in.</Text>}
+            {shown ? children : <Text className="font-sans text-xs text-muted-foreground">turn on the sample desk in settings › devices and pairing to see it filled in.</Text>}
           </View>
         </ContentShell>
       </ScrollView>

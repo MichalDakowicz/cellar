@@ -28,11 +28,11 @@ export function DeskWide({
   wide: ReturnType<typeof useDeskWide>;
 }) {
   return (
-    <View className="gap-6 px-8 pt-8">
+    <View className="gap-7 px-8 pt-7">
       <View className="flex-row items-start gap-4">
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="text-2xl font-bold tracking-tight text-foreground">desk</Text>
-          <Text className="text-sm text-muted-foreground">{home.summary}</Text>
+          <Text className="font-sans text-2xl font-bold tracking-tight text-foreground">desk</Text>
+          <Text className="font-sans text-sm text-muted-foreground">{home.summary}</Text>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -42,7 +42,7 @@ export function DeskWide({
           onPress={() => wide.stopAll?.()}
           className={`h-10 justify-center rounded-full border border-destructive/60 px-4 active:opacity-70 ${wide.stopAll ? '' : 'opacity-40'}`}
         >
-          <Text className="text-sm font-semibold text-destructive">stop all agents</Text>
+          <Text className="font-sans text-sm font-semibold text-destructive">stop all agents</Text>
         </Pressable>
       </View>
 

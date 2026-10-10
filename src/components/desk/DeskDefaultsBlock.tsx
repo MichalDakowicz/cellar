@@ -35,7 +35,7 @@ export function DeskDefaultsBlock({
         onChange={onMode}
         options={DESK_MODES.map((option) => ({ value: option.id, label: option.label }))}
       />
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-xs text-muted-foreground">
         {modeHint(mode)}. new tasks start here; any one can change it before it is sent.
       </Text>
     </View>

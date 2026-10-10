@@ -26,7 +26,7 @@ export default function DeskChat() {
         <RunListPane {...side.list} />
         <View className="flex-1 items-center justify-center gap-3 px-10">
           <MessageSquare size={28} color={COLORS.muted} strokeWidth={1.8} />
-          <Text className="text-center text-sm text-muted-foreground">pick a run on the left, or start a new one with +</Text>
+          <Text className="font-sans text-center text-sm text-muted-foreground">pick a run on the left, or start a new one with +</Text>
         </View>
       </View>
       <AppChrome />

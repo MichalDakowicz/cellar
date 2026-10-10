@@ -17,7 +17,7 @@ export function PreviewChecks({ host, checks, empty }: { host: string; checks: P
   return (
     <View className="gap-2">
       <Overline>{`checks on ${host}`}</Overline>
-      {checks.length === 0 && <Text className="text-xs text-muted-foreground">{empty}</Text>}
+      {checks.length === 0 && <Text className="font-sans text-xs text-muted-foreground">{empty}</Text>}
       {checks.map((check) => {
         const { Icon, color } = MARK[check.state];
         return (
@@ -29,7 +29,7 @@ export function PreviewChecks({ host, checks, empty }: { host: string; checks: P
             >
               {check.label}
             </Text>
-            <Text className="text-xs text-muted-foreground">{check.detail}</Text>
+            <Text className="font-sans text-xs text-muted-foreground">{check.detail}</Text>
           </View>
         );
       })}

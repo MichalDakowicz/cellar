@@ -16,7 +16,7 @@ export function SettingsNav() {
 
   return (
     <View className="w-[210px] gap-0.5 border-r border-border/50 px-3 pt-6">
-      <Text className="px-3 pb-3 text-xl font-bold text-foreground">settings</Text>
+      <Text className="font-sans px-3 pb-3 text-xl font-bold text-foreground">settings</Text>
       {SETTINGS_SECTIONS.map((section) => (
         <NavRow
           key={section.id}
@@ -41,7 +41,7 @@ function NavRow({ section, on, onPress }: { section: SettingsSection; on: boolea
       className={`h-[34px] justify-center rounded-lg px-3 ${on ? 'bg-secondary' : ''}`}
       style={[webTransition('background-color'), hovered && !on ? { backgroundColor: COLORS.rowHover } : null]}
     >
-      <Text className={`text-sm ${on || hovered ? 'text-foreground' : 'text-muted-foreground'} ${on ? 'font-semibold' : ''}`}>
+      <Text className={`font-sans text-sm ${on || hovered ? 'text-foreground' : 'text-muted-foreground'} ${on ? 'font-semibold' : ''}`}>
         {section.label}
       </Text>
     </Pressable>

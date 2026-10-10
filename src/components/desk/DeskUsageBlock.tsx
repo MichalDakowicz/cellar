@@ -18,7 +18,7 @@ export function DeskUsageBlock({
 }) {
   if (agents.length === 0) {
     return (
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-xs text-muted-foreground">
         each agent’s 5-hour and weekly use shows here once it reports them; accounts per agent come with it.
       </Text>
     );
@@ -29,14 +29,14 @@ export function DeskUsageBlock({
       <View className="flex-row flex-wrap gap-6">
         {agents.map((row) => (
           <View key={row.agent} className="min-w-[240px] flex-1 gap-2.5">
-            <Text className="text-sm font-semibold text-foreground">
-              {row.agent} <Text className="font-normal text-muted-foreground">· your plan</Text>
+            <Text className="font-sans text-sm font-semibold text-foreground">
+              {row.agent} <Text className="font-sans font-normal text-muted-foreground">· your plan</Text>
             </Text>
             {row.windows.map((window) => (
               <View key={window.label} className="gap-1">
                 <View className="flex-row justify-between">
-                  <Text className="text-sm text-foreground">{window.label}</Text>
-                  <Text className="text-sm text-muted-foreground">{`${window.used}% · ${window.resets}`}</Text>
+                  <Text className="font-sans text-sm text-foreground">{window.label}</Text>
+                  <Text className="font-sans text-sm text-muted-foreground">{`${window.used}% · ${window.resets}`}</Text>
                 </View>
                 <View className="h-2 overflow-hidden rounded-full bg-secondary">
                   <View
@@ -49,7 +49,7 @@ export function DeskUsageBlock({
           </View>
         ))}
       </View>
-      <Text className="text-xs text-muted-foreground">numbers come from each agent where it reports them; anything marked ≈ is cellar’s own count · sample numbers, the sample desk is on</Text>
+      <Text className="font-sans text-xs text-muted-foreground">numbers come from each agent where it reports them; anything marked ≈ is cellar’s own count · sample numbers, the sample desk is on</Text>
     </View>
   );
 }

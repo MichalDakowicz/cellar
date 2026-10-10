@@ -56,29 +56,29 @@ export function QuestionCard(props: QuestionCardProps) {
   return open ? (
     <OpenCard {...props} />
   ) : (
-    <View className="mt-2.5 gap-1.5 rounded-xl bg-secondary/60 px-3.5 py-3">
+    <View className="mt-2.5 gap-1.5 rounded-xl bg-row px-3.5 py-3">
       <View className="flex-row items-center gap-2">
-        <Text className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <Text className="font-sans text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {status === 'answered' ? 'answered' : 'waved off'}
         </Text>
-        <Text className="min-w-0 flex-1 text-xs text-muted-foreground">{agent ? `· ${agent}` : ''}</Text>
-        <Text className="text-xs text-muted-foreground">{rel}</Text>
+        <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground">{agent ? `· ${agent}` : ''}</Text>
+        <Text className="font-sans text-xs text-muted-foreground">{rel}</Text>
       </View>
-      <Text className="text-sm font-semibold text-foreground">{question}</Text>
+      <Text className="font-sans text-sm font-semibold text-foreground">{question}</Text>
       {options.map((option, index) => {
         const taken = pickedOptions(answer, options).includes(option);
         return (
-          <Text key={option} className={`text-sm ${taken ? 'text-foreground' : 'text-muted-foreground'}`}>
+          <Text key={option} className={`font-sans text-sm ${taken ? 'text-foreground' : 'text-muted-foreground'}`}>
             <Text className="font-mono font-semibold">{optionLabel(index)}</Text>
             {`  ${optionParts(option).label}${taken ? '  ✓' : ''}`}
           </Text>
         );
       })}
-      {!!answer && <Text className="text-sm text-foreground">= {answer}</Text>}
+      {!!answer && <Text className="font-sans text-sm text-foreground">= {answer}</Text>}
       {status === 'answered' && answeredVia === 'chat' && (
-        <Text className="text-xs text-muted-foreground">answered in the chat, written back here</Text>
+        <Text className="font-sans text-xs text-muted-foreground">answered in the chat, written back here</Text>
       )}
-      {status === 'dismissed' && !answer && <Text className="text-xs text-muted-foreground">waved off without an answer</Text>}
+      {status === 'dismissed' && !answer && <Text className="font-sans text-xs text-muted-foreground">waved off without an answer</Text>}
     </View>
   );
 }
@@ -93,12 +93,12 @@ function OpenCard(props: QuestionCardProps) {
     <View className="mt-2.5 gap-2.5 border-t border-border/50 pt-3.5">
       <View className="flex-row items-center gap-1.5">
         <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: COLORS.danger }} />
-        <Text className="min-w-0 flex-1 text-xs font-bold uppercase tracking-widest" style={{ color: COLORS.danger }}>
+        <Text className="font-sans min-w-0 flex-1 text-xs font-bold uppercase tracking-widest" style={{ color: COLORS.danger }}>
           {`${who} asks · ${several ? 'pick any' : 'pick one'}`}
         </Text>
-        <Text className="text-xs text-muted-foreground">{rel}</Text>
+        <Text className="font-sans text-xs text-muted-foreground">{rel}</Text>
       </View>
-      <Text className="text-base font-bold text-foreground">{question}</Text>
+      <Text className="font-sans text-base font-bold text-foreground">{question}</Text>
 
       <View className="gap-2">
         {options.map((option, index) => (
@@ -124,7 +124,7 @@ function OpenCard(props: QuestionCardProps) {
 
       {other && (
         <TextInput
-          className="h-11 rounded-full border border-border bg-secondary px-4 text-foreground"
+          className="font-sans h-11 rounded-full border border-border bg-secondary px-4 text-foreground"
           style={[{ fontSize: 14, lineHeight: undefined }, ANDROID_METRICS]}
           placeholder="say or type your own answer"
           placeholderTextColor={COLORS.muted}
@@ -140,12 +140,12 @@ function OpenCard(props: QuestionCardProps) {
         {options.length > 1 && (
           <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: several }} hitSlop={6} onPress={props.onSeveral} className="flex-row items-center gap-1.5 py-1 active:opacity-70">
             {several ? <SquareCheck size={14} color={COLORS.accent} strokeWidth={2.2} /> : <Square size={14} color={COLORS.muted} strokeWidth={2.2} />}
-            <Text className="text-xs font-semibold text-muted-foreground">pick more than one</Text>
+            <Text className="font-sans text-xs font-semibold text-muted-foreground">pick more than one</Text>
           </Pressable>
         )}
         {note === null && options.length > 0 && (
           <Pressable accessibilityRole="button" hitSlop={6} onPress={props.onOpenNote} className="py-1 active:opacity-70">
-            <Text className="text-xs font-semibold text-muted-foreground">+ add a note</Text>
+            <Text className="font-sans text-xs font-semibold text-muted-foreground">+ add a note</Text>
           </Pressable>
         )}
         <View className="flex-1" />
@@ -155,7 +155,7 @@ function OpenCard(props: QuestionCardProps) {
       </View>
       {note !== null && (
         <TextInput
-          className="h-11 rounded-full border border-border bg-secondary px-4 text-foreground"
+          className="font-sans h-11 rounded-full border border-border bg-secondary px-4 text-foreground"
           style={[{ fontSize: 14, lineHeight: undefined }, ANDROID_METRICS]}
           placeholder="a note to go with it — but keep the total visible"
           placeholderTextColor={COLORS.muted}
@@ -168,7 +168,7 @@ function OpenCard(props: QuestionCardProps) {
 
       <View className="mt-0.5 flex-row gap-2">
         <Pressable accessibilityRole="button" onPress={props.onLetDecide} className="h-12 flex-1 items-center justify-center rounded-full border border-border active:opacity-70">
-          <Text className="text-sm font-semibold text-foreground">{`let ${who} decide`}</Text>
+          <Text className="font-sans text-sm font-semibold text-foreground">{`let ${who} decide`}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -178,7 +178,7 @@ function OpenCard(props: QuestionCardProps) {
           className="h-12 flex-1 items-center justify-center rounded-full bg-primary active:opacity-80"
           style={{ opacity: ready ? 1 : 0.5 }}
         >
-          <Text className="text-sm font-semibold text-primary-foreground">{answerLabel(picked, options)}</Text>
+          <Text className="font-sans text-sm font-semibold text-primary-foreground">{answerLabel(picked, options)}</Text>
         </Pressable>
       </View>
     </View>
@@ -200,7 +200,7 @@ function Option({ letter, option, on, several, onPress }: { letter: string; opti
       accessibilityLabel={`${letter}: ${parts.label}`}
       accessibilityState={several ? { checked: on } : { selected: on }}
       onPress={onPress}
-      className={`min-h-14 flex-row items-center gap-3 rounded-xl border-2 px-3 py-2 active:opacity-80 ${on ? 'border-primary' : 'border-transparent bg-secondary/60'}`}
+      className={`min-h-14 flex-row items-center gap-3 rounded-xl border-2 px-3 py-2 active:opacity-80 ${on ? 'border-primary' : 'border-transparent bg-row'}`}
       style={on ? { backgroundColor: COLORS.accentSoft } : undefined}
     >
       <View className={`h-7 w-7 items-center justify-center ${several ? 'rounded-md' : 'rounded-full'} ${on ? 'bg-primary' : 'bg-secondary'}`}>
@@ -210,14 +210,14 @@ function Option({ letter, option, on, several, onPress }: { letter: string; opti
       </View>
       <View className="min-w-0 flex-1 gap-px">
         <View className="flex-row flex-wrap items-center gap-1.5">
-          <Text className="text-sm font-semibold text-foreground">{parts.label}</Text>
+          <Text className="font-sans text-sm font-semibold text-foreground">{parts.label}</Text>
           {parts.recommended && (
-            <Text className="rounded-full px-1.5 text-[10px] font-semibold" style={{ color: RECOMMENDED.color, backgroundColor: RECOMMENDED.tint }}>
+            <Text className="font-sans rounded-full px-1.5 text-[10px] font-semibold" style={{ color: RECOMMENDED.color, backgroundColor: RECOMMENDED.tint }}>
               recommended
             </Text>
           )}
         </View>
-        {!!parts.detail && <Text className="text-xs text-muted-foreground">{parts.detail}</Text>}
+        {!!parts.detail && <Text className="font-sans text-xs text-muted-foreground">{parts.detail}</Text>}
       </View>
     </Pressable>
   );

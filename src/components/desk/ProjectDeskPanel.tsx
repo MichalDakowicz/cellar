@@ -34,7 +34,7 @@ export function ProjectDeskPanel({
               </Text>
               <View className="flex-row items-center gap-1.5">
                 {row.state && <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: DOT[row.state] }} />}
-                <Text className="min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
+                <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
                   {row.detail}
                 </Text>
               </View>
@@ -42,7 +42,7 @@ export function ProjectDeskPanel({
           ))}
         </View>
       ))}
-      {note && <Text className="text-xs text-muted-foreground">{note}</Text>}
+      {note && <Text className="font-sans text-xs text-muted-foreground">{note}</Text>}
     </View>
   );
 }

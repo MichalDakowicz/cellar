@@ -25,13 +25,13 @@ export function SettingsPage({ title, sub, children }: { title: string; sub: str
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <ScreenTop />
+      <ScreenTop extra={0} />
       <ContentShell maxWidth={MAX_W.text}>
-        <View className={`flex-row items-start gap-3 pt-4 ${gutter}`}>
+        <View className={`flex-row items-start gap-3 ${gutter}`}>
           {!isDesktop && <ScreenAction />}
           <View className="min-w-0 flex-1 gap-1">
-            <Text className="text-2xl font-bold tracking-tight text-foreground">{title}</Text>
-            <Text className="text-sm text-muted-foreground">{sub}</Text>
+            <Text className="font-sans text-2xl font-bold tracking-tight text-foreground">{title}</Text>
+            <Text className="font-sans text-sm text-muted-foreground">{sub}</Text>
           </View>
         </View>
         <View className={gutter}>{children}</View>

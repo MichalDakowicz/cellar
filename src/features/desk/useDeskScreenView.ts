@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 import { pagePath } from '@/lib/deskPreview';
 import { screenHint, screenStatus, type ScreenLoad, type ScreenMode } from '@/lib/deskScreen';
 import { readError } from '@/lib/utils';
+import { useDeskPrefs } from '@/store/deskPrefs';
 
 import { useDeskLink } from './useDeskLink';
 
@@ -19,7 +20,8 @@ import { useDeskLink } from './useDeskLink';
  */
 export function useDeskScreenView() {
   const link = useDeskLink();
-  const calls = link.can.local ? link.calls : null;
+  const sample = useDeskPrefs((state) => state.sample);
+  const calls = link.can.local && !sample ? link.calls : null;
   const [mode, setMode] = useState<ScreenMode>('touch');
   const [load, setLoad] = useState<ScreenLoad>('connecting');
 
@@ -48,10 +50,11 @@ export function useDeskScreenView() {
   // come: reaching the screen page after the ticket's redirect is "live". The
   // web's iframe cannot read its own address, so there a ticket is enough.
   const shown: ScreenLoad = Platform.OS === 'web' && ticket.data ? 'live' : load;
-  const status = screenStatus(unreachable ? 'gone' : shown);
+  const status = screenStatus(sample ? 'live' : unreachable ? 'gone' : shown);
 
   return {
-    name: link.name,
+    name: sample ? 'michu-pc · sample desk' : link.name,
+    sample,
     status,
     url: ticket.data ?? null,
     unreachable,

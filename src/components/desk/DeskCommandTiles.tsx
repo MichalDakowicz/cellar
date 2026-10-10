@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import type { DeskCommandIcon, DeskProjectCommands } from '@/lib/deskSample';
 import { COLORS } from '@/theme/colors';
+import { Overline } from '@/components/ui/controls';
 
 const ICONS: Record<DeskCommandIcon, LucideIcon> = {
   rebuild: RefreshCw,
@@ -38,6 +39,7 @@ export function DeskCommandTiles({
 }) {
   return (
     <View className="gap-2.5">
+      {!mono && <Overline className={gutter}>commands for</Overline>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName={`gap-2 ${gutter}`}>
         {projects.map((project) => {
           const on = project.id === current.id;
@@ -47,10 +49,10 @@ export function DeskCommandTiles({
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
               onPress={() => onPick(project.id)}
-              className={`min-h-9 justify-center rounded-full border px-3.5 ${on ? 'border-primary' : 'border-transparent'}`}
+              className={`min-h-11 justify-center rounded-full border px-3.5 ${on ? 'border-primary' : 'border-border'}`}
               style={{ backgroundColor: on ? COLORS.accentSoft : COLORS.chipGround }}
             >
-              <Text className={`text-sm font-semibold ${on ? 'text-foreground' : 'text-muted-foreground'}`}>{project.name}</Text>
+              <Text className="font-sans text-sm font-semibold" style={{ color: on ? COLORS.accentText : COLORS.muted }}>{project.name}</Text>
             </Pressable>
           );
         })}
@@ -66,7 +68,7 @@ export function DeskCommandTiles({
                 accessibilityLabel={`$${command.label} in ${current.name}`}
                 disabled={!onRun}
                 onPress={() => onRun?.(current.id, command.id)}
-                className="h-10 min-w-[30%] flex-1 items-center justify-center rounded-xl bg-secondary/60 px-3 active:opacity-70"
+                className="h-10 min-w-[30%] flex-1 items-center justify-center rounded-xl bg-row px-3 active:opacity-70"
               >
                 <Text className="font-mono text-xs text-foreground">{`$${command.label}`}</Text>
               </Pressable>
@@ -79,10 +81,10 @@ export function DeskCommandTiles({
               accessibilityLabel={`$${command.label} in ${current.name}`}
               disabled={!onRun}
               onPress={() => onRun?.(current.id, command.id)}
-              className="h-[76px] flex-1 items-center justify-center gap-2 rounded-xl bg-secondary/60 active:opacity-70"
+              className="h-[76px] min-w-0 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-row active:opacity-70"
             >
               <Icon size={20} color={COLORS.foreground} strokeWidth={2} />
-              <Text className="text-xs font-semibold text-foreground">{command.label}</Text>
+              <Text className="font-sans text-xs font-semibold text-foreground">{command.label}</Text>
             </Pressable>
           );
         })}

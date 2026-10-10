@@ -24,13 +24,13 @@ export function NotePreview({
         <View className="h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-primary">
           <Monitor size={11} color={COLORS.accentInk} strokeWidth={2.6} />
         </View>
-        <Text className="min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
+        <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
           {note.head}
         </Text>
       </View>
-      <Text className="text-sm font-semibold text-foreground">{note.title}</Text>
+      <Text className="font-sans text-sm font-semibold text-foreground">{note.title}</Text>
       {done ? (
-        <Text className="text-sm" style={{ color: COLORS.foregroundSoft }}>
+        <Text className="font-sans text-sm" style={{ color: COLORS.foregroundSoft }}>
           {done}
         </Text>
       ) : (
@@ -51,7 +51,7 @@ export function NotePreview({
               onPress={() => onAction(action.id, action.label)}
               className="h-10 justify-center rounded-full px-3.5 active:opacity-60"
             >
-              <Text className="text-sm font-semibold" style={{ color: COLORS.noteAction }}>
+              <Text className="font-sans text-sm font-semibold" style={{ color: COLORS.noteAction }}>
                 {action.label}
               </Text>
             </Pressable>
@@ -71,7 +71,7 @@ function BodyLine({ line, first, mono }: { line: string; first: boolean; mono: b
   const option = line.match(/^([A-Z])  (.*)$/);
   if (option) {
     return (
-      <Text className="text-sm" style={{ color: COLORS.foregroundSoft }}>
+      <Text className="font-sans text-sm" style={{ color: COLORS.foregroundSoft }}>
         <Text className="font-mono font-semibold text-foreground">{option[1]}</Text>
         {`  ${option[2]}`}
       </Text>

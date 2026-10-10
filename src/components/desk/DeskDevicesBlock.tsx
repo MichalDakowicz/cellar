@@ -28,8 +28,8 @@ export function DeskDevicesBlock({
     <View>
       <Pressable accessibilityRole="button" onPress={onPair} className="flex-row items-center gap-3 py-2 active:opacity-70">
         <View className="min-w-0 flex-1">
-          <Text className="text-sm text-foreground">{here ? 'phones and pairing' : (paired ?? 'pair with your pc')}</Text>
-          <Text className="mt-0.5 text-xs text-muted-foreground">
+          <Text className="font-sans text-sm text-foreground">{here ? 'phones and pairing' : (paired ?? 'pair with your pc')}</Text>
+          <Text className="font-sans mt-0.5 text-xs text-muted-foreground">
             {here ? 'pair a phone with this pc from the desk' : paired ? 'paired — open the desk' : 'scan the code cellar shows on your pc'}
           </Text>
         </View>
@@ -37,7 +37,7 @@ export function DeskDevicesBlock({
       </Pressable>
       {onForget && (
         <Pressable accessibilityRole="button" onPress={onForget} className="py-2 active:opacity-70">
-          <Text className="text-sm text-muted-foreground">forget {paired} on this phone</Text>
+          <Text className="font-sans text-sm text-muted-foreground">forget {paired} on this phone</Text>
         </Pressable>
       )}
       <SwitchRow

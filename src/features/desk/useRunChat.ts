@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
 import { chatItems, type DeskApproval } from '@/lib/deskChat';
+import { SAMPLE_COMPOSER_MODELS } from '@/lib/deskCanvas';
 import { agentLabel, isLiveRun, type DeskRunState } from '@/lib/deskProtocol';
 import { SAMPLE_CHATS, SAMPLE_RUNS } from '@/lib/deskSample';
 import { runMeta } from '@/lib/deskView';
@@ -61,6 +62,7 @@ export function useRunChat(id: string) {
 
   return {
     found: sample !== null || run !== null,
+    connection: `${link.name} · ${sample ? 'sample desk' : link.calls ? 'connected' : 'disconnected'}`,
     loading: !sample && runs.loading,
     title: sample?.title ?? run?.name ?? 'run',
     meta,
@@ -94,6 +96,9 @@ export function useRunChat(id: string) {
       onDispatch: setDispatch,
       /** Talking to a running agent waits for the pc's side (W9). */
       disabledReason: 'talking to a running agent comes soon — start a new task for now',
+      modelLabel: agentLabel(run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude')),
+      finished: state === 'done' || state === 'failed' || state === 'stopped',
+      sampleModels: sample ? SAMPLE_COMPOSER_MODELS : undefined,
       keys,
     },
   };

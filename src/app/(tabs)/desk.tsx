@@ -1,15 +1,16 @@
 import { useRouter, type Href } from 'expo-router';
-import { SlidersHorizontal } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
+import { DeskIdentity } from '@/components/desk/DeskIdentity';
+import { DeskRunScope } from '@/components/desk/DeskRunScope';
+import { DeskWaitingCards } from '@/components/desk/DeskWaitingCards';
 import { DeskLaterLinks } from '@/components/desk/DeskLaterLinks';
 import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { ContentShell } from '@/components/layout/ContentShell';
-import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { DeskLocalSections } from '@/features/desk/DeskLocalSections';
 import { DeskWide } from '@/features/desk/DeskWide';
@@ -18,7 +19,6 @@ import { useDeskScreen } from '@/features/desk/useDeskScreen';
 import { useDeskWide } from '@/features/desk/useDeskWide';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
-import { COLORS } from '@/theme/colors';
 
 /**
  * The desk tab — the right plate of the bar (docs/desk/screens.md, `Main.dc.html`).
@@ -51,30 +51,20 @@ export default function Desk() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <ScreenTop />
+        {!isWide && <ScreenTop />}
         <ContentShell maxWidth={isWide ? MAX_W.detail : MAX_W.text}>
           {isWide ? (
             <DeskWide screen={screen} home={home} wide={wide} />
           ) : (
             <>
-              <View className={`flex-row items-start gap-3 pt-2 ${gutter}`}>
-                <ScreenAction />
-                <View className="min-w-0 flex-1 gap-1">
-                  <Text className="text-2xl font-bold tracking-tight text-foreground">your desk</Text>
-                  <Text className="text-xs text-muted-foreground">{home.summary}</Text>
-                </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="settings"
-                  onPress={() => router.push('/settings' as Href)}
-                  className="h-11 w-11 items-center justify-center rounded-full bg-secondary active:opacity-70"
-                >
-                  <SlidersHorizontal size={20} color={COLORS.foreground} strokeWidth={2} />
-                </Pressable>
+              <View className={gutter}>
+                <DeskIdentity name={unpaired ? 'your desk' : home.host.name} online={home.host.online} checking={link.checking} summary={home.host.online ? home.activity : ''} sample={home.sample} onSettings={() => router.push('/settings' as Href)} />
               </View>
 
+              {(home.sections.waiting.length > 0 || wide.thoughts.length > 0) && <View className={`pt-5 ${gutter}`}><DeskWaitingCards runs={home.sections.waiting} thoughts={wide.thoughts} onRun={home.openRun} onThought={wide.openThought} /></View>}
+
               <View className={`pt-5 ${gutter}`}>
-                <DeskHostCard {...home.host} />
+                <DeskHostCard {...home.host} compact />
               </View>
 
               {home.commands && (
@@ -83,11 +73,13 @@ export default function Desk() {
                 </View>
               )}
 
+              {home.commands && <View className={`pt-5 ${gutter}`}><DeskRunScope project={home.commands.current.name} scope={home.scope} onScope={home.onScope} /></View>}
               <DeskRunSections
-                sections={home.sections}
+                sections={home.scopedSections}
                 gutter={gutter}
                 onOpen={home.openRun}
                 empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
+                only={['running', 'lately']}
               />
             </>
           )}
@@ -104,7 +96,7 @@ export default function Desk() {
 
           {unpaired && (
             <DeskSection title="pair with your pc" gutter={gutter}>
-              <Text className="pb-3 text-xs text-muted-foreground">
+              <Text className="font-sans pb-3 text-xs text-muted-foreground">
                 open cellar on the pc, go to this pc from its tray, and scan the code it shows.
                 {link.desk ? ` ${link.desk.name} is reachable through the cellar meanwhile.` : ''}
               </Text>
@@ -114,7 +106,7 @@ export default function Desk() {
                 onPress={() => router.push('/desk-scan' as Href)}
                 className="h-11 items-center justify-center rounded-full bg-secondary active:opacity-80"
               >
-                <Text className="text-sm font-semibold text-foreground">scan the pc&apos;s code</Text>
+                <Text className="font-sans text-sm font-semibold text-foreground">scan the pc&apos;s code</Text>
               </Pressable>
             </DeskSection>
           )}
@@ -128,7 +120,7 @@ export default function Desk() {
           {link.pair && !link.bridge && (
             <View className={`py-7 ${gutter}`}>
               <Pressable accessibilityRole="button" accessibilityLabel="forget this pc" hitSlop={8} onPress={screen.forgetPair}>
-                <Text className="text-xs font-semibold text-muted-foreground">forget {link.pair.name} on this phone</Text>
+                <Text className="font-sans text-xs font-semibold text-muted-foreground">forget {link.pair.name} on this phone</Text>
               </Pressable>
             </View>
           )}

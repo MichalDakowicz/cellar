@@ -66,7 +66,7 @@ export function AgentTokens({ gutter }: { gutter: string }) {
           minting ? 'opacity-50' : '',
         ].join(' ')}
       >
-        <Text className="text-sm font-semibold text-foreground">
+        <Text className="font-sans text-sm font-semibold text-foreground">
           {minting ? 'minting…' : 'mint a token'}
         </Text>
       </Pressable>
@@ -83,7 +83,7 @@ export function AgentTokens({ gutter }: { gutter: string }) {
               onPress={() => copy(fresh, 'token copied')}
               className="h-9 flex-1 items-center justify-center rounded-full border border-border active:opacity-70"
             >
-              <Text className="text-xs font-semibold text-foreground">copy the token</Text>
+              <Text className="font-sans text-xs font-semibold text-foreground">copy the token</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -91,15 +91,15 @@ export function AgentTokens({ gutter }: { gutter: string }) {
               onPress={() => copy(mcpConfig(url, fresh), 'mcp config copied')}
               className="h-9 flex-1 items-center justify-center rounded-full border border-border active:opacity-70"
             >
-              <Text className="text-xs font-semibold text-foreground">copy the config</Text>
+              <Text className="font-sans text-xs font-semibold text-foreground">copy the config</Text>
             </Pressable>
           </View>
-          <Text className="text-xs text-muted-foreground">
+          <Text className="font-sans text-xs text-muted-foreground">
             copy it now — only its hash is stored, so this is the last time it can be shown
           </Text>
         </View>
       ) : (
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           a token lets an agent read and work this cellar over the hosted server, with exactly your access and
           nothing more. revoke one and it stops on the next call.
         </Text>

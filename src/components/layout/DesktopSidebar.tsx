@@ -1,5 +1,5 @@
 import { usePathname, useRouter, type Href } from 'expo-router';
-import { ChevronDown, Eye, MessageSquare, Monitor, Settings, Smartphone, SquareTerminal } from 'lucide-react-native';
+import { ChevronDown, Eye, LayoutDashboard, MessageSquare, Search, Settings, Smartphone, SquareTerminal } from 'lucide-react-native';
 import { useMemo, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -21,7 +21,7 @@ import { COLORS } from '@/theme/colors';
 const CELLAR = NAV_DESTINATIONS.filter((destination) => destination.tabName !== 'desk');
 
 const DESK_ICONS: Record<DeskLink['id'], (color: string, size: number) => ReactNode> = {
-  home: (color, size) => <Monitor color={color} size={size} />,
+  home: (color, size) => <LayoutDashboard color={color} size={size} />,
   chat: (color, size) => <MessageSquare color={color} size={size} />,
   commands: (color, size) => <SquareTerminal color={color} size={size} />,
   previews: (color, size) => <Eye color={color} size={size} />,
@@ -65,9 +65,10 @@ export function DesktopSidebar() {
       style={{ width: SIDEBAR_WIDTH }}
     >
       <ScrollView contentContainerStyle={{ paddingVertical: 22 }} showsVerticalScrollIndicator={false}>
-        <View className="px-4">
-          <Text className="text-xl font-bold tracking-tight text-foreground">cellar</Text>
+        <View className="px-5">
+          <Text className="font-sans text-lg font-bold tracking-tight text-foreground">cellar</Text>
         </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="jump to anything" onPress={() => router.push('/search')} className="mx-3 mt-3.5 h-9 flex-row items-center gap-2 rounded-lg bg-secondary px-2.5"><Search size={16} color={COLORS.muted} /><Text className="font-sans flex-1 text-sm text-muted-foreground">jump to anything</Text><Text className="rounded border border-border px-1.5 font-mono text-[11px] text-muted-foreground">ctrl k</Text></Pressable>
 
         {/* The shelf switcher is a permanent row here rather than a heading you
             have to know is pressable, because on desktop it is also the answer
@@ -80,7 +81,7 @@ export function DesktopSidebar() {
         >
           <View className="min-w-0 flex-1">
             <Overline>shelf</Overline>
-            <Text className="mt-0.5 text-sm font-semibold text-foreground" numberOfLines={1}>
+            <Text className="font-sans mt-0.5 text-sm font-semibold text-foreground" numberOfLines={1}>
               {shelf?.name ?? 'every shelf'}
             </Text>
           </View>
@@ -122,7 +123,7 @@ export function DesktopSidebar() {
             {pinned.map((project) => (
               <SidebarRow
                 key={project.id}
-                icon={(color) => <Text className="w-[17px] text-center text-xs font-bold" style={{ color }}>{project.name.slice(0, 1)}</Text>}
+                icon={(color) => <Text className="font-sans w-[17px] text-center text-xs font-bold" style={{ color }}>{project.name.slice(0, 1)}</Text>}
                 label={project.name}
                 active={pathname === `/project/${project.id}`}
                 badge={0}
@@ -153,7 +154,7 @@ export function DesktopSidebar() {
           className="min-w-0 flex-1 flex-row items-center gap-2.5 rounded-lg px-1 py-1.5 active:opacity-80"
         >
           <Avatar profile={profile} size={30} />
-          <Text className="min-w-0 flex-1 text-xs font-semibold text-foreground" numberOfLines={1}>
+          <Text className="font-sans min-w-0 flex-1 text-xs font-semibold text-foreground" numberOfLines={1}>
             {profile?.displayName || profile?.username || 'you'}
           </Text>
         </Pressable>
@@ -212,7 +213,7 @@ function SidebarRow({
         webTransition('background-color'),
         active ? { backgroundColor: COLORS.islandPlate } : hovered ? { backgroundColor: COLORS.chipGround } : null,
       ]}
-      className="flex-row items-center gap-2.5 rounded-lg px-3 py-2.5"
+      className="h-9 flex-row items-center gap-2.5 rounded-full px-3"
     >
       {icon(active ? COLORS.foreground : COLORS.muted, 17)}
       <Text
@@ -222,10 +223,10 @@ function SidebarRow({
         {label}
       </Text>
       {badge > 0 && <Badge count={badge} />}
-      {!!count && <Text className="text-xs text-muted-foreground">{count}</Text>}
+      {!!count && <Text className="font-sans text-xs text-muted-foreground">{count}</Text>}
       {/* The shortcut prints itself, so the keyboard is discoverable instead of
           being a thing you had to read the release notes to know about. */}
-      {shortcut && <Text className="text-[10px] font-semibold text-muted-foreground opacity-60">{shortcut}</Text>}
+      {shortcut && <Text className="font-sans text-[10px] font-semibold text-muted-foreground opacity-60">{shortcut}</Text>}
     </Pressable>
   );
 }
@@ -233,7 +234,7 @@ function SidebarRow({
 function Badge({ count }: { count: number }) {
   return (
     <View className="min-w-[18px] items-center justify-center rounded-full bg-primary px-1.5 py-px">
-      <Text className="text-[10px] font-bold" style={{ color: COLORS.accentInk }}>
+      <Text className="font-sans text-[10px] font-bold" style={{ color: COLORS.accentInk }}>
         {count > 99 ? '99+' : count}
       </Text>
     </View>

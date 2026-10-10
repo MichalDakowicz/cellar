@@ -42,7 +42,7 @@ export function SkillInstall({ token, supabaseUrl }: { token?: string | null; su
 
   return (
     <View className="gap-2 rounded-2xl border border-border p-3">
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-xs text-muted-foreground">
         {whole
           ? 'one line, the whole setup — it registers the server with the token above and installs the skill that teaches an agent how to work a thought. paste it into a terminal on the machine the agent runs on.'
           : 'the skill teaches an agent how to work a thought — claim it, ask when it is too thin, report back in one line. paste this into a terminal on the machine the agent runs on.'}
@@ -56,12 +56,12 @@ export function SkillInstall({ token, supabaseUrl }: { token?: string | null; su
             onPress={() => copy(shell)}
             className="h-9 flex-1 items-center justify-center rounded-full border border-border active:opacity-70"
           >
-            <Text className="text-xs font-semibold text-foreground">{label}</Text>
+            <Text className="font-sans text-xs font-semibold text-foreground">{label}</Text>
           </Pressable>
         ))}
       </View>
       {whole && (
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           it merges into the config the agent already has and keeps a copy of the old one beside it, so
           nothing in there is lost.
         </Text>

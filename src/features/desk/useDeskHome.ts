@@ -1,5 +1,5 @@
 import { useRouter, type Href } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { SAMPLE_FIGURES, SAMPLE_PROJECTS } from '@/lib/deskSample';
@@ -26,6 +26,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const picked = useDeskPrefs((state) => state.commandsProject);
   const pick = useDeskPrefs((state) => state.setCommandsProject);
   const { say } = useToast();
+  const [scope, setScope] = useState<'all' | 'project'>('all');
 
   const all = useDeskRunCards(runs.runs);
   const cards = useMemo(() => deskSections<DeskRunCard>(all), [all]);
@@ -34,6 +35,11 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const live = cards.waiting.length + cards.running.length;
   const commands = sample ? SAMPLE_PROJECTS : null;
   const current = commands ? (commands.find((project) => project.id === picked) ?? commands[0]) : null;
+  const scopedCards = useMemo(() => ({
+    waiting: cards.waiting,
+    running: cards.running.filter((run) => scope === 'all' || run.project === current?.name),
+    lately: cards.lately.filter((run) => scope === 'all' || run.project === current?.name),
+  }), [cards, scope, current?.name]);
 
   return {
     summary: deskSummary({
@@ -63,6 +69,10 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
           }
         : null,
     sections: cards,
+    scopedSections: scopedCards,
+    scope,
+    onScope: setScope,
+    activity: `${cards.running.length} working · ${cards.waiting.length + waitingEntries} waiting on you`,
     /** A run opens its own screen — real or sample, the same route. */
     openRun: (id: string) => router.push(`/desk/run/${id}` as Href),
     sample,

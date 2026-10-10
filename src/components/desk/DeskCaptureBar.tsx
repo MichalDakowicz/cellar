@@ -28,11 +28,11 @@ export function DeskCaptureBar({
   return (
     <View className="gap-2">
       <View
-        className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border bg-secondary pl-4 pr-2"
+        className="min-h-[56px] flex-row items-center gap-2.5 rounded-full border bg-secondary pl-5 pr-2"
         style={[{ borderColor: focused ? COLORS.accent : 'transparent' }, webFocusRing(false)]}
       >
         <TextInput
-          className="min-w-0 flex-1 py-3 text-base text-foreground"
+          className="font-sans min-w-0 flex-1 py-3 text-base text-foreground"
           style={webFocusRing(false)}
           value={text}
           onChangeText={onText}
@@ -55,12 +55,12 @@ export function DeskCaptureBar({
         <Kbd>shift ⏎ hand it off</Kbd>
         <View
           accessibilityLabel="speaking comes soon"
-          className="h-10 w-10 items-center justify-center rounded-full bg-muted"
+          className="h-10 w-10 items-center justify-center rounded-full bg-primary"
         >
-          <Mic size={18} color={COLORS.muted} strokeWidth={2} />
+          <Mic size={18} color={COLORS.accentInk} strokeWidth={2} />
         </View>
       </View>
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-xs text-muted-foreground">
         same keys as the phone: <Text className="font-mono">@</Text> files, <Text className="font-mono">$</Text> cellar
         and its commands, <Text className="font-mono">/</Text> agent skills — and a hex code like{' '}
         <Text className="font-mono">#64748B</Text> paints itself

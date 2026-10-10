@@ -20,7 +20,7 @@ export default function DeskCommands() {
     >
       <View className="gap-3">
         {SAMPLE_PROJECTS.map((project) => (
-          <View key={project.id} className="gap-2 rounded-xl bg-secondary/60 p-3.5">
+          <View key={project.id} className="gap-2 rounded-xl bg-row p-3.5">
             <Text className="font-mono text-sm font-semibold text-foreground">{`$${project.name}`}</Text>
             <View className="flex-row flex-wrap gap-1.5">
               {project.commands.map((command) => (

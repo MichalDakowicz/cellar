@@ -6,7 +6,7 @@ import type { DeskRunCard, DeskRunSections as Sections } from '@/lib/deskView';
 
 const TITLES: [keyof Sections<DeskRunCard>, string][] = [
   ['waiting', 'waiting on you'],
-  ['running', 'running'],
+  ['running', 'working'],
   ['lately', 'lately'],
 ];
 
@@ -19,20 +19,23 @@ export function DeskRunSections({
   gutter,
   empty,
   onOpen,
+  only,
 }: {
   sections: Sections<DeskRunCard>;
   gutter: string;
   /** Said when there are no runs anywhere — "reading…", an error, "nothing running". */
   empty: string;
   onOpen: ((id: string) => void) | null;
+  only?: (keyof Sections<DeskRunCard>)[];
 }) {
-  const shown = TITLES.filter(([key]) => sections[key].length > 0);
+  const shown = TITLES.filter(([key]) => (!only || only.includes(key)) && sections[key].length > 0);
 
   if (shown.length === 0) {
+    if (only && !empty) return null;
     return (
       <View className={`gap-1 pt-7 ${gutter}`}>
         <Overline>runs</Overline>
-        <Text className="pt-1 text-xs text-muted-foreground">{empty}</Text>
+        <Text className="font-sans pt-1 text-xs text-muted-foreground">{empty}</Text>
       </View>
     );
   }
@@ -41,7 +44,7 @@ export function DeskRunSections({
     <>
       {shown.map(([key, title]) => (
         <View key={key} className={`gap-2.5 pt-5 ${gutter}`}>
-          <Overline>{title}</Overline>
+          <Overline>{`${title} · ${sections[key].length}`}</Overline>
           {sections[key].map((run) => (
             <DeskRunCardRow key={run.id} run={run} onOpen={onOpen} />
           ))}

@@ -46,7 +46,7 @@ export function DumpSettings() {
             void updateSettings({ defaultKind: kind });
           }}
         />
-        <Text className="text-xs text-muted-foreground">what a fresh draft starts as.</Text>
+        <Text className="font-sans text-xs text-muted-foreground">what a fresh draft starts as.</Text>
       </SettingsGroup>
       <SettingsGroup title="how a project opens">
         <Segmented<ProjectViewPref>

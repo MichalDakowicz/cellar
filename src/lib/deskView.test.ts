@@ -3,8 +3,8 @@ import { deskSections, deskSummary, detailParts, hostLine, LATELY_MAX, metaParts
 const run = (state: 'running' | 'waiting' | 'done' | 'failed' | 'stopped', startedAt: number) => ({ state, startedAt });
 
 describe('runChip', () => {
-  it('calls a running run doing and a waiting one waiting', () => {
-    expect(runChip('running').label).toBe('doing');
+  it('calls a running run working and a waiting one waiting', () => {
+    expect(runChip('running').label).toBe('working');
     expect(runChip('waiting').label).toBe('waiting');
   });
 

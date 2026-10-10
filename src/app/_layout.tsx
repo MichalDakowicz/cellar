@@ -3,6 +3,7 @@ import '@/global.css';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { useCallback, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,6 +30,11 @@ SplashScreen.preventAutoHideAsync();
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth();
+  const [fontsLoaded, fontError] = useFonts({
+    SplineSans: require('../../assets/fonts/SplineSans.ttf'),
+    IBMPlexMono: require('../../assets/fonts/IBMPlexMono-Regular.ttf'),
+    IBMPlexMonoMedium: require('../../assets/fonts/IBMPlexMono-Medium.ttf'),
+  });
 
   // Above the Stack, so it also covers settings, search, an entry and a project
   // — the screens pushed out of the tabs, where the tabs navigator's own
@@ -36,12 +42,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useSessionRoute();
 
   useEffect(() => {
-    if (!loading) SplashScreen.hideAsync();
-  }, [loading]);
+    if (!loading && (fontsLoaded || fontError)) SplashScreen.hideAsync();
+  }, [loading, fontsLoaded, fontError]);
 
   // Nothing mounts until auth resolves, so no screen ever renders a signed-out
   // shape and then swaps.
-  if (loading) return null;
+  if (loading || (!fontsLoaded && !fontError)) return null;
 
   return <>{children}</>;
 }

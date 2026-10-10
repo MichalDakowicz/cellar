@@ -86,7 +86,7 @@ export function DisplaySettings({ gutter }: { gutter: string }) {
           <Overline>kind order</Overline>
           {settings.kindOrder && (
             <Pressable accessibilityRole="button" hitSlop={8} onPress={() => set({ kindOrder: null })}>
-              <Text className="text-xs font-semibold text-muted-foreground">reset</Text>
+              <Text className="font-sans text-xs font-semibold text-muted-foreground">reset</Text>
             </Pressable>
           )}
         </View>
@@ -96,7 +96,7 @@ export function DisplaySettings({ gutter }: { gutter: string }) {
           selected={null}
           onToggle={(kind) => set({ kindOrder: kindToFront(settings.kindOrder, kind) })}
         />
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           tap a kind to put it first. chips, groups, the board and stats all follow.
         </Text>
       </View>

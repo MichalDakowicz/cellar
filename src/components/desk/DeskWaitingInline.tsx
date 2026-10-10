@@ -44,12 +44,12 @@ export function DeskWaitingInline({
 
 function Row({ ask, children }: { ask: Ask; children: ReactNode }) {
   return (
-    <View className="flex-row items-center gap-3 rounded-xl bg-secondary/60 px-3.5 py-3">
+    <View className="flex-row items-center gap-3 rounded-xl bg-row px-3.5 py-3">
       <View className="min-w-0 flex-1 gap-0.5">
-        <Text className="text-base font-bold text-foreground" numberOfLines={1}>
+        <Text className="font-sans text-base font-bold text-foreground" numberOfLines={1}>
           {ask.title}
         </Text>
-        <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+        <Text className="font-sans text-xs text-muted-foreground" numberOfLines={1}>
           {ask.detail}
         </Text>
       </View>
@@ -66,7 +66,7 @@ function Button({ label, primary, onPress }: { label: string; primary?: boolean;
       onPress={onPress}
       className={`h-9 justify-center rounded-full px-4 active:opacity-70 ${primary ? 'bg-primary' : 'border border-border'}`}
     >
-      <Text className={`text-sm font-semibold ${primary ? 'text-primary-foreground' : 'text-foreground'}`}>{label}</Text>
+      <Text className={`font-sans text-sm font-semibold ${primary ? 'text-primary-foreground' : 'text-foreground'}`}>{label}</Text>
     </Pressable>
   );
 }

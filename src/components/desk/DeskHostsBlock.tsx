@@ -18,25 +18,25 @@ const FIELDS: { label: string; placeholder: string; mono: boolean }[] = [
 export function DeskHostsBlock({ name, online, line }: { name: string; online: boolean; line: string }) {
   return (
     <View className="gap-2.5">
-      <View className="flex-row items-center gap-3 rounded-xl bg-secondary/60 p-3">
+      <View className="flex-row items-center gap-3 rounded-xl bg-row p-3">
         <View className="min-w-0 flex-1 gap-0.5">
-          <Text className="text-base font-bold text-foreground">{name}</Text>
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+          <Text className="font-sans text-base font-bold text-foreground">{name}</Text>
+          <Text className="font-sans text-xs text-muted-foreground" numberOfLines={1}>
             this pc · local · every project
           </Text>
         </View>
         <View className="flex-row items-center gap-1.5">
           <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: online ? COLORS.ok : COLORS.mutedDeep }} />
-          <Text className="text-xs text-foreground">{line}</Text>
+          <Text className="font-sans text-xs text-foreground">{line}</Text>
         </View>
       </View>
 
       <View className="mt-2.5 max-w-[760px] gap-3.5 rounded-2xl border border-border p-[18px]" style={{ opacity: 0.6 }}>
-        <Text className="text-base font-bold text-foreground">add a host</Text>
+        <Text className="font-sans text-base font-bold text-foreground">add a host</Text>
         <View className="flex-row flex-wrap gap-3">
           {FIELDS.map((field) => (
             <View key={field.label} className="min-w-[200px] flex-1 basis-[45%] gap-1.5">
-              <Text className="text-xs text-muted-foreground">{field.label}</Text>
+              <Text className="font-sans text-xs text-muted-foreground">{field.label}</Text>
               <TextInput
                 editable={false}
                 className={`h-10 rounded-lg border border-border bg-secondary px-3 text-[13px] text-foreground ${field.mono ? 'font-mono' : ''}`}
@@ -54,9 +54,9 @@ export function DeskHostsBlock({ name, online, line }: { name: string; online: b
         </View>
         <View className="flex-row flex-wrap items-center gap-3">
           <View className="h-10 justify-center rounded-full bg-primary px-[18px]">
-            <Text className="text-sm font-semibold text-primary-foreground">test the connection</Text>
+            <Text className="font-sans text-sm font-semibold text-primary-foreground">test the connection</Text>
           </View>
-          <Text className="text-sm text-muted-foreground">after the server is set up — checks the link, the key, node and git, then installs the daemon</Text>
+          <Text className="font-sans text-sm text-muted-foreground">after the server is set up — checks the link, the key, node and git, then installs the daemon</Text>
         </View>
       </View>
     </View>

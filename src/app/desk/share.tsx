@@ -28,7 +28,7 @@ export default function ShareSheet() {
           onPress={share.file}
           className={`h-[52px] items-center justify-center rounded-full bg-foreground active:opacity-80 ${share.canFile ? '' : 'opacity-40'}`}
         >
-          <Text className="text-base font-semibold text-background">{share.label}</Text>
+          <Text className="font-sans text-base font-semibold text-background">{share.label}</Text>
         </Pressable>
       }
     >

@@ -12,7 +12,7 @@ export function UsageMeter() {
     <View accessibilityLabel="usage shows here once the agents report it" className="flex-row items-center gap-3 rounded-full border border-border px-3 py-1.5">
       {BARS.map((bar) => (
         <View key={bar} className="flex-row items-center gap-1.5">
-          <Text className="text-[11px] text-muted-foreground">{bar}</Text>
+          <Text className="font-sans text-[11px] text-muted-foreground">{bar}</Text>
           <View className="h-1 w-8 rounded-full bg-secondary" />
         </View>
       ))}

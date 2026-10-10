@@ -7,6 +7,7 @@ import { raceRows } from '@/lib/deskLater';
 import type { SAMPLE_RACE } from '@/lib/deskSample';
 import { metaParts } from '@/lib/deskView';
 import { COLORS } from '@/theme/colors';
+import { RacePreview } from './RacePreview';
 
 type Race = typeof SAMPLE_RACE;
 
@@ -28,16 +29,14 @@ export function RaceBody({ race }: { race: Race }) {
         onChange={setPick}
         options={race.runs.map((candidate) => ({ value: candidate.agent, label: candidate.agent }))}
       />
-      <View className="h-[300px] items-center justify-center rounded-xl border border-border bg-secondary/60 px-6">
-        <Text className="text-center text-sm text-muted-foreground">{`${run.agent}'s preview · ${run.approach}`}</Text>
-      </View>
+      <RacePreview drawer={run.agent === 'codex'} />
       <View className="gap-2">
         <View className="flex-row gap-2">
-          <Text className="w-20" />
+          <Text className="font-sans w-20" />
           {race.runs.map((candidate) => (
             <Text
               key={candidate.agent}
-              className={`min-w-0 flex-1 text-sm font-semibold ${candidate.agent === pick ? 'text-foreground' : 'text-muted-foreground'}`}
+              className={`font-sans min-w-0 flex-1 text-sm font-semibold ${candidate.agent === pick ? 'text-foreground' : 'text-muted-foreground'}`}
             >
               {candidate.agent}
             </Text>
@@ -45,11 +44,11 @@ export function RaceBody({ race }: { race: Race }) {
         </View>
         {raceRows(race.runs).map((row) => (
           <View key={row.label} className="flex-row gap-2">
-            <Text className="w-20 text-[13px] leading-[18px] text-muted-foreground">{row.label}</Text>
+            <Text className="font-sans w-20 text-[13px] leading-[18px] text-muted-foreground">{row.label}</Text>
             {row.values.map((value, index) => (
               <Text
                 key={`${row.label}:${index}`}
-                className="min-w-0 flex-1 text-[13px] leading-[18px] text-foreground"
+                className="font-sans min-w-0 flex-1 text-[13px] leading-[18px] text-foreground"
                 style={row.label === 'checks' ? { color: COLORS.ok } : undefined}
               >
                 <TextParts parts={metaParts(value)} />
@@ -59,7 +58,7 @@ export function RaceBody({ race }: { race: Race }) {
         ))}
       </View>
       {kept ? (
-        <Text className="text-sm text-muted-foreground">{`kept ${kept}'s · the other worktree goes, its chat stays 7 days`}</Text>
+        <Text className="font-sans text-sm text-muted-foreground">{`kept ${kept}'s · the other worktree goes, its chat stays 7 days`}</Text>
       ) : (
         <View className="gap-2">
           <View className="flex-row gap-2">
@@ -68,17 +67,17 @@ export function RaceBody({ race }: { race: Race }) {
               onPress={() => setKept('both, followed up')}
               className="h-[52px] flex-1 items-center justify-center rounded-full border border-border active:opacity-70"
             >
-              <Text className="text-sm font-semibold text-foreground">follow up both</Text>
+              <Text className="font-sans text-sm font-semibold text-foreground">follow up both</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               onPress={() => setKept(pick)}
               className="h-[52px] flex-1 items-center justify-center rounded-full bg-primary active:opacity-80"
             >
-              <Text className="text-sm font-semibold text-primary-foreground">{`keep ${pick}'s`}</Text>
+              <Text className="font-sans text-sm font-semibold text-primary-foreground">{`keep ${pick}'s`}</Text>
             </Pressable>
           </View>
-          <Text className="text-center text-xs text-muted-foreground">the other worktree is deleted · its chat stays for 7 days</Text>
+          <Text className="font-sans text-center text-xs text-muted-foreground">the other worktree is deleted · its chat stays for 7 days</Text>
         </View>
       )}
     </View>

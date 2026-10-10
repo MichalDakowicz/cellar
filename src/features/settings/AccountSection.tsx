@@ -33,10 +33,10 @@ export function AccountSection({ gutter }: { gutter: string }) {
       <View className="flex-row items-center gap-3">
         <Avatar profile={profile} size={48} />
         <View className="min-w-0 flex-1">
-          <Text className="text-lg font-bold tracking-tight text-foreground" numberOfLines={1}>
+          <Text className="font-sans text-lg font-bold tracking-tight text-foreground" numberOfLines={1}>
             {profile?.displayName || profile?.username || 'you'}
           </Text>
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+          <Text className="font-sans text-xs text-muted-foreground" numberOfLines={1}>
             one ping account · radar · lidar · sonar · pulsar · cellar
           </Text>
         </View>
@@ -46,12 +46,12 @@ export function AccountSection({ gutter }: { gutter: string }) {
         {figures.map((figure) => (
           <View key={figure.label} className="w-1/4">
             <Overline>{figure.label}</Overline>
-            <Text className="mt-1 text-xl font-bold tracking-tight text-foreground">{figure.value}</Text>
+            <Text className="font-sans mt-1 text-xl font-bold tracking-tight text-foreground">{figure.value}</Text>
           </View>
         ))}
       </View>
 
-      <Text className="mt-4 text-xs text-muted-foreground">
+      <Text className="font-sans mt-4 text-xs text-muted-foreground">
         {plural(countToday(entries.map((entry) => entry.createdAt)), 'thought')} in the last day. nothing here is
         ever deleted to clear it — archived entries stay in search and come back in one tap.
       </Text>

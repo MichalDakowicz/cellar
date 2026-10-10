@@ -5,7 +5,14 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['SplineSans', 'sans-serif'],
+        mono: ['IBMPlexMono', 'monospace'],
+      },
       colors: {
+        row: 'hsl(var(--row) / <alpha-value>)',
+        composer: 'hsl(var(--composer) / <alpha-value>)',
+        'composer-edge': 'hsl(var(--composer-edge) / <alpha-value>)',
         background: 'hsl(var(--background) / <alpha-value>)',
         foreground: 'hsl(var(--foreground) / <alpha-value>)',
         card: 'hsl(var(--card) / <alpha-value>)',

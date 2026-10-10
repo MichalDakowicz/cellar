@@ -15,7 +15,7 @@ export type RunChipMeta = { label: string; color: string; tint: string };
 // run waiting on you and a blocked thought are visibly the same kind of stall.
 const CHIPS: Record<DeskRunState, RunChipMeta> = {
   waiting: { label: 'waiting', color: '#ef4444', tint: 'rgba(239,68,68,0.16)' },
-  running: { label: 'doing', color: '#f59e0b', tint: 'rgba(245,158,11,0.16)' },
+  running: { label: 'working', color: '#f59e0b', tint: 'rgba(245,158,11,0.16)' },
   done: { label: 'done', color: '#22c55e', tint: 'rgba(34,197,94,0.16)' },
   failed: { label: 'failed', color: '#ef4444', tint: 'rgba(239,68,68,0.16)' },
   stopped: { label: 'stopped', color: 'hsl(0 0% 63.9%)', tint: 'rgba(163,163,163,0.16)' },

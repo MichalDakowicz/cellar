@@ -44,7 +44,7 @@ export function KeyPlan({
                 {line.token}
               </Text>
             )}
-            <Text className="min-w-0 shrink text-xs text-muted-foreground">{line.says}</Text>
+            <Text className="font-sans min-w-0 shrink text-xs text-muted-foreground">{line.says}</Text>
           </View>
           {open === index && line.key === '#' && (
             <View className="flex-row gap-1.5">
@@ -67,7 +67,7 @@ function ChipAction({ label, onPress }: { label: string; onPress: () => void }) 
       onPress={onPress}
       className="min-h-8 justify-center rounded-full border border-border px-3 active:opacity-70"
     >
-      <Text className="text-xs font-semibold text-foreground">{label}</Text>
+      <Text className="font-sans text-xs font-semibold text-foreground">{label}</Text>
     </Pressable>
   );
 }

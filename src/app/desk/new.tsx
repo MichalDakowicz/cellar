@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ArrowUp } from 'lucide-react-native';
+import { ArrowUp, X } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
@@ -32,6 +32,16 @@ export default function NewTask() {
   return (
     <DeskSheet
       onClose={close}
+      header={<View className="flex-row items-center gap-2">
+        <View className="min-w-0 flex-1 gap-1">
+          <Text className="font-sans text-lg font-bold text-foreground">new task</Text>
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: task.online ? COLORS.ok : COLORS.mutedDeep }} />
+            <Text className="font-sans text-xs text-muted-foreground">to {task.host} · {task.online ? 'connected' : 'disconnected'}</Text>
+          </View>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="close new task" onPress={close} className="h-11 w-11 items-center justify-center rounded-lg border border-border"><X size={22} color={COLORS.foregroundSoft} /></Pressable>
+      </View>}
       footer={
         <View className="gap-2">
           <Pressable
@@ -40,29 +50,22 @@ export default function NewTask() {
             accessibilityState={{ disabled: blocked }}
             disabled={blocked}
             onPress={task.send}
-            className={`h-[52px] flex-row items-center justify-center gap-2 rounded-full active:opacity-80 ${blocked ? 'bg-secondary' : 'bg-foreground'}`}
+            className={`h-[52px] flex-row items-center justify-center gap-2 rounded-lg active:opacity-80 ${blocked ? 'bg-secondary' : 'bg-foreground'}`}
           >
             <ArrowUp size={18} color={blocked ? COLORS.muted : COLORS.background} strokeWidth={2.2} />
-            <Text className={`text-base font-semibold ${blocked ? 'text-muted-foreground' : 'text-background'}`}>
+            <Text className={`font-sans text-base font-semibold ${blocked ? 'text-muted-foreground' : 'text-background'}`}>
               {task.busy ? 'sending…' : task.sendLabel}
             </Text>
           </Pressable>
-          {!!task.blocker && !task.busy && <Text className="text-center text-xs text-muted-foreground">{task.blocker}</Text>}
+          {!!task.blocker && !task.busy && <Text className="font-sans text-center text-xs text-muted-foreground">{task.blocker}</Text>}
           {!!task.untrusted && <TrustAsk folder={task.untrusted} busy={task.trusting} onTrust={task.onTrust} />}
-          {!!task.error && <Text className="text-sm text-destructive-foreground">{task.error}</Text>}
+          {!!task.error && <Text className="font-sans text-sm text-destructive-foreground">{task.error}</Text>}
         </View>
       }
     >
-      <View className="flex-row items-center justify-between gap-3">
-        <Text className="text-lg font-bold text-foreground">new task</Text>
-        <View className="flex-row items-center gap-1.5">
-          <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: task.online ? COLORS.ok : COLORS.mutedDeep }} />
-          <Text className="text-xs text-muted-foreground">to {task.host}</Text>
-        </View>
-      </View>
       <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} />
       <NewTaskChoices {...task} />
-      <AttachedThought thoughts={task.attached} onDetach={task.onDetach} split={task.split} onSplit={task.onSplit} />
+      <AttachedThought thoughts={task.attached} onDetach={task.onDetach} />
     </DeskSheet>
   );
 }

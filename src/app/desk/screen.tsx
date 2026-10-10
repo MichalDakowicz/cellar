@@ -4,6 +4,7 @@ import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PreviewPage } from '@/components/desk/PreviewPage';
+import { SampleDesktopScreen } from '@/components/desk/SampleDesktopScreen';
 import { Glass, ScreenIslands } from '@/components/desk/ScreenIslands';
 import { useDeskScreenView } from '@/features/desk/useDeskScreenView';
 import { COLORS } from '@/theme/colors';
@@ -24,11 +25,11 @@ export default function ScreenView() {
     <View className="flex-1 bg-background">
       <StatusBar hidden />
       <View style={{ flex: 1 }} pointerEvents="none">
-        {screen.url && !screen.unreachable ? (
+        {screen.sample ? <SampleDesktopScreen /> : screen.url && !screen.unreachable ? (
           <PreviewPage url={screen.url} reloads={0} {...screen.page} />
         ) : (
           <View className="flex-1 items-center justify-center px-10">
-            <Text className="text-center text-sm text-muted-foreground">{screen.unreachable ?? 'asking the pc for its screen…'}</Text>
+            <Text className="font-sans text-center text-sm text-muted-foreground">{screen.unreachable ?? 'asking the pc for its screen…'}</Text>
           </View>
         )}
       </View>
@@ -40,11 +41,11 @@ export default function ScreenView() {
       >
         <Glass style={{ height: 32, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: screen.status.live ? COLORS.ok : COLORS.muted }} />
-          <Text className="text-xs font-semibold text-foreground">{screen.name}</Text>
-          <Text className="text-xs text-muted-foreground">{screen.status.text}</Text>
+          <Text className="font-sans text-xs font-semibold text-foreground">{screen.name}</Text>
+          <Text className="font-sans text-xs text-muted-foreground">{screen.status.text}</Text>
         </Glass>
         <Glass style={{ height: 32, paddingHorizontal: 12, justifyContent: 'center', flexShrink: 1 }}>
-          <Text className="text-xs" style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>
+          <Text className="font-sans text-xs" style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>
             {screen.hint}
           </Text>
         </Glass>

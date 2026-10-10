@@ -29,16 +29,16 @@ export function ShareBody(props: {
   return (
     <View className="gap-[18px]">
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg font-bold text-foreground">file it into cellar</Text>
+        <Text className="font-sans text-lg font-bold text-foreground">file it into cellar</Text>
         <Pressable accessibilityRole="button" onPress={props.onCancel} className="h-9 justify-center rounded-full px-3 active:opacity-70">
-          <Text className="text-sm text-muted-foreground">cancel</Text>
+          <Text className="font-sans text-sm text-muted-foreground">cancel</Text>
         </Pressable>
       </View>
 
       <View className="gap-1.5">
-        <Text className="text-xs text-muted-foreground">in your words</Text>
+        <Text className="font-sans text-xs text-muted-foreground">in your words</Text>
         <TextInput
-          className="min-h-[80px] rounded-xl border border-border bg-secondary px-3 py-2.5 text-foreground"
+          className="font-sans min-h-[80px] rounded-xl border border-border bg-secondary px-3 py-2.5 text-foreground"
           style={[{ fontSize: 14, lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS, NO_OUTLINE]}
           value={props.text}
           onChangeText={props.onText}
@@ -51,9 +51,9 @@ export function ShareBody(props: {
       </View>
 
       <View className="gap-2">
-        <Text className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <Text className="font-sans text-xs font-bold uppercase tracking-widest text-muted-foreground">
           kind
-          {props.guessed && <Text className="font-medium normal-case tracking-normal"> · guessed from your words</Text>}
+          {props.guessed && <Text className="font-sans font-medium normal-case tracking-normal"> · guessed from your words</Text>}
         </Text>
         <ChipWrap label="kind" options={KINDS.map((kind) => ({ value: kind.value, label: kind.label }))} selected={props.kind} onToggle={props.onKind} />
       </View>
@@ -68,10 +68,10 @@ export function ShareBody(props: {
         />
       </View>
 
-      <View className="flex-row items-start gap-3 rounded-xl bg-secondary/60 p-3">
+      <View className="flex-row items-start gap-3 rounded-xl bg-row p-3">
         <View className="min-w-0 flex-1 gap-0.5">
-          <Text className="text-sm font-semibold text-foreground">hand it off now</Text>
-          <Text className="text-xs text-muted-foreground">
+          <Text className="font-sans text-sm font-semibold text-foreground">hand it off now</Text>
+          <Text className="font-sans text-xs text-muted-foreground">
             {props.handoff ? 'files it, then opens a new task with these words' : 'just files it — hand it off later from the entry'}
           </Text>
         </View>

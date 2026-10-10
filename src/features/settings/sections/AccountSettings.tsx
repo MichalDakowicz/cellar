@@ -48,14 +48,14 @@ export function AccountSettings() {
             { value: 'system', label: 'system' },
           ]}
         />
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           shared with radar, lidar, sonar and pulsar — picking light here picks light there.
         </Text>
       </SettingsGroup>
 
       <SettingsGroup title="about">
         <AppUpdateControl />
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           one account across radar, lidar, sonar, pulsar and cellar. your cellar itself is private — nobody else can
           read it, and there is no switch that changes that. signing out here asks whether to leave just cellar or
           every ping app.
@@ -64,7 +64,7 @@ export function AccountSettings() {
 
       <View className="py-7">
         <Pressable accessibilityRole="button" accessibilityLabel="sign out" hitSlop={8} onPress={() => setSigningOut(true)}>
-          <Text className="text-sm font-semibold text-destructive-foreground">sign out</Text>
+          <Text className="font-sans text-sm font-semibold text-destructive-foreground">sign out</Text>
         </Pressable>
       </View>
       <SignOutSheet open={signingOut} onClose={() => setSigningOut(false)} />

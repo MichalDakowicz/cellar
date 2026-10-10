@@ -23,12 +23,12 @@ export function KeyList({ list }: { list: KeyListView }) {
       className="gap-0.5 rounded-2xl border border-border bg-card p-1.5"
     >
       {list.suggestions.length === 0 && (
-        <Text className="px-2.5 py-3 text-xs text-muted-foreground">{list.empty}</Text>
+        <Text className="font-sans px-2.5 py-3 text-xs text-muted-foreground">{list.empty}</Text>
       )}
       {list.suggestions.map((suggestion, index) => (
         <View key={suggestion.id}>
           {suggestion.group && suggestion.group !== list.suggestions[index - 1]?.group && (
-            <Text className="px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <Text className="font-sans px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               {suggestion.group}
             </Text>
           )}
@@ -46,7 +46,7 @@ export function KeyList({ list }: { list: KeyListView }) {
               {suggestion.label}
             </Text>
             {!!suggestion.detail && (
-              <Text className="max-w-[45%] text-xs text-muted-foreground" numberOfLines={1}>
+              <Text className="font-sans max-w-[45%] text-xs text-muted-foreground" numberOfLines={1}>
                 {suggestion.detail}
               </Text>
             )}

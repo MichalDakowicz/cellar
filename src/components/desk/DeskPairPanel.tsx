@@ -27,15 +27,15 @@ export function DeskPairPanel({
           <View className="rounded-xl bg-white p-2">
             <QrCode value={url} size={220} label="code that pairs a phone with this pc" />
           </View>
-          <Text className="text-center text-xs text-muted-foreground">
+          <Text className="font-sans text-center text-xs text-muted-foreground">
             scan it with cellar on your phone, or with the phone&apos;s camera — on the same wi-fi as this pc.
           </Text>
         </View>
       ) : (
-        <Text className="text-xs text-muted-foreground">{reason ?? 'no code yet'}</Text>
+        <Text className="font-sans text-xs text-muted-foreground">{reason ?? 'no code yet'}</Text>
       )}
       <Pressable accessibilityRole="button" accessibilityLabel="forget paired phones" hitSlop={8} onPress={onForget}>
-        <Text className="text-xs font-semibold text-muted-foreground">forget every paired phone</Text>
+        <Text className="font-sans text-xs font-semibold text-muted-foreground">forget every paired phone</Text>
       </Pressable>
     </View>
   );
