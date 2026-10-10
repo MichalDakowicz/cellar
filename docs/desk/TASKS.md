@@ -174,6 +174,50 @@ Their small rules are `lib/deskLater.ts`.
 
 ---
 
+## Pass 1b — match the canvas
+
+Pass 1 drew every screen from the written spec; this pass makes each one look like its artboard
+in [`canvas/`](canvas/) and gives the app the structure `Map.dc.html` describes. Same rules as
+pass 1. A board's sample *data* stays behind the sample desk; its labels, layout and look are the
+target.
+
+### M1 · settings in sections `[x]`
+
+`settings/` (`lib/settingsSections.ts`): a column beside the page on the desktop, a list on the
+phone. dump · agents · hosts · recipes and rules · keys · devices and pairing · notifications ·
+night shift · usage and accounts · account. Cellar's own prefs spread by topic (dump habits under
+dump, display under account, nudges under notifications). `desk/settings` redirects to agents.
+
+### M2 · the shared look `[ ]`
+
+Fix once, every board follows: overlines are `text-xs font-bold` (`Overline`); chips are the
+`.ping-chip` (min-h 36, `text-sm`, foreground on chipGround, selected = accent soft + primary
+border + light-accent text) in `Chip`, `ChipWrap` and every hand-rolled chip; raised surfaces are
+the row ground #171717 (a `row` token), the selected/thumb ground #262626; outlined tiles use
+hsl(0 0% 20%) unselected. Nav glyphs: back is a chevron, dump a pen, projects a folder.
+
+### M3 · the desktop sidebar's desk section `[ ]`
+
+Under cellar's four: desk › home · chat · commands · previews · the attached phone, then pinned
+projects. Adds `desk/chat` (the run list with nothing open), `desk/commands` (each project's `$`
+commands — sample until W2) and `desk/previews` (the pc's pages, real).
+
+### M4 · phone boards `[ ]`
+
+Main, NewTask (a sheet over the desk: waveform, 76px primary mic between "type instead" and
+"clear", sticky send with an arrow), Run (step tiles with their own glyphs, the bubble's caption,
+primary mic), Preview, Screen, PhoneNotify (the shade itself), PhoneQuestion (the card pinned in
+the run in place of the composer; uppercase letter tiles, recommended pill, "let it decide"),
+PhoneShare (a sheet), PhoneRace, PhoneNight — each to its artboard.
+
+### M5 · desktop boards `[ ]`
+
+DeskHome, DeskChat (keys list with groups, ↑↓ / tab / esc, step cards for the plan line),
+DeskProjects, DeskPhone, DeskGroupRun, QuestionCard (every state), DeskUsage (header meter, this
+chat, plan limits side by side, accounts, by day, limits), DeskRecipes (kinds as a list, the
+recipe as a labelled grid, rules with the managed-block preview), DeskHosts (host rows, add a
+host card, ping rules as a grid with edit).
+
 ## Pass 2 — the wiring
 
 ### W1 · real counts on the desk `[ ]`
