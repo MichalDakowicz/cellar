@@ -20,7 +20,7 @@ export default function SettingsLayout() {
         {isDesktop && <SettingsNav />}
         <View className="flex-1">
           {/* A stack, so a section pushed from the phone's list goes back to it. */}
-          <Stack screenOptions={{ headerShown: false, animation: isDesktop ? 'none' : 'default', contentStyle: { backgroundColor: 'transparent' } }} />
+          <Stack screenOptions={{ headerShown: false, animation: isDesktop ? 'none' : 'default' }} />
         </View>
       </View>
       <AppChrome />

@@ -7,7 +7,7 @@ import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { Overline } from '@/components/ui/controls';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop, useSidebarSpace } from '@/hooks/useResponsive';
 import { useDeskPrefs } from '@/store/deskPrefs';
 
 /**
@@ -42,6 +42,8 @@ export function LaterScreen({
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
+  // The sidebar names where you are on the desktop; a back pill there is noise.
+  const isDesktop = useIsDesktop();
   const shown = !sampleOnly || sample;
 
   return (
@@ -56,7 +58,7 @@ export function LaterScreen({
         <ContentShell maxWidth={wide ? MAX_W.detail : MAX_W.text}>
           <View className={`gap-5 pt-2 ${gutter}`}>
             <View className="flex-row items-start gap-3">
-              <ScreenAction />
+              {!isDesktop && <ScreenAction />}
               <View className="min-w-0 flex-1 gap-1">
                 <Overline>{shown ? overline : 'coming'}</Overline>
                 <Text className="text-xl font-bold leading-tight text-foreground">{shown ? title : name}</Text>

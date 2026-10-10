@@ -42,5 +42,7 @@ export function deskCan(via: DeskVia) {
     start: via !== 'none',
     log: via === 'bridge' || via === 'lan',
     local: via === 'lan',
+    /** The pc's pages: listed over either direct wire; the pc's own window opens them on localhost. */
+    pages: via === 'bridge' || via === 'lan',
   };
 }

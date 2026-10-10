@@ -5,7 +5,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
-import { MAX_W, useGutter } from '@/hooks/useResponsive';
+import { MAX_W, useGutter, useIsDesktop } from '@/hooks/useResponsive';
 
 /**
  * One settings page (`DeskUsage`/`DeskRecipes`/`DeskHosts`): its title, the
@@ -15,10 +15,12 @@ import { MAX_W, useGutter } from '@/hooks/useResponsive';
 export function SettingsPage({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
+  // Beside the settings column there is nowhere to go back to.
+  const isDesktop = useIsDesktop();
 
   return (
     <ScrollView
-      className="flex-1"
+      className="flex-1 bg-background"
       contentContainerStyle={{ paddingBottom: navBarSpace + 24 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
@@ -26,7 +28,7 @@ export function SettingsPage({ title, sub, children }: { title: string; sub: str
       <ScreenTop />
       <ContentShell maxWidth={MAX_W.text}>
         <View className={`flex-row items-start gap-3 pt-4 ${gutter}`}>
-          <ScreenAction />
+          {!isDesktop && <ScreenAction />}
           <View className="min-w-0 flex-1 gap-1">
             <Text className="text-2xl font-bold tracking-tight text-foreground">{title}</Text>
             <Text className="text-sm text-muted-foreground">{sub}</Text>

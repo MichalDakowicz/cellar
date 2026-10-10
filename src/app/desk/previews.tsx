@@ -25,10 +25,10 @@ export default function DeskPreviews() {
       sampleOnly={false}
       waitsOn=""
     >
-      {!local.available && (
+      {!local.pagesAvailable && (
         <Text className="text-sm text-muted-foreground">{`${link.name} is not on this network — its pages open over the same wi-fi`}</Text>
       )}
-      {local.available && local.ports.length === 0 && (
+      {local.pagesAvailable && local.ports.length === 0 && (
         <Text className="text-sm text-muted-foreground">nothing is listening on the pc right now</Text>
       )}
       {local.ports.map((port) => (
