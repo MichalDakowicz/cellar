@@ -7,6 +7,7 @@ import { readDeskRuns } from '@/lib/deskRunSnapshot';
 import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@/lib/deskCommands';
 
 import type { DeskBridge } from './bridge';
+import type { DeskReceipt } from '@/lib/deskReceipt';
 
 /**
  * The pc's API, over whichever wire reaches it: the LAN, signed with the
@@ -31,16 +32,18 @@ export class DeskRefusal extends Error {
   constructor(
     message: string,
     readonly untrusted: string | null,
+    readonly receipt: DeskReceipt | null = null,
   ) {
     super(message);
   }
 }
 
 function refusal(status: number, body: unknown): Error {
-  const said = body as { error?: unknown; untrusted?: unknown } | null;
+  const said = body as { error?: unknown; untrusted?: unknown; receipt?: DeskReceipt } | null;
   return new DeskRefusal(
     typeof said?.error === 'string' ? said.error : `the pc answered ${status}`,
     typeof said?.untrusted === 'string' ? said.untrusted : null,
+    said?.receipt ?? null,
   );
 }
 
@@ -80,7 +83,9 @@ async function signedFetch(pair: DeskPair, method: string, path: string, text: s
       body: text || undefined,
       signal: controller.signal,
     });
-    return { status: response.status, body: await response.json().catch(() => null) };
+    const body: unknown = await response.json();
+    if (!body || typeof body !== 'object') throw new Error('invalid host response');
+    return { status: response.status, body };
   } catch {
     throw new DeskUnreachable(`${pair.name} is not answering on this network`);
   } finally {
@@ -105,7 +110,7 @@ export function lanTransport(pair: DeskPair): DeskTransport {
         answer = await signedFetch(pair, method, path, text);
       }
     }
-    if (answer.status === 401) throw new Error(`${pair.name} no longer knows this phone — pair it again`);
+    if (answer.status === 401) throw new Error(`${pair.name} refused the request signature — retry or check pairing`);
     if (answer.status < 200 || answer.status >= 300) throw refusal(answer.status, answer.body);
     return answer.body;
   };
@@ -131,6 +136,7 @@ export function deskCalls(send: DeskTransport) {
       return runs;
     },
     start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
+    receipt: async (id: string) => ((await send('GET', `/requests/${encodeURIComponent(id)}`)) as { receipt: DeskReceipt | null }).receipt,
     commands: async () => ((await send('GET', '/commands')) as { projects: DeskProjectCommands[] }).projects,
     job: async (request: DeskJobStart) => ((await send('POST', '/commands', request)) as { run: DeskRun }).run,
     saveCommands: async (projectId: string, commands: DeskCommandDefinition[]) => void (await send('POST', `/commands/${encodeURIComponent(projectId)}/settings`, { commands })),

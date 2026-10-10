@@ -61,7 +61,7 @@ export function StartOnPcControl({
   const installed = link.info
     ? link.info.agents.filter((candidate) => candidate.installed).map((candidate) => candidate.id)
     : (link.desk?.agents ?? null);
-  const built = deskStartFrom({ prompt, repoPath: deskFolderFor(project, projects, groups), entryId, agent });
+  const built = deskStartFrom({ prompt, repoPath: deskFolderFor(project, projects, groups), entryId, agent, projectId: project?.id });
   const reason = !built.ok
     ? built.reason
     : !link.can.start
@@ -88,8 +88,8 @@ export function StartOnPcControl({
       <SheetDialog
         open={open}
         title={`start on ${link.name}`}
-        body="an agent runs this in the project's folder on the pc, in auto mode — the same checks as a session you start there."
-        confirmLabel={starting.busy ? 'starting…' : 'start it'}
+        body="An agent runs in this project's checkout with edits allowed. Permissions are handled at the PC; phone approvals arrive with W8."
+        confirmLabel={starting.busy ? 'starting…' : starting.pending ? 'recover pending task' : 'start it'}
         confirmDisabledReason={reason}
         onConfirm={() => built.ok && starting.begin(built.start)}
         onDismiss={() => setOpen(false)}
@@ -108,6 +108,7 @@ export function StartOnPcControl({
             <TrustAsk folder={starting.untrusted} busy={starting.trusting} onTrust={starting.trustAndStart} />
           )}
           {!!starting.error && <Text className="font-sans text-sm text-destructive-foreground">{starting.error}</Text>}
+          {starting.failed && !starting.busy && <Chip label="edit unstarted task" selected={false} onPress={starting.discardFailed} />}
         </View>
       </SheetDialog>
     </View>

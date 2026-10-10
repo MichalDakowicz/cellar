@@ -38,8 +38,16 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
 
   const start = useMutation({
     mutationFn: async (request: DeskStart): Promise<string | null> => {
-      if (direct) return (await direct.start(request)).id;
-      if (link.via === 'cellar' && link.desk) return sendStart(link.desk.id, request);
+      if (direct) {
+        if (link.info?.taskProtocol !== 2) throw new Error('Update Cellar on the PC before sending tasks.');
+        const receipt = request.commandId ? await direct.receipt(request.commandId) : null;
+        if (receipt?.state === 'confirmed' && receipt.run) return receipt.run.id;
+        return (await direct.start(request)).id;
+      }
+      if (link.via === 'cellar' && link.desk) {
+        if (link.desk.taskProtocol !== 2) throw new Error('Update Cellar on the PC before sending tasks through the mailbox.');
+        return sendStart(link.desk.id, request);
+      }
       throw new Error(`${link.name} is not reachable right now`);
     },
     onSuccess: refresh,
@@ -79,10 +87,12 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
 /** One run's own words. Direct wires only — the cellar heartbeat carries the list, not the transcripts. */
 export function useDeskLog(link: DeskLink, id: string | null) {
   return useQuery({
-    queryKey: ['desk', 'log', id],
+    queryKey: ['desk', 'log', link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none', id],
     queryFn: () => link.calls!.log(id!),
     enabled: id !== null && link.calls !== null,
     refetchInterval: 4_000,
     retry: false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }

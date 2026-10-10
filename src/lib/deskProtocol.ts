@@ -34,6 +34,11 @@ export function agentLabel(agent: DeskAgent | 'job'): string {
 export const PROMPT_MAX = 8000;
 
 export type DeskStart = {
+  commandId?: string;
+  projectId?: string;
+  where?: 'main' | 'worktree';
+  mode?: 'ask' | 'edits' | 'full';
+  entryIds?: string[];
   agent: DeskAgent;
   prompt: string;
   /** The folder it runs in — must be a project's `repo_path`, which the pc checks. */
@@ -65,8 +70,16 @@ export function parseDeskStart(raw: unknown): Parsed<DeskStart> {
 
   const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim().slice(0, 80) : null;
   const entryId = typeof body.entryId === 'string' && UUID.test(body.entryId) ? body.entryId : null;
-
-  return { ok: true, value: { agent, prompt, cwd, name, entryId } };
+  if (body.commandId === undefined) return { ok: true, value: { agent, prompt, cwd, name, entryId } };
+  if (typeof body.commandId !== 'string' || !UUID.test(body.commandId)) return { ok: false, error: 'invalid commandId' };
+  if (typeof body.projectId !== 'string' || !UUID.test(body.projectId)) return { ok: false, error: 'pick a real project' };
+  if (body.where !== 'main' && body.where !== 'worktree') return { ok: false, error: 'pick a checkout or worktree' };
+  if (!['ask', 'edits', 'full'].includes(String(body.mode))) return { ok: false, error: 'pick an access mode' };
+  if (!Array.isArray(body.entryIds) || body.entryIds.length > 20 || body.entryIds.some((id) => typeof id !== 'string' || !UUID.test(id)) || new Set(body.entryIds).size !== body.entryIds.length) {
+    return { ok: false, error: 'attach up to 20 distinct entry ids' };
+  }
+  return { ok: true, value: { agent, prompt, cwd, name, entryId: body.entryIds[0] ?? null, commandId: body.commandId,
+    projectId: body.projectId, where: body.where, mode: body.mode as DeskStart['mode'], entryIds: body.entryIds } };
 }
 
 /** The first line of the prompt, cut to something a list row can hold. */
@@ -84,6 +97,11 @@ export function runTitle(start: Pick<DeskStart, 'prompt' | 'name'>): string {
 export type DeskRunState = 'running' | 'waiting' | 'done' | 'failed' | 'stopped' | 'unknown';
 
 export type DeskRun = {
+  commandId?: string;
+  entryIds?: string[];
+  projectId?: string;
+  mode?: DeskStart['mode'];
+  where?: DeskStart['where'];
   id: string;
   agent: DeskAgent | 'job';
   name: string;
@@ -126,6 +144,7 @@ export type DeskApk = { app: string; file: string; version: string | null; size:
 
 /** What `GET /desk` answers. */
 export type DeskInfo = {
+  taskProtocol?: 2;
   id: string;
   name: string;
   version: string;

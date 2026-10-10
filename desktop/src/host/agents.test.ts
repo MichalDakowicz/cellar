@@ -28,6 +28,15 @@ test('codex is told the folder itself', () => {
   assert.equal(plan.args[plan.args.indexOf('-C') + 1], 'C:\\ping\\cellar');
 });
 
+test('task modes reach each supported agent without silently escalating defaults', () => {
+  for (const [mode, permission] of [['ask', 'manual'], ['edits', 'acceptEdits'], ['full', 'bypassPermissions']] as const) {
+    assert.ok(spawnPlan({ ...start, agent: 'claude', mode }).args.includes(permission));
+  }
+  assert.ok(spawnPlan({ ...start, agent: 'codex', mode: 'ask' }).args.includes('read-only'));
+  assert.ok(spawnPlan({ ...start, agent: 'codex', mode: 'edits' }).args.includes('workspace-write'));
+  assert.ok(!spawnPlan({ ...start, agent: 'codex', mode: 'edits' }).args.includes('--approve-for-me'));
+});
+
 test('reads the id claude --bg prints', () => {
   assert.equal(backgroundId('Starting background service…\nbackgrounded · 4a588420 · desk smoke test\n'), '4a588420');
   assert.equal(backgroundId('nothing here'), null);

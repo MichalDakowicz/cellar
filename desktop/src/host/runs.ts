@@ -26,6 +26,12 @@ import { plainLog, tail } from './transcript.ts';
  */
 
 type RunRecord = {
+  owner?: string | null;
+  commandId?: string;
+  entryIds?: string[];
+  projectId?: string;
+  mode?: DeskStart['mode'];
+  where?: DeskStart['where'];
   id: string;
   agent: DeskAgent;
   name: string;
@@ -51,7 +57,7 @@ export class Runs {
   private readonly file: string;
   private readonly logs: string;
   private readonly children = new Map<string, ChildProcess>();
-  constructor(dir: string, private readonly readClaude = claudeRows) {
+  constructor(dir: string, private readonly readClaude = claudeRows, private readonly owner: () => string | null = () => null) {
     this.file = join(dir, 'runs.json');
     this.logs = join(dir, 'runs');
     mkdirSync(this.logs, { recursive: true });
@@ -71,23 +77,28 @@ export class Runs {
 
   async start(start: DeskStart): Promise<DeskRun> {
     const plan = spawnPlan(start);
-    const base = { agent: start.agent, name: runTitle(start), cwd: start.cwd, startedAt: Date.now(), entryId: start.entryId };
+    const base = { agent: start.agent, name: runTitle(start), cwd: start.cwd, startedAt: Date.now(), entryId: start.entryId,
+      ...(start.commandId ? { commandId: start.commandId, entryIds: start.entryIds, projectId: start.projectId, mode: start.mode, where: start.where } : {}) };
 
     if (plan.kind === 'background') {
       const id = await startClaude(plan.args, start.cwd);
-      this.records.unshift({ id, ...base });
+      this.records.unshift({ id, ...base, owner: this.owner() });
       this.save();
       return { id, ...base, state: 'running', origin: 'phone' };
     }
 
     const path = await toolPath(start.agent);
-    if (!path) throw new DeskError(`${start.agent} is not installed on this pc`, 409);
+    if (!path) throw new DeskError(`${start.agent} is not installed on this pc`, 409, { notStarted: true });
     const id = randomBytes(4).toString('hex');
     const log = join(this.logs, `${id}.log`);
     const out = openSync(log, 'a');
     const child = spawn(path, plan.args, { cwd: start.cwd, detached: true, windowsHide: true, stdio: ['ignore', out, out] });
     closeSync(out);
-    const record: RunRecord = { id, ...base, pid: child.pid, log, exit: undefined };
+    await new Promise<void>((resolve, reject) => {
+      child.once('spawn', resolve);
+      child.once('error', (error) => reject(new DeskError(`Could not spawn ${start.agent}: ${error.message}`, 409, { notStarted: true })));
+    });
+    const record: RunRecord = { id, ...base, owner: this.owner(), pid: child.pid, log, exit: undefined };
     this.children.set(id, child);
     const ended = (code: number | null) => {
       this.children.delete(id);
@@ -110,7 +121,7 @@ export class Runs {
     if (record.exit !== undefined) return record.exit === 0 ? 'done' : 'failed';
     if (this.children.has(record.id)) return 'running';
     const written = record.log ? await lastWrite(record.log) : null;
-    return written !== null && Date.now() - written < QUIET_MS ? 'running' : 'done';
+    return written !== null && Date.now() - written < QUIET_MS ? 'running' : 'unknown';
   }
 
   async list(): Promise<DeskRun[]> {
@@ -120,8 +131,10 @@ export class Runs {
 
     const runs: DeskRun[] = [];
     for (const record of this.records) {
-      const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const };
-      const state = record.agent === 'claude' ? (claudeStates.get(record.id) ?? 'done') : await this.ownState(record);
+      if (record.owner !== undefined && record.owner !== this.owner()) continue;
+      const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const,
+        ...(record.commandId ? { commandId: record.commandId, projectId: record.projectId, entryIds: record.entryIds, mode: record.mode, where: record.where } : {}) };
+      const state = record.agent === 'claude' ? (claudeStates.get(record.id) ?? 'unknown') : await this.ownState(record);
       runs.push({ ...base, state });
     }
 
@@ -144,6 +157,7 @@ export class Runs {
   async stop(id: string): Promise<void> {
     const record = RUN_ID.test(id) ? this.records.find((candidate) => candidate.id === id) : undefined;
     if (!record) throw new DeskError('that run was not started from cellar', 403);
+    if (record.owner !== undefined && record.owner !== this.owner()) throw new DeskError('no such run for this account', 404);
     if (record.agent === 'claude') return stopClaude(id);
     const child = this.children.get(id);
     if (!child?.pid) throw new DeskError('it was started before cellar last restarted — stop it at the pc', 409);
@@ -155,6 +169,7 @@ export class Runs {
   async log(id: string): Promise<DeskLogLine[]> {
     if (!RUN_ID.test(id)) throw new DeskError('no such run', 404);
     const record = this.records.find((candidate) => candidate.id === id);
+    if (record?.owner !== undefined && record.owner !== this.owner()) throw new DeskError('no such run for this account', 404);
     if (record?.log) {
       try {
         return tail(plainLog(await readTail(record.log)));

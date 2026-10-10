@@ -9,12 +9,12 @@ adds behavior through the existing view models, host API and transports.
 | --- | --- | --- |
 | Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; account-owned mailbox requests and heartbeat snapshots | No websocket/resume yet (W7); SSH deferred (W20) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; only running runs count as working | Host `waiting` is coarse: an idle interactive session can need the PC. It is not proof of an approval request (W8) |
-| Send a task | Typed prompt, project folder, agent, attached entry context; folder checks, trust refusal, error reporting; basic sequential starts | No durable start receipts, complete mode/worktree payload or claims per run (W4/W5/W8) |
+| Send a task | W4: full task choices, durable command IDs/receipts, owner-scoped attachment reservations and duplicate-safe recovery over LAN/IPC/mailbox | New worktrees remain W5; runtime approvals on phone remain W8 |
 | Follow a run | Polled run list and transcript/log tail, rendered text and tool steps; stop runs started by Cellar | No durable normalized events, live resume, steering or queue dispatch (W6/W7/W9) |
-| Answer an entry | Several text picks plus a note, sent as composed answer text; confirmed writes unblock the entry | Structured picks/note fields still W3; runtime deny/allow panels are samples until W8 |
-| Commands and keys | `$` finds real projects and entries; hex chips copy/nudge | Command tiles are samples; no jobs (W2). `@` files and `/` skills are samples (W10) |
+| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; hosted MCP reads both | Runtime deny/allow panels remain samples until W8 |
+| Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
 | Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W11), remote input or real phone panel (W18) |
-| Capture and boards | File thoughts, pictures, project routing; board selection opens task composition; desktop enter files and shift-enter hands off | Handoff still needs W4 receipts/claims; race, night shift and group execution are samples (W19) |
+| Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W19) |
 | Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W12–W17 |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
@@ -27,8 +27,8 @@ W20 stays deferred. Counts establish trustworthy status first; project commands 
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
-The user approved **W1: shared real counts and availability rules** before coding.
-W2 is the next recommendation, not authorized implementation in this change.
+The user approved W1 after the behavior review, then explicitly requested W2, W3
+and W4. All four are now verified. W5 is next; implementation awaits a new request.
 
 ## W1 behavior
 
@@ -98,6 +98,7 @@ done. Failed, stopped and restarted-without-exit jobs retain those distinct stat
 Readable test reports parse Jest, Vitest or Node TAP totals from the visible log.
 They describe the latest reported suite, never an inferred result for the whole
 chain. Unsupported, incomplete and truncated output remains available as raw text.
+Interrupted LAN replies report the PC unavailable; a confirmed read restores the report.
 
 Verified: 852 app tests, types/lint/web export and 37 desktop tests/types/build.
 Phone starts actual Cellar `$test` on the updated, signed-in Michu host: 852 passed,
@@ -123,3 +124,40 @@ the exact Deno edge bundle pass. Temporary QA question archived after verificati
 Hosted MCP function deployed with explicit authorization. Live `cellar_get_entry`
 returns exact B+C, the separate note and several-options line. `cellar_check_answers`
 also responds successfully. W3 is verified; website deployment and GitHub remain pending.
+
+## W4 — confirmed task handoff
+
+New task and start-on-PC send project ID, checked folder, agent, permission mode,
+checkout choice and every attachment ID, with one durable UUID command ID. Fresh
+tasks require protocol v2. Unsupported worktrees or Antigravity modes are refused
+before launch. Claude modes map to manual/acceptEdits/bypassPermissions; Codex maps
+to read-only/workspace-write/explicit full access. Phone approvals remain W8.
+
+The PC persists intent before claiming or launching. Repeated IDs return the same
+confirmed run; changed payloads are refused. A lost launch reply or interrupted
+host leaves unknown, never an automatic replay. Proven pre-launch refusals release
+reservations and permit a fresh explicit retry. Phone persists pending payloads
+per account/PC; only confirmed starts leave the queue. Confirmed batch prefixes
+never replay. Safe editing discards only a proven-unstarted remainder.
+
+SQL claims lock all owner-visible attachments together, validate project/state,
+then reserve them with the command ID. Failure rolls back every claim. Open entries
+may carry an agent author stamp; it is not an active claim. Ordinary finish/unclaim
+clears the reservation. Ambiguous claim/launch responses retain the original ID.
+Mailbox requests carry the same payload and recover taken starts from disk receipts.
+Restart never launches a taken request again.
+
+Verified on physical phone and signed-in Michu: actual Codex read-only output and
+observed exit; two attachments reserved together; dropped confirmed response plus
+app restart recovered run b8a96577 with one POST; queued mailbox start while PC
+offline became run bc48be4e after restart, with W4_MAILBOX_OK output. A repeat handoff
+of a reserved entry produced failed receipt and safe-edit UI, without launching.
+Both temporary entries are archived. The explicitly authorized QA proxy is stopped;
+original Michu pairing restored. Updated PC app runs from
+`C:/ping/cellar-desktop-ready/win-unpacked/Cellar.exe`; final Android 1.12.0 installed.
+
+852 app tests, 37 desktop tests, 37 MCP tests, types/lint, local web export, desktop
+package and Android release pass. PostgreSQL migration tests cover reruns, rollback,
+RLS isolation, competing reservations and normal release/reclaim. UI/canvas baseline
+preserved; recovery feedback and permission explanations are functional additions.
+All source commits remain local. Only the authorized MCP function was deployed.

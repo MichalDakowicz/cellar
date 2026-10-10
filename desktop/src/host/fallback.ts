@@ -5,6 +5,7 @@ import { isStaleRequest } from '@/lib/deskProtocol';
 
 import type { DeskSession } from './account.ts';
 import { deskInfo, hostRuns, startRun, type HostDeps } from './api.ts';
+import { DeskError } from './claudeRuns.ts';
 
 /**
  * The way in when the phone is not on the same network: through the cellar.
@@ -39,6 +40,7 @@ type RequestRow = {
   run_id: string | null;
   state: string;
   created_at: string;
+  payload?: unknown;
 };
 
 const BEAT_MS = 30_000;
@@ -102,6 +104,7 @@ export class CellarFallback {
         agents: info.agents.filter((agent) => agent.installed).map((agent) => agent.id),
         runs: snapshot,
         seen_at: new Date().toISOString(),
+        task_protocol: info.taskProtocol ?? null,
       },
       { onConflict: 'user_id,id' },
     );
@@ -111,10 +114,25 @@ export class CellarFallback {
       .from('cellar_desk_requests')
       .select('*')
       .eq('desk_id', identity.id)
-      .eq('state', 'queued')
+      .in('state', ['queued', 'taken'])
       .order('created_at');
     if (queued.error) return this.fail(queued.error);
-    for (const row of (queued.data ?? []) as RequestRow[]) await this.take(row);
+    for (const row of (queued.data ?? []) as RequestRow[]) {
+      if (row.state === 'taken') await this.recover(row);
+      else await this.take(row);
+    }
+  }
+
+  /** A lost mailbox reply is settled from disk, never by launching again. */
+  private async recover(row: RequestRow): Promise<void> {
+    const owner = this.deps.account.current?.userId;
+    if (!owner || row.kind !== 'start') return;
+    const receipt = this.deps.receipts?.get(owner, row.id);
+    if (!receipt || receipt.state === 'pending') return;
+    const patch = receipt.state === 'confirmed' && receipt.run
+      ? { state: 'done', run_id: receipt.run.id, error: null, receipt }
+      : { state: receipt.state === 'failed' ? 'failed' : 'taken', error: receipt.error ?? 'Start outcome is unconfirmed; check the PC.', receipt };
+    await this.deps.account.client().from('cellar_desk_requests').update(patch).eq('id', row.id).eq('state', 'taken');
   }
 
   private fail(error: { code?: string; message: string }): void {
@@ -138,26 +156,29 @@ export class CellarFallback {
 
     const settle = (patch: Record<string, unknown>) => client.from('cellar_desk_requests').update(patch).eq('id', row.id);
     if (isStaleRequest(row.created_at, Date.now())) {
-      await settle({ state: 'failed', error: 'too old to run — send it again' });
+      await settle({ state: 'failed', error: 'too old to run — send it again', receipt: { commandId: row.id, state: 'failed' } });
       return;
     }
     try {
       if (row.kind === 'stop' && row.run_id) {
-        await this.deps.runs.stop(row.run_id);
+        if (this.deps.jobs?.has(row.run_id)) await this.deps.jobs.stop(row.run_id);
+        else await this.deps.runs.stop(row.run_id);
         await settle({ state: 'done' });
       } else {
-        const run = await startRun(this.deps, {
+        const run = await startRun(this.deps, row.payload ?? {
           agent: row.agent,
           prompt: row.prompt,
           cwd: row.cwd,
           name: row.name,
           entryId: row.entry_id,
         });
-        await settle({ state: 'done', run_id: run.id });
+        await settle({ state: 'done', run_id: run.id, receipt: this.deps.receipts?.get(this.deps.account.current!.userId, row.id) ?? null });
       }
       void this.tick();
     } catch (error) {
-      await settle({ state: 'failed', error: error instanceof Error ? error.message : String(error) });
+      const receipt = error instanceof DeskError ? error.extra.receipt : null;
+      await settle({ state: (receipt as { state?: string } | null)?.state === 'unknown' ? 'taken' : 'failed',
+        error: error instanceof Error ? error.message : String(error), receipt });
     }
   }
 }

@@ -9,9 +9,8 @@ import { runTitle } from '@/lib/deskProtocol';
  * same guard for the agent's own parser: a prompt that starts with a dash is
  * still a prompt.
  *
- * Permission mode is the decision on the cellar entry: auto, the same classifier
- * as a session at the desk. Each agent spells it differently and not every one
- * has it — the closest each one offers is written next to it.
+ * W4 permission choices map to each agent's supported flags. Legacy requests
+ * retain the existing auto mode; unsupported W4 modes are refused before launch.
  */
 
 export type SpawnPlan = {
@@ -34,7 +33,7 @@ export function spawnPlan(start: DeskStart): SpawnPlan {
       return {
         agent: 'claude',
         kind: 'background',
-        args: ['--bg', '-n', title, '--permission-mode', 'auto', '--', start.prompt],
+        args: ['--bg', '-n', title, '--permission-mode', start.mode === 'ask' ? 'manual' : start.mode === 'edits' ? 'acceptEdits' : start.mode === 'full' ? 'bypassPermissions' : 'auto', '--', start.prompt],
       };
     case 'codex':
       // --approve-for-me routes every approval through codex's own automatic
@@ -42,7 +41,9 @@ export function spawnPlan(start: DeskStart): SpawnPlan {
       return {
         agent: 'codex',
         kind: 'own',
-        args: ['exec', '--approve-for-me', '--color', 'never', '-C', start.cwd, '--', start.prompt],
+        args: start.mode
+          ? ['-a', 'never', 'exec', ...(start.mode === 'full' ? ['--dangerously-bypass-approvals-and-sandbox'] : ['--sandbox', start.mode === 'ask' ? 'read-only' : 'workspace-write']), '--color', 'never', '-C', start.cwd, '--', start.prompt]
+          : ['exec', '--approve-for-me', '--color', 'never', '-C', start.cwd, '--', start.prompt],
       };
     case 'agy':
       // Antigravity has no classifier mode. accept-edits is the nearest: edits

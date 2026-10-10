@@ -10,9 +10,9 @@
 export type DeskMode = 'ask' | 'edits' | 'full';
 
 export const DESK_MODES: { id: DeskMode; label: string; hint: string }[] = [
-  { id: 'ask', label: 'ask first', hint: 'every command and file edit pings your phone first' },
-  { id: 'edits', label: 'edits ok', hint: 'edits go ahead; commands and installs ping your phone first' },
-  { id: 'full', label: 'full access', hint: 'nothing pings you — it runs to the end in its own worktree' },
+  { id: 'ask', label: 'ask first', hint: 'Claude asks at the PC; Codex is read-only. Phone approvals arrive with W8.' },
+  { id: 'edits', label: 'edits ok', hint: 'Edits are allowed in the project. Claude asks at the PC; Codex cannot escalate. Phone approvals arrive with W8.' },
+  { id: 'full', label: 'full access', hint: 'Full access to the PC for this run, in the checkout selected above. No approval prompts.' },
 ];
 
 export const DEFAULT_MODE: DeskMode = 'edits';
@@ -58,9 +58,8 @@ export type DeskSplit = 'one' | 'each';
 /**
  * What a send starts: one prompt and the thought it is bound to, per run.
  *
- * One run over several thoughts gets the line that picks them all up and is
- * bound to the first — the pc follows one entry per run, and the agent claims
- * the rest from the line. One run each gets each thought's own line.
+ * One run over several thoughts gets their shared pick-up line. Its first ID
+ * remains the legacy entryId; W4 also sends every attachment in entryIds.
  */
 export function taskStarts(input: {
   typed: string;

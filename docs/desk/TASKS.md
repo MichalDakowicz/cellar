@@ -303,11 +303,20 @@ applied by the user; phone saved B+C plus a note excluding A and rendered exact 
 function deployed with explicit authorization. Live `cellar_get_entry` verifies exact B+C,
 explicit several-options line and separate note; `cellar_check_answers` responds successfully.
 
-### W4 · send a task for real `[~]`
+### W4 · send a task for real `[x]`
 
 The new task sheet and the capture bar's shift+enter start a run with project, where, agent,
 mode and attached entries; the send carries a `commandId` and the host stores receipts, so a
 retry never runs twice. Attached entries are claimed by the run.
+
+2026-10-10: complete payload, owner-scoped disk receipts and durable phone pending queue
+verified on real Michu host. Phone read-only Codex runs return actual output; both attached
+entries are reserved atomically. Dropped start response + phone restart recovers the original
+run with one launch. Mailbox task queued while PC offline is confirmed after host restart.
+Already-claimed attachment fails before launch; safe edit clears only unstarted remainder.
+852 app tests and 37 desktop tests/types/lint/build pass; migrations tested in PostgreSQL
+for reruns, rollback and account isolation. Final APK installed; updated local PC app running.
+New worktrees remain W5; phone approvals remain W8. No GitHub push or website deployment.
 
 ### W5 · worktrees `[ ]`
 

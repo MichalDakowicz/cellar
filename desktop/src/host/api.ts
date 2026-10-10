@@ -17,6 +17,8 @@ import { installedAgents } from './tools.ts';
 import type { Commands } from './commands.ts';
 import type { Jobs } from './jobs.ts';
 import { sortRuns } from '@/lib/deskProtocol';
+import type { Receipts } from './receipts.ts';
+import { startTask } from './startTask.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -41,6 +43,7 @@ export type HostDeps = {
   version: string;
   commands?: Commands;
   jobs?: Jobs;
+  receipts?: Receipts;
 };
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
@@ -61,6 +64,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     version: deps.version,
     agents: await installedAgents(),
     signedIn: deps.account.current !== null,
+    ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
   };
 }
 
@@ -84,6 +88,7 @@ export async function startRun(deps: HostDeps, body: unknown) {
   const parsed = parseDeskStart(body);
   if (!parsed.ok) throw new DeskError(parsed.error);
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
+  if (deps.receipts) return deps.receipts.start(deps.account.current.userId, parsed.value, () => startTask(deps, parsed.value));
   const cwd = realFolder(parsed.value.cwd);
   if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
   return deps.runs.start({ ...parsed.value, cwd });
@@ -127,13 +132,17 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
       case 'GET /desk':
         return ok(await deskInfo(deps));
       case 'GET /runs':
         return ok({ runs: await hostRuns(deps) });
+      case 'GET /requests/:id': {
+        if (!deps.account.current || !deps.receipts) throw new DeskError('Sign in and update Cellar on the PC.', 409);
+        return ok({ receipt: deps.receipts.get(deps.account.current.userId, parts[1]) });
+      }
       case 'GET /commands':
         if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
         return ok({ projects: await deps.commands.list() });

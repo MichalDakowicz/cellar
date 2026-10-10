@@ -29,7 +29,7 @@ export class DeskError extends Error {
 
 async function claude(): Promise<string> {
   const path = await toolPath('claude');
-  if (!path) throw new DeskError('claude is not installed on this pc', 409);
+  if (!path) throw new DeskError('claude is not installed on this pc', 409, { notStarted: true });
   return path;
 }
 
@@ -39,7 +39,7 @@ export async function startClaude(args: string[], cwd: string): Promise<string> 
   if (id) return id;
   const said = `${stdout}\n${stderr}`;
   if (untrustedFolder(said)) {
-    throw new DeskError(`claude has not been trusted in ${cwd} yet`, 409, { untrusted: cwd });
+    throw new DeskError(`claude has not been trusted in ${cwd} yet`, 409, { untrusted: cwd, notStarted: true });
   }
   throw new DeskError(said.trim().split(/\r?\n/).at(-1) || 'claude did not start', 502);
 }

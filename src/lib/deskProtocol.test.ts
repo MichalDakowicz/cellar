@@ -3,6 +3,14 @@ import { isDeskSeen, isStaleRequest, parseDeskStart, runTitle, sortRuns, STALE_R
 const NOW = Date.parse('2026-10-09T12:00:00.000Z');
 
 describe('parseDeskStart', () => {
+  it('preserves every task choice and rejects malformed attachments', () => {
+    const id = '00000000-0000-4000-8000-000000000001';
+    const body = { commandId: id, projectId: id, where: 'main', mode: 'ask', agent: 'codex', prompt: 'check', cwd: 'C:/project', entryIds: [id] };
+    expect(parseDeskStart(body)).toMatchObject({ ok: true, value: { ...body, entryId: id } });
+    for (const over of [{ commandId: 'bad' }, { projectId: null }, { mode: 'auto' }, { where: 'elsewhere' }, { entryIds: [id, id] }, { entryIds: ['bad'] }]) {
+      expect(parseDeskStart({ ...body, ...over })).toMatchObject({ ok: false });
+    }
+  });
   it('defaults the agent to claude and trims what it keeps', () => {
     expect(parseDeskStart({ prompt: '  pick up cellar entry 0afbf3fe ', cwd: ' C:\\ping\\cellar ' })).toEqual({
       ok: true,

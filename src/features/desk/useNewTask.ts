@@ -25,10 +25,8 @@ import { repoKey } from '@/lib/repoLink';
  * The new-task screen (`NewTask.dc.html`): what you say, the project it works
  * in, where, which agent and how much it may do, and the thoughts it picks up.
  *
- * Sends through the same start the desk already has. Two of the choices are
- * drawn ahead of the pc understanding them (docs/desk/TASKS.md): "new worktree"
- * waits for W5 and the mode for W8 — until then a run goes in the checkout, in
- * the agent's own auto mode, and the screen says so rather than pretending.
+ * Sends complete choices and all attachment IDs through the durable task protocol.
+ * The host refuses unsupported worktrees or modes before claiming or launching.
  */
 export function useNewTask(entryIds: string[], onSent: () => void) {
   const link = useDeskLink();
@@ -83,7 +81,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     onSent();
   });
 
-  const blocker = taskBlocker({
+  const blocker = starting.pending ? (starting.busy ? `checking ${link.name}…` : null) : taskBlocker({
     prompt,
     hasFolder: folder !== null,
     canStart: link.can.start,
@@ -92,6 +90,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   });
 
   const send = () => {
+    if (starting.pending) { starting.resume(); return; }
     if (blocker || !folder) return;
     const command = leadingCommand(text);
     if (command) {
@@ -102,7 +101,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
       jobs.start.mutate({ projectId: projectCommands?.id ?? folder.projectId, command }, { onSuccess: () => { say(`job started on ${link.name}`); onSent(); } });
       return;
     }
-    const built = starts.map((one) => deskStartFrom({ prompt: one.prompt, repoPath: folder.path, agent, entryId: one.entryId }));
+    const built = starts.map((one) => deskStartFrom({ prompt: one.prompt, repoPath: folder.path, agent, entryId: one.entryId,
+      projectId: folder.projectId, where, mode, entryIds: split === 'each' && one.entryId ? [one.entryId] : attached.map((entry) => entry.id) }));
     const ready = built.flatMap((one) => (one.ok ? [one.start] : []));
     if (ready.length === built.length) starting.begin(ready);
   };
@@ -131,13 +131,18 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     split: attached.length > 1 ? split : null,
     onSplit: setSplit,
     send,
-    sendLabel: starts.length > 1 ? `send ${starts.length} runs to ${link.name}` : `send to ${link.name}`,
+    sendLabel: starting.pending ? 'recover pending task' : starts.length > 1 ? `send ${starts.length} runs to ${link.name}` : `send to ${link.name}`,
     blocker,
     busy: starting.busy || jobs.start.isPending,
     error: starting.error ?? (jobs.start.error ? readError(jobs.start.error) : null),
     untrusted: starting.untrusted,
     trusting: starting.trusting,
     onTrust: starting.trustAndStart,
+    pendingHint: starting.pending ? (starting.failed ? 'PC confirmed this task did not start. Retry saved choices, or edit the unstarted remainder.' : 'Saved task awaiting confirmation. Recover uses its original choices.') : null,
+    onEditFailed: starting.failed && !starting.busy ? () => {
+      const remaining = starting.discardFailed();
+      if (remaining) setAttachedIds([...new Set(remaining.flatMap((task) => task.entryIds ?? []))]);
+    } : null,
   };
 }
 

@@ -61,7 +61,7 @@ export function useRunChat(id: string) {
   const canSaveCommand = !!saveText && !!projectCommands && !!link.calls && !jobs.save.isPending;
   const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id));
 
-  const lines = chat ? chat.lines : (log.data ?? []);
+  const lines = chat ? chat.lines : (link.calls && log.isSuccess && log.isFetchedAfterMount ? log.data : []);
   const asked: DeskApproval | null = chat?.approval ?? null;
   const waiting = (sample?.state ?? run?.state) === 'waiting';
   const state: DeskRunState = sample ? (asked && decision ? 'running' : sample.state) : (run?.state ?? 'unknown');
@@ -120,7 +120,7 @@ export function useRunChat(id: string) {
         } else if (canRunCommand) jobs.start.mutate({ projectId: projectId!, command: command! }, { onSuccess: () => { setDraft(''); say('job started on the pc'); } });
       },
       modelLabel: agentLabel(run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude')),
-      finished: state === 'done' || state === 'failed' || state === 'stopped',
+      finished: !canRunCommand && !canSaveCommand && (state === 'done' || state === 'failed' || state === 'stopped'),
       sampleModels: sample ? SAMPLE_COMPOSER_MODELS : undefined,
       keys,
     },

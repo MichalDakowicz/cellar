@@ -60,6 +60,8 @@ export default function NewTask() {
           {!!task.blocker && !task.busy && <Text className="font-sans text-center text-xs text-muted-foreground">{task.blocker}</Text>}
           {!!task.untrusted && <TrustAsk folder={task.untrusted} busy={task.trusting} onTrust={task.onTrust} />}
           {!!task.error && <Text className="font-sans text-sm text-destructive-foreground">{task.error}</Text>}
+          {!!task.pendingHint && <Text className="font-sans text-xs text-muted-foreground">{task.pendingHint}</Text>}
+          {!!task.onEditFailed && <Pressable accessibilityRole="button" onPress={task.onEditFailed} className="min-h-11 items-center justify-center"><Text className="font-sans text-sm text-foreground">edit unstarted tasks</Text></Pressable>}
         </View>
       }
     >
