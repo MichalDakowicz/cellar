@@ -32,6 +32,8 @@ export type KeySuggestion = {
   mono: boolean;
   /** A project: the list stays open for its entries after the `/`. */
   keepOpen: boolean;
+  /** The heading it sits under (`DeskChat.dc.html`); null for the "new …" row at the end. */
+  group: string | null;
 };
 
 const KEYS: readonly string[] = ['@', '$', '/'];
@@ -80,6 +82,7 @@ function dollar(query: string, sources: KeySources): KeySuggestion[] {
         detail: `${entry.kind} · ${entry.state}`,
         mono: true,
         keepOpen: false,
+        group: `entries in ${project.name}`,
       }));
     const fresh = keySlug(words, 12);
     if (!fresh) return found;
@@ -92,6 +95,7 @@ function dollar(query: string, sources: KeySources): KeySuggestion[] {
         detail: '',
         mono: false,
         keepOpen: false,
+        group: null,
       },
     ];
   }
@@ -99,7 +103,7 @@ function dollar(query: string, sources: KeySources): KeySuggestion[] {
   const q = query.toLowerCase();
   const commands = sources.commands
     .filter((command) => command.startsWith(q))
-    .map((command) => ({ id: `command:${command}`, insert: `$${command}`, label: `$${command}`, detail: 'command', mono: true, keepOpen: false }));
+    .map((command) => ({ id: `command:${command}`, insert: `$${command}`, label: `$${command}`, detail: 'command', mono: true, keepOpen: false, group: 'commands · also buttons' }));
   const projects = sources.projects
     .filter((project) => keySlug(project.name).includes(q))
     .map((project) => ({
@@ -109,6 +113,7 @@ function dollar(query: string, sources: KeySources): KeySuggestion[] {
       detail: `${project.name} · its entries after /`,
       mono: true,
       keepOpen: true,
+      group: 'projects · pick one, then / for its entries',
     }));
   return [...commands, ...projects].slice(0, LIMIT);
 }
@@ -124,9 +129,10 @@ function at(query: string, sources: KeySources): KeySuggestion[] {
       id: `file:${file.path}`,
       insert: `@${file.path}${line}`,
       label: `@${file.path}${line}`,
-      detail: file.changed ? 'changed in this run' : 'file',
+      detail: file.changed ? 'changed' : '',
       mono: true,
       keepOpen: false,
+      group: file.changed ? 'changed in this run' : 'in the worktree',
     }));
 }
 
@@ -136,7 +142,7 @@ function slash(query: string, sources: KeySources): KeySuggestion[] {
     .filter((skill) => skill.name.includes(q))
     .sort((a, b) => Number(b.name.startsWith(q)) - Number(a.name.startsWith(q)))
     .slice(0, LIMIT)
-    .map((skill) => ({ id: `skill:${skill.name}`, insert: `/${skill.name}`, label: `/${skill.name}`, detail: skill.detail, mono: true, keepOpen: false }));
+    .map((skill) => ({ id: `skill:${skill.name}`, insert: `/${skill.name}`, label: `/${skill.name}`, detail: '', mono: true, keepOpen: false, group: skill.detail }));
 }
 
 export function keySuggestions(token: KeyToken, sources: KeySources): KeySuggestion[] {

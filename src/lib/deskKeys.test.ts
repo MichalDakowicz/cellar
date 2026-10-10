@@ -64,6 +64,14 @@ describe('keySuggestions', () => {
     expect(labels('$shop')).toEqual(['$web-shop/']);
   });
 
+  it('heads commands, projects, entries, files and skills by group', () => {
+    const groups = (text: string) => keySuggestions(tokenAt(text)!, sources).map((s) => s.group);
+    expect(groups('$')).toEqual([...Array(4).fill('commands · also buttons'), 'projects · pick one, then / for its entries', 'projects · pick one, then / for its entries']);
+    expect(groups('$cellar/sticky')).toEqual(['entries in Cellar', null]);
+    expect(groups('@src')).toEqual(['changed in this run', 'in the worktree']);
+    expect(groups('/')).toEqual(['built in', 'yours']);
+  });
+
   it('keeps the list open after picking a project', () => {
     expect(keySuggestions(tokenAt('$cel')!, sources)[0].keepOpen).toBe(true);
   });

@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
 import type { DeskKey, KeySuggestion } from '@/lib/deskKeys';
+import { COLORS } from '@/theme/colors';
 
 export type KeyListView = {
   key: DeskKey;
@@ -25,25 +26,32 @@ export function KeyList({ list }: { list: KeyListView }) {
         <Text className="px-2.5 py-3 text-xs text-muted-foreground">{list.empty}</Text>
       )}
       {list.suggestions.map((suggestion, index) => (
-        <Pressable
-          key={suggestion.id}
-          accessibilityRole="button"
-          accessibilityLabel={suggestion.label}
-          onPress={() => list.onPick(suggestion.id)}
-          className={`min-h-11 flex-row items-center gap-2.5 rounded-[10px] px-2.5 active:opacity-70 ${index === 0 ? 'bg-secondary' : ''}`}
-        >
-          <Text
-            className={`min-w-0 flex-1 text-sm ${suggestion.mono ? 'font-mono text-foreground' : 'text-muted-foreground'}`}
-            numberOfLines={1}
-          >
-            {suggestion.label}
-          </Text>
-          {!!suggestion.detail && (
-            <Text className="max-w-[45%] text-xs text-muted-foreground" numberOfLines={1}>
-              {suggestion.detail}
+        <View key={suggestion.id}>
+          {suggestion.group && suggestion.group !== list.suggestions[index - 1]?.group && (
+            <Text className="px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              {suggestion.group}
             </Text>
           )}
-        </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={suggestion.label}
+            onPress={() => list.onPick(suggestion.id)}
+            className={`min-h-11 flex-row items-center gap-2.5 rounded-[10px] px-2.5 active:opacity-70 ${index === 0 ? 'bg-secondary' : ''}`}
+          >
+            <Text
+              className={`min-w-0 flex-1 text-sm ${suggestion.mono ? 'font-mono text-foreground' : ''}`}
+              style={suggestion.mono ? undefined : { color: COLORS.foregroundSoft }}
+              numberOfLines={1}
+            >
+              {suggestion.label}
+            </Text>
+            {!!suggestion.detail && (
+              <Text className="max-w-[45%] text-xs text-muted-foreground" numberOfLines={1}>
+                {suggestion.detail}
+              </Text>
+            )}
+          </Pressable>
+        </View>
       ))}
     </View>
   );
