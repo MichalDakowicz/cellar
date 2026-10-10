@@ -20,7 +20,7 @@ async function npmCli(): Promise<string> {
   throw new DeskError('npm CLI is not installed on this pc', 409);
 }
 
-export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, output: number): Promise<ChildProcess> {
+export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, output: (chunk: Buffer) => void): Promise<ChildProcess> {
   let executable: string;
   let args: string[];
   let cwd = plan.cwd;
@@ -42,9 +42,13 @@ export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, ou
       args = [step.task, '--console=plain'];
     }
   }
-  const child = spawn(executable, args, { cwd, detached: true, windowsHide: true,
+  // DETACHED_PROCESS makes Windows Java drop inherited output handles and
+  // silently exit. POSIX still needs a process group for stopping the tree.
+  const child = spawn(executable, args, { cwd, detached: process.platform !== 'win32', windowsHide: true,
     windowsVerbatimArguments: step.runner === 'gradle' && process.platform === 'win32',
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: ['ignore', output, output] });
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  child.stdout!.on('data', output);
+  child.stderr!.on('data', output);
   await new Promise<void>((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); });
   child.unref();
   return child;
@@ -54,7 +58,7 @@ export async function stopJobProcess(child: ChildProcess): Promise<void> {
   if (!child.pid || child.exitCode !== null) return;
   const exited = new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => reject(new DeskError('stop requested; process has not confirmed exit yet', 409)), 5000);
-    child.once('exit', () => { clearTimeout(timer); resolve(); });
+    child.once('close', () => { clearTimeout(timer); resolve(); });
   });
   const killed = process.platform === 'win32'
     ? exec('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true })

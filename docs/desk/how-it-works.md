@@ -99,13 +99,12 @@ Readable test reports parse Jest, Vitest or Node TAP totals from the visible log
 They describe the latest reported suite, never an inferred result for the whole
 chain. Unsupported, incomplete and truncated output remains available as raw text.
 
-Verified locally: 846 app tests, types, lint, 31 desktop tests, desktop types/build
-and web export. Phone started the real Cellar `$test` job and displayed its confirmed
-841-test result, duration and selectable raw output. Chat saved a project override;
-settings loaded that saved override. A phone `$apk` attempt exposed Windows quoting;
-the app displayed failed, the launcher was fixed and a wrapper-with-spaces regression
-passes. The repeated phone APK build remains under verification; W2 stays in progress.
-QA uses a separate host and account fixture, actual scripts, and no production DB writes.
+Verified: 852 app tests, types/lint/web export and 37 desktop tests/types/build.
+Phone starts actual Cellar `$test` on the updated, signed-in Michu host: 852 passed,
+0 failed, 0 skipped, duration and selectable raw output. Chat saves a project override;
+settings loads it. Real phone `$apk` shows Gradle BUILD SUCCESSFUL and observed exit 0.
+Windows wrapper quoting and Java detached-process output defects have regression coverage.
+Early isolated QA used an account fixture; final jobs use the real account and project.
 
 ## W3 — exact choices and note
 

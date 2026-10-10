@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -45,10 +45,20 @@ test('real scripts become jobs: confirmed exits, failed chains, logs, reload and
       const apk = await jobs.start({ cwd: project, gradle, steps: [{ runner: 'gradle', task: 'assembleRelease' }] }, 'apk');
       assert.equal((await until(apk.id)).state, 'done');
       assert.match((await jobs.log(apk.id)).map((line) => line.text).join('\n'), /wrapper task assembleRelease/);
+      if (process.env.JAVA_HOME && existsSync(join(process.env.JAVA_HOME, 'bin', 'java.exe'))) {
+        writeFileSync(join(gradle, 'gradlew.bat'), '@echo off\r\n"%JAVA_HOME%\\bin\\java.exe" -version\r\nexit /b %errorlevel%\r\n');
+        const java = await jobs.start({ cwd: project, gradle, steps: [{ runner: 'gradle', task: 'help' }] }, 'java-output');
+        assert.equal((await until(java.id)).state, 'done');
+        assert.match((await jobs.log(java.id)).map((line) => line.text).join('\n'), /(?:java|openjdk) version/);
+      }
     }
     const slow = await jobs.start(await commands.plan('project', 'slow'), 'slow');
     const reloaded = new Jobs(dir, () => owner);
     assert.equal(reloaded.list().find((row) => row.id === slow.id)?.state, 'unknown');
+    // Wait for the nested npm script to exist before exercising tree stop.
+    for (let at = 0; at < 100 && !(await jobs.log(slow.id)).some((line) => line.text === 'waiting'); at++)
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.ok((await jobs.log(slow.id)).some((line) => line.text === 'waiting'));
     await jobs.stop(slow.id);
     assert.equal((await until(slow.id)).state, 'stopped');
     owner = 'other';

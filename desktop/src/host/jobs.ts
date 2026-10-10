@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { DeskLogLine, DeskRun } from '@/lib/deskProtocol';
@@ -57,9 +57,8 @@ export class Jobs {
   private async launch(job: Job, plan: CommandPlan, at: number): Promise<ChildProcess> {
     const step = plan.steps[at];
     appendFileSync(job.log, `\n$ ${step.runner} ${step.task}\n`);
-    const out = openSync(job.log, 'a');
     try {
-      const child = await launchJobStep(plan, step, out);
+      const child = await launchJobStep(plan, step, (chunk) => appendFileSync(job.log, chunk));
       this.active.set(job.run.id, { child, stopping: false });
       return child;
     } catch (error) {
@@ -67,11 +66,11 @@ export class Jobs {
       appendFileSync(job.log, `could not start: ${String(error)}\n`);
       this.save();
       throw error;
-    } finally { closeSync(out); }
+    }
   }
 
   private async follow(job: Job, plan: CommandPlan, at: number, child: ChildProcess): Promise<void> {
-    const code = await new Promise<number | null>((resolve) => child.once('exit', resolve));
+    const code = await new Promise<number | null>((resolve) => child.once('close', resolve));
     const stopping = this.active.get(job.run.id)?.stopping;
     this.active.delete(job.run.id);
     appendFileSync(job.log, `\nexit ${code ?? 'signal'}\n`);

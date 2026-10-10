@@ -280,11 +280,16 @@ export pass. Release APK installed and launched; phone checked confirmed counts,
 read failure, retry, disconnect and reconnect against a separate read-only host. Original
 pairing restored. See `how-it-works.md` for flow map, test boundaries and next task W2.
 
-### W2 · `$` commands per project `[~]`
+### W2 · `$` commands per project `[x]`
 
 The host reads each project's `package.json` scripts (and gradle tasks for `$apk`) into commands;
 tiles and `$` run them as **jobs**, not agent turns, streamed back like any run. Per-project
 overrides and chains saved from a chat live in settings.
+
+2026-10-10: real phone `$test` on Michu displays 852 passed, duration and raw output.
+Phone `$apk` displays actual Gradle output, BUILD SUCCESSFUL and exit 0. Fixed Windows
+wrapper quoting and Java's detached-process output failure; real Java regression passes.
+Chains, stopped/failed/unknown jobs, persistence and account scope verified in host tests.
 
 ### W3 · questions carry several picks and a note `[x]`
 
