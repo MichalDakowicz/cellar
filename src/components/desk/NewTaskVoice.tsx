@@ -1,39 +1,36 @@
-import { Mic } from 'lucide-react-native';
-import { Text, TextInput, View } from 'react-native';
+import { Keyboard, Mic, RotateCcw } from 'lucide-react-native';
+import { useRef, type ReactNode } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { COLORS } from '@/theme/colors';
 
 import { KeyList } from './KeyList';
-import { KeyPlan } from './KeyPlan';
-import { KeyStrip } from './KeyStrip';
 import type { ComposerKeys } from './RunComposer';
 
+// The waveform's resting shape (`NewTask.dc.html`); it moves once the mic listens (W12).
+const BARS = [8, 14, 22, 12, 30, 18, 26, 34, 20, 10, 24, 32, 16, 28, 36, 22, 12, 26, 18, 30, 14, 24, 8, 20, 28, 16, 10, 22, 14, 8, 12, 6];
+
 /**
- * The top of the new-task screen (`NewTask.dc.html`): what you want, in your
- * words, under the mic.
- *
- * The mic is drawn and not yet live — speech arrives with docs/desk/TASKS.md
- * W12 — so it is shown quiet with a line saying so, and the field is the
- * working path. The field is the transcript either way: whatever was said
- * stays editable before it is sent. Colour codes in it reach the agent as
- * plain text. The keys sit under the field: the list for the word being typed,
- * the `@ $ /` strip, and what each token will do.
+ * The top of the new-task sheet (`NewTask.dc.html`): the waveform, what you
+ * said as the transcript — editable, centred, a colour code painted as it is
+ * typed — and type instead · the mic · clear. Speech arrives with W12, so the
+ * mic says so and typing is the working path; a key word opens its list.
  */
 export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (text: string) => void; keys: ComposerKeys }) {
+  const field = useRef<TextInput>(null);
+
   return (
     <View className="items-center gap-3.5 pb-2 pt-1">
-      <View
-        accessibilityRole="image"
-        accessibilityLabel="speaking a task is coming — type it for now"
-        className="h-[76px] w-[76px] items-center justify-center rounded-full bg-secondary"
-      >
-        <Mic size={28} color={COLORS.muted} strokeWidth={2} />
+      <View accessibilityElementsHidden className="h-9 flex-row items-center gap-[3px]">
+        {BARS.map((height, index) => (
+          <View key={index} className="w-[3px] rounded-full bg-white/30" style={{ height }} />
+        ))}
       </View>
-      <Text className="text-xs text-muted-foreground">speaking it comes soon — type it for now</Text>
       <TextInput
-        className="min-h-[96px] w-full rounded-xl bg-secondary px-4 py-3 text-base text-foreground"
-        style={[{ textAlignVertical: 'top', lineHeight: undefined }, ANDROID_METRICS]}
+        ref={field}
+        className="min-h-[72px] w-full max-w-[330px] text-center text-base text-foreground"
+        style={[{ textAlignVertical: 'center', lineHeight: undefined }, ANDROID_METRICS]}
         placeholder="what should it do?"
         placeholderTextColor={COLORS.muted}
         value={text}
@@ -43,11 +40,40 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
         autoFocus
         accessibilityLabel="what the agent should do"
       />
-      <View className="w-full gap-2.5">
-        {keys.list && <KeyList list={keys.list} />}
-        <KeyStrip active={keys.list?.key ?? null} onKey={keys.onKey} />
-        <KeyPlan lines={keys.plan} onCopy={keys.onCopy} onNudge={keys.onNudge} />
+      {keys.list && (
+        <View className="w-full">
+          <KeyList list={keys.list} />
+        </View>
+      )}
+      <View className="flex-row items-center gap-5">
+        <Round label="type instead" onPress={() => field.current?.focus()}>
+          <Keyboard size={20} color={COLORS.foreground} strokeWidth={2} />
+        </Round>
+        <View
+          accessibilityRole="image"
+          accessibilityLabel="speaking a task comes soon — type it for now"
+          className="h-[76px] w-[76px] items-center justify-center rounded-full bg-primary"
+        >
+          <Mic size={28} color={COLORS.accentInk} strokeWidth={2} />
+        </View>
+        <Round label="clear and start over" onPress={() => onText('')}>
+          <RotateCcw size={20} color={COLORS.foreground} strokeWidth={2} />
+        </Round>
       </View>
+      <Text className="text-xs text-muted-foreground">speaking it comes soon — type it for now</Text>
     </View>
+  );
+}
+
+function Round({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      className="h-12 w-12 items-center justify-center rounded-full border border-border active:opacity-70"
+    >
+      {children}
+    </Pressable>
   );
 }

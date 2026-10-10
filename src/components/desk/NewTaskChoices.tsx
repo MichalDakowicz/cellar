@@ -75,9 +75,6 @@ export function NewTaskChoices(props: {
           ))}
         </View>
         <Text className="text-xs text-muted-foreground">{props.modeHint}</Text>
-        <Text className="text-xs text-muted-foreground">
-          for now the pc still runs every agent in its own auto mode — this choice reaches it soon.
-        </Text>
       </View>
     </View>
   );
@@ -104,8 +101,12 @@ function Choice({
       accessibilityLabel={sub ? `${label}, ${sub}` : label}
       disabled={disabled}
       onPress={onPress}
-      className={`min-h-11 flex-1 justify-center rounded-xl border-2 px-3 py-2 active:opacity-80 ${on ? 'border-primary' : 'border-border'}`}
-      style={[on ? { backgroundColor: COLORS.accentSoft } : null, disabled ? { opacity: 0.5 } : null]}
+      className="min-h-11 flex-1 justify-center rounded-xl border-2 px-3 py-2 active:opacity-80"
+      style={[
+        { borderColor: on ? COLORS.accent : COLORS.outline },
+        on ? { backgroundColor: COLORS.accentSoft } : null,
+        disabled ? { opacity: 0.5 } : null,
+      ]}
     >
       <Text className={`text-sm font-semibold text-foreground ${sub ? '' : 'text-center'}`}>{label}</Text>
       {!!sub && (

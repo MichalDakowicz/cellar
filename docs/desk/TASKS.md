@@ -216,6 +216,12 @@ Main, NewTask (a sheet over the desk: waveform, 76px primary mic between "type i
 primary mic), Preview, Screen, PhoneNotify (the shade itself), PhoneQuestion (the card pinned in
 the run in place of the composer; uppercase letter tiles, recommended pill, "let it decide"),
 PhoneShare (a sheet), PhoneRace, PhoneNight — each to its artboard.
+- [x] Main — every run on the row ground, waiting raised; mono command/path in the detail
+  (`detailParts`), coloured diff in the meta (`metaParts`); sliders glyph; no stop on the row (it is
+  on the run), no status line under the host card.
+- [x] NewTask — `components/desk/DeskSheet` (backdrop, grabber, scrolling body, pinned footer) as a
+  `transparentModal` route; waveform, centred transcript, type instead · mic · clear; outlined
+  tiles (`COLORS.outline`); "pings your phone" mode copy; the attached thought's kind tile.
 
 ### M5 · desktop boards `[ ]`
 

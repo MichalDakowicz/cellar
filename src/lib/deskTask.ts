@@ -10,9 +10,9 @@
 export type DeskMode = 'ask' | 'edits' | 'full';
 
 export const DESK_MODES: { id: DeskMode; label: string; hint: string }[] = [
-  { id: 'ask', label: 'ask first', hint: 'every command and file edit asks you first' },
-  { id: 'edits', label: 'edits ok', hint: 'edits go ahead; commands and installs ask you first' },
-  { id: 'full', label: 'full access', hint: 'nothing asks you — it runs to the end in its own worktree' },
+  { id: 'ask', label: 'ask first', hint: 'every command and file edit pings your phone first' },
+  { id: 'edits', label: 'edits ok', hint: 'edits go ahead; commands and installs ping your phone first' },
+  { id: 'full', label: 'full access', hint: 'nothing pings you — it runs to the end in its own worktree' },
 ];
 
 export const DEFAULT_MODE: DeskMode = 'edits';

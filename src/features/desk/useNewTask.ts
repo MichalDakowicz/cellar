@@ -110,7 +110,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     mode,
     onMode: setMode,
     modeHint: modeHint(mode),
-    attached: attached.map((thought) => ({ id: thought.id, text: thought.text, kind: kindMeta(thought.kind).label })),
+    attached: attached.map((thought) => ({ id: thought.id, text: thought.text, kind: thought.kind, kindLabel: kindMeta(thought.kind).label })),
     onDetach: (id: string) => setAttachedIds((now) => now.filter((candidate) => candidate !== id)),
     /** Only asked when there is more than one thought to split. */
     split: attached.length > 1 ? split : null,

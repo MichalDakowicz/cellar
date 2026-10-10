@@ -84,6 +84,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
  * The shell, top to bottom. There is no header anywhere in this app — the nav
  * islands are the only chrome, and every screen starts with its own ScreenTop.
  */
+const SHEET = { presentation: 'transparentModal', animation: 'slide_from_bottom' } as const;
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -98,7 +100,12 @@ export default function RootLayout() {
                   <DeskSessionSync />
                   <CellarDisplay>
                     <AppShell>
-                      <Stack screenOptions={{ headerShown: false }} />
+                      <Stack screenOptions={{ headerShown: false }}>
+                        {/* Sheets over what you were looking at (docs/desk/canvas
+                            `NewTask`, `PhoneShare`), not screens of their own. */}
+                        <Stack.Screen name="desk/new" options={SHEET} />
+                        <Stack.Screen name="desk/share" options={SHEET} />
+                      </Stack>
                     </AppShell>
                   </CellarDisplay>
                 </AuthGate>
