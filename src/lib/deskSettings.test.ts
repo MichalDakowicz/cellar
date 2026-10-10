@@ -1,4 +1,4 @@
-import { EXTRA_KEYS, PING_KINDS, recipeLine, startingAgent } from './deskSettings';
+import { defaultRecipe, EXTRA_KEYS, PING_KINDS, recipeLine, startingAgent } from './deskSettings';
 
 describe('recipeLine', () => {
   it('names the agent and the mode in words', () => {
@@ -28,5 +28,14 @@ describe('tables', () => {
 
   it('does not ping every turn out of the box', () => {
     expect(PING_KINDS.find((kind) => kind.label === 'every turn')?.on).toBe(false);
+  });
+});
+
+describe('defaultRecipe', () => {
+  it('is your defaults, the pick-up line, and nothing after', () => {
+    const recipe = defaultRecipe('codex', 'ask');
+    expect(recipeLine(recipe)).toBe('codex · ask first');
+    expect(recipe.prompt).toContain('{entry}');
+    expect(recipe.after).toEqual([]);
   });
 });

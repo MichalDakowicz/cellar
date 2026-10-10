@@ -1,6 +1,10 @@
 import { Text, View } from 'react-native';
 
+import { runChip } from '@/lib/deskView';
 import { COLORS } from '@/theme/colors';
+
+/** A window past 80% turns amber — the warning, not yet the stop. */
+const WARN = runChip('running').color;
 
 /**
  * Settings › desk › usage and accounts (`DeskUsage.dc.html`): each agent's
@@ -22,26 +26,30 @@ export function DeskUsageBlock({
 
   return (
     <View className="gap-5">
-      {agents.map((row) => (
-        <View key={row.agent} className="gap-2.5">
-          <Text className="text-sm font-semibold text-foreground">{row.agent}</Text>
-          {row.windows.map((window) => (
-            <View key={window.label} className="gap-1">
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-muted-foreground">{window.label}</Text>
-                <Text className="text-xs text-muted-foreground">{`${window.used}% · ${window.resets}`}</Text>
+      <View className="flex-row flex-wrap gap-6">
+        {agents.map((row) => (
+          <View key={row.agent} className="min-w-[240px] flex-1 gap-2.5">
+            <Text className="text-sm font-semibold text-foreground">
+              {row.agent} <Text className="font-normal text-muted-foreground">· your plan</Text>
+            </Text>
+            {row.windows.map((window) => (
+              <View key={window.label} className="gap-1">
+                <View className="flex-row justify-between">
+                  <Text className="text-sm text-foreground">{window.label}</Text>
+                  <Text className="text-sm text-muted-foreground">{`${window.used}% · ${window.resets}`}</Text>
+                </View>
+                <View className="h-2 overflow-hidden rounded-full bg-secondary">
+                  <View
+                    className="h-full rounded-full"
+                    style={{ width: `${window.used}%`, backgroundColor: window.used >= 80 ? WARN : COLORS.foreground, opacity: window.used >= 80 ? 1 : 0.8 }}
+                  />
+                </View>
               </View>
-              <View className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                <View
-                  className="h-full rounded-full"
-                  style={{ width: `${window.used}%`, backgroundColor: window.used >= 80 ? COLORS.danger : COLORS.accent }}
-                />
-              </View>
-            </View>
-          ))}
-        </View>
-      ))}
-      <Text className="text-xs text-muted-foreground">sample numbers — the sample desk is on.</Text>
+            ))}
+          </View>
+        ))}
+      </View>
+      <Text className="text-xs text-muted-foreground">numbers come from each agent where it reports them; anything marked ≈ is cellar’s own count · sample numbers, the sample desk is on</Text>
     </View>
   );
 }

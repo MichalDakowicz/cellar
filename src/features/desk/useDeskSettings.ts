@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { deskBridge } from '@/features/desk/bridge';
-import { recipeLine } from '@/lib/deskSettings';
+import { defaultRecipe, recipeLine } from '@/lib/deskSettings';
 import { SAMPLE_RECIPES, SAMPLE_RULES, SAMPLE_USAGE } from '@/lib/deskSample';
 import { offeredAgents } from '@/lib/deskStart';
 import { hostLine } from '@/lib/deskView';
@@ -32,7 +32,9 @@ export function useDeskSettings() {
     ? link.info.agents.filter((candidate) => candidate.installed).map((candidate) => candidate.id)
     : (link.desk?.agents ?? null);
   const host = hostLine(link.via, link.checking);
-  const recipe = prefs.sample ? (SAMPLE_RECIPES[kind] ?? null) : null;
+  // A kind's recipe: the sample desk's, or what actually happens today — your defaults.
+  const fallback = defaultRecipe(prefs.defaultAgent, prefs.defaultMode);
+  const recipeFor = (id: string) => (prefs.sample ? (SAMPLE_RECIPES[id] ?? fallback) : fallback);
 
   return {
     defaults: {
@@ -60,11 +62,12 @@ export function useDeskSettings() {
       kinds: KINDS.map((option) => ({
         id: option.value,
         label: option.label,
-        line: prefs.sample && SAMPLE_RECIPES[option.value] ? recipeLine(SAMPLE_RECIPES[option.value]) : 'your defaults',
+        line: recipeLine(recipeFor(option.value)),
       })),
       kind,
       onKind: setKind,
-      recipe,
+      recipe: recipeFor(kind),
+      custom: prefs.sample,
       rules: prefs.sample ? SAMPLE_RULES : [],
     },
     host: { name: link.name, online: host.online, line: host.line },

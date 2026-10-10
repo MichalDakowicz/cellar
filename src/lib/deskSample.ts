@@ -1,6 +1,7 @@
 import type { DeskApproval } from './deskChat';
 import type { PreviewCheck } from './deskPreview';
 import type { DeskLogLine } from './deskProtocol';
+import type { DeskRecipe } from './deskSettings';
 import type { DeskRunCard } from './deskView';
 
 /**
@@ -252,17 +253,14 @@ export const SAMPLE_USAGE: { agent: string; windows: { label: string; used: numb
 ];
 
 /** A recipe per entry kind on the sample desk (`DeskRecipes.dc.html`), until W15. */
-export const SAMPLE_RECIPES: Record<
-  string,
-  { agent: 'claude' | 'codex' | 'default'; mode: 'ask' | 'edits' | 'full'; prompt: string; after: string[]; then: string }
-> = {
-  glitch: { agent: 'claude', mode: 'edits', prompt: 'reproduce {entry} first. fix it with the smallest change and add a test that fails before the fix.', after: ['$try-on-phone'], then: 'leave the entry in doing until you look' },
-  removal: { agent: 'codex', mode: 'edits', prompt: 'remove {entry} and everything that only it used. list what you deleted.', after: ['$rebuild'], then: 'move the entry to done' },
-  idea: { agent: 'claude', mode: 'ask', prompt: 'write a short plan for {entry} in {project}. no code yet — ask me before building.', after: [], then: 'append the plan to the entry' },
-  question: { agent: 'codex', mode: 'ask', prompt: 'answer {entry} from the code in {project}. no edits. quote the files you used.', after: [], then: 'append the answer, move to done' },
-  research: { agent: 'default', mode: 'ask', prompt: 'read the links in {lines} and summarise what matters for {project} in five lines.', after: [], then: 'append the summary to the entry' },
-  copy: { agent: 'codex', mode: 'edits', prompt: 'rewrite the copy for {entry}. keep the meaning, follow the house style.', after: ['$preview'], then: 'leave in doing until you look' },
-  design: { agent: 'claude', mode: 'edits', prompt: 'design and build {entry}. reuse the existing components in {files}.', after: ['$preview', '$try-on-phone'], then: 'leave in doing until you look' },
+export const SAMPLE_RECIPES: Record<string, DeskRecipe> = {
+  glitch: { agent: 'claude', mode: 'edits', skills: ['/test-driven'], skillsNote: 'your skill', prompt: 'reproduce {entry} first. fix it with the smallest change and add a test that fails before the fix.\nwhat we know so far:\n{lines}', after: ['$try-on-phone'], afterNote: 'when checks pass', then: 'leave the entry in doing until you look' },
+  removal: { agent: 'codex', mode: 'edits', skills: [], skillsNote: 'none', prompt: 'remove {entry} and everything that only it used. list what you deleted.', after: ['$rebuild'], afterNote: '', then: 'move the entry to done' },
+  idea: { agent: 'claude', mode: 'ask', skills: [], skillsNote: 'none', prompt: 'write a short plan for {entry} in {project}. no code yet — ask me before building.', after: [], afterNote: 'nothing', then: 'append the plan to the entry' },
+  question: { agent: 'codex', mode: 'ask', skills: [], skillsNote: 'none', prompt: 'answer {entry} from the code in {project}. no edits. quote the files you used.', after: [], afterNote: 'nothing', then: 'append the answer, move to done' },
+  research: { agent: 'default', mode: 'ask', skills: [], skillsNote: 'none', prompt: 'read the links in {lines} and summarise what matters for {project} in five lines.', after: [], afterNote: 'nothing', then: 'append the summary to the entry' },
+  copy: { agent: 'codex', mode: 'edits', skills: ['/house-style'], skillsNote: 'your skill', prompt: 'rewrite the copy for {entry}. keep the meaning, follow the house style.', after: ['$preview'], afterNote: '', then: 'leave in doing until you look' },
+  design: { agent: 'claude', mode: 'edits', skills: ['/frontend-design'], skillsNote: 'your skill', prompt: 'design and build {entry}. reuse the existing components in {files}.', after: ['$preview', '$try-on-phone'], afterNote: '', then: 'leave in doing until you look' },
 };
 
 /** Rules on the sample desk: what every agent has to follow, and where. */
@@ -270,6 +268,7 @@ export const SAMPLE_RULES: { text: string; scope: string }[] = [
   { text: 'solid colours only, no gradients', scope: 'everywhere' },
   { text: 'never add a dependency without asking', scope: 'everywhere' },
   { text: 'run the tests before saying it is done', scope: 'shelf · apps' },
+  { text: 'all ui copy is lowercase', scope: 'project · app' },
 ];
 
 /** Notes with no source yet on the sample desk (`PhoneNotify.dc.html`): a filed crash (W17), a plan out (W16). */
@@ -366,4 +365,42 @@ export const SAMPLE_PHONE = {
     { at: '18:41:06.004', level: 'E', text: 'toast: undo pressed after unmount' },
   ],
   toggles: ['dark theme', 'show taps', 'layout bounds', 'stay awake while charging'],
+};
+
+/** The rest of usage and accounts on the sample desk (`DeskUsage.dc.html`), until W16. */
+export const SAMPLE_USAGE_MORE = {
+  meter: 'ctx 59% · 5h 42% · week 81%',
+  chat: { title: 'make the cart work on small phones · claude', used: 118, of: 200 },
+  accounts: [
+    {
+      agent: 'claude',
+      rows: [
+        { label: 'personal', meta: 'subscription · signed in on this pc', usage: '5h 42% · week 81%', active: true },
+        { label: 'work', meta: 'team seat · only for projects on the work shelf', usage: '5h 3% · week 22%', active: false },
+        { label: 'api key', meta: 'pay as you go · fallback only', usage: 'not used this month', active: false },
+      ],
+    },
+    {
+      agent: 'codex',
+      rows: [
+        { label: 'personal', meta: 'subscription · signed in on this pc', usage: '5h 12% · week 28%', active: true },
+        { label: 'api key', meta: 'pay as you go · fallback only', usage: 'not used this month', active: false },
+      ],
+    },
+  ],
+  days: [
+    { day: 'mon', share: 0.4 },
+    { day: 'tue', share: 0.65 },
+    { day: 'wed', share: 0.3 },
+    { day: 'thu', share: 0.85 },
+    { day: 'fri', share: 0.55 },
+    { day: 'sat', share: 0.15 },
+    { day: 'sun', share: 0.1 },
+  ],
+  spent: [
+    { title: 'make the cart work on small phones', agent: 'claude', tokens: '118k' },
+    { title: 'race · cart drawer (both runs)', agent: '2 agents', tokens: '90k' },
+    { title: 'night shift · 4 runs', agent: 'mixed', tokens: '≈ 76k' },
+    { title: 'update dependencies', agent: 'codex', tokens: '31k' },
+  ],
 };

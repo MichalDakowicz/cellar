@@ -10,11 +10,11 @@ import { DESK_MODES, type DeskMode } from './deskTask';
  */
 
 /** Your own keys (docs/desk/keys.md): ideas to start from, with their default. */
-export const EXTRA_KEYS: { key: string; name: string; example: string; on: boolean }[] = [
-  { key: '!', name: 'snippets', example: '!review-tone', on: true },
-  { key: '~', name: 'past runs', example: '~desk-tab', on: true },
-  { key: '^', name: 'git', example: '^wt/desk-tab', on: false },
-  { key: '%', name: 'links', example: '%firebase', on: false },
+export const EXTRA_KEYS: { key: string; name: string; searches: string; example: string; on: boolean }[] = [
+  { key: '!', name: 'snippets', searches: 'saved prompts from a notes folder', example: '!review-tone', on: true },
+  { key: '~', name: 'past runs', searches: 'pull another run’s plan and diff in as context', example: '~desk-tab', on: true },
+  { key: '^', name: 'git', searches: 'branches, worktrees, commits', example: '^wt/desk-tab', on: false },
+  { key: '%', name: 'links', searches: 'bookmarks: consoles, docs, dashboards', example: '%firebase', on: false },
 ];
 
 /** Where pings go, top to bottom; the first rule that fits wins (`DeskHosts.dc.html`). */
@@ -48,8 +48,51 @@ export const NIGHT_SHIFT: { label: string; value: string; tokens?: string[] }[] 
   { label: 'digest', value: '07:30, to the phone' },
 ];
 
+/** What an agent does with one kind of thought (`DeskRecipes.dc.html`). */
+export type DeskRecipe = {
+  agent: DeskAgent | 'default';
+  mode: DeskMode;
+  /** `/` skills it loads, and the word beside them ("your skill", "none"). */
+  skills: string[];
+  skillsNote: string;
+  /** The template; `{entry}` `{lines}` `{project}` `{files}` are filled in. */
+  prompt: string;
+  /** `$` commands after it, and when ("when checks pass", "nothing"). */
+  after: string[];
+  afterNote: string;
+  then: string;
+};
+
+/**
+ * What every kind does until it has a recipe of its own (W15): your default
+ * agent and mode, the line that picks the thought up, nothing after.
+ */
+export function defaultRecipe(agent: DeskAgent, mode: DeskMode): DeskRecipe {
+  return {
+    agent,
+    mode,
+    skills: [],
+    skillsNote: 'none',
+    prompt: 'pick up cellar entry {entry} in {project}',
+    after: [],
+    afterNote: 'nothing',
+    then: 'the agent claims it, moves it to doing and writes what it did under it',
+  };
+}
+
+/** When a plan runs out mid-run (`DeskUsage.dc.html`); "ask me" is the default. */
+export const PLAN_OUT_POLICIES = ['ask me', 'next account', 'use the api key', 'hand to the other agent', 'wait for the reset'];
+
+/** Usage limits and whether each is on out of the box. */
+export const USAGE_LIMITS: { label: string; sub: string; on: boolean }[] = [
+  { label: 'hold new runs at 90% of a 5-hour window', sub: 'running ones finish; new ones wait for the reset', on: true },
+  { label: 'keep 20% of the week for daytime', sub: 'night shift and group runs stop before they eat into it', on: true },
+  { label: 'ping my phone at 80%', sub: 'once per window, not per run', on: true },
+  { label: 'show the meter in chat and on the desk tab', sub: 'context, 5-hour and week in one small pill', on: true },
+];
+
 /** A recipe's one-line summary: "claude · edits ok", or "project default · ask first". */
-export function recipeLine(recipe: { agent: DeskAgent | 'default'; mode: DeskMode }): string {
+export function recipeLine(recipe: Pick<DeskRecipe, 'agent' | 'mode'>): string {
   const agent = recipe.agent === 'default' ? 'project default' : recipe.agent;
   const mode = DESK_MODES.find((candidate) => candidate.id === recipe.mode)?.label ?? recipe.mode;
   return `${agent} · ${mode}`;
