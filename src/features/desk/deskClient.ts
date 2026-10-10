@@ -4,6 +4,7 @@ import type { DeskPair } from '@/lib/deskPair';
 import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { hex, signDeskRequest, type Sha256 } from '@/lib/deskSign';
 import { readDeskRuns } from '@/lib/deskRunSnapshot';
+import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@/lib/deskCommands';
 
 import type { DeskBridge } from './bridge';
 
@@ -130,6 +131,9 @@ export function deskCalls(send: DeskTransport) {
       return runs;
     },
     start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
+    commands: async () => ((await send('GET', '/commands')) as { projects: DeskProjectCommands[] }).projects,
+    job: async (request: DeskJobStart) => ((await send('POST', '/commands', request)) as { run: DeskRun }).run,
+    saveCommands: async (projectId: string, commands: DeskCommandDefinition[]) => void (await send('POST', `/commands/${encodeURIComponent(projectId)}/settings`, { commands })),
     stop: async (id: string) => void (await send('POST', `/runs/${encodeURIComponent(id)}/stop`)),
     log: async (id: string) => ((await send('GET', `/runs/${encodeURIComponent(id)}/log`)) as { lines: DeskLogLine[] }).lines,
     ports: async () => ((await send('GET', '/ports')) as { ports: DeskPort[] }).ports,

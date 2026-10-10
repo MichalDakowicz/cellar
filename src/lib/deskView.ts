@@ -19,6 +19,7 @@ const CHIPS: Record<DeskRunState, RunChipMeta> = {
   done: { label: 'done', color: '#22c55e', tint: 'rgba(34,197,94,0.16)' },
   failed: { label: 'failed', color: '#ef4444', tint: 'rgba(239,68,68,0.16)' },
   stopped: { label: 'stopped', color: 'hsl(0 0% 63.9%)', tint: 'rgba(163,163,163,0.16)' },
+  unknown: { label: 'unknown', color: 'hsl(0 0% 63.9%)', tint: 'rgba(163,163,163,0.16)' },
 };
 
 export function runChip(state: DeskRunState): RunChipMeta {

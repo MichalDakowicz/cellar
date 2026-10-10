@@ -19,7 +19,7 @@ const NUDGE = 0.06;
  * desk until the pc can search them (docs/desk/TASKS.md W2, W10); with it off,
  * those lists say so instead of making something up.
  */
-export function useDeskKeys(draft: string, setDraft: (text: string) => void, agent: string) {
+export function useDeskKeys(draft: string, setDraft: (text: string) => void, agent: string, commands: string[] = []) {
   const { projects, entries } = useCellar();
   const sample = useDeskPrefs((state) => state.sample);
   const { say } = useToast();
@@ -29,11 +29,11 @@ export function useDeskKeys(draft: string, setDraft: (text: string) => void, age
     () => ({
       projects,
       entries,
-      commands: sample ? SAMPLE_COMMANDS : [],
+      commands: commands.length ? commands : sample ? SAMPLE_COMMANDS : [],
       files: sample ? SAMPLE_FILES : [],
       skills: sample ? (SAMPLE_SKILLS[agent] ?? []) : [],
     }),
-    [projects, entries, sample, agent],
+    [projects, entries, sample, agent, commands],
   );
 
   const at = caret === null || caret > draft.length ? draft.length : caret;

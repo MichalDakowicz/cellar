@@ -57,7 +57,7 @@ export function DeskCommandTiles({
           );
         })}
       </ScrollView>
-      <View className={`flex-row gap-2 ${mono ? 'flex-wrap' : ''} ${gutter}`}>
+      <View className={`flex-row flex-wrap gap-2 ${gutter}`}>
         {current.commands.map((command) => {
           const Icon = ICONS[command.icon];
           if (mono) {
@@ -80,6 +80,7 @@ export function DeskCommandTiles({
               accessibilityRole="button"
               accessibilityLabel={`$${command.label} in ${current.name}`}
               disabled={!onRun}
+              style={{ flexBasis: '22%', flexGrow: 1 }}
               onPress={() => onRun?.(current.id, command.id)}
               className="h-[76px] min-w-0 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-row active:opacity-70"
             >
@@ -90,7 +91,7 @@ export function DeskCommandTiles({
         })}
       </View>
       <Text className={`font-mono text-xs text-muted-foreground ${gutter}`} numberOfLines={1}>
-        {current.meta}
+        {current.error ?? (current.id.startsWith('sample-') ? `sample · ${current.meta}` : current.meta)}
       </Text>
     </View>
   );

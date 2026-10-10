@@ -74,6 +74,7 @@ export default function Desk() {
                   <DeskCommandTiles {...home.commands} gutter={gutter} />
                 </View>
               )}
+              {!!home.commandsStatus && <Text className={`font-sans pt-2 text-xs text-muted-foreground ${gutter}`}>{home.commandsStatus}</Text>}
 
               {home.commands && <View className={`pt-5 ${gutter}`}><DeskRunScope project={home.commands.current.name} scope={home.scope} onScope={home.onScope} /></View>}
               <DeskRunSections

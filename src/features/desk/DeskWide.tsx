@@ -72,6 +72,7 @@ export function DeskWide({
               <DeskCommandTiles {...home.commands} gutter="" mono />
             </View>
           )}
+          {!!home.commandsStatus && <Text className="font-sans text-xs text-muted-foreground">{home.commandsStatus}</Text>}
           {home.counts.working !== null && <DeskTodayFigures figures={wide.today} />}
         </View>
       </View>

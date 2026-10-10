@@ -280,7 +280,7 @@ export pass. Release APK installed and launched; phone checked confirmed counts,
 read failure, retry, disconnect and reconnect against a separate read-only host. Original
 pairing restored. See `how-it-works.md` for flow map, test boundaries and next task W2.
 
-### W2 · `$` commands per project `[ ]`
+### W2 · `$` commands per project `[~]`
 
 The host reads each project's `package.json` scripts (and gradle tasks for `$apk`) into commands;
 tiles and `$` run them as **jobs**, not agent turns, streamed back like any run. Per-project

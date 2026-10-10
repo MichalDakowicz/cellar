@@ -25,7 +25,7 @@ test('heartbeat retains every host run so remote waiting counts are not truncate
   await fallback.tick();
   assert.ok(written);
   assert.equal((written as { runs: unknown[] }).runs.length, 25);
-  assert.deepEqual((written as { runs: unknown[] }).runs.at(-1), runs[24]);
+  assert.ok((written as { runs: { id: string }[] }).runs.some((run) => run.id === runs[24].id));
 });
 
 test('a failed run poll preserves heartbeat age and still reads the mailbox', async () => {

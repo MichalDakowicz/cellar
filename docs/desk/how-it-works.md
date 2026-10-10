@@ -84,3 +84,25 @@ uncommitted contents. Only small availability/recovery text and controls change 
   and mailbox expiry were verified by controlled tests, not fabricated live tasks.
 
 GitHub push, PR publication and web deployment remain pending explicit authorization.
+
+## W2 — project jobs and test reports
+
+The PC discovers npm scripts and the local Gradle release wrapper. Tiles, a bare
+`$command` in a new task or run chat, and project settings use that real catalogue.
+Commands run as processes, without an agent turn. Chains stop on a failed step.
+`/save-command check = npm:lint + npm:test` stores an account-scoped project override;
+settings reads the same file. Mailbox command delivery is unavailable and says so.
+
+The host acknowledges an actual process spawn; only an observed zero exit becomes
+done. Failed, stopped and restarted-without-exit jobs retain those distinct states.
+Readable test reports parse Jest, Vitest or Node TAP totals from the visible log.
+They describe the latest reported suite, never an inferred result for the whole
+chain. Unsupported, incomplete and truncated output remains available as raw text.
+
+Verified locally: 846 app tests, types, lint, 31 desktop tests, desktop types/build
+and web export. Phone started the real Cellar `$test` job and displayed its confirmed
+841-test result, duration and selectable raw output. Chat saved a project override;
+settings loaded that saved override. A phone `$apk` attempt exposed Windows quoting;
+the app displayed failed, the launcher was fixed and a wrapper-with-spaces regression
+passes. The repeated phone APK build remains under verification; W2 stays in progress.
+QA uses a separate host and account fixture, actual scripts, and no production DB writes.

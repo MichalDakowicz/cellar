@@ -2,6 +2,7 @@ import { DeskHostsBlock } from '@/components/desk/DeskHostsBlock';
 import { DeskKeysBlock } from '@/components/desk/DeskKeysBlock';
 import { DeskRecipesBlock } from '@/components/desk/DeskRecipesBlock';
 import { useDeskSettings } from '@/features/desk/useDeskSettings';
+import { CommandSettings } from '@/features/desk/CommandSettings';
 
 import { SettingsGroup } from '../SettingsGroup';
 import { SettingsPage } from '../SettingsPage';
@@ -38,6 +39,7 @@ export function KeysSettings() {
       <SettingsGroup title="your own keys">
         <DeskKeysBlock />
       </SettingsGroup>
+      <SettingsGroup title="project commands"><CommandSettings /></SettingsGroup>
     </SettingsPage>
   );
 }

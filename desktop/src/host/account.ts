@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { folderAllowed } from '@/lib/deskFolders';
+import { deskFolders } from '@/lib/deskFolders';
 
 /**
  * The account this pc acts for — borrowed from Cellar's own window.
@@ -96,5 +97,10 @@ export class Account {
   async allows(cwd: string): Promise<boolean> {
     const { rows, groups } = await this.places();
     return folderAllowed(cwd, rows, groups);
+  }
+
+  async commandProjects() {
+    const { rows, groups } = await this.places();
+    return deskFolders(rows, groups);
   }
 }

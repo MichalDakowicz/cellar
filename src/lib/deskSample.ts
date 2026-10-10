@@ -3,6 +3,7 @@ import type { PreviewCheck } from './deskPreview';
 import type { DeskLogLine } from './deskProtocol';
 import type { DeskRecipe } from './deskSettings';
 import type { DeskRunCard } from './deskView';
+import type { DeskCommand, DeskProjectCommands } from './deskCommands';
 
 /**
  * The sample desk — what the desk screens show before the pc can report it.
@@ -14,18 +15,10 @@ import type { DeskRunCard } from './deskView';
  * about anybody's pc.
  */
 
-export type DeskCommandIcon = 'rebuild' | 'preview' | 'deploy' | 'apk' | 'test' | 'run';
+export type { DeskCommandIcon, DeskCommand, DeskProjectCommands } from './deskCommands';
 
 /** A prepared `$` command: a button on the desk, a word after `$` in the composer. */
-export type DeskCommand = { id: string; label: string; icon: DeskCommandIcon };
 
-export type DeskProjectCommands = {
-  id: string;
-  name: string;
-  /** The mono line under the tiles: folder, last build. */
-  meta: string;
-  commands: DeskCommand[];
-};
 
 export type DeskHostFigures = { label: string; value: string }[];
 

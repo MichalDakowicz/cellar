@@ -4,7 +4,7 @@ import type { DeskRun } from '@/lib/deskProtocol';
 import { isStaleRequest } from '@/lib/deskProtocol';
 
 import type { DeskSession } from './account.ts';
-import { deskInfo, startRun, type HostDeps } from './api.ts';
+import { deskInfo, hostRuns, startRun, type HostDeps } from './api.ts';
 
 /**
  * The way in when the phone is not on the same network: through the cellar.
@@ -88,7 +88,7 @@ export class CellarFallback {
     const info = await deskInfo(this.deps);
     let snapshot: DeskRun[] | null = null;
     try {
-      snapshot = runs ?? (await this.deps.runs.list());
+      snapshot = runs ?? (await hostRuns(this.deps));
     } catch {
       // Keep the last heartbeat's age. A failed read must not refresh it or
       // stop queued requests from being handled while the next poll retries.

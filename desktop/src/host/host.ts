@@ -13,6 +13,8 @@ import { loadIdentity, rotateKey, saveIdentity, type Identity } from './identity
 import { pickLanAddress } from './network.ts';
 import { Proxies } from './proxy.ts';
 import { Runs } from './runs.ts';
+import { Commands } from './commands.ts';
+import { Jobs } from './jobs.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
 import { Tickets } from './tickets.ts';
 
@@ -71,6 +73,8 @@ export class DeskHost {
       identity: () => (this.boundPort ? { ...this.identity, port: this.boundPort } : this.identity),
       account: this.account,
       runs: new Runs(options.dataDir),
+      commands: new Commands(options.dataDir, this.account),
+      jobs: new Jobs(options.dataDir, () => this.account.current?.userId ?? null),
       tickets,
       proxies: new Proxies(tickets),
       lanHost: () => pickLanAddress(networkInterfaces()),

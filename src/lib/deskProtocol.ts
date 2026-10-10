@@ -25,7 +25,8 @@ export function isDeskAgent(value: unknown): value is DeskAgent {
   return DESK_AGENTS.some((agent) => agent.id === value);
 }
 
-export function agentLabel(agent: DeskAgent): string {
+export function agentLabel(agent: DeskAgent | 'job'): string {
+  if (agent === 'job') return 'job';
   return DESK_AGENTS.find((candidate) => candidate.id === agent)?.label ?? agent;
 }
 
@@ -80,11 +81,11 @@ export function runTitle(start: Pick<DeskStart, 'prompt' | 'name'>): string {
  * something it will not do without a person, which on a background run means
  * someone has to open it at the pc.
  */
-export type DeskRunState = 'running' | 'waiting' | 'done' | 'failed' | 'stopped';
+export type DeskRunState = 'running' | 'waiting' | 'done' | 'failed' | 'stopped' | 'unknown';
 
 export type DeskRun = {
   id: string;
-  agent: DeskAgent;
+  agent: DeskAgent | 'job';
   name: string;
   cwd: string;
   startedAt: number;
@@ -100,6 +101,7 @@ export const RUN_STATE_LABEL: Record<DeskRunState, string> = {
   done: 'done',
   failed: 'failed',
   stopped: 'stopped',
+  unknown: 'status unknown',
 };
 
 export function isLiveRun(run: Pick<DeskRun, 'state'>): boolean {

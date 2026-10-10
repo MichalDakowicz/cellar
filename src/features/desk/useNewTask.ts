@@ -16,6 +16,10 @@ import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
 import { useDeskRuns } from './useDeskRuns';
 import { useDeskStart } from './useDeskStart';
+import { useDeskCommands } from './useDeskCommands';
+import { leadingCommand } from '@/lib/deskCommands';
+import { readError } from '@/lib/utils';
+import { repoKey } from '@/lib/repoLink';
 
 /**
  * The new-task screen (`NewTask.dc.html`): what you say, the project it works
@@ -31,6 +35,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const runs = useDeskRuns(link, { watch: false });
   const { projects, groups, entries } = useCellar();
   const { say } = useToast();
+  const jobs = useDeskCommands();
 
   const folders = useMemo(() => deskFolders(projects, groups), [projects, groups]);
   // Thoughts handed in — from an entry's start on pc, or held on a project and
@@ -63,7 +68,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const projectId = picked ?? entry?.projectId ?? null;
   const folder = folders.find((candidate) => candidate.projectId === projectId) ?? null;
   const projectName = projects.find((candidate) => candidate.id === entry?.projectId)?.name;
-  const keys = useDeskKeys(text, setText, agent);
+  const projectCommands = jobs.projects.find((project) => project.id === projectId || (!!folder && repoKey(project.cwd) === repoKey(folder.path)));
+  const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id));
   const starts = taskStarts({
     typed: text,
     picks: attached.map((thought) => ({ entryId: thought.id, line: agentPrompt(thought, projectName) })),
@@ -82,11 +88,20 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     hasFolder: folder !== null,
     canStart: link.can.start,
     host: link.name,
-    busy: starting.busy,
+    busy: starting.busy || jobs.start.isPending,
   });
 
   const send = () => {
     if (blocker || !folder) return;
+    const command = leadingCommand(text);
+    if (command) {
+      if (text.trim() !== `$${command}` || attached.length) {
+        say('send a command by itself; attach thoughts to an agent task');
+        return;
+      }
+      jobs.start.mutate({ projectId: projectCommands?.id ?? folder.projectId, command }, { onSuccess: () => { say(`job started on ${link.name}`); onSent(); } });
+      return;
+    }
     const built = starts.map((one) => deskStartFrom({ prompt: one.prompt, repoPath: folder.path, agent, entryId: one.entryId }));
     const ready = built.flatMap((one) => (one.ok ? [one.start] : []));
     if (ready.length === built.length) starting.begin(ready);
@@ -118,8 +133,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     send,
     sendLabel: starts.length > 1 ? `send ${starts.length} runs to ${link.name}` : `send to ${link.name}`,
     blocker,
-    busy: starting.busy,
-    error: starting.error,
+    busy: starting.busy || jobs.start.isPending,
+    error: starting.error ?? (jobs.start.error ? readError(jobs.start.error) : null),
     untrusted: starting.untrusted,
     trusting: starting.trusting,
     onTrust: starting.trustAndStart,

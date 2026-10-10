@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { ApprovalPanel } from '@/components/desk/ApprovalPanel';
 import { RunChatItems } from '@/components/desk/RunChatItems';
+import { JobResults } from '@/components/desk/JobResults';
 import { RunComposer } from '@/components/desk/RunComposer';
 import { RunHeader } from '@/components/desk/RunHeader';
 import { ContentShell } from '@/components/layout/ContentShell';
@@ -61,7 +62,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
                 {chat.loading ? 'reading…' : 'this run is not on the pc any more'}
               </Text>
             )}
-            <RunChatItems items={chat.items} youCaption={chat.youCaption} />
+            {chat.job ? <JobResults {...chat.job} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
             {!!chat.logError && <Text className="font-sans text-xs text-muted-foreground">{chat.logError}</Text>}
             {chat.decided && (
               <View className="flex-row items-center gap-2">

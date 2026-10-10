@@ -10,6 +10,8 @@ import { useDeskPrefs } from '@/store/deskPrefs';
 import { useDeskRunCards } from './useDeskRunCards';
 import type { useDeskScreen } from './useDeskScreen';
 import { useDeskStatus } from './DeskStatusProvider';
+import { useDeskCommands } from './useDeskCommands';
+import { readError } from '@/lib/utils';
 
 /**
  * The desk tab's top half — summary, host card, command tiles, and the runs as
@@ -28,6 +30,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const pick = useDeskPrefs((state) => state.setCommandsProject);
   const { say } = useToast();
   const [scope, setScope] = useState<'all' | 'project'>('all');
+  const jobs = useDeskCommands();
 
   const all = useDeskRunCards(runs.runs);
   const cards = useMemo(() => deskSections<DeskRunCard>(
@@ -36,7 +39,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
 
   const host = hostLine(link.via, link.checking);
   const activity = deskCountLine(counts);
-  const commands = sample ? SAMPLE_PROJECTS : null;
+  const commands = jobs.projects.length ? jobs.projects : sample ? SAMPLE_PROJECTS : null;
   const current = commands ? (commands.find((project) => project.id === picked) ?? commands[0]) : null;
   const scopedCards = useMemo(() => ({
     waiting: cards.waiting,
@@ -48,6 +51,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
     summary: `${link.name} · ${host.line}${activity ? ` · ${activity}` : ''}`,
     counts,
     retryCounts,
+    commandsStatus: jobs.start.isPending ? `starting job on ${link.name}…` : jobs.start.error ? readError(jobs.start.error) : jobs.loading ? 'reading project commands…' : jobs.error,
     empty: counts.state === 'disconnected' ? `connect to ${link.name} to read runs`
       : counts.state === 'loading' ? 'reading counts…'
       : counts.state === 'failed' ? 'counts unavailable — retry to read the desk' : 'nothing working',
@@ -64,12 +68,11 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
             projects: commands,
             current,
             onPick: pick,
-            // Only the sample's tiles exist yet; preview opens the sample page,
-            // the rest wait for commands to run for real (W2).
-            onRun: (_project: string, command: string) =>
-              command === 'preview'
+            onRun: jobs.start.isPending ? null : (projectId: string, command: string) =>
+              projectId.startsWith('sample-') ? command === 'preview'
                 ? router.push('/desk/preview/sample' as Href)
-                : say(`$${command} runs once the pc knows a project's commands`),
+                : say(`$${command} is a sample command`)
+              : jobs.start.mutate({ projectId, command }, { onSuccess: (run) => router.push(`/desk/run/${run.id}` as Href) }),
           }
         : null,
     sections: cards,

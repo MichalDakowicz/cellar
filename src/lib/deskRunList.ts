@@ -13,7 +13,7 @@ export type RunFilter = 'all' | 'waiting' | 'running';
 
 type Listed = { project: string; title: string; meta: string; state: DeskRunState; startedAt: number };
 
-const RANK: Record<DeskRunState, number> = { waiting: 0, running: 1, done: 2, failed: 2, stopped: 2 };
+const RANK: Record<DeskRunState, number> = { waiting: 0, running: 1, done: 2, failed: 2, stopped: 2, unknown: 2 };
 
 export function runFilterCounts(runs: readonly Pick<Listed, 'state'>[]): Record<RunFilter, number> {
   return {

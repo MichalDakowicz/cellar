@@ -22,12 +22,13 @@ export type ComposerKeys = {
 };
 
 /** RUN-R1b/R1c: text above one toolbar; popouts open upward. Host actions wait for W9/W12. */
-export function RunComposer({ draft, onDraft, disabledReason, keys, modelLabel = 'model', finished = false, sampleModels, queued = [] }: {
+export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, modelLabel = 'model', finished = false, sampleModels, queued = [] }: {
   draft: string;
   onDraft: (text: string) => void;
   dispatch: 'steer' | 'queue';
   onDispatch: (dispatch: 'steer' | 'queue') => void;
   disabledReason: string | null;
+  onSend?: () => void;
   keys: ComposerKeys;
   modelLabel?: string;
   finished?: boolean;
@@ -70,7 +71,7 @@ export function RunComposer({ draft, onDraft, disabledReason, keys, modelLabel =
           <Pressable accessibilityRole="button" accessibilityLabel="model and reasoning" accessibilityState={{ expanded: tray === 'model' }} onPress={() => setTray(tray === 'model' ? null : 'model')} className="h-11 min-w-0 flex-1 flex-row items-center justify-end gap-1 px-1">
             <Text className="font-sans min-w-0 shrink text-xs text-muted-foreground" numberOfLines={1}>{sampleModels ? `${model} · ${effort}` : modelLabel}</Text><ChevronDown size={14} color={COLORS.muted} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={finished ? 'continue this chat' : 'send message'} accessibilityState={{ disabled: true }} disabled className={`h-11 items-center justify-center rounded-[9px] bg-secondary ${finished ? 'px-2.5' : 'w-11'}`}>
+          <Pressable accessibilityRole="button" accessibilityLabel={disabledReason === null ? 'run command' : finished ? 'continue this chat' : 'send message'} accessibilityState={{ disabled: !!disabledReason || !onSend }} disabled={!!disabledReason || !onSend} onPress={onSend} className={`h-11 items-center justify-center rounded-[9px] bg-secondary ${finished ? 'px-2.5' : 'w-11'}`}>
             {finished ? <Text className="font-sans text-xs text-muted-foreground">Continue</Text> : <ArrowUp size={20} color={COLORS.muted} />}
           </Pressable>
         </View>

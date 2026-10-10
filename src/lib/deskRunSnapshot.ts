@@ -1,6 +1,6 @@
 import { isDeskAgent, type DeskRun } from './deskProtocol';
 
-const STATES: readonly unknown[] = ['running', 'waiting', 'done', 'failed', 'stopped'];
+const STATES: readonly unknown[] = ['running', 'waiting', 'done', 'failed', 'stopped', 'unknown'];
 
 /** Missing or malformed snapshots are unavailable, never a confirmed empty PC. */
 export function readDeskRuns(raw: unknown): DeskRun[] | null {
@@ -8,7 +8,7 @@ export function readDeskRuns(raw: unknown): DeskRun[] | null {
   for (const value of raw) {
     if (!value || typeof value !== 'object') return null;
     const run = value as Partial<DeskRun>;
-    if (typeof run.id !== 'string' || !run.id || !isDeskAgent(run.agent) ||
+    if (typeof run.id !== 'string' || !run.id || (!isDeskAgent(run.agent) && run.agent !== 'job') ||
       typeof run.name !== 'string' || typeof run.cwd !== 'string' ||
       typeof run.startedAt !== 'number' || !Number.isFinite(run.startedAt) ||
       !STATES.includes(run.state) || (run.origin !== 'phone' && run.origin !== 'pc') ||

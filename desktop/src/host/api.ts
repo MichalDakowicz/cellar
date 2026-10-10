@@ -14,6 +14,9 @@ import type { Proxies } from './proxy.ts';
 import type { Runs } from './runs.ts';
 import type { Ticket, Tickets } from './tickets.ts';
 import { installedAgents } from './tools.ts';
+import type { Commands } from './commands.ts';
+import type { Jobs } from './jobs.ts';
+import { sortRuns } from '@/lib/deskProtocol';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -36,9 +39,15 @@ export type HostDeps = {
   proxies: Proxies;
   lanHost: () => string | null;
   version: string;
+  commands?: Commands;
+  jobs?: Jobs;
 };
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
+
+export async function hostRuns(deps: HostDeps) {
+  return sortRuns([...(await deps.runs.list()), ...(deps.jobs?.list() ?? [])]);
+}
 
 export async function hiddenPorts(deps: HostDeps): Promise<Set<number>> {
   return new Set([deps.identity().port, ...(await deps.proxies.ports())]);
@@ -118,20 +127,34 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (parts[0] === 'runs' && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
       case 'GET /desk':
         return ok(await deskInfo(deps));
       case 'GET /runs':
-        return ok({ runs: await deps.runs.list() });
+        return ok({ runs: await hostRuns(deps) });
+      case 'GET /commands':
+        if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
+        return ok({ projects: await deps.commands.list() });
+      case 'POST /commands': {
+        if (!deps.commands || !deps.jobs) throw new DeskError('update cellar on the pc for jobs', 409);
+        const body = req.body as { projectId?: unknown; command?: unknown } | null;
+        if (typeof body?.projectId !== 'string' || typeof body.command !== 'string') throw new DeskError('pick a project command');
+        return ok({ run: await deps.jobs.start(await deps.commands.plan(body.projectId, body.command), body.command) });
+      }
+      case 'POST /commands/:id/settings':
+        if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
+        await deps.commands.save(parts[1], (req.body as { commands?: unknown } | null)?.commands);
+        return ok({ saved: true });
       case 'POST /runs':
         return ok({ run: await startRun(deps, req.body) });
       case 'POST /runs/:id/stop':
-        await deps.runs.stop(parts[1]);
+        if (deps.jobs?.has(parts[1])) await deps.jobs.stop(parts[1]);
+        else await deps.runs.stop(parts[1]);
         return ok({ stopped: parts[1] });
       case 'GET /runs/:id/log':
-        return ok({ lines: await deps.runs.log(parts[1]) });
+        return ok({ lines: deps.jobs?.has(parts[1]) ? await deps.jobs.log(parts[1]) : await deps.runs.log(parts[1]) });
       case 'GET /ports':
         return ok({ ports: await readPorts(await hiddenPorts(deps)) });
       case 'GET /apks':

@@ -7,6 +7,10 @@ it('accepts existing host payload and a confirmed empty list', () => {
   expect(readDeskRuns([])).toEqual([]);
 });
 
-it.each([undefined, null, {}, [null], [{ ...run, state: 'unknown' }], [{ ...run, startedAt: NaN }], [{ ...run, origin: 'sample' }], [{ ...run, agent: 'unknown' }], [{ ...run, entryId: undefined }]])('does not invent an empty list for malformed host data: %j', (raw) => {
+it.each([undefined, null, {}, [null], [{ ...run, state: 'paused' }], [{ ...run, startedAt: NaN }], [{ ...run, origin: 'sample' }], [{ ...run, agent: 'unknown' }], [{ ...run, entryId: undefined }]])('does not invent an empty list for malformed host data: %j', (raw) => {
   expect(readDeskRuns(raw)).toBeNull();
+});
+
+it('accepts real jobs whose result became unknown after a host restart', () => {
+  expect(readDeskRuns([{ ...run, agent: 'job', state: 'unknown' }])).toEqual([{ ...run, agent: 'job', state: 'unknown' }]);
 });

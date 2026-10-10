@@ -4,6 +4,7 @@
 
 ### Added
 
+- Desk: run project commands as jobs, with readable test results and raw output
 - Project: a dump field at the top files a thought straight into that project
 - Project: add a picture to a thought from the dump field, as its cover
 - Entry: edit rewords the thought, and the trail keeps what it said before

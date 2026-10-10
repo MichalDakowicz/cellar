@@ -8,12 +8,15 @@ import { agentLabel, isLiveRun, type DeskRunState } from '@/lib/deskProtocol';
 import { SAMPLE_CHATS, SAMPLE_RUNS } from '@/lib/deskSample';
 import { runMeta } from '@/lib/deskView';
 import { longRel } from '@/lib/relTime';
-import { projectForPath, repoPathLabel } from '@/lib/repoLink';
+import { projectForPath, repoKey, repoPathLabel } from '@/lib/repoLink';
 import { readError } from '@/lib/utils';
 
 import { useDeskKeys } from './useDeskKeys';
 import { useDeskLink } from './useDeskLink';
 import { useDeskLog, useDeskRuns } from './useDeskRuns';
+import { useDeskCommands } from './useDeskCommands';
+import { leadingCommand, parseCommandSettings } from '@/lib/deskCommands';
+import { deskTestResults } from '@/lib/deskTestResults';
 
 export type Dispatch = 'steer' | 'queue';
 type Decision = 'allow' | 'always' | 'deny';
@@ -42,17 +45,26 @@ export function useRunChat(id: string) {
   const [decision, setDecision] = useState<Decision | null>(null);
   const [dispatch, setDispatch] = useState<Dispatch>('steer');
   const [draft, setDraft] = useState('');
+  const jobs = useDeskCommands();
+  const [commandError, setCommandError] = useState<string | null>(null);
 
   const sample = SAMPLE_RUNS.find((candidate) => candidate.id === id) ?? null;
   const chat = sample ? SAMPLE_CHATS[id] : null;
   const run = sample ? null : (runs.runs.find((candidate) => candidate.id === id) ?? null);
 
-  const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'));
+  const matchedProjectId = run ? projectForPath(run.cwd, projects)?.id : null;
+  const projectCommands = jobs.projects.find((project) => project.id === matchedProjectId || (!!run && repoKey(project.cwd) === repoKey(run.cwd)));
+  const projectId = projectCommands?.id ?? matchedProjectId;
+  const command = leadingCommand(draft);
+  const canRunCommand = !!command && draft.trim() === `$${command}` && !!projectId && !!link.calls && !jobs.start.isPending;
+  const saveText = /^\/save-command\s+(.+)$/s.exec(draft.trim())?.[1];
+  const canSaveCommand = !!saveText && !!projectCommands && !!link.calls && !jobs.save.isPending;
+  const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id));
 
   const lines = chat ? chat.lines : (log.data ?? []);
   const asked: DeskApproval | null = chat?.approval ?? null;
   const waiting = (sample?.state ?? run?.state) === 'waiting';
-  const state: DeskRunState = sample ? (asked && decision ? 'running' : sample.state) : (run?.state ?? 'done');
+  const state: DeskRunState = sample ? (asked && decision ? 'running' : sample.state) : (run?.state ?? 'unknown');
 
   const meta = sample
     ? sample.meta
@@ -71,7 +83,8 @@ export function useRunChat(id: string) {
     age: run ? longRel(new Date(run.startedAt).toISOString()) : null,
     diff: chat?.diff ?? null,
     items: chatItems(lines),
-    logError: !sample && log.error ? readError(log.error) : !sample && !link.calls ? `${link.name} is not on this network — its words show here when it is` : null,
+    job: run?.agent === 'job' ? { results: deskTestResults(lines), lines, state } : null,
+    logError: commandError ?? (jobs.save.error ? readError(jobs.save.error) : jobs.start.error ? readError(jobs.start.error) : !sample && log.error ? readError(log.error) : !sample && !link.calls ? `${link.name} is not on this network — its words show here when it is` : null),
     /** The approval it is waiting on, until it is answered. */
     approval: asked && !decision ? asked : null,
     /** A real run stopped on something, before approvals reach the phone. */
@@ -95,7 +108,17 @@ export function useRunChat(id: string) {
       dispatch,
       onDispatch: setDispatch,
       /** Talking to a running agent waits for the pc's side (W9). */
-      disabledReason: 'talking to a running agent comes soon — start a new task for now',
+      disabledReason: canRunCommand || canSaveCommand ? null : jobs.start.isPending || jobs.save.isPending ? 'asking the pc…' : '$command starts a job; /save-command name = npm:task saves a chain. Agent messages come with W9.',
+      onSend: () => {
+        setCommandError(null);
+        if (canSaveCommand) {
+          try {
+            const additions = parseCommandSettings(saveText!);
+            const commands = [...(projectCommands!.overrides ?? []).filter((old) => !additions.some((next) => next.id === old.id)), ...additions];
+            jobs.save.mutate({ projectId: projectId!, commands }, { onSuccess: () => { setDraft(''); say('commands saved on the pc'); } });
+          } catch (error) { setCommandError(readError(error)); }
+        } else if (canRunCommand) jobs.start.mutate({ projectId: projectId!, command: command! }, { onSuccess: () => { setDraft(''); say('job started on the pc'); } });
+      },
       modelLabel: agentLabel(run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude')),
       finished: state === 'done' || state === 'failed' || state === 'stopped',
       sampleModels: sample ? SAMPLE_COMPOSER_MODELS : undefined,
