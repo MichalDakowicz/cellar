@@ -36,6 +36,18 @@ export const PING_KINDS: { label: string; on: boolean }[] = [
   { label: 'every turn', on: false },
 ];
 
+/**
+ * The night shift's settings (`DeskHosts.dc.html`, "night shift"), as the
+ * defaults it will start from. Drawn until the night shift runs (W19).
+ */
+export const NIGHT_SHIFT: { label: string; value: string; tokens?: string[] }[] = [
+  { label: 'window', value: '01:00 to 06:00' },
+  { label: 'runs on', value: 'this pc, if awake' },
+  { label: 'never at night', value: 'anything marked “ships”', tokens: ['$deploy', '$apk'] },
+  { label: 'stops when', value: '20% of the week is left on the account it uses' },
+  { label: 'digest', value: '07:30, to the phone' },
+];
+
 /** A recipe's one-line summary: "claude · edits ok", or "project default · ask first". */
 export function recipeLine(recipe: { agent: DeskAgent | 'default'; mode: DeskMode }): string {
   const agent = recipe.agent === 'default' ? 'project default' : recipe.agent;

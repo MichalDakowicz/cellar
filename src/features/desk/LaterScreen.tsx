@@ -63,7 +63,7 @@ export function LaterScreen({
                 <Text className="text-xs text-muted-foreground">{shown ? sub : waitsOn}</Text>
               </View>
             </View>
-            {shown ? children : <Text className="text-xs text-muted-foreground">turn on the sample desk in desk settings to see it filled in.</Text>}
+            {shown ? children : <Text className="text-xs text-muted-foreground">turn on the sample desk in settings › devices and pairing to see it filled in.</Text>}
           </View>
         </ContentShell>
       </ScrollView>

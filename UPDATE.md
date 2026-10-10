@@ -33,8 +33,9 @@
 - Project: hold thoughts and hand them to an agent on your pc, as one run or one run each
 - Project, inbox, search: a thought shows which agent is on it
 - Project: on a wide window, the aside shows the project's checkout on your pc
-- Settings: desk settings pick the agent and how much it may do for every new task
-- Settings: desk settings show what is coming — keys, where pings go, usage, recipes, hosts
+- Settings: in sections — dump, agents, hosts, recipes, keys, devices, notifications, night shift, usage, account
+- Settings: agents picks the agent and how much it may do for every new task
+- Settings: keys, where pings go, usage, recipes, hosts and night shift show what is coming
 - Settings: see how desk notifications will look, built from your live runs and waiting questions
 - Desk: file it into cellar — type a thing, its kind is guessed, pick a project and hand it off
 - Desk: with the sample desk on, see races, the night shift, group runs and the phone over adb
@@ -46,7 +47,8 @@
 - Desk: the right plate of the bar is now your pc, badged with what is waiting on you
 - Settings: your account and the size of your cellar moved here from profile
 - Your pc: its local pages open in the desk's preview instead of the browser
-- Settings: show a sample desk moved into desk settings
+- Settings: on a wide window, a column of sections sits beside the page
+- Settings: show a sample desk moved into devices and pairing
 - Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
