@@ -188,13 +188,19 @@ phone. dump · agents · hosts · recipes and rules · keys · devices and pairi
 night shift · usage and accounts · account. Cellar's own prefs spread by topic (dump habits under
 dump, display under account, nudges under notifications). `desk/settings` redirects to agents.
 
-### M2 · the shared look `[ ]`
+### M2 · the shared look `[x]`
 
 Fix once, every board follows: overlines are `text-xs font-bold` (`Overline`); chips are the
 `.ping-chip` (min-h 36, `text-sm`, foreground on chipGround, selected = accent soft + primary
 border + light-accent text) in `Chip`, `ChipWrap` and every hand-rolled chip; raised surfaces are
 the row ground #171717 (a `row` token), the selected/thumb ground #262626; outlined tiles use
-hsl(0 0% 20%) unselected. Nav glyphs: back is a chevron, dump a pen, projects a folder.
+hsl(0 0% 20%) unselected. Nav glyphs: back is a chevron, dump a pen, projects a folder. Done
+as: `Overline` to PING.md's `text-xs font-bold`; `Chip` takes `ChipWrap`'s shape (§9.6), and a
+selected chip's label is `COLORS.accentText` (slate is too dim on its own soft ground). Chips keep
+PING.md's muted unselected label rather than the canvas bundle's white — that would be a family
+change. `bg-secondary/60` stays as the raised ground: it composes to ≈#1b1b1b and follows the
+light theme, which a fixed `neutral-900` would not. Bazaar shares `components/ui/controls.tsx` and
+owes the same `Chip`/`Overline` change.
 
 ### M3 · the desktop sidebar's desk section `[ ]`
 

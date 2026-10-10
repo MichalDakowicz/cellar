@@ -1,5 +1,5 @@
 import { type Href } from 'expo-router';
-import { ChartColumn, Inbox, LayoutGrid, Monitor, Plus } from 'lucide-react-native';
+import { ChartColumn, Folder, Inbox, Monitor, PenLine } from 'lucide-react-native';
 import { type ReactNode } from 'react';
 
 /**
@@ -39,7 +39,7 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     href: '/',
     label: 'dump',
     tabName: 'index',
-    icon: (color, size) => <Plus color={color} size={size} />,
+    icon: (color, size) => <PenLine color={color} size={size} />,
     isActive: (pathname) => pathname === '/',
   },
   {
@@ -49,7 +49,7 @@ export const NAV_DESTINATIONS: NavDestination[] = [
     // A project's detail page, an entry, and search are all pushed from here.
     isActive: (pathname) =>
       pathname.startsWith('/shelf') || pathname.startsWith('/project') || pathname.startsWith('/search'),
-    icon: (color, size) => <LayoutGrid color={color} size={size} />,
+    icon: (color, size) => <Folder color={color} size={size} />,
   },
   {
     href: '/inbox',

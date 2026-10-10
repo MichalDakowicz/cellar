@@ -79,6 +79,8 @@ export type ResolvedTheme = keyof typeof themeVars;
 export const COLORS = {
   accent: 'hsl(215 16% 47%)',
   accentSoft: 'hsla(215,16%,47%,0.16)',
+  /** A selected chip's label: slate-500 is too dim to read on its own soft ground. */
+  accentText: 'hsl(215 20% 75%)',
   accentInk: 'hsl(0 0% 98%)',
   foreground: 'hsl(0 0% 98%)',
   muted: 'hsl(0 0% 63.9%)',

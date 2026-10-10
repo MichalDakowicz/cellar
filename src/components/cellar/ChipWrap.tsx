@@ -43,14 +43,14 @@ export function ChipWrap<T extends string>({ options, selected, onToggle, onHold
             accessibilityState={{ selected: active }}
             onPress={() => onToggle(option.value)}
             onLongPress={onHold ? () => onHold(option.value) : undefined}
-            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-80"
+            className="min-h-9 flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-80"
             style={{
               borderColor: active ? COLORS.accent : 'transparent',
               backgroundColor: active ? COLORS.accentSoft : COLORS.chipGround,
             }}
           >
             {option.glyph}
-            <Text className={['text-sm', active ? 'text-primary' : 'text-muted-foreground'].join(' ')}>
+            <Text className={active ? 'text-sm' : 'text-sm text-muted-foreground'} style={active ? { color: COLORS.accentText } : undefined}>
               {option.label}
             </Text>
             {option.count != null && (

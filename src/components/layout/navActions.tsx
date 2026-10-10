@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import {
   ArrowDownUp,
-  ArrowLeft,
+  ChevronLeft,
   FolderPlus,
   Layers,
   MessageSquarePlus,
@@ -50,7 +50,7 @@ export function useNavAction(pathname: string, activeTab: string | null): NavAct
   return useMemo(() => {
     if (activeTab === null || isPushedRoute(pathname)) {
       return {
-        Icon: ArrowLeft,
+        Icon: ChevronLeft,
         label: 'back',
         badge: 0,
         active: false,

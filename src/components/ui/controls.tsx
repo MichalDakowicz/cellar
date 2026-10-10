@@ -30,17 +30,18 @@ export function Chip({ label, selected, onPress, disabled }: ChipProps) {
       disabled={disabled}
       onPress={onPress}
       {...bind}
+      // The one chip (PING.md §9.6): accent soft with an accent edge when on,
+      // the faint white ground and no edge when off.
       style={[
         webTransition('background-color'),
-        hovered && !disabled && !selected ? { backgroundColor: COLORS.chipGround } : null,
+        {
+          borderColor: selected ? COLORS.accent : 'transparent',
+          backgroundColor: selected ? COLORS.accentSoft : hovered && !disabled ? COLORS.rowHover : COLORS.chipGround,
+        },
       ]}
-      className={[
-        'rounded-full border px-3.5 py-2',
-        selected ? 'border-primary bg-primary/15' : 'border-border bg-transparent',
-        disabled ? 'opacity-40' : '',
-      ].join(' ')}
+      className={['min-h-9 justify-center rounded-full border px-3 py-1.5', disabled ? 'opacity-40' : ''].join(' ')}
     >
-      <Text className={['text-xs font-semibold', selected ? 'text-primary' : 'text-muted-foreground'].join(' ')}>
+      <Text className={selected ? 'text-sm' : 'text-sm text-muted-foreground'} style={selected ? { color: COLORS.accentText } : undefined}>
         {label}
       </Text>
     </Pressable>
@@ -211,7 +212,7 @@ export function Field({ error, style, multiline, onFocus, onBlur, ...props }: Fi
 export function Overline({ children, className = '' }: { children: string; className?: string }) {
   return (
     <Text
-      className={['text-[11px] font-semibold uppercase tracking-widest text-muted-foreground', className].join(' ')}
+      className={['text-xs font-bold uppercase tracking-widest text-muted-foreground', className].join(' ')}
     >
       {children}
     </Text>
