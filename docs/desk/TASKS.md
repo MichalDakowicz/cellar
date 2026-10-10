@@ -237,13 +237,18 @@ PhoneShare (a sheet), PhoneRace, PhoneNight — each to its artboard.
   coloured diff. PhoneNight — `text-2xl` title, 16px between cards, soft summaries, "add something
   for tonight".
 
-### M5 · desktop boards `[ ]`
+### M5 · desktop boards `[x]`
 
 DeskHome, DeskChat (keys list with groups, ↑↓ / tab / esc, step cards for the plan line),
 DeskProjects, DeskPhone, DeskGroupRun, QuestionCard (every state), DeskUsage (header meter, this
 chat, plan limits side by side, accounts, by day, limits), DeskRecipes (kinds as a list, the
 recipe as a labelled grid, rules with the managed-block preview), DeskHosts (host rows, add a
-host card, ping rules as a grid with edit).
+host card, ping rules as a grid with edit). Done: recipes as a kind list plus a labelled grid
+(`DeskRecipe`, `defaultRecipe` — your defaults when there is no sample), rules with the managed
+block; hosts with the add-a-host card drawn off; ping rules as a grid; usage with this chat, plan
+limits side by side, accounts, policies, by day and the limits (`USAGE_LIMITS`,
+`PLAN_OUT_POLICIES`); keys as tiles; the keys list headed by group; the wide desk's commands as `$`
+buttons. Checked in the desktop window over CDP, phone views by emulating 390×844.
 
 ## Pass 2 — the wiring
 

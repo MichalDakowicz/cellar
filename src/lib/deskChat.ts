@@ -71,7 +71,7 @@ export function stepRows(steps: readonly string[]): StepRow[] {
     }
     if (kind === 'read') rows.push({ kind, label: 'read 1 file', mono: false, steps: [step] });
     else if (kind === 'edit') rows.push({ kind, label: 'edited 1 file', mono: false, steps: [step] });
-    else if (kind === 'command') rows.push({ kind, label: step.replace(/^\S+\s+/, ''), mono: true, steps: [step] });
+    else if (kind === 'command') rows.push({ kind, label: step.replace(/^\S+\s+/, '').replace(/^[—–-]\s*/, ''), mono: true, steps: [step] });
     else rows.push({ kind, label: step, mono: false, steps: [step] });
   }
   return rows;

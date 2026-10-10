@@ -1,12 +1,15 @@
 import { Keyboard, Mic, RotateCcw } from 'lucide-react-native';
 import { useRef, type ReactNode } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { ANDROID_METRICS } from '@/components/ui/controls';
 import { COLORS } from '@/theme/colors';
 
 import { KeyList } from './KeyList';
 import type { ComposerKeys } from './RunComposer';
+
+/** The field is the sheet's whole point; a browser's focus ring around it is noise. */
+const NO_OUTLINE = Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null;
 
 // The waveform's resting shape (`NewTask.dc.html`); it moves once the mic listens (W12).
 const BARS = [8, 14, 22, 12, 30, 18, 26, 34, 20, 10, 24, 32, 16, 28, 36, 22, 12, 26, 18, 30, 14, 24, 8, 20, 28, 16, 10, 22, 14, 8, 12, 6];
@@ -30,7 +33,7 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
       <TextInput
         ref={field}
         className="min-h-[72px] w-full max-w-[330px] text-center text-base text-foreground"
-        style={[{ textAlignVertical: 'center', lineHeight: undefined }, ANDROID_METRICS]}
+        style={[{ textAlignVertical: 'center', lineHeight: undefined }, ANDROID_METRICS, NO_OUTLINE]}
         placeholder="what should it do?"
         placeholderTextColor={COLORS.muted}
         value={text}

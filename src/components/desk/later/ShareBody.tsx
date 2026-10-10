@@ -1,9 +1,12 @@
-import { Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, Switch, Text, TextInput, View } from 'react-native';
 
 import { ChipWrap } from '@/components/cellar/ChipWrap';
 import { ANDROID_METRICS, Overline } from '@/components/ui/controls';
 import { KINDS } from '@/lib/kinds';
 import { COLORS } from '@/theme/colors';
+
+/** The field is the sheet's whole point; a browser's focus ring around it is noise. */
+const NO_OUTLINE = Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null;
 
 /**
  * The share sheet's body (`PhoneShare.dc.html`): in your words, the kind —
@@ -36,7 +39,7 @@ export function ShareBody(props: {
         <Text className="text-xs text-muted-foreground">in your words</Text>
         <TextInput
           className="min-h-[80px] rounded-xl border border-border bg-secondary px-3 py-2.5 text-foreground"
-          style={[{ fontSize: 14, lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS]}
+          style={[{ fontSize: 14, lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS, NO_OUTLINE]}
           value={props.text}
           onChangeText={props.onText}
           multiline

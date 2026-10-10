@@ -43,6 +43,10 @@ describe('stepRows', () => {
     expect(rows[0].steps).toEqual(['Read a.tsx', 'Read b.tsx']);
   });
 
+  it('drops the dash a log puts between the tool and its words', () => {
+    expect(stepRows(['Bash — list the files'])[0].label).toBe('list the files');
+  });
+
   it('keeps an unknown step as it is', () => {
     expect(stepRows(['WebSearch cats'])).toEqual([{ kind: 'other', label: 'WebSearch cats', mono: false, steps: ['WebSearch cats'] }]);
   });
