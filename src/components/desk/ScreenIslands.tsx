@@ -7,8 +7,8 @@ import { SCREEN_MODES, type ScreenMode } from '@/lib/deskScreen';
 import { COLORS } from '@/theme/colors';
 
 const BLUR_METHOD = Platform.OS === 'android' ? 'dimezisBlurView' : 'none';
-const HEIGHT = 56;
-const SLOT = 48;
+const HEIGHT = 52;
+const SLOT = 46;
 
 const ICONS: Record<ScreenMode, LucideIcon> = { touch: Hand, pad: MousePointer2, keys: Keyboard, voice: Mic };
 
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   round: { width: HEIGHT, height: HEIGHT },
   press: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  pill: { height: HEIGHT, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 },
-  slot: { width: SLOT, height: SLOT - 4, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
+  pill: { height: HEIGHT, flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 4 },
+  slot: { width: SLOT, height: 42, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
   slotOn: { backgroundColor: COLORS.islandPlate },
 });

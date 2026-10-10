@@ -51,7 +51,9 @@ export function ApprovalPanel({
         onPress={() => onDecide('always')}
         className="h-10 items-center justify-center rounded-full active:opacity-70"
       >
-        <Text className="text-sm font-semibold text-muted-foreground">{approval.always}</Text>
+        <Text className="text-sm font-semibold" style={{ color: COLORS.foregroundSoft }}>
+          {approval.always}
+        </Text>
       </Pressable>
     </View>
   );

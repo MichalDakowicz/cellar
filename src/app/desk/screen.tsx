@@ -44,7 +44,7 @@ export default function ScreenView() {
           <Text className="text-xs text-muted-foreground">{screen.status.text}</Text>
         </Glass>
         <Glass style={{ height: 32, paddingHorizontal: 12, justifyContent: 'center', flexShrink: 1 }}>
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+          <Text className="text-xs" style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>
             {screen.hint}
           </Text>
         </Glass>
@@ -54,7 +54,7 @@ export default function ScreenView() {
         mode={screen.mode}
         onMode={screen.onMode}
         onLeave={() => (router.canGoBack() ? router.back() : router.replace('/desk' as Href))}
-        bottom={Math.max(insets.bottom, 4) + 8}
+        bottom={insets.bottom + 10}
       />
     </View>
   );

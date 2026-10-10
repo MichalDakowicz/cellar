@@ -18,9 +18,9 @@ export type Dispatch = 'steer' | 'queue';
 type Decision = 'allow' | 'always' | 'deny';
 
 const DECIDED: Record<Decision, string> = {
-  allow: 'allowed from your phone',
-  always: 'allowed for the rest of this run',
-  deny: 'denied — the agent was told to go without it',
+  allow: 'allowed from your phone · carrying on',
+  always: 'allowed for the rest of this run · carrying on',
+  deny: 'denied · the agent was told to go without it',
 };
 
 /**
@@ -75,6 +75,10 @@ export function useRunChat(id: string) {
     /** A real run stopped on something, before approvals reach the phone. */
     waitingAtPc: !sample && waiting,
     decided: decision ? DECIDED[decision] : null,
+    /** Amber while it carries on, grey when it was told no. */
+    decidedTone: decision === 'deny' ? ('denied' as const) : ('allowed' as const),
+    /** Under your bubble: who said it, and from where. */
+    youCaption: run?.origin === 'pc' ? 'you · at the pc' : 'you · from your phone',
     decide: (next: Decision) => setDecision(next),
     canStop: !!run && isLiveRun(run) && run.origin === 'phone',
     stop: () =>

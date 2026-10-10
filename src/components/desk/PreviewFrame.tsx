@@ -7,7 +7,7 @@ import { COLORS } from '@/theme/colors';
 
 import { PreviewPage, type PreviewPageProps } from './PreviewPage';
 
-const FRAME_HEIGHT = 380;
+const FRAME_HEIGHT = 320;
 
 const LOAD_COLOR: Record<PreviewLoad, string> = {
   connecting: COLORS.muted,

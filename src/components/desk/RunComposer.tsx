@@ -80,9 +80,9 @@ export function RunComposer({
         />
         <View
           accessibilityLabel="speaking comes soon"
-          className="h-[52px] w-[52px] items-center justify-center rounded-full bg-secondary"
+          className="h-[52px] w-[52px] items-center justify-center rounded-full bg-primary"
         >
-          <Mic size={22} color={COLORS.muted} strokeWidth={2} />
+          <Mic size={22} color={COLORS.accentInk} strokeWidth={2} />
         </View>
       </View>
       <KeyStrip active={keys.list?.key ?? null} onKey={keys.onKey} />

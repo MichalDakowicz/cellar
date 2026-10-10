@@ -1,5 +1,4 @@
 import { useLocalSearchParams } from 'expo-router';
-import { GitBranch } from 'lucide-react-native';
 import { ScrollView, Text, View } from 'react-native';
 
 import { PreviewChecks } from '@/components/desk/PreviewChecks';
@@ -13,7 +12,6 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { useDeskPreview } from '@/features/desk/useDeskPreview';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter, useSidebarSpace } from '@/hooks/useResponsive';
-import { COLORS } from '@/theme/colors';
 
 /**
  * Preview before deploy (docs/desk/screens.md, `Preview.dc.html`): a page the
@@ -36,12 +34,11 @@ export default function PreviewScreen() {
       >
         <ScreenTop />
         <ContentShell maxWidth={MAX_W.text}>
-          <View className={`gap-4 pt-2 ${gutter}`}>
+          <View className={`gap-3.5 pt-2 ${gutter}`}>
             <View className="flex-row items-start gap-3">
               <ScreenAction />
               <View className="min-w-0 flex-1 gap-1">
                 <View className="flex-row items-center gap-1.5">
-                  {preview.branch && <GitBranch size={14} color={COLORS.muted} strokeWidth={2} />}
                   <Text className="min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
                     {preview.branch ? <Text className="font-mono">{preview.branch}</Text> : null}
                     {preview.branch ? ' · ' : ''}

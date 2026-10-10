@@ -11,6 +11,7 @@ import { ScreenTop } from '@/components/layout/ScreenTop';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { useNavBarSpace } from '@/hooks/useNavBarSpace';
 import { MAX_W, useGutter } from '@/hooks/useResponsive';
+import { runChip } from '@/lib/deskView';
 import { COLORS } from '@/theme/colors';
 
 import type { useRunChat } from './useRunChat';
@@ -68,11 +69,14 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
                 {chat.loading ? 'reading…' : 'this run is not on the pc any more'}
               </Text>
             )}
-            <RunChatItems items={chat.items} />
+            <RunChatItems items={chat.items} youCaption={chat.youCaption} />
             {!!chat.logError && <Text className="text-xs text-muted-foreground">{chat.logError}</Text>}
             {chat.decided && (
               <View className="flex-row items-center gap-2">
-                <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: COLORS.accent }} />
+                <View
+                  className="h-[7px] w-[7px] rounded-full"
+                  style={{ backgroundColor: chat.decidedTone === 'denied' ? COLORS.muted : runChip('running').color }}
+                />
                 <Text className="text-xs text-muted-foreground">{chat.decided}</Text>
               </View>
             )}
