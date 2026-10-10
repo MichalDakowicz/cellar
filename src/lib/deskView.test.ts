@@ -1,4 +1,4 @@
-import { deskSections, deskSummary, hostLine, LATELY_MAX, runChip, runMeta } from './deskView';
+import { deskSections, deskSummary, detailParts, hostLine, LATELY_MAX, metaParts, runChip, runMeta } from './deskView';
 
 const run = (state: 'running' | 'waiting' | 'done' | 'failed' | 'stopped', startedAt: number) => ({ state, startedAt });
 
@@ -54,5 +54,38 @@ describe('hostLine', () => {
     expect(hostLine('lan', false).online).toBe(true);
     expect(hostLine('cellar', false).online).toBe(true);
     expect(hostLine('none', true)).toEqual({ online: false, line: 'looking for it…' });
+  });
+});
+
+describe('detailParts', () => {
+  it('puts the command or path in mono', () => {
+    expect(detailParts('wants to run npm i expo-av')).toEqual([{ text: 'wants to run ' }, { text: 'npm i expo-av', mono: true }]);
+    expect(detailParts('editing src/app/(tabs)/inbox.tsx')).toEqual([
+      { text: 'editing ' },
+      { text: 'src/app/(tabs)/inbox.tsx', mono: true },
+    ]);
+  });
+
+  it('leaves a plain line alone', () => {
+    expect(detailParts('needs you at the pc')).toEqual([{ text: 'needs you at the pc' }]);
+  });
+});
+
+describe('metaParts', () => {
+  it('picks the diff out of the line', () => {
+    expect(metaParts('site · claude · merged · 2h ago · +142 −38')).toEqual([
+      { text: 'site · claude · merged · 2h ago · ' },
+      { text: '+142', mono: true, tone: 'added' },
+      { text: ' ' },
+      { text: '−38', mono: true, tone: 'removed' },
+    ]);
+  });
+
+  it('leaves a branch number alone', () => {
+    expect(metaParts('wt/issue-12')).toEqual([{ text: 'wt/issue-12' }]);
+  });
+
+  it('is the line itself with no diff', () => {
+    expect(metaParts('app · codex · 9m')).toEqual([{ text: 'app · codex · 9m' }]);
   });
 });

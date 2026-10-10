@@ -89,3 +89,29 @@ export function deskSummary(input: { name: string; online: boolean; running: num
   if (input.waiting > 0) parts.push(`${input.waiting} waiting on you`);
   return parts.join(' · ');
 }
+
+export type TextPart = { text: string; mono?: boolean; tone?: 'added' | 'removed' };
+
+/**
+ * A run's detail line with its object in mono, the way the boards draw it:
+ * "wants to run `npm i expo-av`", "editing `src/app/(tabs)/inbox.tsx`".
+ */
+export function detailParts(detail: string): TextPart[] {
+  const match = detail.match(/^(.*?\b(?:run|running|editing|reading|writing|installing)\s+)(\S.*)$/);
+  return match ? [{ text: match[1] }, { text: match[2], mono: true }] : [{ text: detail }];
+}
+
+/** A run's meta line with its diff picked out: "+142" green, "−38" red, both mono. */
+export function metaParts(meta: string): TextPart[] {
+  const parts: TextPart[] = [];
+  let rest = meta;
+  // The minus is U+2212, as the runs write it; a hyphen is a branch name (`issue-12`).
+  const pattern = /([+−]\d+)/;
+  for (let match = rest.match(pattern); match && match.index !== undefined; match = rest.match(pattern)) {
+    if (match.index > 0) parts.push({ text: rest.slice(0, match.index) });
+    parts.push({ text: match[1], mono: true, tone: match[1].startsWith('+') ? 'added' : 'removed' });
+    rest = rest.slice(match.index + match[1].length);
+  }
+  if (rest) parts.push({ text: rest });
+  return parts;
+}

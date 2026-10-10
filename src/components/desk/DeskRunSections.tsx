@@ -19,14 +19,12 @@ export function DeskRunSections({
   gutter,
   empty,
   onOpen,
-  onStop,
 }: {
   sections: Sections<DeskRunCard>;
   gutter: string;
   /** Said when there are no runs anywhere — "reading…", an error, "nothing running". */
   empty: string;
   onOpen: ((id: string) => void) | null;
-  onStop: ((id: string) => void) | null;
 }) {
   const shown = TITLES.filter(([key]) => sections[key].length > 0);
 
@@ -42,10 +40,10 @@ export function DeskRunSections({
   return (
     <>
       {shown.map(([key, title]) => (
-        <View key={key} className={`gap-1.5 pt-6 ${gutter}`}>
+        <View key={key} className={`gap-2.5 pt-5 ${gutter}`}>
           <Overline>{title}</Overline>
           {sections[key].map((run) => (
-            <DeskRunCardRow key={run.id} run={run} onOpen={onOpen} onStop={onStop} />
+            <DeskRunCardRow key={run.id} run={run} onOpen={onOpen} />
           ))}
         </View>
       ))}

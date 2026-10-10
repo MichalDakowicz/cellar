@@ -1,5 +1,5 @@
 import { useRouter, type Href } from 'expo-router';
-import { Settings } from 'lucide-react-native';
+import { SlidersHorizontal } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
@@ -8,7 +8,6 @@ import { DeskLaterLinks } from '@/components/desk/DeskLaterLinks';
 import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
-import { DeskStatusLine } from '@/components/desk/DeskStatusLine';
 import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { ScreenTop } from '@/components/layout/ScreenTop';
@@ -70,18 +69,12 @@ export default function Desk() {
                   onPress={() => router.push('/settings' as Href)}
                   className="h-11 w-11 items-center justify-center rounded-full bg-secondary active:opacity-70"
                 >
-                  <Settings size={20} color={COLORS.foreground} strokeWidth={2} />
+                  <SlidersHorizontal size={20} color={COLORS.foreground} strokeWidth={2} />
                 </Pressable>
               </View>
 
               <View className={`pt-5 ${gutter}`}>
                 <DeskHostCard {...home.host} />
-                <DeskStatusLine
-                  via={link.via}
-                  seenAt={link.desk?.seenAt ?? null}
-                  checking={link.checking}
-                  lanError={link.pair ? link.lanError : null}
-                />
               </View>
 
               {home.commands && (
@@ -94,7 +87,6 @@ export default function Desk() {
                 sections={home.sections}
                 gutter={gutter}
                 onOpen={home.openRun}
-                onStop={home.stopRun}
                 empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
               />
             </>

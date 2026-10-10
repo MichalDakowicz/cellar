@@ -84,6 +84,8 @@ export const COLORS = {
   accentInk: 'hsl(0 0% 98%)',
   foreground: 'hsl(0 0% 98%)',
   muted: 'hsl(0 0% 63.9%)',
+  /** Secondary text on a raised ground and glyphs in a tile — the boards' #d4d4d4. */
+  foregroundSoft: 'hsl(0 0% 83%)',
   mutedDeep: 'hsl(0 0% 45%)',
   /** A host that is awake, a check that passed. */
   ok: '#22c55e',

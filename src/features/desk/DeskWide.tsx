@@ -4,7 +4,6 @@ import { DeskCaptureBar } from '@/components/desk/DeskCaptureBar';
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
-import { DeskStatusLine } from '@/components/desk/DeskStatusLine';
 import { DeskTodayFigures } from '@/components/desk/DeskTodayFigures';
 import { DeskWaitingInline } from '@/components/desk/DeskWaitingInline';
 import { Overline } from '@/components/ui/controls';
@@ -28,8 +27,6 @@ export function DeskWide({
   home: ReturnType<typeof useDeskHome>;
   wide: ReturnType<typeof useDeskWide>;
 }) {
-  const { link } = screen;
-
   return (
     <View className="gap-6 px-8 pt-8">
       <View className="flex-row items-start gap-4">
@@ -58,7 +55,6 @@ export function DeskWide({
             sections={wide.sections}
             gutter=""
             onOpen={home.openRun}
-            onStop={home.stopRun}
             empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
           />
         </View>
@@ -67,12 +63,6 @@ export function DeskWide({
           <View className="gap-2">
             <Overline>devices</Overline>
             <DeskHostCard {...home.host} />
-            <DeskStatusLine
-              via={link.via}
-              seenAt={link.desk?.seenAt ?? null}
-              checking={link.checking}
-              lanError={link.pair ? link.lanError : null}
-            />
           </View>
           {home.commands && (
             <View className="gap-2">

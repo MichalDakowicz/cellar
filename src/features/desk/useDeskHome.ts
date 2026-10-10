@@ -65,10 +65,6 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
     sections: cards,
     /** A run opens its own screen — real or sample, the same route. */
     openRun: (id: string) => router.push(`/desk/run/${id}` as Href),
-    stopRun: (id: string) => {
-      const run = runs.runs.find((candidate) => candidate.id === id);
-      if (run) screen.stop(run);
-    },
     sample,
     /** File it is real; the rest are drawn on the sample desk until their wiring (V16). */
     later: [
