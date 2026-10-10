@@ -48,6 +48,7 @@
 - Settings: your account and the size of your cellar moved here from profile
 - Your pc: its local pages open in the desk's preview instead of the browser
 - Settings: on a wide window, a column of sections sits beside the page
+- Desktop: the sidebar has a desk section — home, chat, commands, previews, phone — and pinned projects
 - Settings: show a sample desk moved into devices and pairing
 - Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects

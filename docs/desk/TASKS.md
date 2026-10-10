@@ -202,11 +202,12 @@ change. `bg-secondary/60` stays as the raised ground: it composes to ≈#1b1b1b 
 light theme, which a fixed `neutral-900` would not. Bazaar shares `components/ui/controls.tsx` and
 owes the same `Chip`/`Overline` change.
 
-### M3 · the desktop sidebar's desk section `[ ]`
+### M3 · the desktop sidebar's desk section `[x]`
 
 Under cellar's four: desk › home · chat · commands · previews · the attached phone, then pinned
 projects. Adds `desk/chat` (the run list with nothing open), `desk/commands` (each project's `$`
-commands — sample until W2) and `desk/previews` (the pc's pages, real).
+commands — sample until W2) and `desk/previews` (the pc's pages, real). Rows and pinned
+projects come from `lib/sidebar.ts`; chat is badged with what is waiting on you.
 
 ### M4 · phone boards `[ ]`
 
