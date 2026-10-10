@@ -18,14 +18,18 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
   const direct = link.calls;
 
   const live = useQuery({
-    queryKey: [...DESK_KEYS.runs, link.via],
+    queryKey: [...DESK_KEYS.runs, link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none'],
     queryFn: () => direct!.runs(),
     enabled: direct !== null && watch,
     refetchInterval: 5_000,
     retry: false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
-  const runs: DeskRun[] = direct ? (live.data ?? []) : link.via === 'cellar' ? sortRuns(link.desk?.runs ?? []) : [];
+  const snapshotError = link.via === 'cellar' ? link.cellarError ?? (link.desk?.runs === null ? 'the pc did not return a valid run snapshot' : null) : null;
+  const available = direct ? live.isSuccess && live.isFetchedAfterMount : link.via === 'cellar' && link.desk !== null && !snapshotError;
+  const runs: DeskRun[] = !available ? [] : direct ? (live.data ?? []) : sortRuns(link.desk?.runs ?? []);
 
   const refresh = () => {
     void client.invalidateQueries({ queryKey: DESK_KEYS.runs });
@@ -60,8 +64,10 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
 
   return {
     runs,
-    loading: direct !== null && live.isLoading,
-    error: live.error ? (live.error as Error).message : null,
+    available,
+    refresh,
+    loading: direct !== null && !available && !live.isError,
+    error: direct && live.error ? (live.error as Error).message : snapshotError,
     /** Through the cellar the list is the pc's last heartbeat, not a live read. */
     snapshotAt: direct ? null : (link.desk?.seenAt ?? null),
     start,

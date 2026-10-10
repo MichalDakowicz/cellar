@@ -46,7 +46,7 @@ export function useDeskLink() {
   });
 
   const desks = useQuery({
-    queryKey: DESK_KEYS.desks,
+    queryKey: [...DESK_KEYS.desks, user?.id ?? null],
     queryFn: fetchDesks,
     enabled: !!user && !bridge,
     retry: false,
@@ -81,6 +81,7 @@ export function useDeskLink() {
   });
 
   return {
+    ownerId: user?.id ?? null,
     via,
     can: deskCan(via),
     /** The direct API — bridge or LAN — only when that is the wire in use. */

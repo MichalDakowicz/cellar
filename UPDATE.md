@@ -42,6 +42,8 @@
 
 ### Changed
 
+- Desk: shared real counts across navigation and headers; unavailable reads hide totals,
+  retry and reconnect wait for confirmed results, and remote counts show snapshot freshness
 - Desk: match canvas layouts, typography, task sheet, chat composer and desktop sample panels
 
 - Entry: start on pc opens the new task screen with the thought attached

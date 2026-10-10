@@ -50,6 +50,14 @@ Lan first, the cellar second — the decision on the cellar entry that asked for
 The cellar wire needs `supabase/schema.sql` §12 run once in the dashboard. Until then the pc
 says so in `/desk` and the phone only uses the LAN.
 
+Desk totals share `src/lib/deskCounts.ts`: blocked entries plus host waiting runs, with
+only running runs counted as working. A waiting run means it needs attention at the PC;
+it is not a verified runtime approval until W8. A failed run poll returns an error rather
+than cached success. Heartbeats include the full run list; a failed poll leaves the last
+heartbeat's age unchanged while mailbox requests can still be handled. The phone labels
+remote counts as snapshots and hides unavailable totals. Flow map and verification:
+[`docs/desk/how-it-works.md`](../docs/desk/how-it-works.md).
+
 ## What it will not do
 
 - **Run anywhere.** A start's folder must be a project's `repo_path` in your cellar, checked

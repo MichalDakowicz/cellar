@@ -44,7 +44,7 @@ export function DeskRunSections({
     <>
       {shown.map(([key, title]) => (
         <View key={key} className={`gap-2.5 pt-5 ${gutter}`}>
-          <Overline>{`${title} · ${sections[key].length}`}</Overline>
+          <Overline>{`${title} · ${sections[key].length}${sections[key].some((run) => run.id.startsWith('sample-')) ? ' · includes sample' : ''}`}</Overline>
           {sections[key].map((run) => (
             <DeskRunCardRow key={run.id} run={run} onOpen={onOpen} />
           ))}

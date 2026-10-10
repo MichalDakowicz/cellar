@@ -39,7 +39,7 @@ export function DeskHostCard({
           {compact && figures ? <><Overline>agent slots</Overline><Text className="font-sans text-sm font-semibold text-foreground">{figures.find((figure) => figure.label === 'agents')?.value}</Text></> : !compact ? <Text className="font-sans text-base font-bold text-foreground" numberOfLines={1}>{name}</Text> : null}
           {(!compact || !figures) && <View className="flex-row items-center gap-1.5">
             {!compact && <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: online ? COLORS.ok : COLORS.mutedDeep }} />}
-            <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>
+            <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground">
               {line}
             </Text>
           </View>}

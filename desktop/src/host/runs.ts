@@ -51,10 +51,7 @@ export class Runs {
   private readonly file: string;
   private readonly logs: string;
   private readonly children = new Map<string, ChildProcess>();
-  /** What `claude agents` last said, for the poll where it fails to answer. */
-  private lastClaude = new Map<string, DeskRunState>();
-
-  constructor(dir: string) {
+  constructor(dir: string, private readonly readClaude = claudeRows) {
     this.file = join(dir, 'runs.json');
     this.logs = join(dir, 'runs');
     mkdirSync(this.logs, { recursive: true });
@@ -117,18 +114,14 @@ export class Runs {
   }
 
   async list(): Promise<DeskRun[]> {
-    let rows: ClaudeAgentRow[] | null = null;
-    try {
-      rows = await claudeRows();
-      this.lastClaude = new Map(rows.map((row) => [rowId(row), claudeRunState(row)]));
-    } catch {
-      // `claude agents` did not answer this time; every claude run keeps the state it had.
-    }
+    // A failed poll must reach the phone as unavailable, not fresh cached totals.
+    const rows = await this.readClaude();
+    const claudeStates = new Map(rows.map((row) => [rowId(row), claudeRunState(row)]));
 
     const runs: DeskRun[] = [];
     for (const record of this.records) {
       const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const };
-      const state = record.agent === 'claude' ? (this.lastClaude.get(record.id) ?? (rows ? 'done' : 'running')) : await this.ownState(record);
+      const state = record.agent === 'claude' ? (claudeStates.get(record.id) ?? 'done') : await this.ownState(record);
       runs.push({ ...base, state });
     }
 

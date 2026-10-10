@@ -86,14 +86,21 @@ export class CellarFallback {
     const client = this.deps.account.client();
     const identity = this.deps.identity();
     const info = await deskInfo(this.deps);
-    const { error } = await client.from('cellar_desks').upsert(
+    let snapshot: DeskRun[] | null = null;
+    try {
+      snapshot = runs ?? (await this.deps.runs.list());
+    } catch {
+      // Keep the last heartbeat's age. A failed read must not refresh it or
+      // stop queued requests from being handled while the next poll retries.
+    }
+    const { error } = snapshot === null ? { error: null } : await client.from('cellar_desks').upsert(
       {
         id: identity.id,
         name: identity.name,
         host: this.deps.lanHost(),
         port: identity.port,
         agents: info.agents.filter((agent) => agent.installed).map((agent) => agent.id),
-        runs: (runs ?? (await this.deps.runs.list())).slice(0, 20),
+        runs: snapshot,
         seen_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,id' },

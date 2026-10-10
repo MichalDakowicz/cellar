@@ -266,10 +266,19 @@ remains in Pass 2. See `visual-clone.md` for coverage and review entry.
 
 ## Pass 2 — the wiring
 
-### W1 · real counts on the desk `[ ]`
+### W1 · real counts on the desk `[x]`
 
-The desk badge and status line from real data: blocked entries + runs waiting on an approval.
-One pure `deskCounts` in `lib/`, used by the island, the sidebar and the header.
+The desk badge and status line from real data: blocked entries + host-reported waiting runs.
+One pure `deskCounts` in `lib/`, used by the island, the sidebar and both headers through a
+shared persistent source. Waiting is not working; unknown counts are not zero. Failed reads
+hide cached totals and offer retry, disconnected hosts offer reconnect, mailbox totals show
+snapshot freshness, and samples never enter real totals. Until W8, a host waiting state says
+"needs you at the pc", not a verified approval.
+
+Verified 2026-10-10: 832 app tests, 30 desktop tests, types, lint, desktop build and local web
+export pass. Release APK installed and launched; phone checked confirmed counts, injected
+read failure, retry, disconnect and reconnect against a separate read-only host. Original
+pairing restored. See `how-it-works.md` for flow map, test boundaries and next task W2.
 
 ### W2 · `$` commands per project `[ ]`
 

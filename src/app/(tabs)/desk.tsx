@@ -2,6 +2,7 @@ import { useRouter, type Href } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
+import { DeskCountRecovery } from '@/components/desk/DeskCountRecovery';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
 import { DeskIdentity } from '@/components/desk/DeskIdentity';
 import { DeskRunScope } from '@/components/desk/DeskRunScope';
@@ -59,6 +60,7 @@ export default function Desk() {
             <>
               <View className={gutter}>
                 <DeskIdentity name={unpaired ? 'your desk' : home.host.name} online={home.host.online} checking={link.checking} summary={home.host.online ? home.activity : ''} sample={home.sample} onSettings={() => router.push('/settings' as Href)} />
+                <DeskCountRecovery state={home.counts.state} onRetry={home.retryCounts} onReconnect={link.recheck} />
               </View>
 
               {(home.sections.waiting.length > 0 || wide.thoughts.length > 0) && <View className={`pt-5 ${gutter}`}><DeskWaitingCards runs={home.sections.waiting} thoughts={wide.thoughts} onRun={home.openRun} onThought={wide.openThought} /></View>}
@@ -78,7 +80,7 @@ export default function Desk() {
                 sections={home.scopedSections}
                 gutter={gutter}
                 onOpen={home.openRun}
-                empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
+                empty={home.empty}
                 only={['running', 'lately']}
               />
             </>

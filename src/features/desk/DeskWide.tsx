@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { DeskCaptureBar } from '@/components/desk/DeskCaptureBar';
+import { DeskCountRecovery } from '@/components/desk/DeskCountRecovery';
 import { DeskCommandTiles } from '@/components/desk/DeskCommandTiles';
 import { DeskHostCard } from '@/components/desk/DeskHostCard';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
@@ -33,6 +34,7 @@ export function DeskWide({
         <View className="min-w-0 flex-1 gap-1">
           <Text className="font-sans text-2xl font-bold tracking-tight text-foreground">desk</Text>
           <Text className="font-sans text-sm text-muted-foreground">{home.summary}</Text>
+          <DeskCountRecovery state={home.counts.state} onRetry={home.retryCounts} onReconnect={screen.link.recheck} />
         </View>
         <Pressable
           accessibilityRole="button"
@@ -55,7 +57,7 @@ export function DeskWide({
             sections={wide.sections}
             gutter=""
             onOpen={home.openRun}
-            empty={screen.runs.error ?? (screen.runs.loading ? 'reading…' : 'nothing running')}
+            empty={home.empty}
           />
         </View>
 
@@ -70,7 +72,7 @@ export function DeskWide({
               <DeskCommandTiles {...home.commands} gutter="" mono />
             </View>
           )}
-          <DeskTodayFigures figures={wide.today} />
+          {home.counts.working !== null && <DeskTodayFigures figures={wide.today} />}
         </View>
       </View>
     </View>

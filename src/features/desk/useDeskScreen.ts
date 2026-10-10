@@ -5,16 +5,14 @@ import type { DeskRun } from '@/lib/deskProtocol';
 import { readError } from '@/lib/utils';
 import { useDeskPair } from '@/store/deskPair';
 
-import { useDeskLink } from './useDeskLink';
+import { useDeskStatus } from './DeskStatusProvider';
 import { useDeskLocal } from './useDeskLocal';
-import { useDeskRuns } from './useDeskRuns';
 
 /**
  * Everything the pc screen shows, put together so the route only lays it out.
  */
 export function useDeskScreen() {
-  const link = useDeskLink();
-  const runs = useDeskRuns(link);
+  const { link, runs } = useDeskStatus();
   const local = useDeskLocal(link);
   const forgetPair = useDeskPair((state) => state.forget);
   const { say } = useToast();

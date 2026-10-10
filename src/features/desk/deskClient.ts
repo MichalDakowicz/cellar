@@ -3,6 +3,7 @@ import * as Crypto from 'expo-crypto';
 import type { DeskPair } from '@/lib/deskPair';
 import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { hex, signDeskRequest, type Sha256 } from '@/lib/deskSign';
+import { readDeskRuns } from '@/lib/deskRunSnapshot';
 
 import type { DeskBridge } from './bridge';
 
@@ -122,7 +123,12 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { 
 export function deskCalls(send: DeskTransport) {
   return {
     info: async () => (await send('GET', '/desk')) as DeskInfo,
-    runs: async () => ((await send('GET', '/runs')) as { runs: DeskRun[] }).runs,
+    runs: async () => {
+      const body = (await send('GET', '/runs')) as { runs?: unknown } | null;
+      const runs = readDeskRuns(body?.runs);
+      if (!runs) throw new Error('the pc did not return a valid run list');
+      return runs;
+    },
     start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
     stop: async (id: string) => void (await send('POST', `/runs/${encodeURIComponent(id)}/stop`)),
     log: async (id: string) => ((await send('GET', `/runs/${encodeURIComponent(id)}/log`)) as { lines: DeskLogLine[] }).lines,

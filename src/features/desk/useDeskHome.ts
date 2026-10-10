@@ -3,12 +3,13 @@ import { useMemo, useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 import { SAMPLE_FIGURES, SAMPLE_PROJECTS } from '@/lib/deskSample';
-import { deskSections, deskSummary, hostLine, type DeskRunCard } from '@/lib/deskView';
+import { deskSections, hostLine, type DeskRunCard } from '@/lib/deskView';
+import { deskCountLine } from '@/lib/deskCounts';
 import { useDeskPrefs } from '@/store/deskPrefs';
 
 import { useDeskRunCards } from './useDeskRunCards';
 import type { useDeskScreen } from './useDeskScreen';
-import { useDeskWaiting } from './useDeskWaiting';
+import { useDeskStatus } from './DeskStatusProvider';
 
 /**
  * The desk tab's top half — summary, host card, command tiles, and the runs as
@@ -21,7 +22,7 @@ import { useDeskWaiting } from './useDeskWaiting';
 export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const router = useRouter();
   const { link, runs, local } = screen;
-  const waitingEntries = useDeskWaiting();
+  const { counts, retryCounts } = useDeskStatus();
   const sample = useDeskPrefs((state) => state.sample);
   const picked = useDeskPrefs((state) => state.commandsProject);
   const pick = useDeskPrefs((state) => state.setCommandsProject);
@@ -29,10 +30,12 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   const [scope, setScope] = useState<'all' | 'project'>('all');
 
   const all = useDeskRunCards(runs.runs);
-  const cards = useMemo(() => deskSections<DeskRunCard>(all), [all]);
+  const cards = useMemo(() => deskSections<DeskRunCard>(
+    all.filter((run) => run.id.startsWith('sample-') || counts.working !== null),
+  ), [all, counts.working]);
 
   const host = hostLine(link.via, link.checking);
-  const live = cards.waiting.length + cards.running.length;
+  const activity = deskCountLine(counts);
   const commands = sample ? SAMPLE_PROJECTS : null;
   const current = commands ? (commands.find((project) => project.id === picked) ?? commands[0]) : null;
   const scopedCards = useMemo(() => ({
@@ -42,15 +45,16 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
   }), [cards, scope, current?.name]);
 
   return {
-    summary: deskSummary({
-      name: link.name,
-      online: host.online,
-      running: live,
-      waiting: waitingEntries + cards.waiting.length,
-    }),
+    summary: `${link.name} · ${host.line}${activity ? ` · ${activity}` : ''}`,
+    counts,
+    retryCounts,
+    empty: counts.state === 'disconnected' ? `connect to ${link.name} to read runs`
+      : counts.state === 'loading' ? 'reading counts…'
+      : counts.state === 'failed' ? 'counts unavailable — retry to read the desk' : 'nothing working',
     host: {
       name: link.name,
       ...host,
+      line: counts.snapshotAt ? `${host.line} · snapshot ${counts.snapshotAt}` : host.line,
       figures: sample ? SAMPLE_FIGURES : null,
       onScreen: local.available ? () => router.push('/desk/screen' as Href) : null,
     },
@@ -72,7 +76,7 @@ export function useDeskHome(screen: ReturnType<typeof useDeskScreen>) {
     scopedSections: scopedCards,
     scope,
     onScope: setScope,
-    activity: `${cards.running.length} working · ${cards.waiting.length + waitingEntries} waiting on you`,
+    activity,
     /** A run opens its own screen — real or sample, the same route. */
     openRun: (id: string) => router.push(`/desk/run/${id}` as Href),
     sample,

@@ -1,5 +1,6 @@
 import type { DeskAgent, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { supabase } from '@/lib/supabase';
+import { readDeskRuns } from '@/lib/deskRunSnapshot';
 
 /**
  * The pc through the cellar, for when it is not on this network: its
@@ -13,7 +14,7 @@ export type DeskRow = {
   host: string | null;
   port: number | null;
   agents: DeskAgent[];
-  runs: DeskRun[];
+  runs: DeskRun[] | null;
   seenAt: string;
 };
 
@@ -29,7 +30,7 @@ export async function fetchDesks(): Promise<DeskRow[]> {
     host: (row.host as string | null) ?? null,
     port: (row.port as number | null) ?? null,
     agents: (row.agents as DeskAgent[] | null) ?? [],
-    runs: Array.isArray(row.runs) ? (row.runs as DeskRun[]) : [],
+    runs: readDeskRuns(row.runs),
     seenAt: row.seen_at as string,
   }));
 }

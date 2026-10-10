@@ -17,6 +17,7 @@ import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarDisplay } from '@/features/cellar/CellarDisplay';
 import { CellarLive } from '@/features/cellar/CellarLive';
 import { DeskSessionSync } from '@/features/desk/DeskSessionSync';
+import { DeskStatusProvider } from '@/features/desk/DeskStatusProvider';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
 // Imported for its side effect: the background task has to be defined at
@@ -104,16 +105,18 @@ export default function RootLayout() {
                   <CellarLive />
                   <QuestionSync />
                   <DeskSessionSync />
-                  <CellarDisplay>
-                    <AppShell>
-                      <Stack screenOptions={{ headerShown: false }}>
-                        {/* Sheets over what you were looking at (docs/desk/canvas
-                            `NewTask`, `PhoneShare`), not screens of their own. */}
-                        <Stack.Screen name="desk/new" options={SHEET} />
-                        <Stack.Screen name="desk/share" options={SHEET} />
-                      </Stack>
-                    </AppShell>
-                  </CellarDisplay>
+                  <DeskStatusProvider>
+                    <CellarDisplay>
+                      <AppShell>
+                        <Stack screenOptions={{ headerShown: false }}>
+                          {/* Sheets over what you were looking at (docs/desk/canvas
+                              `NewTask`, `PhoneShare`), not screens of their own. */}
+                          <Stack.Screen name="desk/new" options={SHEET} />
+                          <Stack.Screen name="desk/share" options={SHEET} />
+                        </Stack>
+                      </AppShell>
+                    </CellarDisplay>
+                  </DeskStatusProvider>
                 </AuthGate>
               </ToastProvider>
             </ThemeProvider>

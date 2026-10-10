@@ -14,6 +14,7 @@ import { useDeskHandoff } from '@/store/deskHandoff';
 import { useDeskPrefs } from '@/store/deskPrefs';
 
 import type { useDeskScreen } from './useDeskScreen';
+import { useDeskStatus } from './DeskStatusProvider';
 
 type Decision = 'allow' | 'deny';
 
@@ -29,6 +30,7 @@ type Decision = 'allow' | 'deny';
 export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: DeskRunSections<DeskRunCard>) {
   const router = useRouter();
   const { entries } = useCellar();
+  const { counts } = useDeskStatus();
   const { drop } = useCellarWrites();
   const { say } = useToast();
   const kind = useCellarPrefs((state) => state.draftKind);
@@ -43,15 +45,15 @@ export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: 
         ? SAMPLE_RUNS.filter((run) => SAMPLE_CHATS[run.id]?.approval && !decided[run.id]).map((run) => ({
             id: run.id,
             title: run.title,
-            detail: `wants to ${SAMPLE_CHATS[run.id].approval!.what}: ${SAMPLE_CHATS[run.id].approval!.subject}`,
+            detail: `sample · wants to ${SAMPLE_CHATS[run.id].approval!.what}: ${SAMPLE_CHATS[run.id].approval!.subject}`,
           }))
         : [],
     [sample, decided],
   );
 
   const thoughts = useMemo(
-    () => waitingOnYou(entries).map((entry) => ({ id: entry.id, title: entry.text, detail: 'an agent asked about this' })),
-    [entries],
+    () => counts.waiting === null ? [] : waitingOnYou(entries).map((entry) => ({ id: entry.id, title: entry.text, detail: 'an agent asked about this' })),
+    [entries, counts.waiting],
   );
 
   const stoppable = screen.runs.runs.filter((run) => run.origin === 'phone' && (run.state === 'running' || run.state === 'waiting'));

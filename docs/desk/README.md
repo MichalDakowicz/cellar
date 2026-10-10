@@ -12,6 +12,7 @@ written half, moved here so they version with the code.
 | [keys.md](keys.md) | `@` files, `$` commands and `$project/entry`, `/` agent skills, `#` colours |
 | [t3code-notes.md](t3code-notes.md) | how t3code hands work to agents, and what cellar takes from it |
 | [TASKS.md](TASKS.md) | the build order: every screen drawn first, then the wiring, easiest to hardest |
+| [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1 verification |
 
 The canvas stays the source for **how it looks** — open an artboard before building its
 screen. A copy lives in [`canvas/`](canvas/): one `*.dc.html` per artboard (inline styles, and its
