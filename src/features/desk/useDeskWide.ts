@@ -18,6 +18,7 @@ import { useDeskStatus } from './DeskStatusProvider';
 import { useDeskStream } from './useDeskStream';
 import { pendingApproval } from '@/lib/deskApprovals';
 import { useApprovalPending } from '@/store/deskApprovals';
+import { useStopAll } from './useStopAll';
 
 type Decision = 'allow' | 'deny';
 
@@ -34,6 +35,7 @@ export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: 
   const { entries } = useCellar();
   const { counts, link } = useDeskStatus();
   const stream = useDeskStream(link);
+  const stopAll = useStopAll(link, stream.live);
   const pendingAnswers = useApprovalPending((state) => state.pending);
   const approvals = stream.live && link.info?.approvalProtocol === 1 ? (stream.state.approvals ?? []).filter((row) => pendingApproval(row)
     || !!pendingAnswers[`${link.ownerId}:${link.info?.id ?? link.pair?.id}:${row.id}`]) : [];
@@ -61,8 +63,6 @@ export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: 
     () => counts.waiting === null ? [] : waitingOnYou(entries).map((entry) => ({ id: entry.id, title: entry.text, detail: 'an agent asked about this' })),
     [entries, counts.waiting],
   );
-
-  const stoppable = screen.runs.runs.filter((run) => run.origin === 'phone' && (run.state === 'running' || run.state === 'waiting'));
 
   return {
     capture: {
@@ -104,7 +104,7 @@ export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: 
       entries.map((entry) => entry.createdAt),
       screen.runs.runs,
     ),
-    /** Every run this desk started that is still going; sessions opened at the pc are the pc's. */
-    stopAll: stoppable.length > 0 ? () => stoppable.forEach((run) => screen.stop(run)) : null,
+    stopAll: stopAll.run,
+    stopAllStatus: stopAll,
   };
 }

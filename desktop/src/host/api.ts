@@ -1,5 +1,6 @@
 import type { RunEvents } from './runEvents.ts';
 import type { Approvals } from './approvals.ts';
+import type { Controls } from './controls.ts';
 import { realpathSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -38,6 +39,7 @@ export type ApiRequest = { method: string; path: string; body?: unknown; source?
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  controls?: Controls;
   approvals?: Approvals;
   events?: RunEvents;
   identity: () => Identity;
@@ -75,6 +77,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     ...(deps.worktrees ? { worktrees: true as const } : {}),
     ...(deps.events ? { eventProtocol: 1 as const } : {}),
     ...(deps.approvals ? { approvalProtocol: 1 as const } : {}),
+    ...(deps.controls ? { dispatchProtocol: 1 as const } : {}),
   };
 }
 
@@ -142,9 +145,18 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'POST /run-controls':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ receipt: await deps.controls.run(req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });
+      case 'GET /run-controls/:id':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ receipt: await deps.controls.receipt(parts[1]) });
+      case 'GET /runs/:id/queue':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ queue: deps.controls.queue(parts[1]) });
       case 'POST /approval-answers':
         if (!deps.approvals || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for approvals.', 409);
         return ok({ receipt: await deps.approvals.answer(deps.account.current.userId,

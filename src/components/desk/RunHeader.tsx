@@ -8,10 +8,11 @@ import type { DeskRunState } from '@/lib/deskProtocol';
 import { COLORS } from '@/theme/colors';
 
 /** Compact pinned identity; workspace and diff live in the disclosure. */
-export function RunHeader({ title, meta, branch, state, age, diff, onStop, meter = false, connection, known = true }: {
+export function RunHeader({ title, meta, branch, state, age, diff, onStop, stopping = false, meter = false, connection, known = true }: {
   title: string; meta: string; branch: string | null; state: DeskRunState; age: string | null;
   diff: { added: number; removed: number; files: number } | null;
   onStop: (() => void) | null; meter?: boolean; connection?: string; known?: boolean;
+  stopping?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -22,7 +23,7 @@ export function RunHeader({ title, meta, branch, state, age, diff, onStop, meter
           <ChevronDown size={16} color={COLORS.foregroundSoft} style={expanded ? { transform: [{ rotate: '180deg' }] } : undefined} />
         </Pressable>
         {meter && <UsageMeter />}
-        {onStop && <Pressable accessibilityRole="button" accessibilityLabel="stop this run" onPress={onStop} className="h-11 w-11 items-center justify-center rounded-lg border border-border"><Square size={18} color={COLORS.foreground} fill={COLORS.foreground} /></Pressable>}
+        {onStop && <Pressable accessibilityRole="button" accessibilityLabel={stopping ? 'confirming stop' : 'stop this run'} accessibilityState={{ disabled: stopping }} disabled={stopping} onPress={onStop} className="h-11 w-11 items-center justify-center rounded-lg border border-border">{stopping ? <Text className="font-sans text-xs text-muted-foreground">…</Text> : <Square size={18} color={COLORS.foreground} fill={COLORS.foreground} />}</Pressable>}
       </View>
       <View className="flex-row flex-wrap items-center gap-1.5">
         {known && <RunChip state={state} compact />}

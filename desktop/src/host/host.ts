@@ -1,6 +1,10 @@
 import { RunEvents } from './runEvents.ts';
 import { Approvals } from './approvals.ts';
 import { ManagedRuns } from './managedRuns.ts';
+import { ControlStore } from './controlStore.ts';
+import { Dispatch } from './dispatch.ts';
+import { Controls } from './controls.ts';
+import { dispatchCommand } from './dispatchCommand.ts';
 import type { Server } from 'node:http';
 import { appendFileSync, statSync, writeFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
@@ -90,8 +94,11 @@ export class DeskHost {
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
+    this.deps.runs.onChange = () => this.deps.events!.invalidate();
+    this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
     this.deps.approvals = new Approvals(join(options.dataDir, 'approvals.sqlite'), (owner, rows) => this.deps.events!.store.approvals(owner, rows));
     this.deps.runs.runtime = new ManagedRuns(this.deps.approvals);
+    this.deps.controls = new Controls(this.deps, new Dispatch(new ControlStore(join(options.dataDir, 'controls.sqlite')), this.deps.runs.runtime, (item, start) => dispatchCommand(this.deps, item, start)));
     this.fallback = new CellarFallback(this.deps);
   }
 
@@ -119,6 +126,7 @@ export class DeskHost {
       await this.deps.runs.runtime?.close();
       await this.deps.events?.stop();
       this.deps.approvals?.close();
+      this.deps.controls?.dispatch.store.close();
     })();
     return this.stopping;
   }

@@ -15,6 +15,7 @@ import { ContentShell } from '@/components/layout/ContentShell';
 import { ScreenTop } from '@/components/layout/ScreenTop';
 import { DeskLocalSections } from '@/features/desk/DeskLocalSections';
 import { DeskWide } from '@/features/desk/DeskWide';
+import { StopAllStatus } from '@/components/desk/StopAllStatus';
 import { useDeskHome } from '@/features/desk/useDeskHome';
 import { useDeskScreen } from '@/features/desk/useDeskScreen';
 import { useDeskWide } from '@/features/desk/useDeskWide';
@@ -67,6 +68,8 @@ export default function Desk() {
 
               <View className={`pt-5 ${gutter}`}>
                 <DeskHostCard {...home.host} compact />
+                <Pressable accessibilityRole="button" accessibilityLabel="stop all agents" disabled={!wide.stopAll} onPress={() => wide.stopAll?.()} className="min-h-11 self-start justify-center px-2"><Text className="font-sans text-xs text-destructive">{wide.stopAllStatus.busy ? 'confirming stops…' : wide.stopAllStatus.pending ? 'check stop results' : 'stop all agents'}</Text></Pressable>
+                <StopAllStatus {...wide.stopAllStatus} />
               </View>
 
               {home.commands && (

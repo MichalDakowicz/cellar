@@ -76,7 +76,7 @@ const ask = () => {
 readline.createInterface({input:process.stdin}).on('line', text => {
   const row = JSON.parse(text);
   if (row.method === 'initialize') return send({id:row.id,result:{}});
-  if (row.method === 'thread/start') { policy=row.params; return send({id:row.id,result:{thread:{id:'thread'}}}); }
+  if (row.method === 'thread/start' || row.method === 'thread/resume') { policy=row.params; return send({id:row.id,result:{thread:{id:'thread'}}}); }
   if (row.method === 'turn/start') { send({id:row.id,result:{turn:{id:'turn'}}}); send({method:'item/started',params:{item:{id:'config',type:'agentMessage',text:JSON.stringify(policy)}}}); return setTimeout(ask,0); }
   if (row.method === 'turn/interrupt') { send({id:row.id,result:{}}); return send({method:'turn/completed',params:{turn:{id:'turn',status:'interrupted'}}}); }
   if (row.id && row.result) {
@@ -88,7 +88,7 @@ readline.createInterface({input:process.stdin}).on('line', text => {
   const rows: any[] = []; let code: number | null | undefined; let session: Awaited<ReturnType<typeof startCodex>> | undefined;
   const start = { cwd: dir, agent: 'codex', prompt: 'fixture', mode: 'ask' } as DeskStart;
   try {
-    session = await startCodex(process.execPath, start, 'abcdef01', 'owner', approvals, process.env, (row) => rows.push(row), (value) => { code = value; });
+    session = await startCodex(process.execPath, start, 'abcdef01', 'owner', approvals, process.env, (row) => rows.push(row), () => {}, (value) => { code = value; });
     for (const decision of ['deny', 'allow', 'always'] as const) {
       await until(() => approvals.list('owner').some((row) => row.state === 'pending'));
       const request = approvals.list('owner').find((row) => row.state === 'pending')!;

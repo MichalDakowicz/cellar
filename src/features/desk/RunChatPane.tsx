@@ -40,7 +40,8 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
     <View className="flex-1">
       <ScreenTop extra={0} />
       <View className="border-b border-border/50 px-4 pb-3 pt-4">
-        <RunHeader title={chat.title} meta={chat.meta} branch={chat.branch} state={chat.state} age={chat.age} diff={chat.diff} onStop={chat.canStop ? chat.stop : null} meter={meter} connection={chat.connection} known={chat.found} />
+        <RunHeader title={chat.title} meta={chat.meta} branch={chat.branch} state={chat.state} age={chat.age} diff={chat.diff} onStop={chat.canStop ? chat.stop : null} stopping={chat.stopping} meter={meter} connection={chat.connection} known={chat.found} />
+        {!!chat.stopMessage && <Text className="font-sans text-xs text-muted-foreground">{chat.stopMessage}</Text>}
       </View>
       <View className="min-h-0 flex-1">
       <ScrollView

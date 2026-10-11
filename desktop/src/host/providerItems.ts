@@ -6,6 +6,7 @@ const detail = (raw: unknown) => typeof raw === 'string' ? raw : raw == null ? '
 const item = (id: string, kind: TurnKind, text: string, status: TurnItem['status'] = 'completed', extra?: unknown): TurnItem => ({ id, kind, text, status, ...(extra == null ? {} : { detail: detail(extra) }) });
 
 export function codexItems(row: Row, prefix: string): TurnItem[] {
+  if (row.type === 'cellar.message') return [item(`message:${row.id}`, 'user_message', detail(row.text))];
   if (row.type === 'turn.failed' || row.type === 'error') return [item(`${prefix}:error`, 'error', detail(row.error?.message ?? row.message ?? row.error), 'failed')];
   if (!['item.started', 'item.updated', 'item.completed'].includes(row.type) || !row.item || typeof row.item.id !== 'string') return [];
   const raw = row.item as Row;
@@ -27,6 +28,7 @@ export function codexItems(row: Row, prefix: string): TurnItem[] {
 }
 
 export function claudeItems(row: Row, prefix: string, state: Row, read: ReadItem): TurnItem[] {
+  if (row.type === 'cellar.message') return [item(`message:${row.id}`, 'user_message', detail(row.text))];
   const out: TurnItem[] = [];
   if (row.type === 'result') {
     if (row.is_error || (Array.isArray(row.permission_denials) && row.permission_denials.length)) out.push(item(`${prefix}:result`, 'error', detail(row.result ?? row.errors ?? 'Agent reported permission denials.'), 'failed', row.permission_denials));

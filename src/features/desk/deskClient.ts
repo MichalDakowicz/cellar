@@ -10,6 +10,7 @@ import type { DeskBridge } from './bridge';
 import type { DeskReceipt } from '@/lib/deskReceipt';
 import { readApprovalReceipt, type ApprovalAnswer, type ApprovalReceipt } from '@/lib/deskApprovals';
 import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest, type WorktreeReview, type WorktreeReceipt } from '@/lib/deskWorktrees';
+import { readControlReceipt, readRunQueue, type RunControl, type ControlReceipt } from '@/lib/deskDispatch';
 
 /**
  * The pc's API, over whichever wire reaches it: the LAN, signed with the
@@ -130,6 +131,12 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { 
 
 export function deskCalls(send: DeskTransport, local = false) {
   return {
+    control: async (request: RunControl) => readControlReceipt(((await send('POST', '/run-controls', request)) as { receipt: unknown }).receipt, request),
+    controlReceipt: async (request: RunControl): Promise<ControlReceipt | null> => {
+      const row = ((await send('GET', `/run-controls/${encodeURIComponent(request.commandId)}`)) as { receipt: unknown }).receipt;
+      return row === null ? null : readControlReceipt(row, request);
+    },
+    queue: async (runId: string) => readRunQueue(((await send('GET', `/runs/${encodeURIComponent(runId)}/queue`)) as { queue: unknown }).queue, runId),
     answerApproval: async (answer: ApprovalAnswer) => readApprovalReceipt(((await send('POST', '/approval-answers', answer)) as { receipt: unknown }).receipt, answer),
     approvalReceipt: async (answer: ApprovalAnswer): Promise<ApprovalReceipt | null> => {
       const row = ((await send('GET', `/approval-answers/${encodeURIComponent(answer.commandId)}`)) as { receipt: unknown }).receipt;

@@ -126,7 +126,14 @@ export class CellarFallback {
   /** A lost mailbox reply is settled from disk, never by launching again. */
   private async recover(row: RequestRow): Promise<void> {
     const owner = this.deps.account.current?.userId;
-    if (!owner || row.kind !== 'start') return;
+    if (!owner) return;
+    if (row.kind === 'stop' && this.deps.controls && row.payload) {
+      const receipt = await this.deps.controls.receipt(row.id);
+      if (!receipt || receipt.state === 'pending') return;
+      await this.deps.account.client().from('cellar_desk_requests').update({ state: receipt.state === 'confirmed' ? 'done' : receipt.state === 'failed' ? 'failed' : 'taken', receipt, error: receipt.error ?? null }).eq('id', row.id).eq('state', 'taken');
+      return;
+    }
+    if (row.kind !== 'start') return;
     const receipt = this.deps.receipts?.get(owner, row.id);
     if (!receipt || receipt.state === 'pending') return;
     const patch = receipt.state === 'confirmed' && receipt.run
@@ -161,6 +168,13 @@ export class CellarFallback {
     }
     try {
       if (row.kind === 'stop' && row.run_id) {
+        if (row.payload && this.deps.controls) {
+          const payload = row.payload as { commandId?: unknown; action?: unknown; scope?: unknown };
+          if (payload.commandId !== row.id || !['stop', 'stopAll'].includes(String(payload.action)) || (payload.action === 'stopAll' && payload.scope !== 'host')) throw new DeskError('Invalid mailbox stop control.');
+          const receipt = await this.deps.controls.run(row.payload);
+          await settle({ state: receipt.state === 'confirmed' ? 'done' : receipt.state === 'failed' ? 'failed' : 'taken', receipt, error: receipt.error ?? null });
+          void this.tick(); return;
+        }
         if (this.deps.jobs?.has(row.run_id)) await this.deps.jobs.stop(row.run_id);
         else await this.deps.runs.stop(row.run_id);
         await settle({ state: 'done' });

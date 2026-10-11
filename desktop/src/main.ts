@@ -109,5 +109,5 @@ void app.whenReady().then(async () => {
   createTray(window, app.isPackaged, () => {
     quitting = true;
     app.quit();
-  });
+  }, host.deps.controls);
 });

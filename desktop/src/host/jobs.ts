@@ -19,6 +19,7 @@ export class Jobs {
   private readonly dir: string;
   private readonly jobs: Job[];
   private readonly active = new Map<string, { child: ChildProcess; stopping: boolean }>();
+  onChange: () => void = () => {};
   constructor(dir: string, private readonly owner: () => string | null) {
     this.file = join(dir, 'jobs.json');
     this.dir = join(dir, 'jobs');
@@ -31,6 +32,7 @@ export class Jobs {
   private save(): void {
     writeFileSync(`${this.file}.tmp`, JSON.stringify(this.jobs));
     renameSync(`${this.file}.tmp`, this.file);
+    this.onChange();
   }
 
   list(): DeskRun[] { return this.jobs.filter((job) => job.owner === this.owner()).map((job) => ({ ...job.run })); }
@@ -42,11 +44,11 @@ export class Jobs {
     return job;
   }
 
-  async start(plan: CommandPlan, command: string): Promise<DeskRun> {
+  async start(plan: CommandPlan, command: string, parentRunId?: string): Promise<DeskRun> {
     const owner = this.owner();
     if (!owner) throw new DeskError('sign in on the pc first', 409);
     const id = `j${randomBytes(8).toString('hex')}`;
-    const run: DeskRun = { id, agent: 'job', name: `$${command}`, cwd: plan.cwd, startedAt: Date.now(), state: 'running', origin: 'phone', entryId: null };
+    const run: DeskRun = { id, agent: 'job', name: `$${command}`, cwd: plan.cwd, startedAt: Date.now(), state: 'running', origin: 'phone', entryId: null, ...(parentRunId ? { parentRunId } : {}) };
     const job = { run, owner, log: join(this.dir, `${id}.log`) };
     this.jobs.push(job);
     this.save();
@@ -85,11 +87,12 @@ export class Jobs {
   }
 
   async stop(id: string): Promise<void> {
-    this.get(id);
+    const job = this.get(id);
+    if (job.run.state === 'stopped') return;
     const active = this.active.get(id);
     if (!active) throw new DeskError('job process is not held by this host — check it at the pc', 409);
     active.stopping = true;
-    try { await stopJobProcess(active.child); }
+    try { await stopJobProcess(active.child); job.run.state = 'stopped'; this.save(); }
     catch (error) { active.stopping = false; throw error; }
   }
 

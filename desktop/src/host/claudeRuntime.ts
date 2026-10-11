@@ -1,8 +1,10 @@
 import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import type { CanUseTool, PermissionUpdate } from '@anthropic-ai/claude-agent-sdk';
 import type { DeskStart } from '@/lib/deskProtocol';
 import type { Approvals } from './approvals.ts';
-import type { ManagedSession } from './codexRuntime.ts';
+import type { ManagedSession, TurnChanged } from './managedSession.ts';
+import { ClaudeInput } from './claudeInput.ts';
 
 /** Only exact session-scoped rule suggestions can be offered as a broader grant. */
 export function sessionSuggestions(suggestions: PermissionUpdate[] = []): PermissionUpdate[] {
@@ -35,13 +37,16 @@ export function claudeCanUseTool(start: DeskStart, runId: string, owner: string,
   };
 }
 export async function startClaudeSdk(path: string, start: DeskStart, runId: string, owner: string, approvals: Approvals,
-  env: NodeJS.ProcessEnv, log: (row: unknown) => void, done: (code: number | null) => void): Promise<ManagedSession> {
-  const { query } = await import('@anthropic-ai/claude-agent-sdk');
-  const abortController = new AbortController(); let stopping = false;
+  env: NodeJS.ProcessEnv, log: (row: unknown) => void, done: (code: number | null) => void, turnChanged: TurnChanged = () => {},
+  injected?: { query: typeof import('@anthropic-ai/claude-agent-sdk').query; spawned?: Promise<void> }): Promise<ManagedSession> {
+  const { query } = injected ?? await import('@anthropic-ai/claude-agent-sdk');
+  const abortController = new AbortController(); let stopping = false; let busy = true; let finished = false;
+  const input = new ClaudeInput(); input.push(start.prompt, start.commandId ?? randomUUID());
+  const pending = new Map<string, { resolve: () => void; reject: (error: Error) => void }>();
   let process: ReturnType<typeof spawn> | null = null;
   let resolveSpawn!: () => void; let rejectSpawn!: (error: Error) => void;
   const spawned = new Promise<void>((resolve, reject) => { resolveSpawn = resolve; rejectSpawn = reject; });
-  const session = query({ prompt: start.prompt, options: {
+  const session = query({ prompt: input, options: {
     cwd: start.cwd, env, pathToClaudeCodeExecutable: path, abortController, includePartialMessages: true,
     settingSources: ['user', 'project', 'local'],
     permissionMode: start.mode === 'full' ? 'bypassPermissions' : start.mode === 'edits' ? 'acceptEdits' : 'default',
@@ -56,12 +61,34 @@ export async function startClaudeSdk(path: string, start: DeskStart, runId: stri
   const ended = (async () => {
     let code: number | null = null;
     try { for await (const message of session) {
-      log(message);
-      if (message.type === 'result') code = message.is_error ? 1 : 0;
+      const echo = message as typeof message & { user_message_uuid?: string; user_message_uuids?: string[] };
+      for (const id of echo.user_message_uuids ?? (echo.user_message_uuid ? [echo.user_message_uuid] : [])) pending.get(id)?.resolve();
+      // Cellar records submitted text only after a provider echo; tool-result user rows remain intact.
+      if (!(message.type === 'user' && typeof message.message.content === 'string')) log(message);
+      if (message.type === 'result') { code = message.is_error ? 1 : 0; busy = false; approvals.expireRun(owner, runId); turnChanged(code); }
     } } catch (error) { rejectSpawn(error instanceof Error ? error : new Error(String(error))); log({ type: 'result', is_error: true, result: String(error) }); code = 1; }
-    finally { approvals.expireRun(owner, runId); done(stopping ? null : code); }
+    finally { finished = true; input.close(); for (const ack of pending.values()) ack.reject(new Error('Claude disconnected before confirming delivery.'));
+      pending.clear(); approvals.expireRun(owner, runId); done(stopping ? null : code); }
   })();
-  await spawned;
-  return { close: async () => { abortController.abort(); process?.kill(); await ended; },
-    stop: async () => { stopping = true; await session.interrupt(); abortController.abort(); await ended; } };
+  await (injected?.spawned ?? spawned);
+  const close = async () => { input.close(); abortController.abort(); process?.kill(); session.close(); await ended; };
+  const interrupt = async () => {
+    if (!busy) return;
+    await session.interrupt();
+    const deadline = Date.now() + 10_000;
+    while (busy && !finished && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 20));
+    if (finished || busy) throw new Error('Claude has not confirmed interruption.');
+  };
+  return { busy: () => busy, close, interrupt,
+    stop: async () => { stopping = true; await interrupt(); await close(); },
+    send: async (text, id, displayText = text) => {
+      if (finished || busy) throw new Error('Claude chat is unavailable or still busy.');
+      busy = true; turnChanged(undefined);
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => { pending.delete(id); reject(new Error('Claude has not echoed this message; delivery is unknown.')); }, 20_000);
+        pending.set(id, { resolve: () => { clearTimeout(timer); pending.delete(id); log({ type: 'cellar.message', id, text: displayText }); resolve(); },
+          reject: (error) => { clearTimeout(timer); pending.delete(id); reject(error); } });
+        try { input.push(text, id); } catch (error) { pending.get(id)?.reject(error as Error); }
+      });
+    } };
 }

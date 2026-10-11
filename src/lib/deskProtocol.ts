@@ -101,6 +101,7 @@ export function runTitle(start: Pick<DeskStart, 'prompt' | 'name'>): string {
 export type DeskRunState = 'running' | 'waiting' | 'done' | 'failed' | 'stopped' | 'unknown';
 
 export type DeskRun = {
+  parentRunId?: string;
   worktreeId?: string;
   branch?: string;
   commandId?: string;
@@ -150,6 +151,7 @@ export type DeskApk = { app: string; file: string; version: string | null; size:
 
 /** What `GET /desk` answers. */
 export type DeskInfo = {
+  dispatchProtocol?: 1;
   approvalProtocol?: 1;
   eventProtocol?: 1;
   worktrees?: true;

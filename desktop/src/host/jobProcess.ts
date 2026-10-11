@@ -55,7 +55,7 @@ export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, ou
 }
 
 export async function stopJobProcess(child: ChildProcess): Promise<void> {
-  if (!child.pid || child.exitCode !== null) return;
+  if (!child.pid || child.exitCode !== null || child.signalCode !== null) return;
   const exited = new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => reject(new DeskError('stop requested; process has not confirmed exit yet', 409)), 5000);
     child.once('close', () => { clearTimeout(timer); resolve(); });

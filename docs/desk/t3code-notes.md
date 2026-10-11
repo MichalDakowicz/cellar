@@ -1,5 +1,28 @@
 # How t3code delegates — and what cellar takes from it
 
+## Standing custom-chat reference
+
+User instruction, 2026-10-11: use [T3 Code's repository](https://github.com/pingdotgg/t3code)
+as implementation help for Cellar's custom agent chat. Consult its session adapters,
+dispatch/queue lifecycle, approvals and event recovery when wiring these flows. Record the
+source revision; adapt the behavior to Cellar's existing host protocol and UI.
+
+W9 reference reviewed at `bed923986fbcbe8279f23b9367efde1596bde1f9`:
+`apps/server/src/orchestration-v2/Adapters/ClaudeAdapterV2.ts` and `CodexAdapterV2.ts`.
+Claude sends streamed `SDKUserMessage` records with client UUIDs and binds provider
+`user_message_uuid` / `user_message_uuids` echoes to those sends. Both adapters separate
+starting a turn from interrupting one. Cellar's accepted Run specification deliberately
+uses interrupt-then-continue for **Send now**; ordinary busy Send stays queued. A provider
+write alone does not prove delivery, and a successful interruption does not prove the
+replacement message ran. Earlier source notes below describe their recorded revision;
+the current canvas supersedes their historical dispatch-selector layout.
+
+The reviewed Codex adapter also terminates background terminals separately from
+`turn/interrupt`. Installed Codex 0.162.1 lacks that newer API. W9 therefore stops
+Cellar's owned private app-server process tree after interruption, then resumes the
+same persisted conversation before promotion. Descendant termination is fixture-tested;
+the final live phone containment check remains pending in `w9-resume.md`.
+
 Read from t3code's source at commit `784b5625` (github.com/pingdotgg/t3code). Files:
 `apps/server/src/provider/codexLaunchArgs.ts`, `CodexAdapterV2.ts`, `ClaudeAdapterV2.ts`,
 `Orchestrator.ts`, `EventSink.ts`, `EffectOutbox.ts`, `ProviderSessionManager.ts`,

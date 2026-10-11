@@ -51,6 +51,11 @@ Structure rules (they are why the siblings are maintainable):
 - `docs/desk/` is the **desk spec** — what the desk tab, the desktop control center and the
   daemon do, and `TASKS.md`, the build order (screens first, then wiring, easiest first).
   Read it and tick its task before and after any desk work.
+- For custom agent chat, consult [T3 Code](https://github.com/pingdotgg/t3code) and
+  `docs/desk/t3code-notes.md` before changing session lifecycle, dispatch/queues, approvals
+  or event recovery. It is a purpose-built agent chat reference. Verify the relevant source
+  at a recorded revision, then adapt it to Cellar's existing architecture and host protocol;
+  preserve Cellar's UI and truthful pending, failed, disconnected and confirmed states.
 
 The design language is `../.design-language/PING.md`. Colour tokens, type scale, spacing,
 radius, motion, the nav islands, the one card and the screen archetypes all come from it —

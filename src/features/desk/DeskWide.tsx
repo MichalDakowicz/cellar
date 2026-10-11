@@ -13,6 +13,7 @@ import type { useDeskHome } from './useDeskHome';
 import type { useDeskScreen } from './useDeskScreen';
 import type { useDeskWide } from './useDeskWide';
 import { RuntimeApprovalPanel } from './RuntimeApprovalPanel';
+import { StopAllStatus } from '@/components/desk/StopAllStatus';
 
 /**
  * The desk tab on a wide window (docs/desk/screens.md, `DeskHome.dc.html`):
@@ -45,9 +46,10 @@ export function DeskWide({
           onPress={() => wide.stopAll?.()}
           className={`h-10 justify-center rounded-full border border-destructive/60 px-4 active:opacity-70 ${wide.stopAll ? '' : 'opacity-40'}`}
         >
-          <Text className="font-sans text-sm font-semibold text-destructive">stop all agents</Text>
+          <Text className="font-sans text-sm font-semibold text-destructive">{wide.stopAllStatus.busy ? 'confirming stops…' : wide.stopAllStatus.pending ? 'check stop results' : 'stop all agents'}</Text>
         </Pressable>
       </View>
+      <StopAllStatus {...wide.stopAllStatus} />
 
       <DeskCaptureBar {...wide.capture} />
 

@@ -376,10 +376,17 @@ provider question tools are explicitly refused; linked questions reuse W3. Notif
 delivery remains W13. Existing canvas/spec edits retain their initial hashes.
 See `how-it-works.md` W8 for behavior and verification boundaries. Next: W9.
 
-### W9 · steer, queue, stop all `[ ]`
+### W9 · steer, queue, stop all `[~]`
 
 Dispatch modes on a busy run (steer now · queue after this turn), interrupt one run, stop every
 run on every host from the tray, the phone or the desktop.
+
+Checkpoint 2026-10-11: implementation committed for continuation; not yet verified complete.
+Durable controls, retained chats, queue actions and account-wide stop coordination are wired.
+868 app tests and 68 desktop tests pass. Live phone Continue, queue acceptance and natural
+FIFO delivery work. Final live interruption/child-process containment, edit/cancel, stop-all
+and rebuilt release checks remain. See `w9-resume.md` before continuing. Claude remains
+fixture-only. Existing canvas/spec edits are included unchanged in this checkpoint.
 
 ### W10 · keys search `[ ]`
 

@@ -8,7 +8,7 @@ export class CodexRpc {
   private next = 0;
   private pending = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>();
   constructor(path: string, cwd: string, env: NodeJS.ProcessEnv, receive: (row: RpcRow) => void, diagnostic: (text: string) => void) {
-    this.child = spawn(path, ['app-server', '--listen', 'stdio://'], { cwd, env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    this.child = spawn(path, ['app-server', '--listen', 'stdio://'], { cwd, env, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     const lines = createInterface({ input: this.child.stdout });
     lines.on('line', (line) => {
       try {

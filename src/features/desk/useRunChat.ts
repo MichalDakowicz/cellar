@@ -25,6 +25,7 @@ import { finishedWorktreeRun } from '@/lib/deskWorktrees';
 import { approvalMessage, pendingApproval } from '@/lib/deskApprovals';
 import { useApprovalPending } from '@/store/deskApprovals';
 import { pendingQuestions } from '@/lib/entryQuestions';
+import { useRunDispatch } from './useRunDispatch';
 
 export type Dispatch = 'steer' | 'queue';
 type Decision = 'allow' | 'always' | 'deny';
@@ -76,6 +77,7 @@ export function useRunChat(id: string) {
   const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id));
 
   const synchronized = stream.live && stream.state.runId === id;
+  const delivery = useRunDispatch(link, id, synchronized && !sample, draft, setDraft);
   const runtimeRequests = !sample && synchronized && link.info?.approvalProtocol === 1
     ? (stream.state.approvals ?? []).filter((row) => row.runId === id) : [];
   const waitingRequests = runtimeRequests.filter((row) => pendingApproval(row)
@@ -114,7 +116,7 @@ export function useRunChat(id: string) {
     historyAt: saved?.at ?? null,
     canViewHistory: !sample && !synchronized && !!saved && !history,
     viewHistory: () => setHistoryId(id),
-    retryEvents: stream.retry,
+    retryEvents: () => { link.recheck(); stream.retry(); },
     job: run?.agent === 'job' ? { results: deskTestResults(lines), lines, state } : null,
     logError: (!sample && stream.supported && !synchronized ? stream.state.error ?? (stream.state.phase === 'connecting' ? 'Synchronizing PC events…' : 'Reconnect to read live output.') : null) ?? commandError ?? (jobs.save.error ? readError(jobs.save.error) : jobs.start.error ? readError(jobs.start.error) : !sample && log.error ? readError(log.error) : !sample && !link.calls ? `${link.name} is not on this network — its words show here when it is` : null),
     /** The approval it is waiting on, until it is answered. */
@@ -131,20 +133,23 @@ export function useRunChat(id: string) {
     /** Under your bubble: who said it, and from where. */
     youCaption: (run ?? (viewingHistory ? saved.runs.find((row) => row.id === id) : null))?.origin === 'pc' ? 'you · at the pc' : 'you · from your phone',
     decide: (next: Decision) => setDecision(next),
-    canStop: !!link.calls && (!stream.supported || synchronized) && !!run && isLiveRun(run) && run.origin === 'phone',
+    canStop: !!link.calls && (!stream.supported || synchronized) && !!run && (isLiveRun(run) || delivery.stopPending) && run.origin === 'phone',
+    stopping: delivery.stopping || runs.stop.isPending,
+    stopMessage: delivery.stopMessage,
     stop: () =>
-      run &&
+      link.info?.dispatchProtocol === 1 ? void delivery.stop().then((message) => { if (message) say(message); runs.refresh(); }) : run &&
       runs.stop.mutate(run.id, {
         onSuccess: () => say(`stopped ${run.name}`),
         onError: (error) => say(readError(error)),
       }),
     composer: {
+      ...delivery,
       draft,
       onDraft: setDraft,
       dispatch,
       onDispatch: setDispatch,
       /** Talking to a running agent waits for the pc's side (W9). */
-      disabledReason: canRunCommand || canSaveCommand ? null : jobs.start.isPending || jobs.save.isPending ? 'asking the pc…' : '$command starts a job; /save-command name = npm:task saves a chain. Agent messages come with W9.',
+      disabledReason: canSaveCommand || (canRunCommand && !run?.commandId) ? null : jobs.save.isPending || jobs.start.isPending ? 'asking the pc…' : sample ? 'Sample chat · no host delivery.' : delivery.disabledReason,
       onSend: () => {
         setCommandError(null);
         if (canSaveCommand) {
@@ -153,7 +158,8 @@ export function useRunChat(id: string) {
             const commands = [...(projectCommands!.overrides ?? []).filter((old) => !additions.some((next) => next.id === old.id)), ...additions];
             jobs.save.mutate({ projectId: projectId!, commands }, { onSuccess: () => { setDraft(''); say('commands saved on the pc'); } });
           } catch (error) { setCommandError(readError(error)); }
-        } else if (canRunCommand) jobs.start.mutate({ projectId: projectId!, command: command! }, { onSuccess: () => { setDraft(''); say('job started on the pc'); } });
+        } else if (canRunCommand && !run?.commandId) jobs.start.mutate({ projectId: projectId!, command: command! }, { onSuccess: () => { setDraft(''); say('job started on the pc'); } });
+        else delivery.onSend();
       },
       modelLabel: agentLabel(run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude')),
       finished: !canRunCommand && !canSaveCommand && (state === 'done' || state === 'failed' || state === 'stopped'),

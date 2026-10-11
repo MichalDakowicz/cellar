@@ -1,7 +1,7 @@
 import { homedir } from 'node:os';
 import type { EventSource } from './eventIngest.ts';
 import { claudeProjectSlug } from './agents.ts';
-import { execFile, spawn, type ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { closeSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,6 +16,7 @@ import { toolPath } from './tools.ts';
 import { plainLog, tail } from './transcript.ts';
 import { worktreeEnv } from './worktreeEnv.ts';
 import type { ManagedRuns } from './managedRuns.ts';
+import { stopJobProcess } from './jobProcess.ts';
 
 /**
  * Every run this pc started for a phone, and the ones someone opened at the pc.
@@ -69,6 +70,7 @@ export class Runs {
   private readonly logs: string;
   private readonly children = new Map<string, ChildProcess>();
   runtime?: ManagedRuns;
+  onChange: () => void = () => {};
   constructor(dir: string, private readonly readClaude = claudeRows, private readonly owner: () => string | null = () => null) {
     this.file = join(dir, 'runs.json');
     this.logs = join(dir, 'runs');
@@ -85,6 +87,7 @@ export class Runs {
     this.records = this.records.sort((a, b) => b.startedAt - a.startedAt).slice(0, KEEP);
     writeFileSync(`${this.file}.tmp`, `${JSON.stringify(this.records, null, 2)}\n`);
     renameSync(`${this.file}.tmp`, this.file);
+    this.onChange();
   }
 
   async start(start: DeskStart & { branch?: string }): Promise<DeskRun> {
@@ -148,6 +151,8 @@ export class Runs {
 
   private async ownState(record: RunRecord): Promise<DeskRunState> {
     if (record.stopped) return 'stopped';
+    const live = record.runtime && record.owner ? this.runtime?.get(record.owner, record.id) : null;
+    if (live?.session.busy()) return this.runtime!.approvals.waiting(record.owner!, record.id) ? 'waiting' : 'running';
     if (record.runtime && record.exit === null) return 'unknown';
     if (record.exit !== undefined) {
       if (record.exit !== 0) return 'failed';
@@ -209,7 +214,7 @@ export class Runs {
     }
     const child = this.children.get(id);
     if (!child?.pid) throw new DeskError('it was started before cellar last restarted — stop it at the pc', 409);
-    await kill(child.pid);
+    await stopJobProcess(child);
     record.stopped = true;
     this.save();
   }
@@ -229,19 +234,4 @@ export class Runs {
     if (!row) throw new DeskError('no such run', 404);
     return claudeLog(row);
   }
-}
-
-/** The whole tree: a CLI agent is a process with children, and killing the parent orphans them. */
-function kill(pid: number): Promise<void> {
-  return new Promise((resolve) => {
-    if (process.platform !== 'win32') {
-      try {
-        process.kill(-pid, 'SIGTERM');
-      } catch {
-        // Already gone.
-      }
-      return resolve();
-    }
-    execFile('taskkill', ['/PID', String(pid), '/T', '/F'], { windowsHide: true }, () => resolve());
-  });
 }

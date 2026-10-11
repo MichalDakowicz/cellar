@@ -15,6 +15,7 @@ export class RunEvents {
   private timer: ReturnType<typeof setInterval> | null = null;
   constructor(dir: string, private readonly deps: HostDeps) { this.store = new EventStore(join(dir, 'events.sqlite')); }
   start() { this.timer = setInterval(() => { void this.refresh(); }, 400); this.timer.unref(); }
+  invalidate() { this.nextCatalog = 0; }
   async stop() { if (this.timer) clearInterval(this.timer); await this.pending; this.store.close(); }
   refresh(): Promise<void> {
     if (this.pending) return this.pending;
