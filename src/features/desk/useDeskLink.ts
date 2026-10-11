@@ -31,7 +31,7 @@ export function useDeskLink() {
   const bridge = useMemo(() => deskBridge(), []);
 
   const direct: DeskCalls | null = useMemo(() => {
-    if (bridge) return deskCalls(bridgeTransport(bridge));
+    if (bridge) return deskCalls(bridgeTransport(bridge), true);
     if (pair) return deskCalls(lanTransport(pair));
     return null;
   }, [bridge, pair]);

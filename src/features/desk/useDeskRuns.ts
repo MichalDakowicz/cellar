@@ -1,3 +1,4 @@
+import { useDeskStream } from './useDeskStream';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { sortRuns, type DeskRun, type DeskStart } from '@/lib/deskProtocol';
@@ -16,11 +17,12 @@ import { DESK_KEYS, type DeskLink } from './useDeskLink';
 export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean } = {}) {
   const client = useQueryClient();
   const direct = link.calls;
+  const stream = useDeskStream(link, null, watch);
 
   const live = useQuery({
     queryKey: [...DESK_KEYS.runs, link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none'],
     queryFn: () => direct!.runs(),
-    enabled: direct !== null && watch,
+    enabled: direct !== null && watch && !stream.supported,
     refetchInterval: 5_000,
     retry: false,
     staleTime: 0,
@@ -28,10 +30,11 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
   });
 
   const snapshotError = link.via === 'cellar' ? link.cellarError ?? (link.desk?.runs === null ? 'the pc did not return a valid run snapshot' : null) : null;
-  const available = direct ? live.isSuccess && live.isFetchedAfterMount : link.via === 'cellar' && link.desk !== null && !snapshotError;
-  const runs: DeskRun[] = !available ? [] : direct ? (live.data ?? []) : sortRuns(link.desk?.runs ?? []);
+  const available = direct ? stream.supported ? stream.live : live.isSuccess && live.isFetchedAfterMount : link.via === 'cellar' && link.desk !== null && !snapshotError;
+  const runs: DeskRun[] = !available ? [] : direct ? (stream.supported ? stream.state.runs : live.data ?? []) : sortRuns(link.desk?.runs ?? []);
 
   const refresh = () => {
+    if (stream.supported && stream.state.phase !== 'live') stream.retry();
     void client.invalidateQueries({ queryKey: DESK_KEYS.runs });
     void client.invalidateQueries({ queryKey: DESK_KEYS.desks });
   };
@@ -74,8 +77,8 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
     runs,
     available,
     refresh,
-    loading: direct !== null && !available && !live.isError,
-    error: direct && live.error ? (live.error as Error).message : snapshotError,
+    loading: direct !== null && !available && (stream.supported ? stream.state.phase === 'connecting' : !live.isError),
+    error: direct && stream.supported ? stream.state.error ?? (stream.state.phase === 'disconnected' ? 'PC live stream disconnected — reconnect.' : null) : direct && live.error ? (live.error as Error).message : snapshotError,
     /** Through the cellar the list is the pc's last heartbeat, not a live read. */
     snapshotAt: direct ? null : (link.desk?.seenAt ?? null),
     start,
@@ -89,7 +92,7 @@ export function useDeskLog(link: DeskLink, id: string | null) {
   return useQuery({
     queryKey: ['desk', 'log', link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none', id],
     queryFn: () => link.calls!.log(id!),
-    enabled: id !== null && link.calls !== null,
+    enabled: id !== null && link.calls !== null && link.info?.eventProtocol !== 1,
     refetchInterval: 4_000,
     retry: false,
     staleTime: 0,

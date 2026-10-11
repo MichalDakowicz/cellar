@@ -19,7 +19,8 @@ import { randomBytes } from 'node:crypto';
 export type Ticket =
   | { kind: 'view'; port: number }
   | { kind: 'screen' }
-  | { kind: 'apk'; app: string };
+  | { kind: 'apk'; app: string }
+  | { kind: 'events'; owner: string; key: string };
 
 const TICKET_MS = 60_000;
 const SESSION_MS = 4 * 60 * 60_000;
@@ -42,7 +43,7 @@ export class Tickets {
   redeem(token: string): Ticket | null {
     const found = this.tickets.get(token);
     this.tickets.delete(token);
-    if (!found || found.expires < this.now()) return null;
+    if (!found || found.expires <= this.now()) return null;
     return found.ticket;
   }
 

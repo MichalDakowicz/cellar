@@ -1,17 +1,17 @@
 # Desk — how it works
 
-Reviewed 2026-10-11 through W5. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-11 through W7. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
 
 | Flow | Works now | Sample or missing |
 | --- | --- | --- |
-| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; account-owned mailbox requests and heartbeat snapshots | No websocket/resume yet (W7); SSH deferred (W20) |
+| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W20) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; only running runs count as working | Host `waiting` is coarse: an idle interactive session can need the PC. It is not proof of an approval request (W8) |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main | Runtime approvals on phone remain W8 |
 | Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W11 |
-| Follow a run | Polled run list and transcript/log tail, rendered text and tool steps; stop runs started by Cellar | No durable normalized events, live resume, steering or queue dispatch (W6/W7/W9) |
+| Follow a run | W6/W7: durable normalized turns, live run catalogue, full tool details, safe Markdown chunks, reconnect and explicit saved history; stop Cellar runs | Runtime approvals (W8), steering and queue dispatch (W9) remain missing; old hosts retain legacy polling |
 | Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; hosted MCP reads both | Runtime deny/allow panels remain samples until W8 |
 | Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
 | Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W11), remote input or real phone panel (W18) |
@@ -28,8 +28,9 @@ W20 stays deferred. Counts establish trustworthy status first; project commands 
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
-The user approved W1 after the behavior review, then explicitly requested W2–W5.
-All five are verified. W6 is next; implementation awaits a new request.
+The user approved W1 after the behavior review, then explicitly requested W2–W7.
+All seven are verified within the recorded boundaries. W8 is next. Live Claude testing
+for W6/W7 was explicitly excluded by the user; provider fixtures cover its parser.
 
 ## W1 behavior
 
@@ -216,3 +217,58 @@ Failed command outputs remained visible; an agent's marker alone was never count
 as successful verification. Current host runs from
 `C:/ping/cellar-desktop-w5-final-host/win-unpacked/Cellar.exe`; Android 1.12.0 installed.
 Canvas/spec edits preserved byte-for-byte. GitHub and website deployment remain pending.
+
+## W6/W7 — durable turns and synchronized streams
+
+The PC stores owner-scoped, contiguous numbered events in `events.sqlite` using
+`node:sqlite`. Catalogues, stable turn-item projections, source byte cursors and
+Claude partial-message state survive restart. Projection and cursor updates commit
+together. Tool deltas update one item; complete UTF-8 lines advance the cursor.
+Large JSON rows and Unicode remain intact; replaced/truncated sources fail visibly.
+Assistant text splits only at safe Markdown block boundaries, retaining fenced code,
+lists and tables. Full tool input/output remains selectable and expandable. Repeated
+CLI diagnostics fold into readable rows without discarding their text.
+
+New Claude tasks use managed print-mode stream-json with partial events; Codex uses
+JSON events. Existing Claude sessions read their original transcripts. Old plain
+logs retain an explicit legacy label and unknown item status; jobs keep exact raw
+output for the existing reported-test parser. A tool with no confirmed result stays
+unknown after its run ends. Process completion and failed individual tools remain
+separate facts. Runtime permission requests still require W8.
+
+A signed LAN request or desktop IPC requests a 60-second, one-use event ticket.
+The websocket binds to the signed-in account and current pairing key, rechecking
+both while sending. Desktop uses loopback; phone uses the existing LAN address.
+One shared socket per account/PC/client supplies every run view and the global
+catalogue. Snapshot -> replay -> synchronized must finish before output/counts are
+live. Duplicate events are idempotent; a sequence gap fails and reconnects. Fresh
+tickets, heartbeat/watchdog and bounded retry handle disconnect/background/resume.
+Run/log polling is disabled for capable hosts; legacy hosts retain their protocol.
+Discovery and command-catalogue queries keep their existing schedules. The mailbox
+and remote heartbeat snapshots retain their existing behavior.
+
+MMKV retains recent account/PC-scoped chats and the resume cursor. Saved content
+requires explicit View history and carries its received timestamp. It renders even
+after a cold phone restart with no live capability response. Offline/unsynchronized
+run status is unknown; saved content never confirms current host state. Live output
+returns only after synchronization. Sample run IDs cannot bypass the sample toggle.
+
+Verified on physical phone and signed-in Michu: checkout/read-only Codex task
+`723f02fa` renders W6 Markdown results; `pwd` confirms actual folder and exit 0,
+while `exit 7` remains a failed tool with full output. Host shutdown hides live
+output; explicit history survives a cold phone restart. Restart restores live
+synchronization automatically. SQLite epoch
+`086764df-950f-4a8b-bf18-a982fa9176e5`, sequence 2576 and unique item IDs survive
+that restart unchanged. Phone background/foreground resynchronizes. Desktop chat
+shows the same turns; existing command-job reports still parse their recorded totals.
+No live Claude task was sent, per the user's token constraint. Claude partial/final
+message and tool-result normalization is verified with recorded-shape fixtures.
+
+862 app tests and 52 desktop tests pass, including signed snapshot/replay/live,
+shared-socket routing, gap handling, one-use/expired tickets, account/key revocation,
+read failure, durable restart, partial Unicode and interrupted-tool status. Lint,
+both TypeScript checks, local web export, desktop bundle/package and Android release
+pass. Android 1.12.0 is installed and launched with no process-scoped error log.
+Current local host: `C:/ping/cellar-desktop-w6-w7-final/Cellar.exe`. Existing canvas,
+metadata, keys and screens edits remain byte-for-byte unchanged. Source commits
+stay local; GitHub push, PR publication and web deployment remain unauthorized.

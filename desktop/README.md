@@ -101,3 +101,24 @@ Windows sandbox agents receive exact managed-folder Git trust in their process
 environment; global Git configuration and sandbox permissions stay unchanged.
 Verified phone flows and the machine's standalone Codex CLI limitation are recorded
 in [`how-it-works.md`](../docs/desk/how-it-works.md#w5--git-confirmed-worktrees).
+
+## Run events and live history
+
+W6/W7 stores owner-scoped numbered events and stable turn items in
+`<app data>/events.sqlite` using `node:sqlite`. Provider source cursors and Claude
+partial state commit with their item updates. New Claude tasks produce stream-json
+partial events; Codex produces JSON items. Existing transcripts and legacy plain
+logs remain readable, with unconfirmed/legacy output labelled. Full tool results and
+Markdown are rendered by the shared app; job reports retain exact raw text.
+
+A signed `POST /event-ticket` (or the same IPC API) opens one shared websocket
+per client/account/PC. Tickets expire at 60 seconds and redeem once. The socket
+rechecks account and pairing key, sends snapshot -> replay -> synchronized and
+resumes from a persisted sequence. Gaps, failed reads and lost connections never
+produce live status. Desktop connects over loopback; phone uses the LAN. New hosts
+replace run/transcript polling with this feed; discovery, commands and mailbox
+behavior stay as before. Explicit View history reads labelled MMKV snapshots while
+disconnected, including after a phone restart; current run state remains unknown.
+
+Verification and the user-requested live Claude test exclusion are recorded in
+[`how-it-works.md`](../docs/desk/how-it-works.md#w6w7--durable-turns-and-synchronized-streams).

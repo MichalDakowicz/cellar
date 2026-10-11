@@ -1,3 +1,4 @@
+import type { RunEvents } from './runEvents.ts';
 import { realpathSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -36,6 +37,7 @@ export type ApiRequest = { method: string; path: string; body?: unknown };
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  events?: RunEvents;
   identity: () => Identity;
   account: Account;
   runs: Runs;
@@ -69,6 +71,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     signedIn: deps.account.current !== null,
     ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
     ...(deps.worktrees ? { worktrees: true as const } : {}),
+    ...(deps.events ? { eventProtocol: 1 as const } : {}),
   };
 }
 
@@ -141,6 +144,12 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
     switch (route) {
       case 'GET /desk':
         return ok(await deskInfo(deps));
+      case 'POST /event-ticket': {
+        if (!deps.events || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for live events.', 409);
+        const host = (req.body as { local?: boolean } | null)?.local === true ? '127.0.0.1' : deps.lanHost() ?? '127.0.0.1';
+        const token = deps.tickets.issue({ kind: 'events', owner: deps.account.current.userId, key: deps.identity().key });
+        return ok({ url: 'ws://' + host + ':' + deps.identity().port + '/events/' + token });
+      }
       case 'GET /runs':
         return ok({ runs: await hostRuns(deps) });
       case 'GET /requests/:id': {

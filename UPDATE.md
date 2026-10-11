@@ -4,6 +4,9 @@
 
 ### Added
 
+- Desk: follow real agent turns live, with full tool output and durable run history
+- Desk: reconnect without duplicate turns; open labelled saved chats while the PC is offline
+
 - Desk: start tasks in worktrees from main; keep, review merges or remove finished workspaces
 - Desk: run project commands as jobs, with readable test results and raw output
 - Questions: keep exact choices and a separate note, with drafts retained on failed saves

@@ -333,17 +333,30 @@ after phone/host restarts without replay. Desktop panel matched live Git catalog
 Details and local CLI limitation: `how-it-works.md` W5. Existing canvas/spec edits
 preserved; no GitHub push or website deployment.
 
-### W6 · the event log `[ ]`
+### W6 · the event log `[x]`
 
 The host keeps runs as numbered events in sqlite (`node:sqlite`): turn items normalised from
 claude's stream-json and codex's json events (`t3code-notes.md` §05). Tool updates coalesced,
 text chunked at markdown-safe boundaries. The run chat renders turn items.
 
-### W7 · the live stream `[ ]`
+Verified: durable cursor/restart and partial Unicode/provider fixtures; physical phone
+Codex run `723f02fa` renders Markdown and separate command results (exit 0 and failed
+exit 7), with full expandable output on phone and desktop. Legacy logs remain labelled;
+interrupted tools become unknown. Live Claude testing omitted at user request; its
+partial/final messages and tool results are covered by fixtures.
+
+### W7 · the live stream `[x]`
 
 A websocket per client with one-minute tickets: snapshot → numbered events → synchronized;
 resume from the last sequence. Replaces polling on the lan; the cellar wire stays the mailbox for
 when the pc is asleep.
+
+Verified: 862 app tests, 52 desktop tests, types/lint, local web export and Android
+release/install/launch. Signed socket integration covers replay, gaps, one-use/expired
+tickets, account/key revocation and read failures. Physical phone confirms disconnect,
+explicit saved history after a cold restart, host restart, and background/resume.
+SQLite epoch/sequence and unique item IDs survive restart; desktop uses the same
+synchronized feed. See `how-it-works.md` W6/W7. GitHub/web publication remains pending.
 
 ### W8 · approvals `[ ]`
 

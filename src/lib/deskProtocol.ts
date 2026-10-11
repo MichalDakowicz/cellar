@@ -150,6 +150,7 @@ export type DeskApk = { app: string; file: string; version: string | null; size:
 
 /** What `GET /desk` answers. */
 export type DeskInfo = {
+  eventProtocol?: 1;
   worktrees?: true;
   taskProtocol?: 2;
   id: string;

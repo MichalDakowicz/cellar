@@ -1,3 +1,4 @@
+import { RunEvents } from './runEvents.ts';
 import type { Server } from 'node:http';
 import { appendFileSync, statSync, writeFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
@@ -85,6 +86,7 @@ export class DeskHost {
     };
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
+    this.deps.events = new RunEvents(options.dataDir, this.deps);
     this.fallback = new CellarFallback(this.deps);
   }
 
@@ -99,12 +101,14 @@ export class DeskHost {
     // Held for this run only. Saved, a port taken once by something else would
     // become the pc's address for good, and every paired phone would lose it.
     this.boundPort = port;
+    this.deps.events!.start();
     return port;
   }
 
   stop(): void {
     this.fallback.stop();
     this.server?.close();
+    void this.deps.events?.stop();
   }
 
   /** The window's way in. Same answers as the LAN, without the key — the window is this pc. */

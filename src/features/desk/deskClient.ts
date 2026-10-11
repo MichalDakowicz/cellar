@@ -127,8 +127,13 @@ export function bridgeTransport(bridge: DeskBridge): DeskTransport {
 
 export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { kind: 'apk'; app: string };
 
-export function deskCalls(send: DeskTransport) {
+export function deskCalls(send: DeskTransport, local = false) {
   return {
+    eventTicket: async () => {
+      const body = await send('POST', '/event-ticket', { local }) as { url?: unknown };
+      if (typeof body?.url !== 'string' || !/^ws:\/\/[^/]+\/events\/[A-Za-z0-9_-]{16,}$/.test(body.url)) throw new Error('Invalid PC stream ticket.');
+      return body.url;
+    },
     info: async () => (await send('GET', '/desk')) as DeskInfo,
     runs: async () => {
       const body = (await send('GET', '/runs')) as { runs?: unknown } | null;

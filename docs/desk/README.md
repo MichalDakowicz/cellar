@@ -12,7 +12,7 @@ written half, moved here so they version with the code.
 | [keys.md](keys.md) | `@` files, `$` commands and `$project/entry`, `/` agent skills, `#` colours |
 | [t3code-notes.md](t3code-notes.md) | how t3code hands work to agents, and what cellar takes from it |
 | [TASKS.md](TASKS.md) | the build order: every screen drawn first, then the wiring, easiest to hardest |
-| [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1 verification |
+| [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1–W7 verification |
 
 The canvas stays the source for **how it looks** — open an artboard before building its
 screen. A copy lives in [`canvas/`](canvas/): one `*.dc.html` per artboard (inline styles, and its
@@ -34,3 +34,11 @@ Two rules from the canvas that hold for every task:
 
 What is already built lives in [`desktop/README.md`](../../desktop/README.md) (the pc side:
 pairing, signed requests, starting claude / codex / antigravity, pages, screen, builds).
+
+W6/W7 carries durable turn items and synchronized streaming through phone Run,
+Main totals/navigation, desktop DeskHome/DeskChat and command-job reports. Existing
+layout remains the canvas baseline; added controls explain reconnect and explicit
+saved history. Provider diagnostics and full tool details use the existing folded
+rows. Runtime approvals, steering and queues remain W8/W9. Implementation behavior
+and device verification live in `how-it-works.md`; preexisting canvas/spec edits are
+preserved separately from this wiring.

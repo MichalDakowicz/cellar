@@ -15,11 +15,13 @@
     "dist": "npm run web && node build.mjs && electron-builder --win --x64"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.0"
+    "@supabase/supabase-js": "^2.110.0",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^26.1.0",
+    "@types/ws": "^8.18.2",
     "electron": "^44.7.0",
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2",
