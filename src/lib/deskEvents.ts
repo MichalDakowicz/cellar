@@ -1,5 +1,6 @@
 import type { DeskLogLine, DeskRun } from './deskProtocol';
 import { readDeskRuns } from './deskRunSnapshot';
+import { readRuntimeRequest, type RuntimeRequest } from './deskApprovals';
 
 export const TURN_KINDS = ['user_message', 'assistant_message', 'reasoning', 'command_execution', 'file_change', 'dynamic_tool', 'web_search', 'file_search', 'todo_list', 'proposed_plan', 'approval_request', 'user_input_request', 'subagent', 'checkpoint', 'error', 'compaction', 'handoff', 'legacy_output'] as const;
 export type TurnKind = (typeof TURN_KINDS)[number];
@@ -8,9 +9,9 @@ export type TurnItem = {
   detail?: string; parts?: string[];
 };
 export type DeskEvent = { sequence: number; at: number; runId: string | null } & (
-  { kind: 'catalog'; runs: DeskRun[] } | { kind: 'item'; item: TurnItem }
+  { kind: 'catalog'; runs: DeskRun[] } | { kind: 'item'; item: TurnItem } | { kind: 'approvals'; approvals: RuntimeRequest[] }
 );
-export type EventSnapshot = { epoch: string; sequence: number; runs: DeskRun[]; runId: string | null; items: TurnItem[]; at: number };
+export type EventSnapshot = { epoch: string; sequence: number; runs: DeskRun[]; runId: string | null; items: TurnItem[]; at: number; approvals?: RuntimeRequest[] };
 export type StreamMessage = { type: 'snapshot'; snapshot: EventSnapshot }
   | { type: 'event'; event: DeskEvent }
   | { type: 'synchronized'; sequence: number }
@@ -40,6 +41,7 @@ export function readStreamMessage(raw: unknown): StreamMessage | null {
     if (!snap || typeof snap.epoch !== 'string' || !snap.epoch || !sequence(snap.sequence) || !readDeskRuns(snap.runs)
       || !(snap.runId === null || typeof snap.runId === 'string') || !Array.isArray(snap.items) || !snap.items.every(readTurnItem)
       || typeof snap.at !== 'number' || !Number.isFinite(snap.at)) return null;
+    if (snap.approvals !== undefined && (!Array.isArray(snap.approvals) || !snap.approvals.every(readRuntimeRequest))) return null;
     return row as StreamMessage;
   }
   if (row.type === 'event') {
@@ -47,6 +49,7 @@ export function readStreamMessage(raw: unknown): StreamMessage | null {
     if (!event || !sequence(event.sequence) || event.sequence === 0 || typeof event.at !== 'number'
       || !(event.runId === null || typeof event.runId === 'string')) return null;
     if (event.kind === 'catalog' && readDeskRuns(event.runs)) return row as StreamMessage;
+    if (event.kind === 'approvals' && Array.isArray(event.approvals) && event.approvals.every(readRuntimeRequest)) return row as StreamMessage;
     if (event.kind === 'item' && typeof event.runId === 'string' && readTurnItem(event.item)) return row as StreamMessage;
   }
   return null;
@@ -62,6 +65,7 @@ export function reduceStream(state: StreamState, message: StreamMessage): Stream
   if (event.sequence <= state.sequence) return state;
   if (event.sequence !== state.sequence + 1) return { ...state, phase: 'failed', error: 'Event gap — reconnect to reload the PC snapshot.' };
   if (event.kind === 'catalog') return { ...state, sequence: event.sequence, at: event.at, runs: event.runs };
+  if (event.kind === 'approvals') return { ...state, sequence: event.sequence, at: event.at, approvals: event.approvals };
   const items = state.items.slice();
   if (event.runId === state.runId) {
     const index = items.findIndex((item) => item.id === event.item.id);

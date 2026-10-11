@@ -26,6 +26,7 @@ export class RunEvents {
     if (!owner) { this.owner = null; this.sources = []; this.error = 'Sign in on the PC to read run events.'; return; }
     if (owner !== this.owner) { this.owner = owner; this.sources = []; this.nextCatalog = 0; }
     try {
+      if (this.deps.approvals) this.store.approvals(owner, this.deps.approvals.list(owner));
       if (Date.now() >= this.nextCatalog) {
         const runs = await hostRuns(this.deps);
         if (this.deps.account.current?.userId !== owner) return;

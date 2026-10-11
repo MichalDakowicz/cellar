@@ -79,9 +79,12 @@ function registerIpc(desk: DeskHost): void {
 
 app.on('second-instance', () => window && showWindow(window));
 
-app.on('before-quit', () => {
+let hostStopped = false;
+app.on('before-quit', (event) => {
   quitting = true;
-  host?.stop();
+  if (!host || hostStopped) return;
+  event.preventDefault();
+  void host.stop().finally(() => { hostStopped = true; app.quit(); });
 });
 
 void app.whenReady().then(async () => {

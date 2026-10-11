@@ -15,12 +15,16 @@ export function eventSockets(server: Server, deps: HostDeps): void {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return;
     }
     wss.handleUpgrade(request, socket, head, (ws) => {
-      let subscribed = false; let runId: string | null = null; let cursor = 0; let busy = false;
+      let subscribed = false; let runId: string | null = null; let cursor = 0; let busy = false; let approvals = false;
       let lastHeartbeat = 0; let alive = true;
       const valid = () => deps.account.current?.userId === ticket.owner && deps.identity().key === ticket.key;
       const send = (message: StreamMessage) => {
         if (!valid()) { ws.close(1008, 'account or pairing changed'); return; }
         if (ws.bufferedAmount > MAX_BUFFER) { ws.close(1013, 'resume after slow connection'); return; }
+        // Keep the existing epoch/sequence protocol usable by phones predating W8.
+        if (!approvals && message.type === 'event' && message.event.kind === 'approvals') {
+          message = { type: 'event', event: { ...message.event, kind: 'catalog', runs: deps.events!.store.snapshot(ticket.owner, null).runs } };
+        }
         if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
       };
       const pump = async () => {
@@ -52,6 +56,7 @@ export function eventSockets(server: Server, deps: HostDeps): void {
             await deps.events!.refresh();
             if (deps.events!.error) throw new Error(deps.events!.error);
             const snapshot = deps.events!.store.snapshot(ticket.owner, raw.runId);
+            approvals = raw.approvals === true;
             runId = raw.runId;
             if (runId && !snapshot.runs.some((run) => run.id === runId) && !snapshot.items.length) throw new Error('This run has no saved history on the PC.');
             const after = raw.epoch === snapshot.epoch && raw.afterSequence <= snapshot.sequence && snapshot.sequence - raw.afterSequence < 2000 ? raw.afterSequence : snapshot.sequence;

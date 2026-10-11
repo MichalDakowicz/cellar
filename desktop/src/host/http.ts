@@ -117,7 +117,7 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
       } catch {
         return send(res, 400, { error: 'not json' });
       }
-      const answer = await handle(deps, { method, path, body });
+      const answer = await handle(deps, { method, path, body, source: 'phone' });
       if (answer.status >= 400) log(`  ${(answer.body as { error?: string } | null)?.error ?? ''}`);
       send(res, answer.status, answer.body);
     })().catch((error) => {

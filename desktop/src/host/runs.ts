@@ -15,6 +15,7 @@ import { lastWrite, readTail } from './logTail.ts';
 import { toolPath } from './tools.ts';
 import { plainLog, tail } from './transcript.ts';
 import { worktreeEnv } from './worktreeEnv.ts';
+import type { ManagedRuns } from './managedRuns.ts';
 
 /**
  * Every run this pc started for a phone, and the ones someone opened at the pc.
@@ -30,6 +31,7 @@ import { worktreeEnv } from './worktreeEnv.ts';
  */
 
 type RunRecord = {
+  runtime?: true;
   prompt?: string;
   format?: 'codex' | 'claude';
   worktreeId?: string;
@@ -66,6 +68,7 @@ export class Runs {
   private readonly file: string;
   private readonly logs: string;
   private readonly children = new Map<string, ChildProcess>();
+  runtime?: ManagedRuns;
   constructor(dir: string, private readonly readClaude = claudeRows, private readonly owner: () => string | null = () => null) {
     this.file = join(dir, 'runs.json');
     this.logs = join(dir, 'runs');
@@ -102,6 +105,13 @@ export class Runs {
     const id = randomBytes(4).toString('hex');
     const log = join(this.logs, `${id}.log`);
     const env = start.where === 'worktree' && start.worktreeId ? worktreeEnv(start.cwd, process.env) : process.env;
+    if (this.runtime && start.commandId && start.agent !== 'agy') {
+      const owner = this.owner(); if (!owner) throw new DeskError('Sign in on the PC.', 409, { notStarted: true });
+      const record: RunRecord = { id, ...base, owner, log, runtime: true };
+      this.records.unshift(record); this.save();
+      await this.runtime.start(start, id, owner, log, env, (code) => { record.exit = code; this.save(); });
+      return { id, ...base, state: record.exit === 0 ? 'done' : record.exit === null ? 'unknown' : record.exit !== undefined ? 'failed' : 'running', origin: 'phone' };
+    }
     const out = openSync(log, 'a');
     const child = spawn(path, plan.args, { cwd: start.cwd, env, detached: true, windowsHide: true, stdio: ['ignore', out, out] });
     closeSync(out);
@@ -138,6 +148,7 @@ export class Runs {
 
   private async ownState(record: RunRecord): Promise<DeskRunState> {
     if (record.stopped) return 'stopped';
+    if (record.runtime && record.exit === null) return 'unknown';
     if (record.exit !== undefined) {
       if (record.exit !== 0) return 'failed';
       if (record.format && record.log) {
@@ -148,6 +159,8 @@ export class Runs {
       }
       return 'done';
     }
+    if (record.runtime) return this.runtime?.has(record.id)
+      ? this.runtime.approvals.waiting(record.owner!, record.id) ? 'waiting' : 'running' : 'unknown';
     if (this.children.has(record.id)) return 'running';
     const written = record.log ? await lastWrite(record.log) : null;
     return written !== null && Date.now() - written < QUIET_MS ? 'running' : 'unknown';
@@ -190,6 +203,10 @@ export class Runs {
     if (!record) throw new DeskError('that run was not started from cellar', 403);
     if (record.owner !== undefined && record.owner !== this.owner()) throw new DeskError('no such run for this account', 404);
     if (record.agent === 'claude' && !record.log) return stopClaude(id);
+    if (record.runtime) {
+      if (!this.runtime) throw new DeskError('Provider callback unavailable; stop it at the PC.', 409);
+      await this.runtime.stop(id); record.stopped = true; this.save(); return;
+    }
     const child = this.children.get(id);
     if (!child?.pid) throw new DeskError('it was started before cellar last restarted — stop it at the pc', 409);
     await kill(child.pid);

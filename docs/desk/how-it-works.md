@@ -1,6 +1,6 @@
 # Desk — how it works
 
-Reviewed 2026-10-11 through W7. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-11 through W8. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -8,11 +8,11 @@ adds behavior through the existing view models, host API and transports.
 | Flow | Works now | Sample or missing |
 | --- | --- | --- |
 | Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W20) |
-| Desk totals | W1: shared global blocked-entry and host waiting-run counts; only running runs count as working | Host `waiting` is coarse: an idle interactive session can need the PC. It is not proof of an approval request (W8) |
-| Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main | Runtime approvals on phone remain W8 |
+| Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
+| Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
 | Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W11 |
-| Follow a run | W6/W7: durable normalized turns, live run catalogue, full tool details, safe Markdown chunks, reconnect and explicit saved history; stop Cellar runs | Runtime approvals (W8), steering and queue dispatch (W9) remain missing; old hosts retain legacy polling |
-| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; hosted MCP reads both | Runtime deny/allow panels remain samples until W8 |
+| Follow a run | W6/W7: durable normalized turns, live run catalogue, full tool details, safe Markdown chunks, reconnect and explicit saved history; W8 real approvals in the existing dock; stop Cellar runs | Steering and queue dispatch remain W9; old hosts retain legacy polling |
+| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W13 |
 | Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
 | Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W11), remote input or real phone panel (W18) |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W19) |
@@ -28,9 +28,10 @@ W20 stays deferred. Counts establish trustworthy status first; project commands 
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
-The user approved W1 after the behavior review, then explicitly requested W2–W7.
-All seven are verified within the recorded boundaries. W8 is next. Live Claude testing
-for W6/W7 was explicitly excluded by the user; provider fixtures cover its parser.
+The user approved W1 after the behavior review, then explicitly requested W2–W7 and
+approved W8 approvals after the next flow review. The recorded verification boundaries
+remain in force: no live Claude tasks; Claude uses fixtures, Codex uses fixtures and
+live phone-to-PC checks. W9 is next, followed by W10 and W11.
 
 ## W1 behavior
 
@@ -272,3 +273,100 @@ pass. Android 1.12.0 is installed and launched with no process-scoped error log.
 Current local host: `C:/ping/cellar-desktop-w6-w7-final/Cellar.exe`. Existing canvas,
 metadata, keys and screens edits remain byte-for-byte unchanged. Source commits
 stay local; GitHub push, PR publication and web deployment remain unauthorized.
+
+## W8 behavior and verification
+
+Agreed scope: real runtime approvals for fresh Cellar Claude/Codex tasks, durable
+first-answer-wins responses, the existing waiting dock, linked entry questions and
+truthful disconnect/restart recovery. Preserve the visual clone and the user's
+preexisting canvas/spec edits. Notifications remain W13 and dispatch remains W9.
+
+Fresh complete tasks use the installed Claude executable through pinned Agent SDK
+0.3.296 (`canUseTool`) or installed Codex 0.162.1 through its stdio app-server. No
+model is pinned. Ask first maps to Claude `default` and Codex `untrusted` plus
+`read-only`; edits ok maps to `acceptEdits` and `on-request` plus `workspace-write`;
+full access maps to explicit `bypassPermissions` and `never` plus
+`danger-full-access`. Codex uses `approvalsReviewer: user` so auto review cannot
+silently replace a requested human decision. Existing provider allow/deny rules
+still apply; a provider action that does not ask never creates an invented request.
+
+The host stores actual request identity, run/account, subject, effect, supported
+broader scope, state and first decision in `approvals.sqlite`. A signed LAN POST or
+desktop IPC uses the same `/approval-answers` handler. The transport supplies the
+answer source; client text cannot impersonate a PC answer. The SQLite claim and
+answer receipt commit before the provider callback runs. Another command cannot
+win the same request. Resending the same UUID/choices returns its original receipt;
+changing that UUID's choices is refused. Receipt GETs are account-scoped.
+
+Codex command, file-change and granular-permission requests retain provider scope.
+File proposals display available path/diff details. Session grants appear only
+when supported: Codex command decisions honor `availableDecisions`, granular
+permissions copy the exact requested profile, and Claude only offers exact
+session-scoped allow-rule suggestions. File-change requests have no broad grant.
+Granular Codex permission approval explicitly says it applies to the turn.
+Unsupported native question requests are refused with explanatory copy; linked
+Cellar questions keep their original stored record and W3 confirmed write path.
+
+Pending becomes answering while delivery is unconfirmed. Codex confirmation waits
+for the matching `serverRequest/resolved`; Claude confirmation records the host's
+accepted permission callback result. This confirms the decision, not tool success.
+Actual tool items/exit codes still determine execution results. A lost/late provider
+acknowledgment remains unknown and blocks a second authorization; a late live
+acknowledgment can confirm the original receipt. Restart expires unanswered requests
+and keeps in-flight answers unknown because original callbacks cannot be recovered.
+Neither is replayed. Interrupted/disconnected managed runs cannot imply a successful
+or failed turn without a provider result. Confirmed stop remains a separate state.
+
+Approval projections travel through the existing durable epoch/sequence stream.
+New clients subscribe with `approvals: true`; older clients receive compatible
+catalogue events at the same sequence rather than an unknown event kind. Older
+hosts retain the explicit PC-only waiting state. Offline/unsynchronized clients
+hide current approval actions and offer reconnect; saved chats do not authorize.
+
+The existing run dock and wide Desk waiting area display real approval panels.
+Tabs retain mounted question drafts; the composer and unconfirmed answer UUIDs
+persist in account/PC/run-scoped MMKV. Repeated taps are disabled. Recovery reads
+the original receipt before resending the same answer. Both Run and wide Desk keep
+receipt recovery available after a decision event arrives ahead of its HTTP reply.
+Sample approvals remain visibly separate and never authorize real host requests.
+
+Verified on physical phone and signed-in Michu:
+
+- Codex run `1e3f6a20`: actual write request appeared with exact command/reason;
+  marker absent before Allow once, decision confirmed from phone, command exit 0
+  and expected marker contents verified independently
+- Codex run `509a9295`: Deny confirmed, tool marked failed, denied marker absent;
+  the agent's completed turn remains separate from its refused tool action
+- Codex run `5c5f4bf3`: cold phone restart restored the same pending request
+  `77b9f07d-bf63-492a-b338-2db0e5571d67`; host shutdown hid approval controls and
+  showed disconnected/unknown; host restart expired that exact callback, left the
+  run unknown and did not create the marker
+- Composer draft `W8_draft_keep` survived cold phone restart and APK replacement
+- Desktop home displayed the same actual runtime approval and waiting count
+- Final capability-aware APK/package run `adac981b` displayed the actual request
+  without a duplicate prompt tool row; Deny confirmed and its marker remained absent
+
+Automated coverage includes signed HTTP/websocket delivery, competing phone/PC
+answers, original-receipt recovery after a lost reply, changed-choice refusal,
+account isolation, exact grant scope, late confirmation, cancellation, restart
+expiry and real stdio request/acknowledgment fixture sequencing. PC bridge source
+attribution is tested through `DeskHost.request`. Legacy event subscribers retain
+valid sequence continuity. Claude callbacks use fixtures only; no live Claude
+task was sent. A physical dropped-reply proxy was not used: automatic approval
+review rejected the LAN listener, and the safer loopback alternative was refused
+by the existing pairing validator. The proxy and ADB reverse mapping were removed;
+physical phone retained its original pairing. Lost replies are verified in the
+signed HTTP/receipt tests, not claimed as a physical proxy test.
+
+864 app tests and 59 desktop tests pass. Lint, both TypeScript checks, local web
+export, desktop bundle/package and Android release pass. The standalone APK is
+installed and launched. Local host: `C:/ping/cellar-desktop-w8-final/win-unpacked/Cellar.exe`.
+The seven protected canvas/spec files retain their initial SHA-256 hashes. Source
+work remains local; publication is still pending under the earlier authorization
+boundary. Next wiring task is W9.
+
+Provider references: [Codex app-server](https://learn.chatgpt.com/docs/app-server),
+[Claude SDK user input](https://code.claude.com/docs/en/agent-sdk/user-input), and
+[Claude SDK permissions](https://code.claude.com/docs/en/agent-sdk/permissions).
+Installed generated Codex schemas and pinned SDK types/code determine exact enum
+spellings and supported response shapes when online examples differ.

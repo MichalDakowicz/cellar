@@ -3,6 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import type { DeskEvent, EventSnapshot, TurnItem } from '@/lib/deskEvents';
 import { markdownChunks } from '@/lib/deskEvents';
 import type { DeskRun } from '@/lib/deskProtocol';
+import type { RuntimeRequest } from '@/lib/deskApprovals';
 
 type Source = { offset: number; state: string };
 /** Events, projection and source cursor commit together. A crash cannot duplicate ingestion. */
@@ -21,6 +22,15 @@ export class EventStore {
     this.epoch = (this.db.prepare('SELECT value FROM meta WHERE key=?').get('epoch') as { value: string }).value;
   }
   close() { this.db.close(); }
+  approvals(owner: string, requests: RuntimeRequest[]): void {
+    const key = `approvals:${owner}`; const body = JSON.stringify(requests);
+    const old = this.db.prepare('SELECT value FROM meta WHERE key=?').get(key) as { value: string } | undefined;
+    if (old?.value === body) return;
+    this.transaction(() => {
+      this.db.prepare('INSERT OR REPLACE INTO meta VALUES (?,?)').run(key, body);
+      this.write(owner, { kind: 'approvals', runId: null, approvals: requests } as Omit<DeskEvent, 'sequence' | 'at'>);
+    });
+  }
   head(owner: string): number { return Number((this.db.prepare('SELECT COALESCE(MAX(seq),0) AS seq FROM events WHERE owner=?').get(owner) as { seq: number }).seq); }
   source(owner: string, key: string): Source {
     return this.db.prepare('SELECT offset,state FROM sources WHERE owner=? AND key=?').get(owner, key) as Source | undefined ?? { offset: 0, state: '{}' };
@@ -62,7 +72,8 @@ export class EventStore {
     const row = this.db.prepare('SELECT body FROM catalog WHERE owner=?').get(owner) as { body: string } | undefined;
     const runs: DeskRun[] = row ? JSON.parse(row.body) : [];
     const items = runId ? (this.db.prepare('SELECT body FROM items WHERE owner=? AND run=? ORDER BY position').all(owner, runId) as { body: string }[]).map((item) => JSON.parse(item.body)) : [];
-    return { epoch: this.epoch, sequence: this.head(owner), runs, runId, items, at: Date.now() };
+    const approvals = this.db.prepare('SELECT value FROM meta WHERE key=?').get(`approvals:${owner}`) as { value: string } | undefined;
+    return { epoch: this.epoch, sequence: this.head(owner), runs, runId, items, at: Date.now(), ...(approvals ? { approvals: JSON.parse(approvals.value) } : {}) };
   }
   private transaction(fn: () => void): void {
     this.db.exec('BEGIN IMMEDIATE');

@@ -9,9 +9,11 @@ export function codexItems(row: Row, prefix: string): TurnItem[] {
   if (row.type === 'turn.failed' || row.type === 'error') return [item(`${prefix}:error`, 'error', detail(row.error?.message ?? row.message ?? row.error), 'failed')];
   if (!['item.started', 'item.updated', 'item.completed'].includes(row.type) || !row.item || typeof row.item.id !== 'string') return [];
   const raw = row.item as Row;
-  const status: TurnItem['status'] = raw.status === 'failed' || (typeof raw.exit_code === 'number' && raw.exit_code !== 0) ? 'failed' : row.type === 'item.completed' ? 'completed' : 'running';
+  const status: TurnItem['status'] = ['failed', 'declined', 'interrupted'].includes(raw.status) || (typeof raw.exit_code === 'number' && raw.exit_code !== 0) ? 'failed' : row.type === 'item.completed' ? 'completed' : 'running';
   const id = `codex:${raw.id}`;
   switch (raw.type) {
+    // The managed source already seeds the task prompt once with its durable ID.
+    case 'user_message': return [];
     case 'agent_message': return [item(id, 'assistant_message', detail(raw.text), status)];
     case 'reasoning': return [item(id, 'reasoning', detail(raw.text), status)];
     case 'command_execution': return [item(id, 'command_execution', `command — ${detail(raw.command)}`, status, `${detail(raw.aggregated_output)}${raw.exit_code == null ? '' : `\nexit ${raw.exit_code}`}`)];
@@ -27,7 +29,7 @@ export function codexItems(row: Row, prefix: string): TurnItem[] {
 export function claudeItems(row: Row, prefix: string, state: Row, read: ReadItem): TurnItem[] {
   const out: TurnItem[] = [];
   if (row.type === 'result') {
-    if (row.is_error || (Array.isArray(row.permission_denials) && row.permission_denials.length)) out.push(item(`${prefix}:result`, 'error', detail(row.result ?? row.errors ?? 'Agent reported permission denials; answer at the PC until W8.'), 'failed', row.permission_denials));
+    if (row.is_error || (Array.isArray(row.permission_denials) && row.permission_denials.length)) out.push(item(`${prefix}:result`, 'error', detail(row.result ?? row.errors ?? 'Agent reported permission denials.'), 'failed', row.permission_denials));
     return out;
   }
   if (row.type === 'stream_event') {

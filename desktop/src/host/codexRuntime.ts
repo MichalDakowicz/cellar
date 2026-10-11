@@ -1,0 +1,84 @@
+import type { ApprovalDecision } from '@/lib/deskApprovals';
+import type { DeskStart } from '@/lib/deskProtocol';
+import type { Approvals } from './approvals.ts';
+import { CodexRpc, type RpcRow } from './codexRpc.ts';
+import { codexLogItem, codexPermissionRequest } from './codexApprovals.ts';
+
+export type ManagedSession = { stop: () => Promise<void>; close: () => Promise<void> };
+export async function startCodex(path: string, start: DeskStart, runId: string, owner: string, approvals: Approvals,
+  env: NodeJS.ProcessEnv, log: (row: unknown) => void, done: (code: number | null) => void): Promise<ManagedSession> {
+  const items = new Map<string, any>(); const waiting = new Map<string | number, { id: string; resolve?: () => void; reject?: (error: Error) => void }>();
+  let threadId = ''; let turnId = ''; let finished = false;
+  const finish = (code: number | null) => {
+    if (finished) return; finished = true;
+    approvals.expireRun(owner, runId);
+    for (const reply of waiting.values()) reply.reject?.(new Error('Provider disconnected before confirming the decision.'));
+    waiting.clear(); done(code); rpc.child.kill();
+  };
+  const receive = (row: RpcRow) => {
+    const p = row.params ?? {};
+    if (row.method && row.id !== undefined) {
+      const spec = codexPermissionRequest(row, start.cwd);
+      if (!spec || p.threadId !== threadId) { void rpc.send({ id: row.id, error: { code: -32601, message: 'Unsupported runtime request; use Cellar entry questions for structured answers.' } }); return; }
+      if (row.method === 'item/fileChange/requestApproval') {
+        const changes = items.get(p.itemId)?.changes;
+        if (Array.isArray(changes) && changes.length) spec.subject = JSON.stringify(changes, null, 2);
+      }
+      const providerId = row.id;
+      const opened = approvals.open(owner, { runId, agent: 'codex', what: spec.what, subject: spec.subject, effect: spec.effect, always: spec.always },
+        async (choice: ApprovalDecision) => {
+          const reply = waiting.get(providerId);
+          if (!reply) throw new Error('Codex no longer waits for this request.');
+          await new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Codex has not confirmed the decision.')), 20_000);
+            reply.resolve = () => { clearTimeout(timer); resolve(); }; reply.reject = (error) => { clearTimeout(timer); reject(error); };
+            void rpc.send({ id: providerId, result: spec.response(choice) }).catch(reply.reject);
+          });
+        });
+      waiting.set(providerId, { id: opened.id }); return;
+    }
+    if (row.method === 'serverRequest/resolved') {
+      const reply = waiting.get(p.requestId);
+      if (reply?.resolve) { approvals.acknowledge(owner, reply.id); reply.resolve(); } else if (reply) approvals.expire(owner, reply.id);
+      waiting.delete(p.requestId); return;
+    }
+    if (row.method === 'turn/started') turnId = p.turn?.id ?? turnId;
+    if (row.method === 'item/started' || row.method === 'item/completed') {
+      const raw = p.item; if (!raw?.id) return;
+      items.set(raw.id, raw); log({ type: row.method === 'item/completed' ? 'item.completed' : 'item.started', item: codexLogItem(raw) });
+    }
+    if (row.method?.startsWith('item/') && typeof p.delta === 'string') {
+      const raw = items.get(p.itemId); if (!raw) return;
+      if (row.method === 'item/agentMessage/delta') raw.text = (raw.text ?? '') + p.delta;
+      if (row.method === 'item/commandExecution/outputDelta') raw.aggregatedOutput = (raw.aggregatedOutput ?? '') + p.delta;
+      log({ type: 'item.updated', item: codexLogItem(raw) });
+    }
+    if (row.method === 'error') log({ type: 'error', error: p.error });
+    if (row.method === 'turn/completed') {
+      const status = p.turn?.status;
+      if (status === 'failed') log({ type: 'turn.failed', error: p.turn.error });
+      // Resolved notifications normally precede completion; an unresolved response stays unknown.
+      finish(status === 'completed' ? 0 : status === 'interrupted' ? null : 1);
+    }
+  };
+  const rpc = new CodexRpc(path, start.cwd, env, receive, (text) => log({ type: 'diagnostic', message: text }));
+  const closed = new Promise<void>((resolve) => rpc.child.once('close', () => resolve()));
+  rpc.child.on('exit', () => finish(null));
+  try {
+    await rpc.call('initialize', { clientInfo: { name: 'cellar', title: 'Cellar', version: '1.12.0' }, capabilities: { experimentalApi: true } });
+    await rpc.send({ method: 'initialized', params: {} });
+    const approvalPolicy = start.mode === 'full' ? 'never' : start.mode === 'ask' ? 'untrusted' : 'on-request';
+    const sandbox = start.mode === 'full' ? 'danger-full-access' : start.mode === 'ask' ? 'read-only' : 'workspace-write';
+    const result = await rpc.call('thread/start', { cwd: start.cwd, approvalPolicy, approvalsReviewer: 'user', sandbox });
+    threadId = result.thread.id;
+    const turn = await rpc.call('turn/start', { threadId, input: [{ type: 'text', text: start.prompt }], approvalPolicy, approvalsReviewer: 'user' });
+    turnId = turn.turn.id;
+  } catch (error) { finish(1); await closed; throw error; }
+  return { close: async () => { finish(null); await closed; }, stop: async () => {
+    await rpc.call('turn/interrupt', { threadId, turnId });
+    const deadline = Date.now() + 10_000;
+    while (!finished && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 20));
+    if (!finished) throw new Error('Codex has not confirmed interruption.');
+    await closed;
+  } };
+}

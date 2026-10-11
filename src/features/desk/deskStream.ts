@@ -37,7 +37,7 @@ export class DeskStream {
     if (this.socket?.readyState !== this.Socket.OPEN || this.state.phase === 'connecting' || (runId === this.lastRun && this.state.phase !== 'disconnected')) return;
     this.lastRun = runId;
     this.emit({ ...this.state, phase: 'connecting', error: null });
-    this.socket.send(JSON.stringify({ type: 'subscribe', runId, ...{ afterSequence: this.cursor.sequence, epoch: this.cursor.epoch } }));
+    this.socket.send(JSON.stringify({ type: 'subscribe', runId, approvals: true, ...{ afterSequence: this.cursor.sequence, epoch: this.cursor.epoch } }));
   }
   private disconnect() {
     this.generation++; if (this.retry) clearTimeout(this.retry); if (this.watchdog) clearTimeout(this.watchdog);
@@ -59,7 +59,7 @@ export class DeskStream {
       socket.onopen = () => {
         if (generation !== this.generation) return;
         const runId = this.selectedRun(); this.lastRun = runId;
-        socket.send(JSON.stringify({ type: 'subscribe', runId, afterSequence: this.cursor.sequence, epoch: this.cursor.epoch })); alive();
+        socket.send(JSON.stringify({ type: 'subscribe', runId, approvals: true, afterSequence: this.cursor.sequence, epoch: this.cursor.epoch })); alive();
       };
       socket.onmessage = (event) => {
         if (generation !== this.generation) return;

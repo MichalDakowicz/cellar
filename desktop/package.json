@@ -15,6 +15,7 @@
     "dist": "npm run web && node build.mjs && electron-builder --win --x64"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.296",
     "@supabase/supabase-js": "^2.110.0",
     "ws": "^8.22.0"
   },

@@ -19,7 +19,7 @@ test('one client shares one socket; synchronization gates output and changed vie
   const offHome = client.acquire({}, null); const offChat = client.acquire({}, 'run1');
   await flush(); expect(ticket).toHaveBeenCalledTimes(1); expect(Socket.all).toHaveLength(1);
   const socket = Socket.all[0]; socket.open();
-  expect(JSON.parse(socket.sent[0])).toMatchObject({ runId: 'run1', epoch: 'old', afterSequence: 12 });
+  expect(JSON.parse(socket.sent[0])).toMatchObject({ runId: 'run1', approvals: true, epoch: 'old', afterSequence: 12 });
   const offNext = client.acquire({}, 'run2'); expect(socket.sent).toHaveLength(1);
   socket.message({ type: 'snapshot', snapshot: { epoch: 'new', sequence: 15, at: 1, runs: [], runId: 'run1', items: [] } });
   expect(client.state.phase).toBe('connecting'); expect(save).not.toHaveBeenCalled();

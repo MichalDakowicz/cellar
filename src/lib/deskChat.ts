@@ -86,5 +86,5 @@ export type DeskApproval = {
   /** Where and what it changes — "in .worktrees/desk-tab · changes package.json". */
   effect: string;
   /** The "for the rest of this run" offer, worded for what is asked. */
-  always: string;
+  always: string | null;
 };

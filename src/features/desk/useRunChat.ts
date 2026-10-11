@@ -22,6 +22,9 @@ import { useDeskCommands } from './useDeskCommands';
 import { leadingCommand, parseCommandSettings } from '@/lib/deskCommands';
 import { deskTestResults } from '@/lib/deskTestResults';
 import { finishedWorktreeRun } from '@/lib/deskWorktrees';
+import { approvalMessage, pendingApproval } from '@/lib/deskApprovals';
+import { useApprovalPending } from '@/store/deskApprovals';
+import { pendingQuestions } from '@/lib/entryQuestions';
 
 export type Dispatch = 'steer' | 'queue';
 type Decision = 'allow' | 'always' | 'deny';
@@ -36,10 +39,8 @@ const DECIDED: Record<Decision, string> = {
  * One run's screen (`Run.dc.html`): its header, what it said folded into a
  * chat, the approval it is waiting on, and the composer.
  *
- * A real run reads its log from the pc. Answering an approval and talking to a
- * running agent need the pc to hold them open (docs/desk/TASKS.md W8, W9), so
- * on a real run those are drawn and say they are coming; the sample desk's runs
- * show them working, locally.
+ * Real approvals come from the synchronized host stream. Composer steering
+ * still waits for W9; samples remain separate local demonstrations.
  */
 export function useRunChat(id: string) {
   const link = useDeskLink();
@@ -50,11 +51,14 @@ export function useRunChat(id: string) {
   const history = historyId === id;
   const runs = useDeskRuns(link);
   const log = useDeskLog(link, id.startsWith('sample-') ? null : id);
-  const { projects } = useCellar();
+  const { projects, entries } = useCellar();
   const { say } = useToast();
   const [decision, setDecision] = useState<Decision | null>(null);
   const [dispatch, setDispatch] = useState<Dispatch>('steer');
-  const [draft, setDraft] = useState('');
+  const draftKey = `${link.ownerId}:${link.info?.id ?? link.pair?.id}:${id}`;
+  const draft = useApprovalPending((state) => state.drafts[draftKey] ?? '');
+  const setDraft = (text: string) => useApprovalPending.getState().draft(draftKey, text);
+  const pendingAnswers = useApprovalPending((state) => state.pending);
   const jobs = useDeskCommands();
   const [commandError, setCommandError] = useState<string | null>(null);
 
@@ -72,6 +76,12 @@ export function useRunChat(id: string) {
   const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id));
 
   const synchronized = stream.live && stream.state.runId === id;
+  const runtimeRequests = !sample && synchronized && link.info?.approvalProtocol === 1
+    ? (stream.state.approvals ?? []).filter((row) => row.runId === id) : [];
+  const waitingRequests = runtimeRequests.filter((row) => pendingApproval(row)
+    || !!pendingAnswers[`${link.ownerId}:${link.info?.id ?? link.pair?.id}:${row.id}`]);
+  const linkedQuestions = synchronized && !sample ? entries.filter((entry) => (run?.entryIds ?? (run?.entryId ? [run.entryId] : [])).includes(entry.id))
+    .flatMap((entry) => pendingQuestions(entry.questions).map((question) => ({ entry, id: question.id }))) : [];
   const viewingHistory = !synchronized && history && !!saved;
   const realItems = synchronized ? stream.state.items : viewingHistory ? saved.items : [];
   const renderEvents = stream.supported || viewingHistory;
@@ -109,8 +119,12 @@ export function useRunChat(id: string) {
     logError: (!sample && stream.supported && !synchronized ? stream.state.error ?? (stream.state.phase === 'connecting' ? 'Synchronizing PC events…' : 'Reconnect to read live output.') : null) ?? commandError ?? (jobs.save.error ? readError(jobs.save.error) : jobs.start.error ? readError(jobs.start.error) : !sample && log.error ? readError(log.error) : !sample && !link.calls ? `${link.name} is not on this network — its words show here when it is` : null),
     /** The approval it is waiting on, until it is answered. */
     approval: asked && !decision ? asked : null,
+    runtimeRequests: waitingRequests,
+    linkedQuestions,
+    runtimeOutcome: runtimeRequests.find((row) => ['answered', 'expired', 'unknown'].includes(row.state))
+      ? approvalMessage(runtimeRequests.find((row) => ['answered', 'expired', 'unknown'].includes(row.state))!) : null,
     /** A real run stopped on something, before approvals reach the phone. */
-    waitingAtPc: !sample && state === 'waiting',
+    waitingAtPc: !sample && state === 'waiting' && !waitingRequests.length && !linkedQuestions.length,
     decided: decision ? DECIDED[decision] : null,
     /** Amber while it carries on, grey when it was told no. */
     decidedTone: decision === 'deny' ? ('denied' as const) : ('allowed' as const),

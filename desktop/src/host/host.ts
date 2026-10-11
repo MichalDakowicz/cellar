@@ -1,4 +1,6 @@
 import { RunEvents } from './runEvents.ts';
+import { Approvals } from './approvals.ts';
+import { ManagedRuns } from './managedRuns.ts';
 import type { Server } from 'node:http';
 import { appendFileSync, statSync, writeFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
@@ -64,6 +66,7 @@ export class DeskHost {
   private identity: Identity;
   private boundPort: number | null = null;
   private server: Server | null = null;
+  private stopping: Promise<void> | null = null;
   readonly account: Account;
   readonly deps: HostDeps;
   readonly fallback: CellarFallback;
@@ -87,6 +90,8 @@ export class DeskHost {
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
+    this.deps.approvals = new Approvals(join(options.dataDir, 'approvals.sqlite'), (owner, rows) => this.deps.events!.store.approvals(owner, rows));
+    this.deps.runs.runtime = new ManagedRuns(this.deps.approvals);
     this.fallback = new CellarFallback(this.deps);
   }
 
@@ -105,18 +110,28 @@ export class DeskHost {
     return port;
   }
 
-  stop(): void {
+  stop(): Promise<void> {
+    if (this.stopping) return this.stopping;
     this.fallback.stop();
     this.server?.close();
-    void this.deps.events?.stop();
+    this.stopping = (async () => {
+      // Providers must release callbacks while the event store can still publish expiry.
+      await this.deps.runs.runtime?.close();
+      await this.deps.events?.stop();
+      this.deps.approvals?.close();
+    })();
+    return this.stopping;
   }
 
   /** The window's way in. Same answers as the LAN, without the key — the window is this pc. */
   request(req: ApiRequest): Promise<ApiResponse> {
-    return handle(this.deps, req);
+    if (this.stopping) return Promise.resolve({ status: 503, body: { error: 'PC is shutting down; no new commands accepted.' } });
+    return handle(this.deps, { ...req, source: 'pc' });
   }
 
   setSession(session: DeskSession | null): void {
+    const previous = this.account.current?.userId;
+    if (previous && previous !== session?.userId) void this.deps.runs.runtime?.stopOwner(previous);
     this.account.setSession(session);
   }
 

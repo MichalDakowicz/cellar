@@ -15,6 +15,9 @@ import { useDeskPrefs } from '@/store/deskPrefs';
 
 import type { useDeskScreen } from './useDeskScreen';
 import { useDeskStatus } from './DeskStatusProvider';
+import { useDeskStream } from './useDeskStream';
+import { pendingApproval } from '@/lib/deskApprovals';
+import { useApprovalPending } from '@/store/deskApprovals';
 
 type Decision = 'allow' | 'deny';
 
@@ -23,14 +26,17 @@ type Decision = 'allow' | 'deny';
  * on you answered inline, today's figures and stop all.
  *
  * Enter files the thought in the inbox, the way the dump does; shift+enter
- * hands it to the new task screen with the words already in it. Approvals are
- * answered here only on the sample desk until the pc holds them open (W8); a
- * real thought waiting on you opens its question.
+ * hands it to the new task screen with the words already in it. Runtime
+ * approvals use the synchronized host feed; a blocked thought opens its question.
  */
 export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: DeskRunSections<DeskRunCard>) {
   const router = useRouter();
   const { entries } = useCellar();
-  const { counts } = useDeskStatus();
+  const { counts, link } = useDeskStatus();
+  const stream = useDeskStream(link);
+  const pendingAnswers = useApprovalPending((state) => state.pending);
+  const approvals = stream.live && link.info?.approvalProtocol === 1 ? (stream.state.approvals ?? []).filter((row) => pendingApproval(row)
+    || !!pendingAnswers[`${link.ownerId}:${link.info?.id ?? link.pair?.id}:${row.id}`]) : [];
   const { drop } = useCellarWrites();
   const { say } = useToast();
   const kind = useCellarPrefs((state) => state.draftKind);
@@ -85,6 +91,7 @@ export function useDeskWide(screen: ReturnType<typeof useDeskScreen>, sections: 
       },
     },
     asks,
+    approvals,
     /** The runs, less the approvals already answerable above them. */
     sections: { ...sections, waiting: sections.waiting.filter((run) => !asks.some((ask) => ask.id === run.id)) },
     onDecide: (id: string, decision: Decision) => {

@@ -1,4 +1,5 @@
 import type { RunEvents } from './runEvents.ts';
+import type { Approvals } from './approvals.ts';
 import { realpathSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -33,10 +34,11 @@ import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
  * which is here, and are served by the LAN server.
  */
 
-export type ApiRequest = { method: string; path: string; body?: unknown };
+export type ApiRequest = { method: string; path: string; body?: unknown; source?: 'phone' | 'pc' };
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  approvals?: Approvals;
   events?: RunEvents;
   identity: () => Identity;
   account: Account;
@@ -72,6 +74,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
     ...(deps.worktrees ? { worktrees: true as const } : {}),
     ...(deps.events ? { eventProtocol: 1 as const } : {}),
+    ...(deps.approvals ? { approvalProtocol: 1 as const } : {}),
   };
 }
 
@@ -139,9 +142,16 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'POST /approval-answers':
+        if (!deps.approvals || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for approvals.', 409);
+        return ok({ receipt: await deps.approvals.answer(deps.account.current.userId,
+          req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });
+      case 'GET /approval-answers/:id':
+        if (!deps.approvals || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for approvals.', 409);
+        return ok({ receipt: deps.approvals.receipt(deps.account.current.userId, parts[1]) });
       case 'GET /desk':
         return ok(await deskInfo(deps));
       case 'POST /event-ticket': {

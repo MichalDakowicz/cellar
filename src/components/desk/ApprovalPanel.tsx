@@ -13,9 +13,11 @@ import { COLORS } from '@/theme/colors';
 export function ApprovalPanel({
   approval,
   onDecide,
+  disabled = false,
 }: {
   approval: DeskApproval;
   onDecide: (decision: 'allow' | 'always' | 'deny') => void;
+  disabled?: boolean;
 }) {
   const [more, setMore] = useState(false);
   return (
@@ -36,6 +38,8 @@ export function ApprovalPanel({
         <Pressable
           accessibilityRole="button"
           onPress={() => onDecide('deny')}
+          disabled={disabled}
+          accessibilityState={{ disabled }}
           className="h-[52px] flex-1 items-center justify-center rounded-lg border border-border active:opacity-70"
         >
           <Text className="font-sans text-base font-semibold text-foreground">deny</Text>
@@ -43,12 +47,14 @@ export function ApprovalPanel({
         <Pressable
           accessibilityRole="button"
           onPress={() => onDecide('allow')}
+          disabled={disabled}
+          accessibilityState={{ disabled }}
           className="h-[52px] flex-1 items-center justify-center rounded-lg bg-foreground active:opacity-80"
         >
           <Text className="font-sans text-base font-semibold text-background">allow once</Text>
         </Pressable>
       </View>
-      <Pressable
+      {!!approval.always && <Pressable
         accessibilityRole="button"
         onPress={() => setMore(!more)}
         accessibilityState={{ expanded: more }}
@@ -57,8 +63,8 @@ export function ApprovalPanel({
         <Text className="font-sans text-sm font-semibold" style={{ color: COLORS.foregroundSoft }}>
           {more ? 'fewer options' : 'more options'}
         </Text>
-      </Pressable>
-      {more && <Pressable accessibilityRole="button" onPress={() => onDecide('always')} className="min-h-11 items-center justify-center rounded-lg border border-border px-3"><Text className="font-sans text-sm text-foreground">{approval.always}</Text></Pressable>}
+      </Pressable>}
+      {more && !!approval.always && <Pressable accessibilityRole="button" disabled={disabled} accessibilityState={{ disabled }} onPress={() => onDecide('always')} className="min-h-11 items-center justify-center rounded-lg border border-border px-3"><Text className="font-sans text-sm text-foreground">{approval.always}</Text></Pressable>}
     </View>
   );
 }

@@ -4,6 +4,7 @@
 
 ### Added
 
+- Desk: answer real Claude and Codex approvals, with durable receipts and first answer wins
 - Desk: follow real agent turns live, with full tool output and durable run history
 - Desk: reconnect without duplicate turns; open labelled saved chats while the PC is offline
 

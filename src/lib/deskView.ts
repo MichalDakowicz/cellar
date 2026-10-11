@@ -56,6 +56,7 @@ export type DeskRunCard = {
   project: string;
   /** What it is doing or wants right now ("wants to run npm i expo-av"); null when unknown. */
   detail: string | null;
+  waitingLabel?: string;
   state: DeskRunState;
   startedAt: number;
   /** This desk started it and it is still going — a session opened at the pc is not ours to stop. */

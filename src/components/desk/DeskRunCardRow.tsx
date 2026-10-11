@@ -34,7 +34,7 @@ export function DeskRunCardRow({ run, onOpen }: { run: DeskRunCard; onOpen: ((id
       )}
       <View className="min-w-0 flex-1 gap-1">
         <View className="flex-row items-center justify-between gap-2">
-          <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>{run.id.startsWith('sample-') ? `sample · ${waiting ? 'approval' : run.project}` : waiting ? 'needs you at the pc' : run.project}</Text>
+          <Text className="font-sans min-w-0 flex-1 text-xs text-muted-foreground" numberOfLines={1}>{run.id.startsWith('sample-') ? `sample · ${waiting ? 'approval' : run.project}` : waiting ? run.waitingLabel ?? 'needs you at the pc' : run.project}</Text>
           <RunChip state={run.state} />
         </View>
         <Text className="font-sans text-base font-bold text-foreground" numberOfLines={1}>

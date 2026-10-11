@@ -12,6 +12,7 @@ import { Overline } from '@/components/ui/controls';
 import type { useDeskHome } from './useDeskHome';
 import type { useDeskScreen } from './useDeskScreen';
 import type { useDeskWide } from './useDeskWide';
+import { RuntimeApprovalPanel } from './RuntimeApprovalPanel';
 
 /**
  * The desk tab on a wide window (docs/desk/screens.md, `DeskHome.dc.html`):
@@ -53,6 +54,7 @@ export function DeskWide({
       <View className="flex-row items-start gap-8">
         <View className="min-w-0 flex-[3]">
           <DeskWaitingInline asks={wide.asks} onDecide={wide.onDecide} thoughts={wide.thoughts} onAnswer={wide.openThought} />
+          {wide.approvals.map((request) => <View key={request.id} className="mb-4 rounded-lg bg-row p-4"><RuntimeApprovalPanel request={request} /></View>)}
           <DeskRunSections
             sections={wide.sections}
             gutter=""

@@ -8,6 +8,7 @@ import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@
 
 import type { DeskBridge } from './bridge';
 import type { DeskReceipt } from '@/lib/deskReceipt';
+import { readApprovalReceipt, type ApprovalAnswer, type ApprovalReceipt } from '@/lib/deskApprovals';
 import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest, type WorktreeReview, type WorktreeReceipt } from '@/lib/deskWorktrees';
 
 /**
@@ -129,6 +130,11 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { 
 
 export function deskCalls(send: DeskTransport, local = false) {
   return {
+    answerApproval: async (answer: ApprovalAnswer) => readApprovalReceipt(((await send('POST', '/approval-answers', answer)) as { receipt: unknown }).receipt, answer),
+    approvalReceipt: async (answer: ApprovalAnswer): Promise<ApprovalReceipt | null> => {
+      const row = ((await send('GET', `/approval-answers/${encodeURIComponent(answer.commandId)}`)) as { receipt: unknown }).receipt;
+      return row === null ? null : readApprovalReceipt(row, answer);
+    },
     eventTicket: async () => {
       const body = await send('POST', '/event-ticket', { local }) as { url?: unknown };
       if (typeof body?.url !== 'string' || !/^ws:\/\/[^/]+\/events\/[A-Za-z0-9_-]{16,}$/.test(body.url)) throw new Error('Invalid PC stream ticket.');

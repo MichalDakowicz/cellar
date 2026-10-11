@@ -12,6 +12,7 @@ import { lanServer } from './http.ts';
 import { EventStore } from './eventStore.ts';
 import { Tickets } from './tickets.ts';
 import type { HostDeps } from './api.ts';
+import { randomUUID } from 'node:crypto';
 
 test('signed phone snapshot, replay, live, reconnect, ticket expiry and account revocation', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cellar-socket-')); const store = new EventStore(join(dir, 'events.sqlite'));
@@ -44,7 +45,10 @@ test('signed phone snapshot, replay, live, reconnect, ticket expiry and account 
   try {
     const unsigned = await fetch(`http://127.0.0.1:${port}/event-ticket`, { method: 'POST' }); assert.equal(unsigned.status, 401);
     const url = await ticket(); const client = await connect(url); assert.equal(client.state().phase, 'live');
-    assert.equal(client.messages[0].type, 'snapshot'); assert.equal(client.messages.at(-1).type, 'synchronized');
+    store.approvals(owner, [{ id: randomUUID(), runId: run.id, agent: 'codex', what: 'command', subject: 'echo test', effect: dir, always: null, state: 'pending', createdAt: now }]);
+    await client.until(() => client.messages.some((message) => message.type === 'event'));
+    assert.equal(client.messages.find((message) => message.type === 'event').event.kind, 'catalog'); // Older clients never receive the new event kind.
+    assert.equal(client.messages[0].type, 'snapshot'); assert.ok(client.messages.some((message) => message.type === 'synchronized'));
     await refused(url); // Used ticket cannot open a second client.
     store.ingest(owner, run.id, 'source', 1, '{}', [{ id: 'cmd', kind: 'command_execution', text: 'command — test', status: 'running' }]);
     await client.until(() => client.state().items.length === 1);

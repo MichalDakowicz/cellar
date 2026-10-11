@@ -358,12 +358,23 @@ explicit saved history after a cold restart, host restart, and background/resume
 SQLite epoch/sequence and unique item IDs survive restart; desktop uses the same
 synchronized feed. See `how-it-works.md` W6/W7. GitHub/web publication remains pending.
 
-### W8 · approvals `[ ]`
+### W8 · approvals `[x]`
 
 Agents run through the claude agent sdk (`canUseTool`) and `codex app-server`
 (`requestApproval`), so a permission ask becomes a stored runtime request. The pinned panel
 answers it; first answer wins across phone, pc and notification. Ask first · edits ok · full
 access map onto each agent's modes.
+
+Verified 2026-10-11: actual stored requests/receipts, first answer wins on phone/PC,
+exact provider grant scopes, pending/unknown/restart expiry and synchronized waiting
+dock; composer survives cold restart. Live Codex phone Allow/Deny, callback expiry
+after host restart and desktop waiting area checked. Claude uses SDK callback fixtures
+only, preserving the no-live-Claude constraint. 864 app and 59 desktop tests, types,
+lint, web export, desktop package and installed Android release pass. Lost replies
+are verified by signed HTTP/receipt tests; physical fault proxy was removed. Native
+provider question tools are explicitly refused; linked questions reuse W3. Notification
+delivery remains W13. Existing canvas/spec edits retain their initial hashes.
+See `how-it-works.md` W8 for behavior and verification boundaries. Next: W9.
 
 ### W9 · steer, queue, stop all `[ ]`
 

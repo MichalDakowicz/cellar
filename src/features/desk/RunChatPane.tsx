@@ -17,6 +17,7 @@ import { COLORS } from '@/theme/colors';
 
 import type { useRunChat } from './useRunChat';
 import { WorktreeActions } from './WorktreeActions';
+import { RunWaitingDock } from './RunWaitingDock';
 
 /**
  * One run's chat (`Run.dc.html`): the header, what it said, and at the bottom in
@@ -69,6 +70,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
             {chat.job ? <JobResults {...chat.job} /> : chat.turnItems ? <TurnChatItems items={chat.turnItems} youCaption={chat.youCaption} historical={chat.history} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
             {!!chat.logError && <View className="gap-2"><Text className="font-sans text-xs text-muted-foreground">{chat.logError}</Text><Pressable accessibilityRole="button" onPress={chat.retryEvents} className="min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2"><Text className="font-sans text-sm text-foreground">Reconnect</Text></Pressable></View>}
             {!!chat.worktreeId && <WorktreeActions id={chat.worktreeId} />}
+            {!!chat.runtimeOutcome && <Text className="font-sans text-xs text-muted-foreground">{chat.runtimeOutcome}</Text>}
             {chat.decided && (
               <View className="flex-row items-center gap-2">
                 <View
@@ -90,11 +92,13 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
       >
         <ContentShell maxWidth={MAX_W.text}>
           <View className="px-4 pt-2.5">
-            {chat.approval ? (
+            {chat.runtimeRequests.length || chat.linkedQuestions.length ? (
+              <RunWaitingDock requests={chat.runtimeRequests} questions={chat.linkedQuestions} />
+            ) : chat.approval ? (
               <ApprovalPanel approval={chat.approval} onDecide={chat.decide} />
             ) : chat.waitingAtPc ? (
               <Text className="font-sans pb-1 text-xs text-muted-foreground">
-                it stopped on something only the pc can answer for now — answering from here comes soon
+                This session needs the PC. Fresh Cellar tasks support phone approvals; legacy sessions keep their original controls.
               </Text>
             ) : (
               <RunComposer {...chat.composer} />
