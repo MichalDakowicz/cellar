@@ -16,6 +16,7 @@ import { Runs } from './runs.ts';
 import { Commands } from './commands.ts';
 import { Jobs } from './jobs.ts';
 import { Receipts } from './receipts.ts';
+import { Worktrees } from './worktrees.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
 import { Tickets } from './tickets.ts';
 
@@ -82,6 +83,8 @@ export class DeskHost {
       lanHost: () => pickLanAddress(networkInterfaces()),
       version: options.version,
     };
+    this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
+      join(this.identity.workspace, '.cellar-worktrees'));
     this.fallback = new CellarFallback(this.deps);
   }
 

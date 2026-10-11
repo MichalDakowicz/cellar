@@ -17,6 +17,7 @@ import { useDeskLog, useDeskRuns } from './useDeskRuns';
 import { useDeskCommands } from './useDeskCommands';
 import { leadingCommand, parseCommandSettings } from '@/lib/deskCommands';
 import { deskTestResults } from '@/lib/deskTestResults';
+import { finishedWorktreeRun } from '@/lib/deskWorktrees';
 
 export type Dispatch = 'steer' | 'queue';
 type Decision = 'allow' | 'always' | 'deny';
@@ -52,7 +53,7 @@ export function useRunChat(id: string) {
   const chat = sample ? SAMPLE_CHATS[id] : null;
   const run = sample ? null : (runs.runs.find((candidate) => candidate.id === id) ?? null);
 
-  const matchedProjectId = run ? projectForPath(run.cwd, projects)?.id : null;
+  const matchedProjectId = run ? run.projectId ?? projectForPath(run.cwd, projects)?.id : null;
   const projectCommands = jobs.projects.find((project) => project.id === matchedProjectId || (!!run && repoKey(project.cwd) === repoKey(run.cwd)));
   const projectId = projectCommands?.id ?? matchedProjectId;
   const command = leadingCommand(draft);
@@ -69,7 +70,7 @@ export function useRunChat(id: string) {
   const meta = sample
     ? sample.meta
     : run
-      ? runMeta([projectForPath(run.cwd, projects)?.name ?? repoPathLabel(run.cwd), agentLabel(run.agent)])
+      ? runMeta([projects.find((project) => project.id === matchedProjectId)?.name ?? repoPathLabel(run.cwd), agentLabel(run.agent)])
       : '';
 
   return {
@@ -78,7 +79,8 @@ export function useRunChat(id: string) {
     loading: !sample && runs.loading,
     title: sample?.title ?? run?.name ?? 'run',
     meta,
-    branch: chat?.branch ?? null,
+    branch: chat?.branch ?? run?.branch ?? null,
+    worktreeId: run?.worktreeId && finishedWorktreeRun(state) ? run.worktreeId : null,
     state,
     age: run ? longRel(new Date(run.startedAt).toISOString()) : null,
     diff: chat?.diff ?? null,

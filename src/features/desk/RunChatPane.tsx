@@ -15,6 +15,7 @@ import { runChip } from '@/lib/deskView';
 import { COLORS } from '@/theme/colors';
 
 import type { useRunChat } from './useRunChat';
+import { WorktreeActions } from './WorktreeActions';
 
 /**
  * One run's chat (`Run.dc.html`): the header, what it said, and at the bottom in
@@ -64,6 +65,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
             )}
             {chat.job ? <JobResults {...chat.job} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
             {!!chat.logError && <Text className="font-sans text-xs text-muted-foreground">{chat.logError}</Text>}
+            {!!chat.worktreeId && <WorktreeActions id={chat.worktreeId} />}
             {chat.decided && (
               <View className="flex-row items-center gap-2">
                 <View

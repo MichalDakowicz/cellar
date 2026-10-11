@@ -4,6 +4,7 @@
 
 ### Added
 
+- Desk: start tasks in worktrees from main; keep, review merges or remove finished workspaces
 - Desk: run project commands as jobs, with readable test results and raw output
 - Questions: keep exact choices and a separate note, with drafts retained on failed saves
 - Desk: send complete tasks, claim all attached thoughts and recover starts without duplicates

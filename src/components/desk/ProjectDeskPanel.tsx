@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Overline } from '@/components/ui/controls';
 import type { DeskPanelRow } from '@/lib/deskSample';
@@ -18,9 +18,11 @@ const DOT: Record<NonNullable<DeskPanelRow['state']>, string> = {
 export function ProjectDeskPanel({
   sections,
   note,
+  retry,
 }: {
   sections: { title: string; rows: DeskPanelRow[] }[];
   note: string | null;
+  retry?: () => void;
 }) {
   return (
     <View className="gap-6">
@@ -43,6 +45,7 @@ export function ProjectDeskPanel({
         </View>
       ))}
       {note && <Text className="font-sans text-xs text-muted-foreground">{note}</Text>}
+      {!!retry && <Pressable accessibilityRole="button" onPress={retry} className="min-h-11 justify-center rounded-lg border border-border px-3"><Text className="font-sans text-xs text-foreground">retry worktrees</Text></Pressable>}
     </View>
   );
 }

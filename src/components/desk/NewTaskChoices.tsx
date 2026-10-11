@@ -14,6 +14,7 @@ export function NewTaskChoices(props: {
   projectId: string | null;
   onProject: (id: string) => void;
   where: DeskWhere;
+  worktreeReason?: string | null;
   onWhere: (where: DeskWhere) => void;
   folder: string | null;
   agents: DeskAgent[];
@@ -40,7 +41,8 @@ export function NewTaskChoices(props: {
       <View className="gap-2.5">
         <Overline>where it works</Overline>
         <View className="flex-row gap-2">
-          <Choice label="new worktree" sub="from default branch · coming soon" on={false} disabled onPress={() => {}} />
+          <Choice label="new worktree" sub="wt/<task> · from main" on={props.where === 'worktree'}
+            disabled={!!props.worktreeReason} onPress={() => props.onWhere('worktree')} />
           <Choice
             label="checkout"
             sub={props.folder ?? 'the project’s folder'}
@@ -48,7 +50,9 @@ export function NewTaskChoices(props: {
             onPress={() => props.onWhere('main')}
           />
         </View>
-        <View className="rounded-lg bg-row px-3 py-2.5"><Text className="font-sans text-xs text-muted-foreground">Uses the existing checkout and its current changes.</Text></View>
+        <View className="rounded-lg bg-row px-3 py-2.5"><Text className="font-sans text-xs text-muted-foreground">{props.where === 'worktree'
+          ? props.worktreeReason ?? 'PC creates a separate folder from local main when it accepts this task. Existing checkout changes stay there.'
+          : 'Uses the existing checkout and its current changes.'}</Text></View>
       </View>
 
       <View className="gap-2.5">

@@ -27,7 +27,10 @@ export function useDeskStart(link: DeskLink, runs: ReturnType<typeof useDeskRuns
       if ((link.calls ? link.info?.taskProtocol : link.desk?.taskProtocol) !== 2) {
         setError('Update Cellar on the PC before sending tasks. Nothing sent.'); return;
       }
-      requests = (Array.isArray(request) ? request : [request]).map((one) => ({ ...one, commandId: one.commandId ?? randomUUID() }));
+      requests = (Array.isArray(request) ? request : [request]).map((one) => {
+        const commandId = one.commandId ?? randomUUID();
+        return { ...one, commandId, ...(one.where === 'worktree' ? { worktreeId: one.worktreeId ?? commandId } : {}) };
+      });
       for (const one of requests) {
         const parsed = parseDeskStart(one);
         if (!parsed.ok) { setError(parsed.error); return; }

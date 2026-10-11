@@ -8,6 +8,7 @@ import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@
 
 import type { DeskBridge } from './bridge';
 import type { DeskReceipt } from '@/lib/deskReceipt';
+import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest, type WorktreeReview, type WorktreeReceipt } from '@/lib/deskWorktrees';
 
 /**
  * The pc's API, over whichever wire reaches it: the LAN, signed with the
@@ -74,7 +75,7 @@ async function signedFetch(pair: DeskPair, method: string, path: string, text: s
   const controller = new AbortController();
   const timer = setTimeout(
     () => controller.abort(),
-    method === 'POST' && path === '/runs' ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
+    method === 'POST' && (path === '/runs' || path.startsWith('/worktrees/')) ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
   );
   try {
     const response = await fetch(`http://${pair.host}:${pair.port}${path}`, {
@@ -138,6 +139,10 @@ export function deskCalls(send: DeskTransport) {
     start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
     receipt: async (id: string) => ((await send('GET', `/requests/${encodeURIComponent(id)}`)) as { receipt: DeskReceipt | null }).receipt,
     commands: async () => ((await send('GET', '/commands')) as { projects: DeskProjectCommands[] }).projects,
+    worktrees: async () => readProjectWorktrees(((await send('GET', '/worktrees')) as { projects?: unknown })?.projects),
+    reviewWorktree: async (id: string, action: WorktreeAction) => ((await send('POST', `/worktrees/${encodeURIComponent(id)}/review`, { action })) as { review: WorktreeReview }).review,
+    actWorktree: async (request: WorktreeRequest) => ((await send('POST', `/worktrees/${encodeURIComponent(request.worktreeId)}`, request)) as { receipt: WorktreeReceipt }).receipt,
+    worktreeReceipt: async (id: string) => ((await send('GET', `/worktree-requests/${encodeURIComponent(id)}`)) as { receipt: WorktreeReceipt | null }).receipt,
     job: async (request: DeskJobStart) => ((await send('POST', '/commands', request)) as { run: DeskRun }).run,
     saveCommands: async (projectId: string, commands: DeskCommandDefinition[]) => void (await send('POST', `/commands/${encodeURIComponent(projectId)}/settings`, { commands })),
     stop: async (id: string) => void (await send('POST', `/runs/${encodeURIComponent(id)}/stop`)),

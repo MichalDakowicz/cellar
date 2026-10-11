@@ -18,7 +18,7 @@ export function useDeskRunCards(runs: readonly DeskRun[]): DeskRunCard[] {
   const sample = useDeskPrefs((state) => state.sample);
 
   return useMemo(() => {
-    const real = runs.map((run) => runCard(run, projectForPath(run.cwd, projects)?.name ?? null));
+    const real = runs.map((run) => runCard(run, projects.find((project) => project.id === run.projectId)?.name ?? projectForPath(run.cwd, projects)?.name ?? null));
     return sample ? [...real, ...SAMPLE_RUNS] : real;
   }, [runs, projects, sample]);
 }
@@ -31,6 +31,7 @@ function runCard(run: DeskRun, project: string | null): DeskRunCard {
     meta: runMeta([
       project ?? repoPathLabel(run.cwd),
       agentLabel(run.agent),
+      run.branch ?? null,
       longRel(new Date(run.startedAt).toISOString()),
       run.origin === 'pc' ? 'opened at the pc' : null,
     ]),

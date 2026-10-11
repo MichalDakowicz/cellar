@@ -37,6 +37,8 @@ export type DeskStart = {
   commandId?: string;
   projectId?: string;
   where?: 'main' | 'worktree';
+  /** Stable workspace identity across proven pre-launch retries. */
+  worktreeId?: string;
   mode?: 'ask' | 'edits' | 'full';
   entryIds?: string[];
   agent: DeskAgent;
@@ -74,12 +76,14 @@ export function parseDeskStart(raw: unknown): Parsed<DeskStart> {
   if (typeof body.commandId !== 'string' || !UUID.test(body.commandId)) return { ok: false, error: 'invalid commandId' };
   if (typeof body.projectId !== 'string' || !UUID.test(body.projectId)) return { ok: false, error: 'pick a real project' };
   if (body.where !== 'main' && body.where !== 'worktree') return { ok: false, error: 'pick a checkout or worktree' };
+  if (body.worktreeId !== undefined && (body.where !== 'worktree' || typeof body.worktreeId !== 'string' || !UUID.test(body.worktreeId))) return { ok: false, error: 'invalid worktreeId' };
   if (!['ask', 'edits', 'full'].includes(String(body.mode))) return { ok: false, error: 'pick an access mode' };
   if (!Array.isArray(body.entryIds) || body.entryIds.length > 20 || body.entryIds.some((id) => typeof id !== 'string' || !UUID.test(id)) || new Set(body.entryIds).size !== body.entryIds.length) {
     return { ok: false, error: 'attach up to 20 distinct entry ids' };
   }
   return { ok: true, value: { agent, prompt, cwd, name, entryId: body.entryIds[0] ?? null, commandId: body.commandId,
-    projectId: body.projectId, where: body.where, mode: body.mode as DeskStart['mode'], entryIds: body.entryIds } };
+    projectId: body.projectId, where: body.where, mode: body.mode as DeskStart['mode'], entryIds: body.entryIds,
+    ...(typeof body.worktreeId === 'string' ? { worktreeId: body.worktreeId } : {}) } };
 }
 
 /** The first line of the prompt, cut to something a list row can hold. */
@@ -97,6 +101,8 @@ export function runTitle(start: Pick<DeskStart, 'prompt' | 'name'>): string {
 export type DeskRunState = 'running' | 'waiting' | 'done' | 'failed' | 'stopped' | 'unknown';
 
 export type DeskRun = {
+  worktreeId?: string;
+  branch?: string;
   commandId?: string;
   entryIds?: string[];
   projectId?: string;
@@ -144,6 +150,7 @@ export type DeskApk = { app: string; file: string; version: string | null; size:
 
 /** What `GET /desk` answers. */
 export type DeskInfo = {
+  worktrees?: true;
   taskProtocol?: 2;
   id: string;
   name: string;

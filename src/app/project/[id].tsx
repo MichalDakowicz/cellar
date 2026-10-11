@@ -52,7 +52,7 @@ export default function ProjectScreen() {
   const router = useRouter();
   const openFilter = useCellarSheets((state) => state.filter);
   const openEditProject = useCellarSheets((state) => state.editProject);
-  const desk = useProjectDesk(project.project?.repoPath ?? null);
+  const desk = useProjectDesk(project.project?.repoPath ?? null, project.project?.id);
   const selection = useEntrySelection(project.onScreen, (entry) => router.navigate(`/entry/${entry.id}`));
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
@@ -200,7 +200,7 @@ export default function ProjectScreen() {
                     kindOrder={project.kindOrder}
                     onEdit={() => project.project && openEditProject?.(project.project.id)}
                   />
-                  <ProjectDeskPanel sections={desk.sections} note={desk.note} />
+                  <ProjectDeskPanel {...desk} />
                 </ScrollView>
               </View>
             </View>

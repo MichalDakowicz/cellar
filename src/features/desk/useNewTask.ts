@@ -20,6 +20,7 @@ import { useDeskCommands } from './useDeskCommands';
 import { leadingCommand } from '@/lib/deskCommands';
 import { readError } from '@/lib/utils';
 import { repoKey } from '@/lib/repoLink';
+import { useDeskWorktrees } from './useDeskWorktrees';
 
 /**
  * The new-task screen (`NewTask.dc.html`): what you say, the project it works
@@ -34,6 +35,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const { projects, groups, entries } = useCellar();
   const { say } = useToast();
   const jobs = useDeskCommands();
+  const worktrees = useDeskWorktrees();
+  const commandsProject = useDeskPrefs((state) => state.commandsProject);
 
   const folders = useMemo(() => deskFolders(projects, groups), [projects, groups]);
   // Thoughts handed in — from an entry's start on pc, or held on a project and
@@ -51,7 +54,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const [text, setText] = useState(() => useDeskHandoff.getState().text);
   useEffect(() => useDeskHandoff.getState().clear(), []);
   const [picked, setPicked] = useState<string | null>(null);
-  const [where, setWhere] = useState<DeskWhere>('main');
+  const [where, setWhere] = useState<DeskWhere>('worktree');
   // Started from the defaults in settings › desk; the agent falls back to one
   // the pc actually has.
   const [chosen, setAgent] = useState<DeskAgent>(() => useDeskPrefs.getState().defaultAgent);
@@ -63,7 +66,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const agent = startingAgent(chosen, offered);
 
   // An attached thought brings its project with it, until you pick another.
-  const projectId = picked ?? entry?.projectId ?? null;
+  const projectId = picked ?? entry?.projectId ?? commandsProject ?? null;
   const folder = folders.find((candidate) => candidate.projectId === projectId) ?? null;
   const projectName = projects.find((candidate) => candidate.id === entry?.projectId)?.name;
   const projectCommands = jobs.projects.find((project) => project.id === projectId || (!!folder && repoKey(project.cwd) === repoKey(folder.path)));
@@ -81,7 +84,10 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     onSent();
   });
 
-  const blocker = starting.pending ? (starting.busy ? `checking ${link.name}…` : null) : taskBlocker({
+  const workspace = worktrees.projects.find((project) => project.projectId === projectId);
+  const worktreeReason = worktrees.error ?? (worktrees.loading ? 'Checking project Git support…' : workspace?.reason
+    ?? (!workspace?.available ? 'Select a linked Git project; worktrees require local main.' : null));
+  const blocker = starting.pending ? (starting.busy ? `checking ${link.name}…` : null) : (where === 'worktree' ? worktreeReason : null) ?? taskBlocker({
     prompt,
     hasFolder: folder !== null,
     canStart: link.can.start,
@@ -117,6 +123,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     projectId,
     onProject: (id: string) => setPicked(id),
     where,
+    worktreeReason,
     onWhere: setWhere,
     folder: folder?.path ?? null,
     agents: offered,

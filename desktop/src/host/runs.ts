@@ -11,6 +11,7 @@ import { claudeLog, claudeRows, DeskError, startClaude, stopClaude } from './cla
 import { lastWrite, readTail } from './logTail.ts';
 import { toolPath } from './tools.ts';
 import { plainLog, tail } from './transcript.ts';
+import { worktreeEnv } from './worktreeEnv.ts';
 
 /**
  * Every run this pc started for a phone, and the ones someone opened at the pc.
@@ -26,6 +27,8 @@ import { plainLog, tail } from './transcript.ts';
  */
 
 type RunRecord = {
+  worktreeId?: string;
+  branch?: string;
   owner?: string | null;
   commandId?: string;
   entryIds?: string[];
@@ -75,10 +78,11 @@ export class Runs {
     renameSync(`${this.file}.tmp`, this.file);
   }
 
-  async start(start: DeskStart): Promise<DeskRun> {
+  async start(start: DeskStart & { branch?: string }): Promise<DeskRun> {
     const plan = spawnPlan(start);
     const base = { agent: start.agent, name: runTitle(start), cwd: start.cwd, startedAt: Date.now(), entryId: start.entryId,
-      ...(start.commandId ? { commandId: start.commandId, entryIds: start.entryIds, projectId: start.projectId, mode: start.mode, where: start.where } : {}) };
+      ...(start.commandId ? { commandId: start.commandId, entryIds: start.entryIds, projectId: start.projectId, mode: start.mode, where: start.where,
+        worktreeId: start.worktreeId, branch: start.branch } : {}) };
 
     if (plan.kind === 'background') {
       const id = await startClaude(plan.args, start.cwd);
@@ -91,8 +95,9 @@ export class Runs {
     if (!path) throw new DeskError(`${start.agent} is not installed on this pc`, 409, { notStarted: true });
     const id = randomBytes(4).toString('hex');
     const log = join(this.logs, `${id}.log`);
+    const env = start.where === 'worktree' && start.worktreeId ? worktreeEnv(start.cwd, process.env) : process.env;
     const out = openSync(log, 'a');
-    const child = spawn(path, plan.args, { cwd: start.cwd, detached: true, windowsHide: true, stdio: ['ignore', out, out] });
+    const child = spawn(path, plan.args, { cwd: start.cwd, env, detached: true, windowsHide: true, stdio: ['ignore', out, out] });
     closeSync(out);
     await new Promise<void>((resolve, reject) => {
       child.once('spawn', resolve);
@@ -133,7 +138,8 @@ export class Runs {
     for (const record of this.records) {
       if (record.owner !== undefined && record.owner !== this.owner()) continue;
       const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const,
-        ...(record.commandId ? { commandId: record.commandId, projectId: record.projectId, entryIds: record.entryIds, mode: record.mode, where: record.where } : {}) };
+        ...(record.commandId ? { commandId: record.commandId, projectId: record.projectId, entryIds: record.entryIds, mode: record.mode, where: record.where,
+          worktreeId: record.worktreeId, branch: record.branch } : {}) };
       const state = record.agent === 'claude' ? (claudeStates.get(record.id) ?? 'unknown') : await this.ownState(record);
       runs.push({ ...base, state });
     }

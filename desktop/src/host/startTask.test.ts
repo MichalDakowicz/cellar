@@ -27,7 +27,7 @@ test('task preflight refuses unsupported choices; reserves all attachments befor
   } as unknown as HostDeps;
   const installed = async () => 'test-agent';
   try {
-    await assert.rejects(startTask(deps, { ...request, where: 'worktree' }, installed), /W5/);
+    await assert.rejects(startTask(deps, { ...request, where: 'worktree' }, installed), /Update Cellar/);
     await assert.rejects(startTask(deps, { ...request, agent: 'agy' }, installed), /edits ok/);
     await assert.rejects(startTask(deps, { ...request, projectId: 'other' }, installed), /no folder/);
     await assert.rejects(startTask(deps, request, async () => null), /not installed/);

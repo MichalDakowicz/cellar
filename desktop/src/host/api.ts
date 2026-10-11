@@ -19,6 +19,8 @@ import type { Jobs } from './jobs.ts';
 import { sortRuns } from '@/lib/deskProtocol';
 import type { Receipts } from './receipts.ts';
 import { startTask } from './startTask.ts';
+import type { Worktrees } from './worktrees.ts';
+import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -44,6 +46,7 @@ export type HostDeps = {
   commands?: Commands;
   jobs?: Jobs;
   receipts?: Receipts;
+  worktrees?: Worktrees;
 };
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
@@ -65,6 +68,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     agents: await installedAgents(),
     signedIn: deps.account.current !== null,
     ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
+    ...(deps.worktrees ? { worktrees: true as const } : {}),
   };
 }
 
@@ -104,7 +108,7 @@ async function trust(deps: HostDeps, body: unknown): Promise<string> {
   if (typeof raw.cwd !== 'string' || !raw.cwd.trim()) throw new DeskError('which folder?');
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
   const cwd = realFolder(raw.cwd);
-  if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
+  if (!(await deps.account.allows(cwd)) && !(await deps.worktrees?.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
   trustFolder(cwd);
   return cwd;
 }
@@ -132,7 +136,7 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
       case 'GET /desk':
@@ -146,6 +150,24 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
       case 'GET /commands':
         if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
         return ok({ projects: await deps.commands.list() });
+      case 'GET /worktrees':
+        if (!deps.worktrees) throw new DeskError('Update Cellar on the PC for worktrees.', 409);
+        return ok({ projects: await deps.worktrees.list() });
+      case 'GET /worktree-requests/:id':
+        if (!deps.worktrees || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC.', 409);
+        return ok({ receipt: deps.worktrees.receipts.get(deps.account.current.userId, parts[1]) });
+      case 'POST /worktrees/:id/review': {
+        const action = (req.body as { action?: unknown } | null)?.action;
+        if (!deps.worktrees || !['keep', 'merge', 'remove'].includes(String(action))) throw new DeskError('Select a worktree action.', 409);
+        return ok({ review: await deps.worktrees.review(parts[1], action as WorktreeAction) });
+      }
+      case 'POST /worktrees/:id': {
+        const raw = req.body as Partial<WorktreeRequest> | null;
+        if (!deps.worktrees || !raw || raw.worktreeId !== parts[1] || !['keep', 'merge', 'remove'].includes(String(raw.action))
+          || typeof raw.commandId !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(raw.commandId)
+          || typeof raw.token !== 'string' || !/^[a-f0-9]{64}$/.test(raw.token)) throw new DeskError('Invalid worktree action.', 409);
+        return ok({ receipt: await deps.worktrees.act(raw as WorktreeRequest) });
+      }
       case 'POST /commands': {
         if (!deps.commands || !deps.jobs) throw new DeskError('update cellar on the pc for jobs', 409);
         const body = req.body as { projectId?: unknown; command?: unknown } | null;
