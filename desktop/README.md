@@ -6,6 +6,8 @@ inside the app — and its main process is the half a phone talks to:
 - **start agents** — claude, codex or antigravity, in a project's folder, from a thought, a
   project or a typed prompt
 - **follow runs** — what is running, what it said, stop it
+- **manage worktrees** — start in a separate branch from local main, read Git workspaces
+  per project, and review Keep/Merge/Remove after every source run finishes
 - **open the pc's pages** — anything listening on localhost (a dev server, `expo start --web`),
   served to the phone through a per-port proxy and shown in the app's preview screen
   (`desk/preview/<port>`), sized as a phone, tablet or desktop
@@ -60,11 +62,12 @@ remote counts as snapshots and hides unavailable totals. Flow map and verificati
 
 ## What it will not do
 
-- **Run anywhere.** A start's folder must be a project's `repo_path` in your cellar, checked
-  against the signed-in account. Signed out on the pc, nothing starts.
+- **Run anywhere.** A start's selected folder must be a project's `repo_path`, checked
+  against the signed-in account. Worktree tasks launch only in a host-created, validated
+  folder bound to that project and account. Signed out on the pc, nothing starts.
 - **Use a shell.** Every agent is spawned with an argument list; the prompt is one argv entry.
-- **Bypass permissions.** claude runs in auto, codex with `--approve-for-me`, antigravity in
-  accept-edits (it has no auto mode).
+- **Invent permission choices.** W4 maps Ask first / Edits ok / explicit Full access to
+  each agent's supported modes. Antigravity supports Edits ok only. Phone approvals remain W8.
 - **Send the key.** The pairing secret leaves the main process only through IPC to its own
   window. A phone proves it holds it by signing every request (HMAC over method, path, body,
   time and a one-use nonce — `src/lib/deskSign.ts`), so the key never crosses the Wi-Fi. Pages,
@@ -80,3 +83,21 @@ remote counts as snapshots and hides unavailable totals. Flow map and verificati
 - **Google sign-in** comes back to `http://127.0.0.1:54545/callback`, the same address the MCP
   login uses. It must be on Supabase → Authentication → URL Configuration → Redirect URLs. Sign
   in with your phone works without it.
+
+## Worktrees
+
+W5 requires Git and a local `main` branch. New task defaults to a worktree under
+`<host workspace>/.cellar-worktrees`; the original checkout stays as it is. The
+project panel reads actual Git branches, paths, local changes, locks and kept state.
+Lifecycle review/actions require a direct LAN or IPC connection. Starts use W4's
+same durable protocol, including mailbox handling and explicit trust retry.
+
+Keep retains local work. Merge only fast-forwards a clean, checked-out main after
+all relevant runs finish. Remove refuses dirty, locked, active/unknown or unmerged
+work; it keeps the Git branch and commits. A changed review requires another review.
+Lost replies recover one persisted command receipt, never optimistic success.
+
+Windows sandbox agents receive exact managed-folder Git trust in their process
+environment; global Git configuration and sandbox permissions stay unchanged.
+Verified phone flows and the machine's standalone Codex CLI limitation are recorded
+in [`how-it-works.md`](../docs/desk/how-it-works.md#w5--git-confirmed-worktrees).

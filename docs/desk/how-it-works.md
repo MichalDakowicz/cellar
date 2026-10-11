@@ -1,6 +1,6 @@
 # Desk — how it works
 
-Reviewed 2026-10-10 after M6. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-11 through W5. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -9,7 +9,8 @@ adds behavior through the existing view models, host API and transports.
 | --- | --- | --- |
 | Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; account-owned mailbox requests and heartbeat snapshots | No websocket/resume yet (W7); SSH deferred (W20) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; only running runs count as working | Host `waiting` is coarse: an idle interactive session can need the PC. It is not proof of an approval request (W8) |
-| Send a task | W4: full task choices, durable command IDs/receipts, owner-scoped attachment reservations and duplicate-safe recovery over LAN/IPC/mailbox | New worktrees remain W5; runtime approvals on phone remain W8 |
+| Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main | Runtime approvals on phone remain W8 |
+| Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W11 |
 | Follow a run | Polled run list and transcript/log tail, rendered text and tool steps; stop runs started by Cellar | No durable normalized events, live resume, steering or queue dispatch (W6/W7/W9) |
 | Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; hosted MCP reads both | Runtime deny/allow panels remain samples until W8 |
 | Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
@@ -27,8 +28,8 @@ W20 stays deferred. Counts establish trustworthy status first; project commands 
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
-The user approved W1 after the behavior review, then explicitly requested W2, W3
-and W4. All four are now verified. W5 is next; implementation awaits a new request.
+The user approved W1 after the behavior review, then explicitly requested W2–W5.
+All five are verified. W6 is next; implementation awaits a new request.
 
 ## W1 behavior
 
@@ -161,3 +162,57 @@ package and Android release pass. PostgreSQL migration tests cover reruns, rollb
 RLS isolation, competing reservations and normal release/reclaim. UI/canvas baseline
 preserved; recovery feedback and permission explanations are functional additions.
 All source commits remain local. Only the authorized MCP function was deployed.
+
+## W5 — Git-confirmed worktrees
+
+New task defaults to a separate `wt/<task-slug>-<workspace-id>` branch from local
+`main`. The host checks the linked account/project/repository before reserving
+entries, stores workspace identity before Git creation, and launches the selected
+agent inside that folder. Proven trust refusals reuse the same workspace on an
+explicit retry; unknown starts never replay. Existing checkout edits stay there.
+
+Managed folders live under `<host workspace>/.cellar-worktrees`, with short owner,
+project and UUID directories for Windows paths. Metadata/receipts remain in app
+data. Windows sandbox agents receive exact-folder `safe.directory` through their
+child process environment, preserving inherited Git configuration. No global Git
+trust or sandbox permission changes. A Git creation failure is a proven refusal
+before agent launch, even if the PC must inspect partial Git preparation.
+
+Project panels read actual Git registrations, branches, local changes, locks and
+kept state. Missing external folders remain individually unavailable; they neither
+disable healthy project creation nor get pruned. Failed/disconnected reads hide
+cached rows. Samples stay explicitly labelled.
+
+Every run under the source folder must have a confirmed finished state. Keep
+retains the folder, including local changes. Merge requires clean unlocked source
+and checked-out main, no active/unknown main run, and fast-forward history. Remove
+requires a clean unlocked tree with no unmerged commits; Git removes only the
+folder/registration, retaining branch and commits. Review tokens bind source and
+target commits, paths, local-change checks and run states; confirmation rechecks.
+No force removal, automatic conflict resolution or implicit checkout/stash.
+
+Lifecycle intent is persisted before effects. Confirmed/failed/unknown/pending
+states stay distinct; restart during an action becomes unknown. Phone retains
+pending UUIDs across restart and recovers the original owner-scoped receipt.
+
+Verified: 855 app tests, 46 desktop tests, lint/types, local web export, desktop
+package and Android release/install/launch. Actual Git tests cover clean merge,
+dirty/unmerged/divergent/locked refusal, active/unknown runs, stale reviews,
+account isolation, trust retry and signed LAN/IPC receipt recovery.
+
+Physical phone on signed-in Michu started Codex read-only run `5d5a00e2` in a real
+worktree. Both Git commands succeeded: its `wt/` branch and SHA
+`8fc76df22aaff0432aa984c6a75f2240d2aa253f` matched local main. Phone Keep/Remove
+confirmed actual Git effects; Merge refused because production main was not
+checked out. Dropped Keep response, phone restart and host restart recovered
+receipt `fe6830b2-4b3b-43bd-89de-3ae10e137696` with one action POST and one receipt
+GET. Desktop project panel showed the same live catalogue, kept/local-change and
+missing-folder states. QA proxy stopped and original pairing restored.
+
+Standalone Codex CLI 0.162.1 hit a machine runtime ACL refresh error while another
+session held `node_repl.exe`. The installed Codex app runtime passed the same
+read-only sandbox check; final local host uses that binary through process PATH.
+Failed command outputs remained visible; an agent's marker alone was never counted
+as successful verification. Current host runs from
+`C:/ping/cellar-desktop-w5-final-host/win-unpacked/Cellar.exe`; Android 1.12.0 installed.
+Canvas/spec edits preserved byte-for-byte. GitHub and website deployment remain pending.

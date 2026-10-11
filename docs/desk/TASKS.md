@@ -318,10 +318,20 @@ Already-claimed attachment fails before launch; safe edit clears only unstarted 
 for reruns, rollback and account isolation. Final APK installed; updated local PC app running.
 New worktrees remain W5; phone approvals remain W8. No GitHub push or website deployment.
 
-### W5 · worktrees `[ ]`
+### W5 · worktrees `[x]`
 
 "New worktree" creates `wt/<slug>` off main on the host; the project panel lists worktrees per
 project; a finished run's worktree can be kept, merged or removed.
+
+2026-10-11: Git-confirmed worktrees from local main, owner-scoped workspace/start
+identity, reviewed Keep/Merge/Remove and durable lifecycle recovery verified.
+Merge is clean fast-forward only; remove refuses dirty/locked/unmerged or
+active/unknown trees and retains branch/commits. Physical phone confirmed actual
+Codex Git output, Keep/Remove and merge refusal; dropped Keep reply recovered
+after phone/host restarts without replay. Desktop panel matched live Git catalogue.
+855 app tests and 46 desktop tests/types/lint/build pass; final APK installed.
+Details and local CLI limitation: `how-it-works.md` W5. Existing canvas/spec edits
+preserved; no GitHub push or website deployment.
 
 ### W6 · the event log `[ ]`
 
