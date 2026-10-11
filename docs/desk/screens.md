@@ -9,34 +9,111 @@ the logic under it. Artboard file names are given so the canvas can be opened at
 
 - Replaces profile: the right nav island becomes the host, its badge counts what is waiting on
   you.
-- Header: "your desk" and one status line (host awake · agents at work · waiting on you).
-  Settings sits top right.
-- Host card: name, awake/over what/latency, a button to see its screen; cpu, memory, agent
-  slots.
+- Header: the paired PC's name and monitor icon replace "your desk". Connection state sits
+  directly below, beside the global working/waiting counts when those counts are available.
+  Keep the paired name during reconnecting/disconnected states so the target stays clear;
+  before pairing, the title is "your desk". Settings sits top right. Long names truncate without
+  pushing settings outside the header; connection status may wrap when needed.
+- Top content inset is 16px after the device safe area. The browser canvas has no system
+  status bar, so its simulated top safe-area inset is zero; do not add an empty 40px band.
+- Waiting on you comes immediately after the header: questions on entries and run approvals
+  together, labelled by type, with a shared count. Open the run or entry to answer; no inline
+  answering on phone home. This section always spans all projects.
+- Compact host card: occupied agent slots beside the screen action, then connection route/
+  latency and freshness. PC identity and connection state are not repeated here. CPU/memory
+  expand on tap. Checking, connected, unreachable and not-paired states are explicit;
+  an unavailable screen action stays visible with a reason. Show freshness only for the data
+  actually available; a previous snapshot must not look like a live desk.
 - Project chips pick which set of `$` command tiles shows; the tiles are that project's
   commands (rebuild, preview, deploy, apk…). Under them, one mono line: project · folder · last
   build.
-- Runs sort: **waiting → running → lately**. Tap a run to open its chat.
+- Label the project chips "commands for"; their selection changes commands. A separate run
+  filter defaults to all projects and narrows working/history to the commands project when
+  selected. It never filters waiting items. Show counts alongside the run-filter choices.
+- Run headings and chips say **working** (the protocol's internal `running` state is unchanged).
+  Waiting reasons have two lines; project/agent remain readable, branch/path are secondary.
+  Project chips retain compact visual sizing with 44px hit areas.
+- Runs sort: **waiting → working → lately**. Tap a run to open its chat.
+- Canvas includes busy, connecting, run-load-error while connected, disconnected, unpaired,
+  no-projects and no-runs states. On-page recovery actions are pair PC, link project and retry
+  as appropriate; start a task through the chat-plus navigation action, without a duplicate
+  empty-state button. While disconnected or connecting, hide PC runs, blockers/counts, metrics,
+  project commands, paths and build history; retain host identity and connection recovery.
+  Local Cellar navigation remains available. A run-loading error with a verified PC connection
+  is a separate state: no invented run totals or slot figures, but independently available
+  commands and screen remain usable. Retry only the failed run load; do not relabel the PC as
+  disconnected. Reconnect moves the disconnected state to connecting without restoring data.
+- Keep 16px side gutters in every state, consistent button/link geometry and 44px controls.
+  On-page primary/recovery actions fill their container width, are at least 48px high and use
+  the 8px control radius rather than pill corners. Project command tiles retain their grid.
+  The scroll end must leave the final content above the floating navigation.
 
-### new task — speak it · `NewTask.dc.html`
+### new task — type or speak · `NewTask.dc.html`
 
-- A sheet over the desk tab. The mic starts listening on open; the transcript stays editable.
-- **project** chips · **where it works**: main checkout or a new worktree off main.
-- **agent · how much it may do**: agent chips, then ask first · edits ok · full access, with a
-  one-line hint for the picked mode.
-- Agent and mode default from the project, then from the entry kind's recipe.
-- **from your cellar**: attached entries get claimed by the run.
-- Send carries its own id, so a retry on bad signal never runs twice.
+- A tall sheet over the desk tab. Restore the original centered transcript and circular
+  controls. The field remains editable, with inline colour chips. Typing starts first and
+  focuses the field, opening the phone keyboard.
+- The large 76px primary control shows the keyboard by default; 48px microphone sits beside it.
+  Tapping voice swaps their icons/roles: voice/stop becomes primary, keyboard becomes secondary.
+  Waveform appears above the input in voice mode and disappears when typing resumes.
+  Transcribing, stopped, denied and unavailable states retain clear feedback and a typing path.
+- Preserve mobile chat-plus and the always-tall opening. Keyboard appearance reduces the body;
+  dismissal restores the same sheet top/height. Pin title/target/close and send around the scroll
+  body. Use 16px gutters, at least 44px targets and a full-width 52px send with 8px corners.
+  Send stays at the bottom of the sheet, above the keyboard when visible.
+- This page always starts **one run**. Label the action **send to michu-pc**, with no run count,
+  configuration summary strip, split-run controls or started-runs monitor. Any compatible
+  attached thoughts become context for that one task. Open its Run chat only after confirmation.
+  Batch flows in other pages require their own review.
+- Initial project: attached thoughts' project → Main commands project → explicit selection.
+  Main chat-plus passes the commands project; the run filter does not replace this context.
+- Agent/permissions: project override → compatible kind recipe → global settings, per field.
+  Preserve explicit overrides on project changes. Workspace starts as new worktree from the
+  project's default branch; paths/base branch follow project. Unsupported worktrees require an
+  explicit checkout choice. Permissions stay independent and must be enforced by the host.
+- Picker and attachments stay scoped to the selected project. Mixed-project context blocks send
+  until resolved. Empty prompt, no project, offline, unavailable choices and incomplete speech
+  explain blocked sending. Offline choices are saved context rather than live host capability.
+- Autosave drafts. Reopening offers Resume draft / New task, preserving incoming handoff until
+  the user chooses. Keep the existing folder trust flow. Failed sends retain work; unknown
+  outcomes check the original receipt using the same start ID before another start.
+- Revision 2 reflects the user's single-run/composer correction (NEW-R2 in canvas/updates.md),
+  overriding the earlier split/run-list decisions for this page. Canvas voice and host replies
+  remain simulations; browser storage is canvas-only. App implementation remains pending.
 
 ### run chat + approval · `Run.dc.html`
 
-- Header: branch · project · agent, title, state chip, age, diff pill (+/− · files), stop.
-- An approval pins above the nav, in thumb reach, and replaces the composer until answered:
-  deny · allow · "allow installs for the rest of this run".
-- First answer wins: phone, desktop or the notification.
-- Then the composer returns with **steer it now / queue after this turn**.
-- Tool steps fold into one tile; the diff pill opens changed files.
-- Key strip `@ $ /` sits above the keyboard.
+- Compact pinned title, state and PC connection/freshness; tap for full title, project,
+  agent, branch/worktree, age, changed files and separate Preview. Use “working”, 16px gutters,
+  normal top spacing and 44px control targets.
+- Chat scrolls above the measured bottom dock. Keyboard moves the dock up and hides nav.
+  Follow new output only when already at the bottom; otherwise show New messages.
+- Composer follows the user's latest reference: multiline text above a compact toolbar inside
+  one frame. Transparent plus opens an upward File / Image tray. Voice, model/reasoning and
+  primary Send remain in the toolbar. No persistent `@ $ /` buttons or dispatch selector.
+  Typed symbols still open context suggestions; the message retains selected references.
+- Send during an active turn always queues. After PC acceptance, show a compact queue count
+  and popout rows with preview, Send now, Cancel and More → full text/settings/Edit. Send now
+  interrupts the active tool/command, then continues with that queued message. Keep the item
+  queued until PC confirms; reject/unknown outcomes retain it and reuse the original receipt.
+- Model/reasoning choices apply to the next message and are saved on each queued item.
+  Pickers list host-supported models and effort combinations; explain unsupported switching.
+  Uploading/failed attachments block Send until confirmed or removed. Keep draft and files on
+  failure; do not pretend that browser-local file metadata is a durable PC upload.
+- Voice toggles mic to Stop and shows waveform above the frame; transcription can be edited
+  before sending. Sending has pending/rejected/unknown states; check an unknown receipt before
+  retrying. Draft survives waiting and reconnects. Finished runs use explicit Continue in the
+  same chat/workspace; explain when the host cannot resume.
+- Approvals and existing linked entry questions share the bottom waiting area, replacing the
+  composer and preserving its draft. Switch pending items. Allow once is primary, Deny stays
+  visible, and host-supported run scope appears under More options. First answer wins across
+  phone, PC and notifications; show pending/failure/expired/answered elsewhere truthfully.
+- Tool rows expand saved file/command/edit details. Changed files opens a diff list; Preview
+  remains separate. Stop has pending/failure/retry and becomes stopped only after PC confirms.
+- Disconnected/reconnecting shows recovery first, with no live progress/actions. Saved chat
+  requires View history and a last-received label. Loading/missing/empty are distinct from done.
+- Run revision 1, including RUN-R1b/R1c in canvas/updates.md, awaits canvas acceptance. Host,
+  queue, model, voice and upload replies are simulations; app wiring remains pending.
 
 ### preview before deploy · `Preview.dc.html`
 

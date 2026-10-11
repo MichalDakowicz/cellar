@@ -2,7 +2,9 @@
 
 Three keys, and colours that paint themselves. The same on the pc and the phone: one search
 behind both. The pc shows results above the composer and takes the keyboard; the phone shows
-them above the keyboard, with the keys in a strip so you never dig for symbols.
+them above the keyboard. On Run, type `@`, `$` or `/` inside the message: the reviewed composer
+has no separate symbol-button strip (RUN-R1a/R1b in `canvas/updates.md`). Other canvas pages
+retain their existing arrangements until their own review.
 
 A task always names its project first, so search stays exact.
 
@@ -22,6 +24,9 @@ A task always names its project first, so search stays exact.
     its entries by their words — `$cellar/sticky` finds "inbox swipe feels sticky".
 - **a command** — first in the message it runs straight away as a job; inside a sentence the
   agent runs it when it gets there. Every command is also a button on the desk tab and on home.
+  In an active Run chat, sending always queues the message, including command references.
+  Queue popout **Send now** explicitly interrupts the active tool, then delivers that message.
+  The leading command runs when the host dispatches the message; typing it bypasses no queue.
 - **an entry** — the agent claims it, moves it to doing and writes its lines back to it.
 - **a new name** — `$project/new words` makes an entry in that project; a new project comes
   from "new project" at the bottom of the list.
