@@ -1,3 +1,4 @@
+import type { EventSource } from './eventIngest.ts';
 import type { ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -33,6 +34,7 @@ export class Jobs {
   }
 
   list(): DeskRun[] { return this.jobs.filter((job) => job.owner === this.owner()).map((job) => ({ ...job.run })); }
+  eventSources(): EventSource[] { return this.jobs.filter((job) => job.owner === this.owner()).map((job) => ({ run: { ...job.run }, path: job.log, format: 'plain' })); }
   has(id: string): boolean { return this.list().some((run) => run.id === id); }
   private get(id: string): Job {
     const job = this.jobs.find((candidate) => candidate.run.id === id && candidate.owner === this.owner());

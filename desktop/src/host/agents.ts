@@ -30,6 +30,11 @@ export function spawnPlan(start: DeskStart): SpawnPlan {
     case 'claude':
       // Never a model flag: haiku has no auto mode and silently drops to manual,
       // which on a background run is a session that stops at its first tool call.
+      if (start.commandId) return {
+        agent: 'claude', kind: 'own',
+        args: ['-p', '--output-format', 'stream-json', '--verbose', '--include-partial-messages', '--permission-mode',
+          start.mode === 'ask' ? 'manual' : start.mode === 'edits' ? 'acceptEdits' : start.mode === 'full' ? 'bypassPermissions' : 'auto', '--', start.prompt],
+      };
       return {
         agent: 'claude',
         kind: 'background',
@@ -42,8 +47,8 @@ export function spawnPlan(start: DeskStart): SpawnPlan {
         agent: 'codex',
         kind: 'own',
         args: start.mode
-          ? ['-a', 'never', 'exec', ...(start.mode === 'full' ? ['--dangerously-bypass-approvals-and-sandbox'] : ['--sandbox', start.mode === 'ask' ? 'read-only' : 'workspace-write']), '--color', 'never', '-C', start.cwd, '--', start.prompt]
-          : ['exec', '--approve-for-me', '--color', 'never', '-C', start.cwd, '--', start.prompt],
+          ? ['-a', 'never', 'exec', '--json', ...(start.mode === 'full' ? ['--dangerously-bypass-approvals-and-sandbox'] : ['--sandbox', start.mode === 'ask' ? 'read-only' : 'workspace-write']), '--color', 'never', '-C', start.cwd, '--', start.prompt]
+          : ['exec', '--json', '--approve-for-me', '--color', 'never', '-C', start.cwd, '--', start.prompt],
       };
     case 'agy':
       // Antigravity has no classifier mode. accept-edits is the nearest: edits

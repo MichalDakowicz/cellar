@@ -1,3 +1,6 @@
+import { homedir } from 'node:os';
+import type { EventSource } from './eventIngest.ts';
+import { claudeProjectSlug } from './agents.ts';
 import { execFile, spawn, type ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { closeSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -27,6 +30,8 @@ import { worktreeEnv } from './worktreeEnv.ts';
  */
 
 type RunRecord = {
+  prompt?: string;
+  format?: 'codex' | 'claude';
   worktreeId?: string;
   branch?: string;
   owner?: string | null;
@@ -56,6 +61,7 @@ const RUN_ID = /^[0-9a-f]{6,16}$/;
 const rowId = (row: ClaudeAgentRow) => row.id ?? row.sessionId.slice(0, 8);
 
 export class Runs {
+  private latestClaude: ClaudeAgentRow[] = [];
   private records: RunRecord[];
   private readonly file: string;
   private readonly logs: string;
@@ -80,7 +86,7 @@ export class Runs {
 
   async start(start: DeskStart & { branch?: string }): Promise<DeskRun> {
     const plan = spawnPlan(start);
-    const base = { agent: start.agent, name: runTitle(start), cwd: start.cwd, startedAt: Date.now(), entryId: start.entryId,
+    const base = { prompt: start.prompt, ...(start.agent !== 'agy' ? { format: start.agent } : {}), agent: start.agent, name: runTitle(start), cwd: start.cwd, startedAt: Date.now(), entryId: start.entryId,
       ...(start.commandId ? { commandId: start.commandId, entryIds: start.entryIds, projectId: start.projectId, mode: start.mode, where: start.where,
         worktreeId: start.worktreeId, branch: start.branch } : {}) };
 
@@ -121,9 +127,27 @@ export class Runs {
     return { id, ...base, state: 'running', origin: 'phone' };
   }
 
+  eventSources(runs: DeskRun[]): EventSource[] {
+    return runs.filter((run) => run.agent !== 'job').map((run) => {
+      const record = this.records.find((row) => row.id === run.id);
+      const claude = this.latestClaude.find((row) => rowId(row) === run.id);
+      const path = record?.log ?? (claude ? join(homedir(), '.claude', 'projects', claudeProjectSlug(claude.cwd), claude.sessionId + '.jsonl') : null);
+      return { run, path, format: record?.log ? record.format ?? 'plain' : 'claude', prompt: record?.prompt };
+    });
+  }
+
   private async ownState(record: RunRecord): Promise<DeskRunState> {
     if (record.stopped) return 'stopped';
-    if (record.exit !== undefined) return record.exit === 0 ? 'done' : 'failed';
+    if (record.exit !== undefined) {
+      if (record.exit !== 0) return 'failed';
+      if (record.format && record.log) {
+        const raw = await readTail(record.log);
+        for (const line of raw.split(/\r?\n/)) {
+          try { const row = JSON.parse(line); if (row.type === 'turn.failed' || (row.type === 'result' && (row.is_error || row.permission_denials?.length))) return 'failed'; } catch { /* diagnostic output */ }
+        }
+      }
+      return 'done';
+    }
     if (this.children.has(record.id)) return 'running';
     const written = record.log ? await lastWrite(record.log) : null;
     return written !== null && Date.now() - written < QUIET_MS ? 'running' : 'unknown';
@@ -132,6 +156,7 @@ export class Runs {
   async list(): Promise<DeskRun[]> {
     // A failed poll must reach the phone as unavailable, not fresh cached totals.
     const rows = await this.readClaude();
+    this.latestClaude = rows;
     const claudeStates = new Map(rows.map((row) => [rowId(row), claudeRunState(row)]));
 
     const runs: DeskRun[] = [];
@@ -140,7 +165,7 @@ export class Runs {
       const base = { id: record.id, agent: record.agent, name: record.name, cwd: record.cwd, startedAt: record.startedAt, entryId: record.entryId, origin: 'phone' as const,
         ...(record.commandId ? { commandId: record.commandId, projectId: record.projectId, entryIds: record.entryIds, mode: record.mode, where: record.where,
           worktreeId: record.worktreeId, branch: record.branch } : {}) };
-      const state = record.agent === 'claude' ? (claudeStates.get(record.id) ?? 'unknown') : await this.ownState(record);
+      const state = record.agent === 'claude' && !record.log ? (claudeStates.get(record.id) ?? 'unknown') : await this.ownState(record);
       runs.push({ ...base, state });
     }
 
@@ -164,7 +189,7 @@ export class Runs {
     const record = RUN_ID.test(id) ? this.records.find((candidate) => candidate.id === id) : undefined;
     if (!record) throw new DeskError('that run was not started from cellar', 403);
     if (record.owner !== undefined && record.owner !== this.owner()) throw new DeskError('no such run for this account', 404);
-    if (record.agent === 'claude') return stopClaude(id);
+    if (record.agent === 'claude' && !record.log) return stopClaude(id);
     const child = this.children.get(id);
     if (!child?.pid) throw new DeskError('it was started before cellar last restarted — stop it at the pc', 409);
     await kill(child.pid);
@@ -183,7 +208,7 @@ export class Runs {
         return [{ who: 'system', text: 'nothing logged yet' }];
       }
     }
-    const row = (await claudeRows()).find((candidate) => rowId(candidate) === id);
+    const row = (await this.readClaude()).find((candidate) => rowId(candidate) === id);
     if (!row) throw new DeskError('no such run', 404);
     return claudeLog(row);
   }

@@ -37,6 +37,15 @@ test('task modes reach each supported agent without silently escalating defaults
   assert.ok(!spawnPlan({ ...start, agent: 'codex', mode: 'edits' }).args.includes('--approve-for-me'));
 });
 
+test('managed Claude exposes stream events and keeps default permissions', () => {
+  const plan = spawnPlan({ ...start, agent: 'claude', commandId: 'test-command' });
+  assert.equal(plan.kind, 'own');
+  assert.ok(plan.args.includes('stream-json'));
+  assert.ok(plan.args.includes('--include-partial-messages'));
+  assert.ok(plan.args.includes('auto'));
+  assert.ok(!plan.args.includes('bypassPermissions'));
+});
+
 test('reads the id claude --bg prints', () => {
   assert.equal(backgroundId('Starting background service…\nbackgrounded · 4a588420 · desk smoke test\n'), '4a588420');
   assert.equal(backgroundId('nothing here'), null);
