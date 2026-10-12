@@ -376,17 +376,20 @@ provider question tools are explicitly refused; linked questions reuse W3. Notif
 delivery remains W13. Existing canvas/spec edits retain their initial hashes.
 See `how-it-works.md` W8 for behavior and verification boundaries. Next: W9.
 
-### W9 · steer, queue, stop all `[~]`
+### W9 · steer, queue, stop all `[x]`
 
 Dispatch modes on a busy run (steer now · queue after this turn), interrupt one run, stop every
 run on every host from the tray, the phone or the desktop.
 
-Checkpoint 2026-10-11: implementation committed for continuation; not yet verified complete.
-Durable controls, retained chats, queue actions and account-wide stop coordination are wired.
-868 app tests and 68 desktop tests pass. Live phone Continue, queue acceptance and natural
-FIFO delivery work. Final live interruption/child-process containment, edit/cancel, stop-all
-and rebuilt release checks remain. See `w9-resume.md` before continuing. Claude remains
-fixture-only. Existing canvas/spec edits are included unchanged in this checkpoint.
+Completed 2026-10-12: live phone edit/cancel, Send now with owned descendant termination,
+single stop, phone/desktop/tray Stop all and host/cold-phone restart recovery verified.
+Offline hosts stay pending; unknown historical sessions fail explicitly. Fresh emergency
+stops remain possible after local results settle while an earlier remote stop is pending.
+86 app suites / 871 tests, 68 desktop tests, lint, both types, web/desktop/Android builds
+pass; standalone APK installed/launched and rebuilt desktop running at the paired path.
+Physical two-online-host behavior remains fixture coverage; Claude stays fixture-only.
+Protected canvas/spec hashes unchanged. See `how-it-works.md` W9 and `w9-resume.md`.
+Separate controller/desktop rebuild notes: `desktop-rebuild.md`; migration not part of W9/W10.
 
 ### W10 · keys search `[ ]`
 

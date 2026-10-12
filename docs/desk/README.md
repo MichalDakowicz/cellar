@@ -12,7 +12,10 @@ written half, moved here so they version with the code.
 | [keys.md](keys.md) | `@` files, `$` commands and `$project/entry`, `/` agent skills, `#` colours |
 | [t3code-notes.md](t3code-notes.md) | how t3code hands work to agents, and what cellar takes from it |
 | [TASKS.md](TASKS.md) | the build order: every screen drawn first, then the wiring, easiest to hardest |
-| [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1–W7 verification |
+| [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1–W9 verification |
+| [w9-resume.md](w9-resume.md) | completed W9 handoff, environment and next-task boundaries |
+| [desktop-rebuild.md](desktop-rebuild.md) | planned controller/desktop separation, technology choice, UI parity and migration/build steps |
+| [w10-prompt.md](w10-prompt.md) | ready-to-paste W10 keys-search task |
 
 The canvas stays the source for **how it looks** — open an artboard before building its
 screen. A copy lives in [`canvas/`](canvas/): one `*.dc.html` per artboard (inline styles, and its
@@ -39,6 +42,7 @@ W6/W7 carries durable turn items and synchronized streaming through phone Run,
 Main totals/navigation, desktop DeskHome/DeskChat and command-job reports. Existing
 layout remains the canvas baseline; added controls explain reconnect and explicit
 saved history. Provider diagnostics and full tool details use the existing folded
-rows. Runtime approvals, steering and queues remain W8/W9. Implementation behavior
+rows. W8 runtime approvals and W9 dispatch/queues/Stop all are complete. Implementation behavior
 and device verification live in `how-it-works.md`; preexisting canvas/spec edits are
-preserved separately from this wiring.
+preserved separately from this wiring. The future split uses independent controller and
+desktop renderer builds while retaining the accepted appearance; see `desktop-rebuild.md`.

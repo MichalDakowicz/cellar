@@ -1,6 +1,6 @@
 # Desk — how it works
 
-Reviewed 2026-10-11 through W8. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-12 through W9. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -11,7 +11,7 @@ adds behavior through the existing view models, host API and transports.
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
 | Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W11 |
-| Follow a run | W6/W7: durable normalized turns, live run catalogue, full tool details, safe Markdown chunks, reconnect and explicit saved history; W8 real approvals in the existing dock; stop Cellar runs | Steering and queue dispatch remain W9; old hosts retain legacy polling |
+| Follow a run | W6/W7 synchronized events and saved history; W8 runtime approvals; W9 retained chats, queue/edit/cancel/Send now, single stop and account-wide Stop all | Restarted/legacy provider chats explain unavailability; offline host stops remain pending |
 | Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W13 |
 | Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
 | Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W11), remote input or real phone panel (W18) |
@@ -31,7 +31,8 @@ worktrees. Durable events precede streaming, approvals and dispatch controls.
 The user approved W1 after the behavior review, then explicitly requested W2–W7 and
 approved W8 approvals after the next flow review. The recorded verification boundaries
 remain in force: no live Claude tasks; Claude uses fixtures, Codex uses fixtures and
-live phone-to-PC checks. W9 is next, followed by W10 and W11.
+live phone-to-PC checks. W9 is complete; W10 is next, followed by W11. The separate
+controller/desktop renderer rebuild is planned in [desktop-rebuild.md](desktop-rebuild.md).
 
 ## W1 behavior
 
@@ -370,3 +371,83 @@ Provider references: [Codex app-server](https://learn.chatgpt.com/docs/app-serve
 [Claude SDK permissions](https://code.claude.com/docs/en/agent-sdk/permissions).
 Installed generated Codex schemas and pinned SDK types/code determine exact enum
 spellings and supported response shapes when online examples differ.
+
+## W9 — retained chat, dispatch and Stop all
+
+Completed 2026-10-12 on `feat/desk-w9`, retaining the accepted UI. `deskDispatch.ts`
+defines the shared validated controls and queue model. The host's `ControlStore`,
+`Dispatch`, `Controls` and `ManagedRuns` own effects; clients retain requests/drafts
+under their account/PC/run scope. No database schema or additional transport was added.
+
+Controls save a UUID before effects. Duplicate requests and lost replies recover that
+receipt; a different payload cannot reuse it. Busy Send queues FIFO; idle Continue
+uses the retained provider conversation and workspace. Queue rows save the actual
+agent/mode and explicit provider-default model/effort, rather than inventing settings.
+An accepted queue receipt means the PC saved the message, not that a tool or turn succeeded.
+
+Queue edit/cancel check revisions. Send now interrupts first, then delivers the selected
+message in the same conversation; an ambiguous provider result remains unknown. Codex
+0.162.1 lacks T3's background-terminal termination method, so the fallback stops the
+private owned app-server tree before resuming its persisted thread. Process names or
+global CLI searches never authorize kills. Claude uses injected SDK fixtures only.
+Reference: T3 adapter source at `bed923986fbcbe8279f23b9367efde1596bde1f9`, recorded
+in `t3code-notes.md`.
+
+Stop targets one owned run. Stop all from phone, desktop or tray coordinates every
+account host through the existing mailbox, with separate host/run results. Offline
+hosts stay pending; historical or external sessions without an owned runtime fail
+explicitly. No blanket “all stopped” claim is made from partial results. When local
+results are known, an explicit new Stop all gets a new UUID even while an older remote
+stop is pending. The client archives the old pending receipt; background recovery still
+uses its original UUID. Missing receipts and uncertain local effects keep recovery mode.
+
+Restart never silently resends queued or claimed provider effects. Saved queue items
+become unknown and explain the unavailable original chat. A prior send receipt continues
+to describe acceptance at the time it was written; the live queue describes current
+delivery uncertainty. Pending controls recover their original UUID, and uncertain local
+stops do not become confirmed. Composer drafts survive cold phone restart and replacement
+APK install, and clear only after confirmed message acceptance.
+
+### Verification
+
+All live tasks below used bounded read-only Codex QA. Claude remained fixture-only.
+
+| Check | Evidence |
+| --- | --- |
+| Phone Continue/FIFO | Earlier `36d39b56` continued with a real reply; `901f10e7` queued and delivered `W9_CONTAINED_PHONE` once after its approved command finished |
+| Phone edit/cancel/Send now | `c6fd6308`: queue `17c66d04-711e-4e0c-bfc8-5b3b26c064c4` edited at revision 1, promoted to delivered revision 2; cancelled item `51dc75cc-3fdb-4284-91b7-7d4dd0ea1ab6` retained cancelled revision 1; owned command PID 2940 and provider PID 29372 exited before `W9_EDITED_PHONE` replied |
+| Single-run phone stop | `c3ada845`: approved command PID 6276 and provider PID 19660 exited; stop receipt `bd9cb498-c8f9-46a5-a7be-47ed9655bdeb` confirmed; interrupted tool became failed |
+| Desktop Stop all | `8c6e7e5b`: command PID 24064 and provider PID 31492 exited; PC receipt `cbbf0494-c6a1-4868-bec4-750c49ac4c55` confirmed this run separately from unsupported runs and offline host |
+| Phone Stop all | `cdc3e8d5`: command PID 28156 and provider PID 24864 exited; phone receipt `92cc0ac6-afae-4f28-bc71-1ea89110aeb5` retained partial/offline results |
+| Tray Stop all | User clicked the actual tray action; receipt `91b4f694-fbe6-4241-ab01-0d2b26c89d78` stopped `9a9c8623`, expired its pending approval and left no owned provider. Its command was never approved/executed; this is not a running-command containment claim |
+| Host and cold phone restart | `94c997ce`: phone queued `acd0796e-0a4b-418e-95b6-89654126c3a1` and saved draft `W9_RESTART_DRAFT_KEEP`; controlled termination of the verified Cellar tree removed command PID 28704 and provider PID 29324. Cold phone showed disconnected/explicit saved history with draft intact; rebuilt host restored queue as unknown, run unknown, chat unavailable |
+| Duplicate after restart | GET and duplicate POST for the same send UUID returned the identical original acceptance receipt; no replacement message or provider launched. Epoch `086764df-950f-4a8b-bf18-a982fa9176e5` persisted, sequence advanced 2869 → 2874; original tray Stop all UUID retained offline pending and local partial results |
+| Rebuilt-app regression | Installed phone stopped new run `2733317c` using fresh receipt `26955706-6133-4e75-86d5-636c326aba9c`, despite old remote pending; command PID 33528 and provider PID 28536 exited. Rebuilt desktop stopped `73ddee33` with fresh PC receipt `100258eb-1267-466c-8b0f-c6216fb3ffb8`; pending approval expired, provider PID 32444 exited |
+
+The reachable host was `fdc08940efe02b5c`; account host `02da56786abe3b95` was offline
+and remained pending throughout. Historical `5c5f4bf3` and `916e2dba`, plus restart QA
+`94c997ce`, remained unknown/unsupported rather than falsely stopped. Final UI reported
+one confirmed stop, three unsupported/unconfirmed runs and one pending host. Physical
+two-online-host testing was not performed; mailbox pickup/confirmation, duplicate
+delivery and owner isolation are covered by two-host fixtures. Earlier `44e90ea6`
+exposed the descendant bug and is not cited as successful containment.
+
+Final checks: 86 app suites / 871 tests, 68 desktop tests, lint and both TypeScript
+checks pass. Desktop process-tree fixtures need normal Windows process permissions;
+the sandbox-only invocation failed to terminate its own fixture, which was cleaned up
+by exact verified PID before the successful rerun. Local web export, Electron bundle,
+Windows x64 package/NSIS installer and Android release build pass.
+
+APK `android/app/build/outputs/apk/release/cellar-v1.12.0.apk` was replacement-installed
+on serial `00166152F003681`, launched and verified running without Cellar boot errors.
+Release remains 1.12.0 / Android versionCode 14. Desktop package is
+`C:/ping/cellar-desktop-w9-final/Cellar Setup 0.1.0.exe`; its unpacked payload refreshed
+the existing reachable `C:/ping/cellar-desktop-w9-qa/win-unpacked/Cellar.exe` and was
+launched there with the existing profile/pairing. The NSIS installer was built, not run.
+No firewall, pairing or global Git trust settings changed.
+
+Logs, snapshots, exact process records and artifact hashes remain outside Git under
+`C:/ping/cellar-w9-qa`. Seven protected spec/canvas files retain their starting SHA-256
+hashes. This pass builds local web; website publication remains outside the requested
+scope. W10 is next. The separate desktop renderer/controller cleanup is described in
+[desktop-rebuild.md](desktop-rebuild.md); this W9 build still uses the shared web export.

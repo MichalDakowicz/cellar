@@ -2,10 +2,16 @@
 
 Cellar on the desktop is all of cellar, plus the desk.
 
-One app, three roles. At the desk it is the **control center**: chat, projects, commands, the
-phone on the side. Away from it, the **phone is the remote**. The part that actually runs agents
-is a small **daemon** inside the desktop app; it keeps running in the tray when the window is
-closed.
+Current implementation shares one renderer across three roles. At the desk it is the
+**control center**: chat, projects, commands, the phone on the side. Away from it, the
+**phone is the remote**. The part that actually runs agents is a small **daemon** inside
+the desktop app; it keeps running in the tray when the window is closed.
+
+The 2026-10-12 direction separates the controller app (mobile and web) from the desktop
+host app, with an independent desktop renderer and the same Cellar appearance. This is
+planned work, not a completed migration; see [desktop-rebuild.md](desktop-rebuild.md) for
+ownership, technology, controller cleanup and staged builds. The host daemon remains part
+of the desktop app.
 
 | Role | Is | Does |
 | ---- | -- | ---- |

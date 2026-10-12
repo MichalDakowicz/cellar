@@ -122,3 +122,24 @@ disconnected, including after a phone restart; current run state remains unknown
 
 Verification and the user-requested live Claude test exclusion are recorded in
 [`how-it-works.md`](../docs/desk/how-it-works.md#w6w7--durable-turns-and-synchronized-streams).
+
+## W9 dispatch and stop controls
+
+Managed chats retain their provider conversation between turns. Durable controls save
+requests before effects; busy Send queues, edit/cancel use revisions, and Send now confirms
+interruption before delivery. Codex's fallback terminates only its private owned process
+tree before resuming the persisted conversation. Restarted chats and uncertain delivery
+remain unavailable/unknown instead of silently replaying work.
+
+Phone, desktop and tray Stop all coordinate account hosts through the existing mailbox.
+Each host/run reports its own result; offline hosts stay pending, unsupported historical
+sessions fail explicitly. Known local results allow a distinct new Stop all even if an
+earlier remote stop remains pending. Live checks, exact process exits, rebuilt artifacts
+and fixture boundaries are recorded in [`how-it-works.md` W9](../docs/desk/how-it-works.md#w9--retained-chat-dispatch-and-stop-all).
+Claude remains fixture-only.
+
+The current package still embeds the root Expo web export. The planned rebuild uses a
+dedicated TypeScript/React DOM/Vite renderer inside Electron, leaving mobile/web as
+controllers and retaining the host/protocol and accepted Cellar look. See
+[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md) before extraction; W9/W10 do not
+perform that migration.

@@ -20,8 +20,11 @@ the current canvas supersedes their historical dispatch-selector layout.
 The reviewed Codex adapter also terminates background terminals separately from
 `turn/interrupt`. Installed Codex 0.162.1 lacks that newer API. W9 therefore stops
 Cellar's owned private app-server process tree after interruption, then resumes the
-same persisted conversation before promotion. Descendant termination is fixture-tested;
-the final live phone containment check remains pending in `w9-resume.md`.
+same persisted conversation before promotion. Descendant termination is fixture-tested
+and verified live on phone run `c6fd6308`: owned command PID 2940 and app-server PID 29372
+exited before `W9_EDITED_PHONE` replied. Single stop and phone/desktop Stop all also
+verified owned process exits. Host restart keeps queued work unknown without replay.
+See `how-it-works.md` W9 and `w9-resume.md` for evidence and test boundaries.
 
 Read from t3code's source at commit `784b5625` (github.com/pingdotgg/t3code). Files:
 `apps/server/src/provider/codexLaunchArgs.ts`, `CodexAdapterV2.ts`, `ClaudeAdapterV2.ts`,

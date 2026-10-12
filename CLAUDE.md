@@ -48,6 +48,10 @@ Structure rules (they are why the siblings are maintainable):
   (`desktop/README.md`): its window loads Cellar's own web build, its main process is what a
   paired phone talks to. Like `mcp/` it imports `src/lib/*` (the `desk*.ts` protocol), has
   its own `tsc` and `npm test`, and the root checks do not see it.
+- The user plans **separate controller and desktop renderer builds**, keeping Cellar's
+  accepted appearance: `docs/desk/desktop-rebuild.md`. Mobile/web remain controllers;
+  Electron/TypeScript with a dedicated React DOM renderer is the recommended desktop stack.
+  This migration is planned separately; the current desktop still loads the shared web build.
 - `docs/desk/` is the **desk spec** — what the desk tab, the desktop control center and the
   daemon do, and `TASKS.md`, the build order (screens first, then wiring, easiest first).
   Read it and tick its task before and after any desk work.

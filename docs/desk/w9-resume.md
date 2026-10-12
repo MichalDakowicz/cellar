@@ -1,83 +1,80 @@
-# W9 checkpoint — 2026-10-11
+# W9 completed — 2026-10-12
 
-User requested committing all changes and pushing a branch, then continuing tomorrow.
-W8 is complete at `e5a9bef`. W9 remains in progress; do not mark it complete from this
-checkpoint. The existing canvas/spec edits are included without changing their contents.
+W9 is complete on `feat/desk-w9`. W8 remains complete at `e5a9bef`; W9 checkpoint
+`0897a32` was followed by live verification and recovery fix `8a73556`. W10 has not
+started. See `how-it-works.md` W9 for behavior, exact run/receipt IDs, process exits,
+build evidence and limitations; `TASKS.md` records completion.
 
-## Behavior implemented
+## Verified outcome
 
-- The existing host protocol carries durable control UUIDs and account-scoped receipts.
-  Requests are saved before effects. Recovery reads the original receipt; uncertain
-  provider effects are not replayed. A queue receipt confirms PC acceptance, not an
-  agent reply or successful tool result.
-- Managed Claude/Codex chats retain their provider conversation between turns. Busy
-  Send queues; idle Continue uses the same available conversation and workspace.
-  Restarted or released sessions explain unavailability rather than inventing recovery.
-- The existing queue popout shows real messages and saved provider-default settings.
-  Edit/cancel use revisions. Send now interrupts before delivering the selected message.
-  Unknown delivery stays visible. Composer drafts clear only after confirmed acceptance.
-- Single-run stop and stop-all use durable controls. Account-wide stop coordinates local
-  owned runs and remote hosts through the existing mailbox; offline hosts remain pending.
-  Unsupported external or historical runs produce explicit failures, never guessed kills.
-- Phone, desktop and tray use the same control facade. No new schema or transport was added.
+- Phone run `c6fd6308` verified queue edit/cancel, cold-restart draft retention and Send now.
+  Owned command PID 2940 and provider PID 29372 exited before `W9_EDITED_PHONE` replied.
+  Edit revision 1, delivered revision 2 and cancelled revision 1 remain durable.
+- Previously pending `c3ada845` was approved for its exact bounded read-only command,
+  then stopped from the phone. Owned command PID 6276 and provider PID 19660 exited;
+  receipt `bd9cb498-c8f9-46a5-a7be-47ed9655bdeb` confirmed the stop.
+- Desktop `8c6e7e5b` and phone `cdc3e8d5` Stop all stopped their approved commands and
+  owned provider trees. Tray `9a9c8623` was stopped using the actual tray action clicked
+  by the user; its unapproved callback expired. Automation verified the PC receipt and
+  provider absence. Tray command execution was never authorized or claimed.
+- Restart run `94c997ce` queued message `acd0796e-0a4b-418e-95b6-89654126c3a1` from
+  the phone, then the verified Cellar host tree was terminated for the recovery check.
+  Cold phone restart showed disconnected/explicit saved history; draft
+  `W9_RESTART_DRAFT_KEEP` survived both restart and replacement APK install.
+- Rebuilt host restored that run and queue item as unknown with original chat unavailable;
+  no silent replay. GET and duplicate POST of the same send UUID returned the identical
+  original acceptance receipt. Event epoch persisted; sequence advanced 2869 → 2874.
+- A real regression was fixed: an offline host's earlier pending Stop all had prevented
+  another Stop all from stopping new local runs. Explicit new stops now get fresh UUIDs
+  after local results settle, retaining old pending receipts. Background recovery and
+  uncertain local effects still use the original UUID.
+- Rebuilt phone regression `2733317c` confirmed fresh Stop all receipt
+  `26955706-6133-4e75-86d5-636c326aba9c`, terminating command PID 33528 and provider
+  PID 28536. Rebuilt desktop `73ddee33` confirmed another fresh PC stop receipt,
+  expired its unapproved callback and terminated provider PID 32444.
 
-Consult [T3 Code](https://github.com/pingdotgg/t3code) for custom-chat work as required in
-`CLAUDE.md`; pinned source and adaptation notes are in `t3code-notes.md`.
+Account host `02da56786abe3b95` was offline and remains pending. Historical unknown
+`5c5f4bf3` and `916e2dba`, plus restart QA `94c997ce`, remain unsupported/unknown,
+not successfully stopped. Final Stop all reported one stopped, three unsupported/
+unconfirmed and one pending host. Physical two-online-host verification did not occur;
+two-host pickup, duplicate safety and isolation use fixtures. Earlier `44e90ea6`
+exposed the descendant bug and is not successful containment evidence.
 
-## Verification so far
+## Checks and installed artifacts
 
-- Checkpoint: 85 app suites / 868 tests and 68 desktop tests pass. Lint and both
-  TypeScript checks pass. The queue edit state cleanup is included in these checks.
-- Fixtures cover durable duplicate/recovery semantics, FIFO, revision conflicts,
-  ambiguous promotion, restart uncertainty, owner isolation and two-host stop delivery.
-  Claude uses injected SDK fixtures only. Do not run live Claude tasks.
-- Physical phone run `36d39b56` confirmed Continue and a real Codex reply. Its initial
-  command failed Windows sandbox setup; do not count that as a successful command run.
-- Physical phone run `901f10e7` approved the exact read-only 180-second command, queued
-  `Reply W9_CONTAINED_PHONE with no tools`, and displayed the edit controls. At checkpoint,
-  the original command completed with exit 0 and the queued message delivered once,
-  followed by the real `W9_CONTAINED_PHONE` reply. Queue is empty. No edit was submitted.
-- Earlier Send now run `44e90ea6` exposed a real bug: turn interruption left a command
-  descendant alive. Do not cite it as successful process containment. The source fix
-  passes a real stdio fixture that spawns a descendant and verifies its termination.
+- 86 app suites / 871 tests and 68 desktop tests pass; lint and both TypeScript checks pass.
+  Desktop process containment tests passed with normal Windows process permissions after
+  the sandbox-only invocation could not kill its own fixture. That exact fixture was cleaned up.
+- Root local web export, Electron main/preload build, Windows x64 package/NSIS installer
+  and JDK 21 Android release all pass. Version remains 1.12.0 / Android versionCode 14.
+- `android/app/build/outputs/apk/release/cellar-v1.12.0.apk` replacement-installed on
+  serial `00166152F003681`, launched and verified running without Cellar boot errors.
+- Built `C:/ping/cellar-desktop-w9-final/Cellar Setup 0.1.0.exe`; its unpacked payload
+  refreshed the existing reachable desktop path below. NSIS installer was not run.
+  Source and installed `app.asar` hashes match. Existing profile, pairing and host ID retained.
+- Accepted UI preserved. Seven protected spec/canvas files retain their initial hashes.
+  Website publication is outside this requested pass; local web build was verified.
 
-## First checks tomorrow
+## Environment and boundaries for the next task
 
-1. Re-read `CLAUDE.md`, `TASKS.md`, `screens.md`, `canvas/updates.md`, `visual-clone.md`
-   and this note. Preserve the accepted UI. W9 is the current task; W10 has not started.
-2. Finish live Codex Send now verification: approve a bounded read-only long command,
-   queue from phone, capture its actual descendant PIDs, promote, then verify those
-   exact processes exited before the replacement message runs in the same conversation.
-   Installed Codex 0.162.1 lacks T3's newer background-terminal termination API. Cellar's
-   fallback interrupts, stops its private app-server process tree, then resumes the same
-   persisted thread. Only Cellar-owned live process handles may be terminated.
-3. Verify phone queue edit/cancel confirmations and draft retention. Verify one-run stop
-   and phone/desktop/tray stop-all; keep partial failures and offline hosts truthful.
-   Physical multi-host testing has not occurred; two-host behavior is fixture coverage.
-4. Repeat phone cold restart and host restart with a queued or pending action. Keep
-   uncertain items unknown; never silently replay them. Historical unknown run
-   `5c5f4bf3` is unsupported and must not be reported as successfully stopped.
-5. Review the final implementation, update `how-it-works.md` with verified W9 behavior,
-   run relevant checks, rebuild local web/desktop and standalone APK, then install and
-   launch on the physical phone. Only then check W9 complete in `TASKS.md`.
+Use `C:/ping/cellar-desktop-w9-qa/win-unpacked/Cellar.exe`, normal Cellar profile,
+host `fdc08940efe02b5c`. A different executable path previously caused phone LAN
+timeouts while loopback worked. Keep this reachable path; do not change firewall,
+pairing, global Git trust or credentials to work around a local test problem.
 
-## Local QA environment
+Installed Codex 0.162.1 lacks T3's newer background-terminal termination API. W9
+interrupts, terminates only its private owned app-server tree, then resumes the same
+persisted thread for Send now. Consult `t3code-notes.md`, pinned adapter source
+`bed923986fbcbe8279f23b9367efde1596bde1f9`. **Claude remains fixture-only.**
 
-The running host is `C:/ping/cellar-desktop-w9-qa/win-unpacked/Cellar.exe`, using the
-normal Cellar profile. A different executable path caused phone LAN timeouts while
-loopback still worked. Reuse the reachable path; do not change firewall or pairing
-settings to work around it. Its package and the installed APK predate the latest source
-adjustments, including stop optimization, interrupted-tool status and queue edit cleanup.
-Rebuild before claiming final device verification. Release remains 1.12.0 / Android 14.
+Evidence/scripts/logs remain outside Git in `C:/ping/cellar-w9-qa` and `cellar-w8-qa`.
+`inspect.mjs` reads a signed snapshot; `observe-phone.mjs` reads Android UI hierarchy;
+`read-controls.mjs` reads local durable receipts. Secrets stay in the normal profile,
+never in docs or Git. No approved bounded QA command/provider remains running.
 
-Scratch evidence and scripts are outside the repository in `C:/ping/cellar-w9-qa` and
-`C:/ping/cellar-w8-qa`. `inspect.mjs` reads a signed snapshot; `start.mjs` starts only a
-bounded Codex QA run; `phone.ps1` observes Cellar's Android hierarchy. Credentials stay
-in the normal local profile and must not be copied into documents or Git. Android serial
-is `00166152F003681`. Use JDK 21 for release builds. Reobserve the current phone app before
-typing; native queue popout hierarchy bounds can be clipped even when screenshots and
-touch targets work correctly.
-
-The latest bounded QA command finished naturally; no matching sleep process remained
-at checkpoint. No new QA work was launched for this checkpoint. Git push is explicitly
-authorized by the user; website deployment and a completed-feature PR were not requested.
+The user chose phone controller + desktop host, Windows first with future macOS/Linux
+possible. `desktop-rebuild.md` records mobile/web cleanup and a dedicated Electron /
+TypeScript / React DOM / Vite desktop renderer, retaining Cellar's look and existing host.
+This is planned work, not implemented by W9. W10 remains keys search; keep new pure
+search/domain contracts reusable and do not merge a full renderer rewrite into it.
+Ready-to-paste continuation: `w10-prompt.md`.
