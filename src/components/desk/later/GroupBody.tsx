@@ -6,7 +6,7 @@ import type { SAMPLE_GROUP } from '@/lib/deskSample';
 import { metaParts, runChip } from '@/lib/deskView';
 import { TextParts } from '@/components/desk/TextParts';
 import { COLORS } from '@/theme/colors';
-import { Pill } from './PhoneTools';
+import { Pill } from './VisualPill';
 
 type Group = typeof SAMPLE_GROUP;
 

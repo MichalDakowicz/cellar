@@ -55,7 +55,7 @@ export function StartOnPcControl({
     say(`started on ${link.name}${link.via === 'cellar' ? ' through the cellar' : ''}`);
   });
 
-  if (!link.bridge && !link.pair && !link.desk) return null;
+  if (!link.pair && !link.desk) return null;
 
   const project = projects.find((candidate) => candidate.id === projectId) ?? null;
   const installed = link.info

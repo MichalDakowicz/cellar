@@ -10,14 +10,14 @@ import { COLORS } from '@/theme/colors';
  * fills the desk's coming screens on this device only.
  */
 export function DeskDevicesBlock({
-  here,
+  browser,
   paired,
   onPair,
   onForget,
   sample,
   onSample,
 }: {
-  here: boolean;
+  browser: boolean;
   paired: string | null;
   onPair: () => void;
   onForget: (() => void) | null;
@@ -28,9 +28,9 @@ export function DeskDevicesBlock({
     <View>
       <Pressable accessibilityRole="button" onPress={onPair} className="flex-row items-center gap-3 py-2 active:opacity-70">
         <View className="min-w-0 flex-1">
-          <Text className="font-sans text-sm text-foreground">{here ? 'phones and pairing' : (paired ?? 'pair with your pc')}</Text>
+          <Text className="font-sans text-sm text-foreground">{browser ? 'account connection' : (paired ?? 'pair with your pc')}</Text>
           <Text className="font-sans mt-0.5 text-xs text-muted-foreground">
-            {here ? 'pair a phone with this pc from the desk' : paired ? 'paired — open the desk' : 'scan the code cellar shows on your pc'}
+            {browser ? 'browser uses the cellar mailbox; pairing keys stay on your phone' : paired ? 'paired — open the desk' : 'scan the code cellar shows on your pc'}
           </Text>
         </View>
         <ChevronRight size={16} color={COLORS.muted} strokeWidth={2} />

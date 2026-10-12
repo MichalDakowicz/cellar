@@ -15,7 +15,7 @@ export function useApprovalAction(request: RuntimeRequest | null) {
   const connected = !!link.calls && stream.live && link.info?.approvalProtocol === 1;
   const submit = async (decision?: ApprovalDecision) => {
     if (!connected || locked.current || !request || (!pending && (!decision || request.state !== 'pending'))) return;
-    const answer = pending ?? { commandId: randomUUID(), requestId: request.id, decision: decision!, source: link.via === 'bridge' ? 'pc' as const : 'phone' as const };
+    const answer = pending ?? { commandId: randomUUID(), requestId: request.id, decision: decision!, source: 'phone' as const };
     locked.current = true; setBusy(true); setError(null); useApprovalPending.getState().put(key, answer);
     try {
       // Recovery first reads the original receipt. A missing receipt may resend only the same UUID/choices.

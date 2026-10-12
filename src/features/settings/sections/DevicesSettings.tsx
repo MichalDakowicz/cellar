@@ -13,7 +13,7 @@ export function DevicesSettings() {
   const { settings, updateSettings } = useCellarSettings();
   return (
     <SettingsPage title="devices and pairing" sub="your pc and its phones, other devices signed in, and the sample desk">
-      <SettingsGroup title={desk.devices.here ? 'this pc' : 'your pc'}>
+      <SettingsGroup title="your pc">
         <DeskDevicesBlock {...desk.devices} />
       </SettingsGroup>
       <SettingsGroup title="this phone">

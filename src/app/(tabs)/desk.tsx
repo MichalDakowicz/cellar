@@ -8,7 +8,6 @@ import { DeskIdentity } from '@/components/desk/DeskIdentity';
 import { DeskRunScope } from '@/components/desk/DeskRunScope';
 import { DeskWaitingCards } from '@/components/desk/DeskWaitingCards';
 import { DeskLaterLinks } from '@/components/desk/DeskLaterLinks';
-import { DeskPairPanel } from '@/components/desk/DeskPairPanel';
 import { DeskRunSections } from '@/components/desk/DeskRunSections';
 import { DeskSection } from '@/components/desk/DeskSection';
 import { ContentShell } from '@/components/layout/ContentShell';
@@ -43,7 +42,7 @@ export default function Desk() {
   const navBarSpace = useNavBarSpace();
   const gutter = useGutter();
   const sidebar = useSidebarSpace();
-  const unpaired = !link.bridge && !link.pair;
+  const unpaired = link.role === 'phone-controller' && !link.pair;
 
   return (
     <View className="flex-1 bg-background">
@@ -90,16 +89,6 @@ export default function Desk() {
             </>
           )}
 
-          {link.bridge && (
-            <DeskSection title="pair a phone" gutter={gutter}>
-              <DeskPairPanel
-                url={screen.pairing?.url ?? null}
-                reason={screen.pairing && screen.pairing.url === null ? screen.pairing.reason : null}
-                onForget={() => void screen.forgetPhones()}
-              />
-            </DeskSection>
-          )}
-
           {unpaired && (
             <DeskSection title="pair with your pc" gutter={gutter}>
               <Text className="font-sans pb-3 text-xs text-muted-foreground">
@@ -117,13 +106,15 @@ export default function Desk() {
             </DeskSection>
           )}
 
+          {link.role === 'web-controller' && <DeskSection title="account connection" gutter={gutter}><Text className="font-sans text-xs text-muted-foreground">browser uses the cellar mailbox for start, run snapshots and stop. live chat, approvals, commands, previews and downloads need your paired phone on the host network; this browser holds no pairing key.</Text></DeskSection>}
+
           <DeskSection title="more on the desk" gutter={gutter}>
             <DeskLaterLinks links={home.later} />
           </DeskSection>
 
           <DeskLocalSections local={screen.local} gutter={gutter} />
 
-          {link.pair && !link.bridge && (
+          {link.pair && (
             <View className={`py-7 ${gutter}`}>
               <Pressable accessibilityRole="button" accessibilityLabel="forget this pc" hitSlop={8} onPress={screen.forgetPair}>
                 <Text className="font-sans text-xs font-semibold text-muted-foreground">forget {link.pair.name} on this phone</Text>

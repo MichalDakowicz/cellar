@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@/features/auth/AuthProvider';
-import { chooseDeskVia, deskCan, pickDesk, type DeskVia } from '@/lib/deskLink';
+import { chooseDeskVia, pickDesk, type DeskVia } from '@/lib/deskLink';
+import { appCapabilities } from '@/lib/deskAppRole';
 import { useDeskPair } from '@/store/deskPair';
 
-import { deskBridge } from './bridge';
+import { APP_ROLE } from './appRole';
 import { fetchDesks, type DeskRow } from './deskCellarApi';
-import { bridgeTransport, deskCalls, lanTransport, type DeskCalls } from './deskClient';
+import { deskCalls, lanTransport, type DeskCalls } from './deskClient';
 
 export const DESK_KEYS = {
   info: ['desk', 'info'] as const,
@@ -28,16 +29,14 @@ export function useDeskLink() {
   const { user } = useAuth();
   const pair = useDeskPair((state) => state.pair);
   const moved = useDeskPair((state) => state.moved);
-  const bridge = useMemo(() => deskBridge(), []);
 
   const direct: DeskCalls | null = useMemo(() => {
-    if (bridge) return deskCalls(bridgeTransport(bridge), true);
-    if (pair) return deskCalls(lanTransport(pair));
+    if (APP_ROLE === 'phone-controller' && pair) return deskCalls(lanTransport(pair));
     return null;
-  }, [bridge, pair]);
+  }, [pair]);
 
   const info = useQuery({
-    queryKey: [...DESK_KEYS.info, bridge ? 'bridge' : pair ? `${pair.host}:${pair.port}` : 'none'],
+    queryKey: [...DESK_KEYS.info, pair ? `${pair.host}:${pair.port}` : 'none'],
     queryFn: () => direct!.info(),
     enabled: direct !== null,
     retry: false,
@@ -48,7 +47,7 @@ export function useDeskLink() {
   const desks = useQuery({
     queryKey: [...DESK_KEYS.desks, user?.id ?? null],
     queryFn: fetchDesks,
-    enabled: !!user && !bridge,
+    enabled: !!user,
     retry: false,
     // An error here is almost always the tables not being there yet; asking
     // again every 15 s would only repeat it.
@@ -74,8 +73,8 @@ export function useDeskLink() {
   }, [desk?.id, desk?.host, desk?.port, info.isError, moved]);
 
   const via: DeskVia = chooseDeskVia({
-    bridge: bridge !== null,
-    lanAnswered: !bridge && info.isSuccess,
+    bridge: false,
+    lanAnswered: APP_ROLE === 'phone-controller' && info.isSuccess,
     seenAt: desk?.seenAt ?? null,
     now,
   });
@@ -83,13 +82,13 @@ export function useDeskLink() {
   return {
     ownerId: user?.id ?? null,
     via,
-    can: deskCan(via),
-    /** The direct API — bridge or LAN — only when that is the wire in use. */
-    calls: via === 'bridge' || via === 'lan' ? direct : null,
+    role: APP_ROLE,
+    can: appCapabilities(APP_ROLE, via, info.data ?? null),
+    /** Only a paired native controller can use the LAN wire. */
+    calls: via === 'lan' ? direct : null,
     info: info.data ?? null,
     desk,
     pair,
-    bridge,
     name: info.data?.name ?? desk?.name ?? pair?.name ?? 'your pc',
     checking: (direct !== null && info.isLoading) || desks.isLoading,
     /** Why the cellar wire is not there, when it is because the tables are missing. */

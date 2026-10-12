@@ -397,7 +397,7 @@ Physical two-online-host behavior remains fixture coverage; Claude stays fixture
 Protected canvas/spec hashes unchanged. See `how-it-works.md` W9 and `w9-resume.md`.
 Controller/desktop rebuild is the next task, W10; it is not part of completed W9.
 
-### W10 · separate controller and desktop apps `[ ]`
+### W10 · separate controller and desktop apps `[~]`
 
 Implement [desktop-rebuild.md](desktop-rebuild.md) before wiring more features. Mobile
 and web remain controllers; desktop keeps the existing Electron/TypeScript host and

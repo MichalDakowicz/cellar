@@ -1,4 +1,6 @@
-import type { DeskRun, DeskRunState } from './deskProtocol';
+import { agentLabel, isLiveRun, RUN_STATE_LABEL, type DeskRun, type DeskRunState } from './deskProtocol';
+import { longRel } from './relTime';
+import { repoPathLabel } from './repoLink';
 
 /**
  * How the desk draws a run — its chip and where it sits on the desk tab
@@ -65,6 +67,15 @@ export type DeskRunCard = {
 
 export function runMeta(parts: readonly (string | null | undefined)[]): string {
   return parts.filter((part): part is string => !!part && part.trim().length > 0).join(' · ');
+}
+
+/** Same card in phone, roomy browser and independent desktop. */
+export function deskRunCard(run: DeskRun, project: string | null): DeskRunCard {
+  return { id: run.id, title: run.name, project: project ?? repoPathLabel(run.cwd) ?? 'no folder',
+    meta: runMeta([project ?? repoPathLabel(run.cwd), agentLabel(run.agent), run.branch ?? null,
+      longRel(new Date(run.startedAt).toISOString()), run.origin === 'pc' ? 'opened at the pc' : null]),
+    detail: run.state === 'waiting' ? RUN_STATE_LABEL.waiting : null, state: run.state,
+    startedAt: run.startedAt, stoppable: isLiveRun(run) && run.origin === 'phone' };
 }
 
 /** Where the host is, in the few words the host card has room for. */

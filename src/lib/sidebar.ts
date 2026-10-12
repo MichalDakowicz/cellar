@@ -16,6 +16,9 @@ export const DESK_LINKS: DeskLink[] = [
   { id: 'phone', label: 'phone', href: '/desk/phone' },
 ];
 
+/** Controllers keep roomy navigation without offering the desktop ADB presenter. */
+export const CONTROLLER_DESK_LINKS = DESK_LINKS.filter((link) => link.id !== 'phone');
+
 /** Which desk link a path belongs to; a run belongs to chat, a preview to previews. */
 export function deskLinkFor(pathname: string): DeskLink['id'] | null {
   if (pathname === '/desk') return 'home';

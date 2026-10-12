@@ -24,8 +24,6 @@ export function useDeskPreview(param: string) {
   const sample = param === 'sample';
   const port = sample ? SAMPLE_PREVIEW.port : Number(param);
   const calls = !sample && link.can.local ? link.calls : null;
-  // In the pc's own window the page is on this machine: no ticket, just localhost.
-  const onPc = !sample && link.via === 'bridge';
   const pageCalls = !sample && link.can.pages ? link.calls : null;
 
   const [size, setSize] = useState<PreviewSize>('phone');
@@ -69,9 +67,7 @@ export function useDeskPreview(param: string) {
 
   const unreachable = sample
     ? 'a sample page — a real one loads here from the pc'
-    : onPc
-      ? null
-      : !calls
+    : !calls
         ? `${link.name} is not on this network — a page opens over the same wi-fi`
         : ticket.error
           ? readError(ticket.error)
@@ -86,7 +82,7 @@ export function useDeskPreview(param: string) {
     onSize: setSize,
     address: previewAddress(link.name, port, path),
     load: sample ? ('live' as const) : unreachable ? ('gone' as const) : load,
-    url: onPc ? `http://localhost:${port}` : (ticket.data ?? null),
+    url: ticket.data ?? null,
     unreachable,
     reloads,
     page: {

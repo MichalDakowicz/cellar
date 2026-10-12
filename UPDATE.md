@@ -1,5 +1,12 @@
 # Update notes
 
+## 1.13.0 — Unreleased
+
+### Changed
+
+- Phone and browser focus on controlling your PC; host pairing and USB phone tools live in the desktop app
+- Desktop has its own renderer, with Cellar views and Desk controls preserved across upgrades
+
 ## 1.12.0 — Unreleased
 
 ### Added

@@ -35,7 +35,6 @@ import { RunChatItems } from '@/components/desk/RunChatItems';
 import { RunRail } from '@/components/desk/RunRail';
 import { GroupBody } from '@/components/desk/later/GroupBody';
 import { NightBody } from '@/components/desk/later/NightBody';
-import { PhoneBody } from '@/components/desk/later/PhoneBody';
 import { RaceBody } from '@/components/desk/later/RaceBody';
 import { ShareBody } from '@/components/desk/later/ShareBody';
 import { QuestionCard } from '@/components/cellar/QuestionCard';
@@ -47,7 +46,7 @@ import { chatItems } from '@/lib/deskChat';
 import { approvalNote, questionNote, runNote } from '@/lib/deskNotify';
 import { defaultRecipe } from '@/lib/deskSettings';
 import { deskSections } from '@/lib/deskView';
-import { SAMPLE_CHATS, SAMPLE_FIGURES, SAMPLE_GROUP, SAMPLE_NIGHT, SAMPLE_PHONE, SAMPLE_PREVIEW, SAMPLE_PROJECTS, SAMPLE_QUESTION, SAMPLE_RACE, SAMPLE_RAIL, SAMPLE_RULES, SAMPLE_RUNS, SAMPLE_USAGE } from '@/lib/deskSample';
+import { SAMPLE_CHATS, SAMPLE_FIGURES, SAMPLE_GROUP, SAMPLE_NIGHT, SAMPLE_PREVIEW, SAMPLE_PROJECTS, SAMPLE_QUESTION, SAMPLE_RACE, SAMPLE_RAIL, SAMPLE_RULES, SAMPLE_RUNS, SAMPLE_USAGE } from '@/lib/deskSample';
 import { COLORS, rawThemeVars, themeVars } from '@/theme/colors';
 
 const noop = () => {};
@@ -92,7 +91,6 @@ function Preview() {
     {board === 'preview' && <><Text className="font-sans text-xl font-bold text-foreground">try it before it ships</Text><PreviewSizeBar size={size} onSize={setSize} onReload={noop} /><PreviewFrame address="michu-pc · tailnet :8081/inbox" load="live" size={size} url={null} unreachable={null} sample page={{ reloads: 0, onLoadStart: noop, onLoad: noop, onError: noop, onUrl: noop }} /><PreviewChecks host="michu-pc" checks={SAMPLE_PREVIEW.checks} empty="" /><PreviewDeployBar deploy={{ kind: 'ready', target: 'to firebase hosting · sample-site' }} onDeploy={noop} onTellAgent={noop} /></>}
     {board === 'race' && <><Text className="font-sans text-xs text-muted-foreground">cellar · race · 2 runs off the same commit</Text><Text className="font-sans text-xl font-bold text-foreground">{SAMPLE_RACE.title}</Text><RaceBody race={SAMPLE_RACE} /></>}
     {board === 'night' && <><Text className="font-sans text-xs text-muted-foreground">NIGHT SHIFT · {SAMPLE_NIGHT.host}</Text><Text className="font-sans text-2xl font-bold text-foreground">while you slept</Text><NightBody night={SAMPLE_NIGHT} onAdd={noop} /></>}
-    {board === 'phone' && <><Text className="font-sans text-2xl font-bold text-foreground">pixel</Text><PhoneBody phone={SAMPLE_PHONE} /></>}
     {board === 'group' && <><Text className="font-sans text-2xl font-bold text-foreground">{SAMPLE_GROUP.title}</Text><GroupBody group={SAMPLE_GROUP} /></>}
     {board === 'hosts' && <><Text className="font-sans text-2xl font-bold text-foreground">hosts</Text><DeskHostsBlock name="michu-pc" online line="connected" /></>}
     {board === 'keys' && <DeskKeysBlock />}

@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 
 import { useCellar } from '@/features/cellar/useCellar';
-import { agentLabel, isLiveRun, RUN_STATE_LABEL, type DeskRun } from '@/lib/deskProtocol';
+import { type DeskRun } from '@/lib/deskProtocol';
 import { SAMPLE_RUNS } from '@/lib/deskSample';
-import { runMeta, type DeskRunCard } from '@/lib/deskView';
-import { longRel } from '@/lib/relTime';
-import { projectForPath, repoPathLabel } from '@/lib/repoLink';
+import { deskRunCard, type DeskRunCard } from '@/lib/deskView';
+import { projectForPath } from '@/lib/repoLink';
 import { useDeskPrefs } from '@/store/deskPrefs';
 import { useDeskStatus } from './DeskStatusProvider';
 import { useDeskStream } from './useDeskStream';
@@ -25,7 +24,7 @@ export function useDeskRunCards(runs: readonly DeskRun[]): DeskRunCard[] {
 
   return useMemo(() => {
     const real = runs.map((run) => {
-      const card = runCard(run, projects.find((project) => project.id === run.projectId)?.name ?? projectForPath(run.cwd, projects)?.name ?? null);
+      const card = deskRunCard(run, projects.find((project) => project.id === run.projectId)?.name ?? projectForPath(run.cwd, projects)?.name ?? null);
       const request = approvals?.find((row) => row.runId === run.id && pendingApproval(row));
       return request ? { ...card, detail: `approval · ${request.what}`, waitingLabel: 'needs your approval' } : card;
     });
@@ -33,21 +32,3 @@ export function useDeskRunCards(runs: readonly DeskRun[]): DeskRunCard[] {
   }, [runs, projects, sample, approvals]);
 }
 
-function runCard(run: DeskRun, project: string | null): DeskRunCard {
-  return {
-    id: run.id,
-    title: run.name,
-    project: project ?? repoPathLabel(run.cwd) ?? 'no folder',
-    meta: runMeta([
-      project ?? repoPathLabel(run.cwd),
-      agentLabel(run.agent),
-      run.branch ?? null,
-      longRel(new Date(run.startedAt).toISOString()),
-      run.origin === 'pc' ? 'opened at the pc' : null,
-    ]),
-    detail: run.state === 'waiting' ? RUN_STATE_LABEL.waiting : null,
-    state: run.state,
-    startedAt: run.startedAt,
-    stoppable: isLiveRun(run) && run.origin === 'phone',
-  };
-}

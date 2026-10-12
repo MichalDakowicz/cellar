@@ -16,7 +16,6 @@ import { UpdateNotice } from '@/features/updates/UpdateNotice';
 import { useSessionRoute } from '@/features/auth/useSessionRoute';
 import { CellarDisplay } from '@/features/cellar/CellarDisplay';
 import { CellarLive } from '@/features/cellar/CellarLive';
-import { DeskSessionSync } from '@/features/desk/DeskSessionSync';
 import { DeskStatusProvider } from '@/features/desk/DeskStatusProvider';
 import { QuestionSync } from '@/features/notifications/QuestionSync';
 import { useWebShortcuts } from '@/hooks/useWebShortcuts';
@@ -104,7 +103,6 @@ export default function RootLayout() {
                 <AuthGate>
                   <CellarLive />
                   <QuestionSync />
-                  <DeskSessionSync />
                   <DeskStatusProvider>
                     <CellarDisplay>
                       <AppShell>

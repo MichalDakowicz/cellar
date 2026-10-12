@@ -2,7 +2,6 @@ import { useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
-import { deskBridge } from '@/features/desk/bridge';
 import { defaultRecipe, recipeLine } from '@/lib/deskSettings';
 import { SAMPLE_RECIPES, SAMPLE_RULES, SAMPLE_USAGE } from '@/lib/deskSample';
 import { offeredAgents } from '@/lib/deskStart';
@@ -45,7 +44,7 @@ export function useDeskSettings() {
       onMode: prefs.setDefaultMode,
     },
     devices: {
-      here: deskBridge() !== null,
+      browser: link.role === 'web-controller',
       paired: pair?.name ?? null,
       onPair: () => router.push('/desk' as Href),
       onForget: pair

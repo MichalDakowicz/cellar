@@ -14,7 +14,7 @@ import { SettingsPage } from '../SettingsPage';
 export function HostsSettings() {
   const desk = useDeskSettings();
   return (
-    <SettingsPage title="hosts" sub="where agents and commands actually run. any machine you can reach over ssh can be one.">
+    <SettingsPage title="hosts" sub="the remote pc your controller talks to">
       <SettingsGroup>
         <DeskHostsBlock {...desk.host} />
       </SettingsGroup>

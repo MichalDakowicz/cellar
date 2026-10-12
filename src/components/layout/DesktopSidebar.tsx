@@ -13,7 +13,7 @@ import { useDeskWaiting } from '@/features/desk/useDeskWaiting';
 import { Avatar } from '@/features/friends/Avatar';
 import { useProfile } from '@/hooks/useProfile';
 import { SIDEBAR_WIDTH, useHover, webTransition } from '@/hooks/useResponsive';
-import { deskLinkFor, DESK_LINKS, pinnedProjects, type DeskLink } from '@/lib/sidebar';
+import { deskLinkFor, CONTROLLER_DESK_LINKS as DESK_LINKS, pinnedProjects, type DeskLink } from '@/lib/sidebar';
 import { useCellarSheets } from '@/store/cellarPrefs';
 import { COLORS } from '@/theme/colors';
 

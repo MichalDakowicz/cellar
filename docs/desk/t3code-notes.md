@@ -2,6 +2,15 @@
 
 ## Standing custom-chat reference
 
+W10 extraction rechecked the same pinned `bed923986fbcbe8279f23b9367efde1596bde1f9`
+adapters. The renderer move keeps provider acknowledgement, UUID correlation,
+interrupt-before-promotion and private process containment in the existing host.
+It does not adopt the newer background-terminal API unsupported by installed Codex.
+DOM recovery reads the original receipts and queue revisions; it never infers delivery
+from a renderer write or interruption alone. The desktop history key retains W9's
+transport suffix. Auth handoff is serialized in the renderer so an older session cannot
+replace a later sign-out/account change; the host still receives no refresh token.
+
 User instruction, 2026-10-11: use [T3 Code's repository](https://github.com/pingdotgg/t3code)
 as implementation help for Cellar's custom agent chat. Consult its session adapters,
 dispatch/queue lifecycle, approvals and event recovery when wiring these flows. Record the

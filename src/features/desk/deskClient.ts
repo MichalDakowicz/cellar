@@ -1,54 +1,11 @@
 import * as Crypto from 'expo-crypto';
-
 import type { DeskPair } from '@/lib/deskPair';
-import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { hex, signDeskRequest, type Sha256 } from '@/lib/deskSign';
-import { readDeskRuns } from '@/lib/deskRunSnapshot';
-import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@/lib/deskCommands';
+import { DeskUnreachable, refusal, type DeskTransport } from '@/lib/deskCalls';
+export { deskCalls, DeskRefusal, DeskUnreachable, type DeskCalls, type TicketFor } from '@/lib/deskCalls';
 
-import type { DeskBridge } from './bridge';
-import type { DeskReceipt } from '@/lib/deskReceipt';
-import { readApprovalReceipt, type ApprovalAnswer, type ApprovalReceipt } from '@/lib/deskApprovals';
-import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest, type WorktreeReview, type WorktreeReceipt } from '@/lib/deskWorktrees';
-import { readControlReceipt, readRunQueue, type RunControl, type ControlReceipt } from '@/lib/deskDispatch';
-
-/**
- * The pc's API, over whichever wire reaches it: the LAN, signed with the
- * paired key, or the desktop window's bridge. Both answer the same paths with the same
- * bodies, so everything above this file is written once.
- */
-
-export type DeskTransport = (method: 'GET' | 'POST', path: string, body?: unknown) => Promise<unknown>;
-
-/** The pc did not answer at all — off, asleep, or on another network. Not the same as a refusal. */
-export class DeskUnreachable extends Error {}
-
-/** A question gets a few seconds; a start waits for the agent to come up, which for `claude --bg` is several. */
 const ASK_TIMEOUT_MS = 6000;
 const START_TIMEOUT_MS = 120_000;
-
-/**
- * The pc said no, and said why. `untrusted` is the folder claude wants trusted
- * before it will start there — the one refusal the phone can do something about.
- */
-export class DeskRefusal extends Error {
-  constructor(
-    message: string,
-    readonly untrusted: string | null,
-    readonly receipt: DeskReceipt | null = null,
-  ) {
-    super(message);
-  }
-}
-
-function refusal(status: number, body: unknown): Error {
-  const said = body as { error?: unknown; untrusted?: unknown; receipt?: DeskReceipt } | null;
-  return new DeskRefusal(
-    typeof said?.error === 'string' ? said.error : `the pc answered ${status}`,
-    typeof said?.untrusted === 'string' ? said.untrusted : null,
-    said?.receipt ?? null,
-  );
-}
 
 // A copy into a fresh ArrayBuffer: expo-crypto's types want an ArrayBuffer-backed view, never a shared one.
 const sha256: Sha256 = async (data) =>
@@ -119,57 +76,3 @@ export function lanTransport(pair: DeskPair): DeskTransport {
   };
 }
 
-export function bridgeTransport(bridge: DeskBridge): DeskTransport {
-  return async (method, path, body) => {
-    const { status, body: answer } = await bridge.request(method, path, body);
-    if (status < 200 || status >= 300) throw refusal(status, answer);
-    return answer;
-  };
-}
-
-export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { kind: 'apk'; app: string };
-
-export function deskCalls(send: DeskTransport, local = false) {
-  return {
-    control: async (request: RunControl) => readControlReceipt(((await send('POST', '/run-controls', request)) as { receipt: unknown }).receipt, request),
-    controlReceipt: async (request: RunControl): Promise<ControlReceipt | null> => {
-      const row = ((await send('GET', `/run-controls/${encodeURIComponent(request.commandId)}`)) as { receipt: unknown }).receipt;
-      return row === null ? null : readControlReceipt(row, request);
-    },
-    queue: async (runId: string) => readRunQueue(((await send('GET', `/runs/${encodeURIComponent(runId)}/queue`)) as { queue: unknown }).queue, runId),
-    answerApproval: async (answer: ApprovalAnswer) => readApprovalReceipt(((await send('POST', '/approval-answers', answer)) as { receipt: unknown }).receipt, answer),
-    approvalReceipt: async (answer: ApprovalAnswer): Promise<ApprovalReceipt | null> => {
-      const row = ((await send('GET', `/approval-answers/${encodeURIComponent(answer.commandId)}`)) as { receipt: unknown }).receipt;
-      return row === null ? null : readApprovalReceipt(row, answer);
-    },
-    eventTicket: async () => {
-      const body = await send('POST', '/event-ticket', { local }) as { url?: unknown };
-      if (typeof body?.url !== 'string' || !/^ws:\/\/[^/]+\/events\/[A-Za-z0-9_-]{16,}$/.test(body.url)) throw new Error('Invalid PC stream ticket.');
-      return body.url;
-    },
-    info: async () => (await send('GET', '/desk')) as DeskInfo,
-    runs: async () => {
-      const body = (await send('GET', '/runs')) as { runs?: unknown } | null;
-      const runs = readDeskRuns(body?.runs);
-      if (!runs) throw new Error('the pc did not return a valid run list');
-      return runs;
-    },
-    start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
-    receipt: async (id: string) => ((await send('GET', `/requests/${encodeURIComponent(id)}`)) as { receipt: DeskReceipt | null }).receipt,
-    commands: async () => ((await send('GET', '/commands')) as { projects: DeskProjectCommands[] }).projects,
-    worktrees: async () => readProjectWorktrees(((await send('GET', '/worktrees')) as { projects?: unknown })?.projects),
-    reviewWorktree: async (id: string, action: WorktreeAction) => ((await send('POST', `/worktrees/${encodeURIComponent(id)}/review`, { action })) as { review: WorktreeReview }).review,
-    actWorktree: async (request: WorktreeRequest) => ((await send('POST', `/worktrees/${encodeURIComponent(request.worktreeId)}`, request)) as { receipt: WorktreeReceipt }).receipt,
-    worktreeReceipt: async (id: string) => ((await send('GET', `/worktree-requests/${encodeURIComponent(id)}`)) as { receipt: WorktreeReceipt | null }).receipt,
-    job: async (request: DeskJobStart) => ((await send('POST', '/commands', request)) as { run: DeskRun }).run,
-    saveCommands: async (projectId: string, commands: DeskCommandDefinition[]) => void (await send('POST', `/commands/${encodeURIComponent(projectId)}/settings`, { commands })),
-    stop: async (id: string) => void (await send('POST', `/runs/${encodeURIComponent(id)}/stop`)),
-    log: async (id: string) => ((await send('GET', `/runs/${encodeURIComponent(id)}/log`)) as { lines: DeskLogLine[] }).lines,
-    ports: async () => ((await send('GET', '/ports')) as { ports: DeskPort[] }).ports,
-    apks: async () => ((await send('GET', '/apks')) as { apks: DeskApk[] }).apks,
-    ticket: async (what: TicketFor) => ((await send('POST', '/tickets', what)) as { url: string }).url,
-    trust: async (cwd: string) => ((await send('POST', '/trust', { cwd })) as { trusted: string }).trusted,
-  };
-}
-
-export type DeskCalls = ReturnType<typeof deskCalls>;

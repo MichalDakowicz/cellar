@@ -12,13 +12,13 @@ export function useRunControl(link: DeskLink, slot: string, connected: boolean) 
   const [busy, setBusy] = useState(false); const locked = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const pending = !!saved && (!saved.receipt || ['pending', 'unknown'].includes(saved.receipt.state));
-  const calls = link.calls; const via = link.via;
+  const calls = link.calls;
   const hostId = link.info?.id ?? link.pair?.id;
   const submit = useCallback(async (input?: Omit<RunControl, 'commandId' | 'source'>) => {
     const saved = useDeskControls.getState().controls[key];
     const pending = shouldRecoverControl(saved, input?.action, hostId);
     if (!connected || locked.current || (!input && !saved) || !calls) return null;
-    const request = pending || !input ? saved!.request : { ...input, commandId: randomUUID(), source: via === 'bridge' ? 'pc' as const : 'phone' as const };
+    const request = pending || !input ? saved!.request : { ...input, commandId: randomUUID(), source: 'phone' as const };
     locked.current = true; setBusy(true); setError(null);
     // Preserve the prior pending remote receipt before starting a distinct emergency stop.
     if (saved && saved.request.commandId !== request.commandId && saved.receipt?.state === 'pending') {
@@ -32,7 +32,7 @@ export function useRunControl(link: DeskLink, slot: string, connected: boolean) 
       return { request, receipt };
     } catch (failure) { setError(`${readError(failure)} · reply missing; check the original receipt`); return null; }
     finally { locked.current = false; setBusy(false); }
-  }, [connected, key, calls, via, hostId]);
+  }, [connected, key, calls, hostId]);
   return { busy, pending, connected, saved, submit,
     message: error ?? (saved?.receipt ? controlMessage(saved.receipt) : pending ? 'Reply missing; check the original receipt.' : null) };
 }

@@ -1,6 +1,13 @@
-import { deskSections, deskSummary, detailParts, hostLine, LATELY_MAX, metaParts, runChip, runMeta } from './deskView';
+import { deskRunCard, deskSections, deskSummary, detailParts, hostLine, LATELY_MAX, metaParts, runChip, runMeta } from './deskView';
 
 const run = (state: 'running' | 'waiting' | 'done' | 'failed' | 'stopped', startedAt: number) => ({ state, startedAt });
+
+test('shared run card retains unknowns and never offers to stop unrelated PC sessions', () => {
+  const row = { id: 'run', state: 'unknown' as const, name: 'task', agent: 'codex' as const, cwd: 'C:/work/app', startedAt: 0, origin: 'phone' as const, entryId: null };
+  expect(deskRunCard(row, 'app')).toMatchObject({ state: 'unknown', stoppable: false, project: 'app' });
+  expect(deskRunCard({ ...row, state: 'running' }, 'app').stoppable).toBe(true);
+  expect(deskRunCard({ ...row, state: 'running', origin: 'pc' }, 'app').stoppable).toBe(false);
+});
 
 describe('runChip', () => {
   it('calls a running run working and a waiting one waiting', () => {
