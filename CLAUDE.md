@@ -51,7 +51,9 @@ Structure rules (they are why the siblings are maintainable):
 - The user plans **separate controller and desktop renderer builds**, keeping Cellar's
   accepted appearance: `docs/desk/desktop-rebuild.md`. Mobile/web remain controllers;
   Electron/TypeScript with a dedicated React DOM renderer is the recommended desktop stack.
-  This migration is planned separately; the current desktop still loads the shared web build.
+  This migration is now **W10**, before keys search (W11) and the remaining features.
+  Former W10–W20 tasks shift to W11–W21; see `TASKS.md` for current numbering. The current
+  desktop still loads the shared web build until W10 completes.
 - `docs/desk/` is the **desk spec** — what the desk tab, the desktop control center and the
   daemon do, and `TASKS.md`, the build order (screens first, then wiring, easiest first).
   Read it and tick its task before and after any desk work.

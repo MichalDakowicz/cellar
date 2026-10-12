@@ -7,32 +7,35 @@ adds behavior through the existing view models, host API and transports.
 
 | Flow | Works now | Sample or missing |
 | --- | --- | --- |
-| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W20) |
+| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W21) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
-| Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W11 |
+| Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W12 |
 | Follow a run | W6/W7 synchronized events and saved history; W8 runtime approvals; W9 retained chats, queue/edit/cancel/Send now, single stop and account-wide Stop all | Restarted/legacy provider chats explain unavailability; offline host stops remain pending |
-| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W13 |
-| Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W10) |
-| Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W11), remote input or real phone panel (W18) |
-| Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W19) |
-| Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W12–W17 |
+| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W14 |
+| Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W11) |
+| Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W12), remote input or real phone panel (W19) |
+| Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
+| Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W13–W18 |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
 real header or navigation totals. Sample actions do not confirm host execution.
 
 ## Agreed wiring order
 
-W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 → W11, then W12–W19.
-W20 stays deferred. Counts establish trustworthy status first; project commands are
+W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 rebuild → W11 keys search
+→ W12 previews/deploy, then W13–W20.
+W21 stays deferred. Counts establish trustworthy status first; project commands are
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
 The user approved W1 after the behavior review, then explicitly requested W2–W7 and
 approved W8 approvals after the next flow review. The recorded verification boundaries
 remain in force: no live Claude tasks; Claude uses fixtures, Codex uses fixtures and
-live phone-to-PC checks. W9 is complete; W10 is next, followed by W11. The separate
-controller/desktop renderer rebuild is planned in [desktop-rebuild.md](desktop-rebuild.md).
+live phone-to-PC checks. W9 is complete. The user moved the controller/desktop rebuild
+to W10, before keys search (W11) and previews/deploy (W12), so later work lands in the
+separated apps. See [desktop-rebuild.md](desktop-rebuild.md) and current `TASKS.md`;
+legacy canvas/spec/source W10–W20 references map to W11–W21 after this insertion.
 
 ## W1 behavior
 
@@ -280,7 +283,7 @@ stay local; GitHub push, PR publication and web deployment remain unauthorized.
 Agreed scope: real runtime approvals for fresh Cellar Claude/Codex tasks, durable
 first-answer-wins responses, the existing waiting dock, linked entry questions and
 truthful disconnect/restart recovery. Preserve the visual clone and the user's
-preexisting canvas/spec edits. Notifications remain W13 and dispatch remains W9.
+preexisting canvas/spec edits. Notifications remain W14 and dispatch remains W9.
 
 Fresh complete tasks use the installed Claude executable through pinned Agent SDK
 0.3.296 (`canUseTool`) or installed Codex 0.162.1 through its stdio app-server. No
@@ -449,5 +452,6 @@ No firewall, pairing or global Git trust settings changed.
 Logs, snapshots, exact process records and artifact hashes remain outside Git under
 `C:/ping/cellar-w9-qa`. Seven protected spec/canvas files retain their starting SHA-256
 hashes. This pass builds local web; website publication remains outside the requested
-scope. W10 is next. The separate desktop renderer/controller cleanup is described in
-[desktop-rebuild.md](desktop-rebuild.md); this W9 build still uses the shared web export.
+scope. W10 is next: the desktop renderer/controller rebuild described in
+[desktop-rebuild.md](desktop-rebuild.md). Keys search follows as W11; this completed
+W9 build still uses the shared web export.

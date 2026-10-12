@@ -9,9 +9,9 @@ the desktop app; it keeps running in the tray when the window is closed.
 
 The 2026-10-12 direction separates the controller app (mobile and web) from the desktop
 host app, with an independent desktop renderer and the same Cellar appearance. This is
-planned work, not a completed migration; see [desktop-rebuild.md](desktop-rebuild.md) for
-ownership, technology, controller cleanup and staged builds. The host daemon remains part
-of the desktop app.
+scheduled as W10 before keys search (now W11), not a completed migration; see
+[desktop-rebuild.md](desktop-rebuild.md) for ownership, technology, controller cleanup
+and staged builds. The host daemon remains part of the desktop app.
 
 | Role | Is | Does |
 | ---- | -- | ---- |

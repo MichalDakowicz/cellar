@@ -75,6 +75,8 @@ never in docs or Git. No approved bounded QA command/provider remains running.
 The user chose phone controller + desktop host, Windows first with future macOS/Linux
 possible. `desktop-rebuild.md` records mobile/web cleanup and a dedicated Electron /
 TypeScript / React DOM / Vite desktop renderer, retaining Cellar's look and existing host.
-This is planned work, not implemented by W9. W10 remains keys search; keep new pure
-search/domain contracts reusable and do not merge a full renderer rewrite into it.
+The user scheduled this rebuild as W10, immediately after W9, before more features need
+moving. Keys search is W11 and every later task shifts forward by one (SSH stays deferred
+as W21). This is planned work, not implemented by W9. Preserve W1–W9 behavior and the
+accepted UI while separating the builds; verify W10 before starting W11.
 Ready-to-paste continuation: `w10-prompt.md`.

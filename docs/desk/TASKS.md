@@ -22,6 +22,12 @@ Rules for every task:
 
 Status: `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` deferred
 
+Order changed 2026-10-12 at the user's request: W10 is the controller/desktop rebuild,
+before more features need moving. Keys search is W11; every former W10–W20 task shifts
+to W11–W21, preserving order and deferred status. Accepted canvas/spec files and older
+source comments retain their original task numbers; apply this +1 mapping to their
+W10–W20 references. This ledger supplies current numbering; visual baselines stay intact.
+
 ---
 
 ## Pass 1 — the screens
@@ -64,7 +70,7 @@ answered collapses to the pick, expired greys out. The note rides in the answer 
 
 `NewTask.dc.html`. Built as a screen, `desk/new`, not a sheet — taller than a phone once the
 keyboard is up. From the left island on the desk tab, and from an entry's start on pc (`?entry=`): the transcript field with
-the mic block (mic is a visual until W12 — "type instead" is the working path), project chips,
+the mic block (mic is a visual until W13 — "type instead" is the working path), project chips,
 where it works (main checkout · new worktree), agent chips, ask first · edits ok · full access
 with its hint, attached entries ("from your cellar"), send to <host>. Replaces `DeskPromptForm`
 on the phone.
@@ -81,7 +87,7 @@ today's log tail as plain agent text until W6.
 
 `Preview.dc.html`. Size chips (phone · tablet · desktop) around the existing per-port page,
 reload, the host + address bar with "live", checks list, "tell the agent" and deploy with its
-meta line. Deploy is disabled with a reason until W11. Built as `desk/preview/[port]` in a
+meta line. Deploy is disabled with a reason until W12. Built as `desk/preview/[port]` in a
 `react-native-webview` (an iframe on web); the page is laid out at the picked width and scaled
 into the frame (`lib/deskPreview.ts`). The pc's port rows open it instead of the browser;
 `desk/preview/sample` is the sample desk's, from its `preview` tile. "Tell the agent" goes to
@@ -91,7 +97,7 @@ the page's run when there is one, else to a new task.
 
 `Keys.dc.html`. The suggestion list above the composer (phone: above the keyboard, keys in a
 strip): `$` lists projects then entries inside one — real already, from the cellar; `@` and `/`
-from the sample desk until W10. The line under the composer that spells out what each token will
+from the sample desk until W11. The line under the composer that spells out what each token will
 do. Chip actions: copy, nudge lighter/darker. One pure search in `lib/deskKeys.ts` (`tokenAt`,
 `keySuggestions`, `applySuggestion`, `keyPlan`) behind `features/desk/useDeskKeys`, used by the run
 composer and the new task screen. `$` commands are the sample's until W2; with the sample off,
@@ -101,10 +107,10 @@ rewrites the code in the message); chips in entries still copy on tap.
 ### V10 · live screen, landscape `[x]`
 
 `Screen.dc.html`. Restyle the existing screen view to the landscape artboard; mode chips (touch ·
-trackpad · keyboard · dictate) drawn, view-only until W18. Built as `desk/screen`: the pc's MJPEG
+trackpad · keyboard · dictate) drawn, view-only until W19. Built as `desk/screen`: the pc's MJPEG
 page in a webview, the phone locked landscape while it is open (`expo-screen-orientation`),
 host pill and mode hint over the picture, and the screen's own islands (`ScreenIslands`, not the
-shared bar). The hint says a mode is view only until W18 (`lib/deskScreen.ts`); switch display is
+shared bar). The hint says a mode is view only until W19 (`lib/deskScreen.ts`); switch display is
 drawn off. The host card and the pc's "the screen" row open it instead of the browser.
 
 ### V11 · desktop home `[x]`
@@ -122,11 +128,11 @@ deny / allow inline; real blocked thoughts open their entry. Today counts real d
 
 `DeskChat.dc.html`. Runs grouped by project on the left (what needs you first), the run chat in
 the middle, the right rail: attached phone, this run's files, checkpoints, preview. Header meter
-slot for usage (drawn empty until W16). Built as the wide shape of `desk/run/[id]`: `RunListPane`
+slot for usage (drawn empty until W17). Built as the wide shape of `desk/run/[id]`: `RunListPane`
 (`lib/deskRunList.ts` groups, filters, searches), `features/desk/RunChatPane` (the phone's whole
 run screen, moved out of the route) and `RunRail`. Run cards carry their project now
-(`useDeskRunCards`, shared with the desk tab). The phone in the rail is drawn until W18; files,
-checkpoints and preview come from the sample desk until W6/W14.
+(`useDeskRunCards`, shared with the desk tab). The phone in the rail is drawn until W19; files,
+checkpoints and preview come from the sample desk until W6/W15.
 
 ### V13 · project board: hand off from it `[x]`
 
@@ -136,26 +142,26 @@ run each" in the selection bar; the side panel: worktrees, previews, shipped, la
 selection bar's hand-off opens `desk/new?entries=a,b` with every held thought attached; with two or
 more, "one run · one run each" decides the starts (`taskStarts` in `lib/deskTask.ts`), sent in
 turn by `useDeskStart` — a trust refusal holds the rest. The desktop project aside gets
-`ProjectDeskPanel`: the checkout for real, the whole panel on the sample desk (W5, W11, W2).
+`ProjectDeskPanel`: the checkout for real, the whole panel on the sample desk (W5, W12, W2).
 
 ### V14 · settings, desk half `[x]`
 
 `DeskUsage`, `DeskRecipes`, `DeskHosts`. Settings › agents (slots, default per project, default
 mode), keys (`!` `~` `^` `%` on/off), devices and pairing, notifications (quiet hours), usage +
 accounts, recipes by kind + rules, hosts. **Hosts lists this pc only**; "add a host over ssh" is
-shown disabled with "after the server is set up" — see W20. Built as `desk/settings`, reached from
+shown disabled with "after the server is set up" — see W21. Built as `desk/settings`, reached from
 settings › your pc › desk settings (the desk tab's gear stays main settings — on the phone it is
 the only way there). Real: default agent and mode (`store/deskPrefs`, used by the new task screen
-through `startingAgent`), pairing, and the sample desk switch, moved here. Drawn: keys (W10),
-where pings go (W13), usage (W16; sample bars), recipes and rules (W15; sample recipes), hosts
+through `startingAgent`), pairing, and the sample desk switch, moved here. Drawn: keys (W11),
+where pings go (W14), usage (W17; sample bars), recipes and rules (W16; sample recipes), hosts
 (this pc, add-over-ssh off).
 
 ### V15 · notifications, drawn `[x]`
 
 `PhoneNotify.dc.html`. The notification layouts as in-app previews: one per run, approvals with
-up to 3 actions, questions with 2 options + more. Real presentation is W13. Built as `desk/notify`,
+up to 3 actions, questions with 2 options + more. Real presentation is W14. Built as `desk/notify`,
 from settings › desk › where pings go. `lib/deskNotify.ts` builds every note (`runNote`,
-`approvalNote`, `questionNote`, `capActions` — Android's three) so W13 draws the same ones. Real
+`approvalNote`, `questionNote`, `capActions` — Android's three) so W14 draws the same ones. Real
 notes come from live runs and thoughts waiting on you, and open them; the sample desk adds an
 approval, a question, a filed crash and a plan out, answered locally.
 
@@ -166,7 +172,7 @@ night shift digest (`PhoneNight`), group run (`DeskGroupRun`), phone over adb pa
 (`DeskPhone`). Each behind the sample desk until its wiring task. Built as `desk/share`,
 `desk/race`, `desk/night`, `desk/group`, `desk/phone` in one frame (`features/desk/LaterScreen`),
 linked from the desk tab's "more on the desk". The share sheet files for real (kind guessed by
-`guessKind`, hand-off through `store/deskHandoff`) — only arriving from another app waits for W17;
+`guessKind`, hand-off through `store/deskHandoff`) — only arriving from another app waits for W18;
 the other four show their body only on the sample desk and say what they wait for otherwise.
 Their small rules are `lib/deskLater.ts`.
 
@@ -373,7 +379,7 @@ only, preserving the no-live-Claude constraint. 864 app and 59 desktop tests, ty
 lint, web export, desktop package and installed Android release pass. Lost replies
 are verified by signed HTTP/receipt tests; physical fault proxy was removed. Native
 provider question tools are explicitly refused; linked questions reuse W3. Notification
-delivery remains W13. Existing canvas/spec edits retain their initial hashes.
+delivery remains W14. Existing canvas/spec edits retain their initial hashes.
 See `how-it-works.md` W8 for behavior and verification boundaries. Next: W9.
 
 ### W9 · steer, queue, stop all `[x]`
@@ -389,67 +395,89 @@ stops remain possible after local results settle while an earlier remote stop is
 pass; standalone APK installed/launched and rebuilt desktop running at the paired path.
 Physical two-online-host behavior remains fixture coverage; Claude stays fixture-only.
 Protected canvas/spec hashes unchanged. See `how-it-works.md` W9 and `w9-resume.md`.
-Separate controller/desktop rebuild notes: `desktop-rebuild.md`; migration not part of W9/W10.
+Controller/desktop rebuild is the next task, W10; it is not part of completed W9.
 
-### W10 · keys search `[ ]`
+### W10 · separate controller and desktop apps `[ ]`
+
+Implement [desktop-rebuild.md](desktop-rebuild.md) before wiring more features. Mobile
+and web remain controllers; desktop keeps the existing Electron/TypeScript host and
+gets its own React DOM/Vite renderer. Remove receiver-specific bridge imports, local-PC
+settings/routes and ADB panels from controller build graphs. Keep remote host features
+and useful responsive browser layouts. App role and host capabilities determine access;
+window width only determines layout.
+
+Preserve the accepted Cellar appearance and all working W1–W9 behavior, including drafts,
+approvals, durable UUID receipts, queue revisions, process containment, offline pending
+and restart unknowns. Keep the current profile, identity, pairing and auth ownership.
+Share pure contracts/domain/tokens; desktop artifacts must no longer embed the Expo
+controller export. Migrate all existing Cellar desktop surfaces before removing the old
+renderer, without implementing the later unwired features during the move.
+
+Verify visual parity and controller/host boundaries, run app and desktop checks, build
+independent controller web/Android and desktop artifacts, replacement-install and launch
+on phone and the existing reachable desktop path. Claude remains fixture-only; consult
+T3 for lifecycle changes. Complete and verify this rebuild before W11 keys search.
+Ready-to-paste task: [w10-prompt.md](w10-prompt.md).
+
+### W11 · keys search `[ ]`
 
 `@` files from the run's worktree (changed first, `:42` line refs), `/` skills per agent (built
 in + the user's own skill folders), `$` commands from W2. One search used by phone and pc.
 
-### W11 · previews and deploy `[ ]`
+### W12 · previews and deploy `[ ]`
 
 One dev server per worktree on the host, ports allocated and reached over the tailnet; checks =
 the project's check commands; deploy = its `$deploy`, asking first if the preview was never
 opened.
 
-### W12 · voice `[ ]`
+### W13 · voice `[ ]`
 
 Speech to text on the new task sheet and the composer; "B" / "the second one" answers a question;
 "dollar deploy" types `$deploy`.
 
-### W13 · notifications that answer `[ ]`
+### W14 · notifications that answer `[ ]`
 
 Actionable notifications for approvals and questions, one per run updated in place, routed by
 where you are (desk in use → desk; idle 5 min or locked → phone; unanswered 2 min → phone),
 never on two devices at once. Read the open bug "notifications arrive only on app launch" first —
 it is the same delivery path.
 
-### W14 · checkpoints `[ ]`
+### W15 · checkpoints `[ ]`
 
 Hidden git refs per turn, diffs from them, one-click roll back that also rolls the agent's
 conversation back.
 
-### W15 · recipes and rules `[ ]`
+### W16 · recipes and rules `[ ]`
 
 A recipe per entry kind (agent, mode, skills, prompt template, commands after) feeds the new task
 defaults; rule entries sync into a managed block in AGENTS.md / CLAUDE.md, scoped everywhere →
 shelf → project, each write shown as a diff first.
 
-### W16 · usage and accounts `[ ]`
+### W17 · usage and accounts `[ ]`
 
 First check what each agent actually exposes (5h / weekly windows, resets); estimate and say so
 where it does not. Context meter with `/compact` at 80%. Accounts per agent with per-run config
 dirs and keychain secrets; when a plan runs out, "ask me" is the default.
 
-### W17 · share and crashes `[ ]`
+### W18 · share and crashes `[ ]`
 
 Cellar as an android share target; kind guessed from what was shared; crashes of debug builds
 filed as glitches with stack, screenshot and log, repeats counted.
 
-### W18 · screens both ways `[ ]`
+### W19 · screens both ways `[ ]`
 
 Control on the live pc screen (touch, trackpad, keyboard, dictate), asked on the pc unless the
 phone is trusted. The phone on the pc over adb: mirror, who drives, agent taps as rings, install,
 deep links, logcat, dev toggles.
 
-### W19 · race, night shift, group runs `[ ]`
+### W20 · race, night shift, group runs `[ ]`
 
 Two runs off one commit and a pick; tonight's queue in a window with a digest; one task across a
 shelf of projects.
 
-### W20 · other hosts over ssh `[-]`
+### W21 · other hosts over ssh `[-]`
 
-**W20 · other hosts over ssh** — **Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
+**W21 · other hosts over ssh** — **Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
 cellar project. A host = user@host:port + key; cellar installs and updates the daemon over ssh; per host:
 slots, night shift, which projects; runs pick a free host. Until then, everything assumes one
 host: this pc.

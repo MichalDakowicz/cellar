@@ -141,5 +141,6 @@ Claude remains fixture-only.
 The current package still embeds the root Expo web export. The planned rebuild uses a
 dedicated TypeScript/React DOM/Vite renderer inside Electron, leaving mobile/web as
 controllers and retaining the host/protocol and accepted Cellar look. See
-[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md) before extraction; W9/W10 do not
-perform that migration.
+[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md) before extraction. The rebuild is
+now W10, ahead of keys search (W11) and the later features, reducing how much must move.
+Completed W9 still uses the shared renderer; W10 has not been implemented yet.

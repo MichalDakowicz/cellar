@@ -2,7 +2,9 @@
 
 Decision recorded 2026-10-12. The user wants two app roles: a phone controller and a
 desktop host, with the web app remaining another controller. Windows comes first;
-keep macOS/Linux practical. This document plans the rebuild; W9 does not perform it.
+keep macOS/Linux practical. The user scheduled this rebuild as **W10**, immediately
+after completed W9, so fewer later features need moving. Keys search becomes W11;
+remaining tasks shift forward by one. This is planned work until W10 is implemented.
 The accepted Cellar appearance remains the visual contract.
 
 ## Technology choice
@@ -29,11 +31,11 @@ that Electron or a different language automatically fixes UI reuse.
 
 ## Responsibilities
 
-| Surface | Owns | Sends to host |
-| --- | --- | --- |
-| Mobile controller | Cellar capture/projects/inbox/stats, pairing client, drafts, saved history, remote Desk UI | Starts, approvals, dispatch/queue controls, command/worktree requests, preview and screen requests |
-| Web controller | Cellar browser UI, responsive remote Desk UI, account mailbox client | Only operations supported by its authenticated transport and host capabilities |
-| Desktop app | Dedicated Cellar desktop UI, local host, tray, pairing issuer, provider processes, filesystem/Git, command jobs, event log, ADB, preview/screen servers | Renderer calls the local host through narrow typed IPC |
+| Surface           | Owns                                                                                                                                                    | Sends to host                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Mobile controller | Cellar capture/projects/inbox/stats, pairing client, drafts, saved history, remote Desk UI                                                              | Starts, approvals, dispatch/queue controls, command/worktree requests, preview and screen requests |
+| Web controller    | Cellar browser UI, responsive remote Desk UI, account mailbox client                                                                                    | Only operations supported by its authenticated transport and host capabilities                     |
+| Desktop app       | Dedicated Cellar desktop UI, local host, tray, pairing issuer, provider processes, filesystem/Git, command jobs, event log, ADB, preview/screen servers | Renderer calls the local host through narrow typed IPC                                             |
 
 The phone and browser never execute provider processes or receive a local filesystem
 bridge. Remote control remains useful: removing receiver responsibilities must not remove
@@ -154,6 +156,8 @@ queue revisions, interrupt-before-promotion, offline-host pending and restart un
 Repeat W9 process containment checks after extraction. Consult pinned T3 adapter notes in
 `t3code-notes.md`; keep Claude fixture-only unless the user changes that instruction.
 
-This is a separate rebuild task. W10 remains keys search: implement its shared pure search
-and host data boundary so the future renderer can consume them. Do not mix a full renderer
-rewrite, a new transport, provider changes or a visual redesign into W10.
+W10 implements this rebuild before W11 keys search. Move the existing W1–W9 behavior and
+presentations, leaving later unwired features as explicit samples/unavailable states.
+Keep pure search/domain contracts reusable for W11. Do not add a new transport, change
+provider semantics or redesign the accepted UI during the rebuild. Complete independent
+builds, migration checks and device verification before starting W11.
