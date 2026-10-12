@@ -21,12 +21,26 @@ inside the app â€” and its main process is the half a phone talks to:
 ```sh
 cd cellar/desktop
 npm install
-npm --prefix .. run build:web   # the window loads ../dist
-npm start                       # builds build/main.js + preload.js, opens the app
+npm start                       # builds host/preload and renderer-dist, opens the app
 ```
 
-`npm run dev` loads `http://localhost:8081` (an `expo start --web` in the repo root) instead of
-the exported build. `npm run dist` builds a Windows installer into `release/`.
+Run `npm run renderer:dev` in one terminal and `npm run dev` in another for Vite on
+`http://127.0.0.1:5173`. `npm run build:host` bundles main/preload;
+`npm run renderer:build` produces `renderer-dist/`; `npm run build` runs both.
+`npm run dist` packages that output as `resources/renderer` and builds a Windows
+installer into `release/`. No root Expo export is consumed.
+
+Checks: `npm test`, `npm run lint`, `npm run check`, `npm run renderer:check`.
+Vite validates every transitive renderer module and emits `module-graph.json`.
+Controller source maps are checked with `node scripts/controllerBoundary.mjs <output>`
+from the repository root. Keep the graphs separate: only pure contracts, domain helpers,
+tokens and assets cross their boundary.
+
+The packaged renderer retains `cellar-desk://app`, existing profile/auth storage and MMKV
+web preference namespaces. It alone refreshes the account session; main receives only
+an access token and user ID. IPC accepts only this window’s top-level renderer.
+Development `?sample=1` fixtures are isolated from account operations; production sample
+presenters remain labelled and never execute later unwired features.
 
 Closing the window hides it to the tray; the phone can still reach the pc. Quit from the tray.
 
@@ -138,9 +152,8 @@ earlier remote stop remains pending. Live checks, exact process exits, rebuilt a
 and fixture boundaries are recorded in [`how-it-works.md` W9](../docs/desk/how-it-works.md#w9--retained-chat-dispatch-and-stop-all).
 Claude remains fixture-only.
 
-The current package still embeds the root Expo web export. The planned rebuild uses a
-dedicated TypeScript/React DOM/Vite renderer inside Electron, leaving mobile/web as
-controllers and retaining the host/protocol and accepted Cellar look. See
-[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md) before extraction. The rebuild is
-now W10, ahead of keys search (W11) and the later features, reducing how much must move.
-Completed W9 still uses the shared renderer; W10 has not been implemented yet.
+W10 implements the independent renderer and controller extraction described in
+[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence and remaining
+verification are tracked in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is
+W11 and remains outside this migration. Windows packaging is exercised here; existing
+host platform interfaces remain available for future macOS/Linux adapters.

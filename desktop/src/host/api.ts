@@ -73,6 +73,8 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     version: deps.version,
     agents: await installedAgents(),
     signedIn: deps.account.current !== null,
+    capabilities: { commands: !!deps.commands, previews: true, screen: true, downloads: true,
+      worktrees: !!deps.worktrees, events: !!deps.events, approvals: !!deps.approvals, dispatch: !!deps.controls },
     ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
     ...(deps.worktrees ? { worktrees: true as const } : {}),
     ...(deps.events ? { eventProtocol: 1 as const } : {}),
@@ -122,7 +124,7 @@ async function trust(deps: HostDeps, body: unknown): Promise<string> {
   return cwd;
 }
 
-async function ticket(deps: HostDeps, body: unknown): Promise<string> {
+async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'phone'): Promise<string> {
   const raw = (body ?? {}) as { kind?: string; port?: unknown; app?: unknown };
   let wanted: Ticket;
   if (raw.kind === 'screen') {
@@ -138,7 +140,7 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
   } else {
     throw new DeskError('what is the ticket for?');
   }
-  const host = deps.lanHost();
+  const host = source === 'pc' ? '127.0.0.1' : deps.lanHost();
   if (!host) throw new DeskError('this pc is not on a network the phone can reach', 409);
   return `http://${host}:${deps.identity().port}/t/${deps.tickets.issue(wanted)}`;
 }
@@ -222,7 +224,7 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
       case 'GET /apks':
         return ok({ apks: await findApks(deps.identity().workspace) });
       case 'POST /tickets':
-        return ok({ url: await ticket(deps, req.body) });
+        return ok({ url: await ticket(deps, req.body, req.source) });
       case 'POST /trust':
         return ok({ trusted: await trust(deps, req.body) });
       default:

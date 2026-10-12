@@ -8,7 +8,7 @@ import { contextBridge, ipcRenderer } from 'electron';
  * pc. The rest is what only the pc's own window may do: show the pairing code,
  * forget the paired phones, and hand over the session the host acts with.
  *
- * Its shape is mirrored in the app's `features/desk/bridge.ts`; change both.
+ * Its shape is mirrored in `renderer/bridge.ts`; change both.
  */
 contextBridge.exposeInMainWorld('cellarDesk', {
   version: 1,

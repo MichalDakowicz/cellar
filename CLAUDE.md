@@ -45,15 +45,15 @@ Structure rules (they are why the siblings are maintainable):
   this machine. It defines no tools of its own — it imports `mcp/src` — so a tool is
   written once and both transports get it.
 - `desktop/` is the **desktop app** (Electron), a third separate package
-  (`desktop/README.md`): its window loads Cellar's own web build, its main process is what a
+  (`desktop/README.md`): its window loads its own React DOM/Vite build, its main process is what a
   paired phone talks to. Like `mcp/` it imports `src/lib/*` (the `desk*.ts` protocol), has
   its own `tsc` and `npm test`, and the root checks do not see it.
-- The user plans **separate controller and desktop renderer builds**, keeping Cellar's
+- W10 implements **separate controller and desktop renderer builds**, keeping Cellar's
   accepted appearance: `docs/desk/desktop-rebuild.md`. Mobile/web remain controllers;
   Electron/TypeScript with a dedicated React DOM renderer is the recommended desktop stack.
   This migration is now **W10**, before keys search (W11) and the remaining features.
-  Former W10–W20 tasks shift to W11–W21; see `TASKS.md` for current numbering. The current
-  desktop still loads the shared web build until W10 completes.
+  Former W10–W20 tasks shift to W11–W21; see `TASKS.md` for current numbering. The desktop
+  package consumes its own `renderer-dist`; W10 acceptance remains tracked separately.
 - `docs/desk/` is the **desk spec** — what the desk tab, the desktop control center and the
   daemon do, and `TASKS.md`, the build order (screens first, then wiring, easiest first).
   Read it and tick its task before and after any desk work.
@@ -300,7 +300,7 @@ signed-in session of your own.
 - A release build blocks cleartext HTTP, and the pc's LAN server is `http://`.
   `plugins/withDeskCleartext.js` turns it back on; without it every LAN call dies on the phone
   and the pc screen says "not answering" while the pc is listening fine. Debug builds hide this.
-- The host acts with the **window's** session, handed over through `DeskSessionSync` on every
+- The host acts with the **window's** session, handed over through the desktop renderer auth boundary on every
   refresh. It must never hold a refresh token of its own: two holders rotate it out from under
   each other and Supabase revokes the whole family.
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import type { ApprovalAnswer, ApprovalDecision, ApprovalReceipt, RuntimeRequest } from '@/lib/deskApprovals';
+import type { ApprovalDecision, ApprovalReceipt, RuntimeRequest } from '@/lib/deskApprovals';
 import { readApprovalAnswer, pendingApproval } from '@/lib/deskApprovals';
 import { DeskError } from './claudeRuns.ts';
 

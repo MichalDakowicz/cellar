@@ -35,28 +35,48 @@ History/cursors retain the W9 `owner:host:bridge:` key, including its trailing c
 Missing replies retain their UUID; only confirmed prefixes leave task batches.
 
 No profile reset, pairing-key rotation, SQLite replacement or firewall change has
-been performed. The installed W9 executable remains available while parity is checked.
+been performed. The W9 payload remains available as the migration baseline; the reachable path is refreshed only after packaging checks.
 
 ## Verification so far
 
-- Root tests, lint and types passed before the latest shared card extraction;
-  final checks will be repeated after all source changes.
-- Desktop host fixture suite passed 69 tests outside the sandbox, including W9
-  containment, approval, queue and restart checks. Initial sandbox run could not
-  terminate a fixture tree; the unrestricted rerun passed.
-- Host and renderer type checks and the independent Vite build pass. New IPC and
-  graph boundary tests pass. Desktop lint is being completed with its own tooling.
-- 36 protected canvas/spec references matched their initial SHA-256 values.
-- Background browser previews use ports 5173 (DOM), 8134 (current controller QA)
-  and 8140 (W9 reference). The W9 source snapshot is isolated in the external QA
-  directory. Its Metro uses IPv6 loopback because an unrelated IPv4 listener owns
-  port 8090. That listener was not changed or stopped.
+- Root: 90 suites / 882 tests, lint and TypeScript pass. Desktop: 76 tests,
+  host/renderer TypeScript and independent lint pass. Process containment runs with
+  normal Windows process permissions. Controller boundary tests pass (2).
+- JDK 21 Android release replacement-installed on physical phone `00166152F003681`,
+  version 1.13.0 / code 15. It launched after unlock with original account/inbox.
+  APK SHA-256: `5440911036D558E8E7CCE1ED025E14125CF9883B9C4ACA3F4C42F35FF87C7DED`.
+- Actual web export maps: 3937 modules; actual Android release map: 4370 modules.
+  Both reject local host/IPC/ADB imports and report zero forbidden modules.
+- Desktop host and Vite renderer build with root `dist/` absent. Windows x64/NSIS
+  packaging passes; artifact installation and real W10 host checks remain pending.
+- 13 DOM surfaces have background browser smoke screenshots; no global overflow at
+  1440px. Approval light state, folded tools, rails, queue popout and deliberate
+  380px desktop layout inspected. Loading/empty/working/failed/unknown/disconnected
+  and explicit saved-history states captured. Native W9 capture/home inspected;
+  capture layout, glyph gutters and today figures adjusted to that baseline.
+- Matching controller approval at 320px is pixel-identical to W9. Wide light chat
+  retains run/preview rail and intentionally removes the attached-phone presenter.
+  Browser fixtures are not evidence of native IPC, credential migration or process
+  effects; those require the preserved-profile desktop and physical controller.
+- 36 protected canvas/spec references matched initial SHA-256 values; repeat at end.
+
+QA outputs stay outside Git in `C:/ping/cellar-w10-qa`. Controller web artifact was
+moved there to prove independent desktop builds (`controller-web-v1.13.0`). The W9
+reference is an isolated source snapshot, not another refresh-token owner. Ports:
+5173 DOM, 8134 current controller, 8140 W9 reference. W9 Metro uses IPv6 loopback
+because an unrelated IPv4 listener owns port 8090; it was left untouched.
+
+Capture gains durable desktop drafts in separate `desktop-capture` and
+`desktop-desk-capture` namespaces; original chat/task/control migration keys remain
+unchanged. Samples are presentation data: their IDs never subscribe to a provider
+and their commands/approvals/message delivery cannot execute. Unreadable preference
+envelopes show a recovery error without resetting saved records.
 
 ## Remaining acceptance
 
-Complete remaining screen parity and fixture states; verify dark/light and matching
-phone, narrow/wide web and desktop views; switch packaging to the independent renderer;
-inspect controller exports and Android bundles; build all three standalone artifacts;
-replacement-install/launch the phone and refresh the documented Windows path/profile;
-repeat real bounded Codex checks and restart recovery; finish docs/status and push.
-Claude remains fixture-only. W10 must stay unchecked until this acceptance passes.
+Refresh the documented Windows path/profile; verify native session/preferences,
+pairing, drafts, history and worktrees; repeat real bounded Codex approval, queue,
+interrupt-before-delivery, owned process containment, offline pending and restart
+unknown checks on desktop and phone. Inspect the installed artifact, repeat final
+checks/protected hashes, finish task status, commit and push. Claude remains
+fixture-only. W10 stays unchecked until this acceptance passes; W11 has not started.

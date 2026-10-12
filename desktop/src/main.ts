@@ -4,14 +4,15 @@ import { DeskHost } from './host/host.ts';
 import { signInInBrowser } from './oauth.ts';
 import { readSession } from './session.ts';
 import { createTray } from './tray.ts';
-import { APP_ORIGIN, registerWebScheme, serveWeb } from './web.ts';
+import { registerWebScheme, serveWeb } from './web.ts';
 import { createWindow, showWindow } from './window.ts';
+import { isCellarOrigin, isRendererSender, readIpcRequest } from './ipcBoundary.ts';
 
 /**
  * Cellar on the pc.
  *
- * The window is Cellar itself — the same web build the site serves, loaded
- * from inside the app. The main process is the half the phone talks to: the
+ * The window is Cellar's dedicated DOM renderer, loaded from inside the app.
+ * The main process is the half the phone talks to: the
  * LAN server, the agent runs, the page proxies, the screen, the builds, and the
  * cellar fallback for when the phone is away. Closing the window hides it; the
  * tray keeps the pc reachable until you quit from there.
@@ -42,23 +43,18 @@ async function frame(): Promise<Buffer | null> {
 
 /** Only Cellar's own page may reach the host; a page it navigated to must not. Compared by origin, never prefix. */
 function fromCellar(url: string): boolean {
-  try {
-    const { origin, protocol, host } = new URL(url);
-    if (protocol === 'cellar-desk:') return `${protocol}//${host}` === APP_ORIGIN;
-    return dev && origin === 'http://localhost:8081';
-  } catch {
-    return false;
-  }
+  return isCellarOrigin(url, dev);
 }
 
 function registerIpc(desk: DeskHost): void {
   const guard = <A extends unknown[], R>(fn: (...args: A) => R) =>
     (event: Electron.IpcMainInvokeEvent, ...args: A): R => {
-      if (!fromCellar(event.senderFrame?.url ?? '')) throw new Error('not cellar');
+      if (!isRendererSender({ url: event.senderFrame?.url ?? '', dev, senderId: event.sender.id,
+        windowId: window?.webContents.id ?? null, topLevel: event.senderFrame === event.sender.mainFrame })) throw new Error('not cellar');
       return fn(...args);
     };
 
-  ipcMain.handle('desk:request', guard((req: { method: string; path: string; body?: unknown }) => desk.request(req)));
+  ipcMain.handle('desk:request', guard((raw: unknown) => desk.request(readIpcRequest(raw))));
   ipcMain.handle('desk:pairing', guard(() => desk.pairing()));
   ipcMain.handle('desk:session', guard((raw: unknown) => desk.setSession(readSession(raw))));
   ipcMain.handle('desk:forget', guard(() => desk.forgetPhones()));

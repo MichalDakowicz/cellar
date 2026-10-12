@@ -4,11 +4,11 @@ import { join, normalize, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 /**
- * Cellar's web build, served to the window from inside the app.
+ * Cellar's independent DOM renderer, served to the window from inside the app.
  *
  * A custom scheme rather than `file://`: the build is a single-page app whose
  * routes are paths (`/entry/…`, `/desk`) and whose assets are root-relative
- * (`/_expo/static/…`), and both only work from the root of an origin. The scheme
+ * (`/assets/…`), and both only work from the root of an origin. The scheme
  * is registered standard and secure, so it is an origin with its own storage —
  * the session survives a restart — and a secure context, so WebCrypto works.
  */
@@ -26,16 +26,14 @@ export function registerWebScheme(): void {
 }
 
 export function webRoot(packaged: boolean): string {
-  // Packaged, electron-builder copies the build into resources/web; from source,
-  // it is the app's own `npm run build:web` output two folders up.
-  return packaged ? join(process.resourcesPath, 'web') : join(__dirname, '..', '..', 'dist');
+  return packaged ? join(process.resourcesPath, 'renderer') : join(__dirname, '..', 'renderer-dist');
 }
 
 /**
  * Scripts only from the build itself. This page holds `window.cellarDesk`,
  * which can start an agent on the pc, so a script injected into it — a hostile
  * dependency, a bug that renders text as markup — must not run. Styles may be
- * inline (react-native-web writes its own), data goes to Supabase over https and
+ * inline for theme tokens, data goes to Supabase over https and
  * wss, and pictures come from wherever a link preview points.
  */
 const CSP = [
@@ -46,7 +44,7 @@ const CSP = [
   "font-src 'self' data:",
   "connect-src 'self' https: wss: ws://127.0.0.1:*",
   "media-src 'self' blob: https:",
-  'frame-src https:',
+  'frame-src https: http://127.0.0.1:*',
   "object-src 'none'",
   "base-uri 'none'",
 ].join('; ');
