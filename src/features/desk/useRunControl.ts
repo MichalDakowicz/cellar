@@ -1,6 +1,7 @@
 import { randomUUID } from 'expo-crypto';
 import { useCallback, useRef, useState } from 'react';
 import { controlMessage, type RunControl } from '@/lib/deskDispatch';
+import { shouldRecoverControl } from '@/lib/deskControlRecovery';
 import { readError } from '@/lib/utils';
 import { useDeskControls } from '@/store/deskControls';
 import type { DeskLink } from './useDeskLink';
@@ -12,12 +13,17 @@ export function useRunControl(link: DeskLink, slot: string, connected: boolean) 
   const [error, setError] = useState<string | null>(null);
   const pending = !!saved && (!saved.receipt || ['pending', 'unknown'].includes(saved.receipt.state));
   const calls = link.calls; const via = link.via;
+  const hostId = link.info?.id ?? link.pair?.id;
   const submit = useCallback(async (input?: Omit<RunControl, 'commandId' | 'source'>) => {
     const saved = useDeskControls.getState().controls[key];
-    const pending = !!saved && (!saved.receipt || ['pending', 'unknown'].includes(saved.receipt.state));
+    const pending = shouldRecoverControl(saved, input?.action, hostId);
     if (!connected || locked.current || (!input && !saved) || !calls) return null;
     const request = pending || !input ? saved!.request : { ...input, commandId: randomUUID(), source: via === 'bridge' ? 'pc' as const : 'phone' as const };
     locked.current = true; setBusy(true); setError(null);
+    // Preserve the prior pending remote receipt before starting a distinct emergency stop.
+    if (saved && saved.request.commandId !== request.commandId && saved.receipt?.state === 'pending') {
+      useDeskControls.getState().save(`${key}:${saved.request.commandId}`, saved.request, saved.receipt);
+    }
     useDeskControls.getState().save(key, request, pending ? saved?.receipt : undefined);
     try {
       const old = pending || !input ? await calls.controlReceipt(request) : null;
@@ -26,7 +32,7 @@ export function useRunControl(link: DeskLink, slot: string, connected: boolean) 
       return { request, receipt };
     } catch (failure) { setError(`${readError(failure)} · reply missing; check the original receipt`); return null; }
     finally { locked.current = false; setBusy(false); }
-  }, [connected, key, calls, via]);
+  }, [connected, key, calls, via, hostId]);
   return { busy, pending, connected, saved, submit,
     message: error ?? (saved?.receipt ? controlMessage(saved.receipt) : pending ? 'Reply missing; check the original receipt.' : null) };
 }

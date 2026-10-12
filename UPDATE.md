@@ -71,6 +71,7 @@
 
 ### Fixed
 
+- Desk: stop new runs while another PC still has an earlier Stop all pending
 - Sign-in screen: continuing with an app that is already open now signs you in
 - The app icon, splash and web favicon are the same size as the other Ping apps
 

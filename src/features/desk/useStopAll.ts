@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRunControl } from './useRunControl';
+import { canStartNewStopAll } from '@/lib/deskControlRecovery';
 import type { DeskLink } from './useDeskLink';
 
 /** Account-wide command lives on the reachable host; remote hosts report separately. */
@@ -12,7 +13,7 @@ export function useStopAll(link: DeskLink, live: boolean) {
     const timer = setTimeout(() => { void submit(); }, 5000);
     return () => clearTimeout(timer);
   }, [connected, busy, saved, submit]);
-  return { busy: action.busy, pending: action.pending,
+  return { busy: action.busy, pending: action.pending && !canStartNewStopAll(saved?.receipt, link.info?.id ?? link.pair?.id),
     run: connected && !action.busy ? () => void action.submit({ action: 'stopAll', runId: null, scope: 'account' }) : null,
     message: action.message ?? (!connected ? 'Reconnect to an updated PC for Stop all across hosts.' : null),
     hosts: action.saved?.receipt?.hosts ?? [],
