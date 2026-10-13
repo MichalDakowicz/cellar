@@ -428,11 +428,17 @@ capture/chat/draft, light/dark styling and route scroll checks pass at the origi
 Windows path/profile; original theme restored. Verification boundaries and evidence:
 [w10-rebuild.md](w10-rebuild.md). No release or website publication performed.
 
-### W11 · keys search `[ ]`
+### W11 · keys search `[x]`
 
 `@` files from the run's worktree (changed first, `:42` line refs), `/` skills per agent (built
 in + the user's own skill folders), `$` commands from W2. One search used by phone and pc.
-Ready-to-paste task: [w11-prompt.md](w11-prompt.md). W11 has not started.
+Verified 2026-10-13 on dedicated `feat/desk-w11`, based on verified W10 `7b0fd4b`
+while PR #61 remains open/unmerged. Root 889 tests and desktop 83 tests, lint/types,
+independent web/Android/Windows builds and graph boundaries pass. Paired physical
+phone and preserved-profile desktop verify real file/line/skill/command search,
+insertion/focus, colour chips and disconnect/draft recovery. Browser retains its
+mailbox limits; host runs hidden in tray. Protected references unchanged. Exact
+live boundaries, artifact evidence and limitations: [w11-keys.md](w11-keys.md).
 
 ### W12 · previews and deploy `[ ]`
 

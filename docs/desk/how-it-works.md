@@ -13,7 +13,7 @@ adds behavior through the existing view models, host API and transports.
 | Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W12 |
 | Follow a run | W6/W7 synchronized events and saved history; W8 runtime approvals; W9 retained chats, queue/edit/cancel/Send now, single stop and account-wide Stop all | Restarted/legacy provider chats explain unavailability; offline host stops remain pending |
 | Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W14 |
-| Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W11) |
+| Commands and keys | W2 jobs/catalogue; W11 shared file/skill/command search, line previews, project/entry references and hex chips | Host sources require signed LAN or desktop IPC; browser retains mailbox limits. New-task files require a selected existing run |
 | Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W12), remote input or real phone panel (W19) |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
 | Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W13–W18 |
@@ -487,5 +487,27 @@ unverified live. NSIS was built; the existing unpacked reachable payload was
 refreshed and launched without running the installer. No release or web publication.
 
 Exact live run/receipt evidence, artifact hashes, visual comparison limits and
-reachable path are in [w10-rebuild.md](w10-rebuild.md). Keys search is next as W11:
-[w11-prompt.md](w11-prompt.md). W11 has not started; SSH remains deferred W21.
+reachable path are in [w10-rebuild.md](w10-rebuild.md). W11 keys search follows in
+[w11-keys.md](w11-keys.md); SSH remains deferred W21.
+
+## W11 — scoped keys search
+
+Phone and DOM desktop use shared pure token/search contracts over the existing
+authenticated host API. `@` searches the selected run's owned checkout/worktree,
+changed files first, with folders, quoted paths and line references. Read-only
+previews are bounded and recheck scope/path containment. `/` follows the installed
+agent's built-ins and configured home/project skill folders; `$` uses W2 commands
+alongside existing Cellar projects/entries. Selection inserts text without effects.
+
+Search lifetime guards hide mismatched scopes and drop late successes/failures.
+Unavailable sources, disconnection, unsupported browser transport and empty results
+are explicit. Width still selects layout only. No browser filesystem/process/IPC
+bridge, credential copying, provider lifecycle change or later wiring is added.
+Tray startup keeps the existing profile renderer as the only refresh-token owner.
+
+Root 889 tests and desktop 83 tests pass with lint/types. Standalone Android,
+controller web and independent Windows builds pass their graph checks. Native
+phone and preserved-profile desktop verify live file/skill/command suggestions,
+line preview, insertion/focus, colour chips and reconnect/draft retention. Current
+source tests retain W1–W10 regression coverage; exact live limits, artifact paths,
+protected hashes and browser/platform restrictions are in [w11-keys.md](w11-keys.md).
