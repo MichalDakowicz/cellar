@@ -44,6 +44,26 @@ presenters remain labelled and never execute later unwired features.
 
 Closing the window hides it to the tray; the phone can still reach the pc. Quit from the tray.
 
+Launch `Cellar.exe --tray` to keep the window hidden from startup. Its renderer still
+loads the existing profile and remains the only account refresh-token owner. The
+tray opens the normal desktop UI when needed. A second `--tray` launch hides an
+already-running window without creating another host.
+
+## Keys search (W11)
+
+Run and new-task composers share pure token/search contracts with the controllers.
+Signed LAN and local IPC call read-only `/keys-search` and `/keys-preview` endpoints.
+Files require an owned run and validated project checkout/worktree; changed files
+include untracked/working changes and commits since the merge base with local main.
+Ignored files and symlinks/junctions are excluded; previews are bounded text only.
+Skills read configured agent homes and project skill folders, without executing
+skills or returning their bodies. `$` uses the existing W2 command catalogue.
+
+Browser UI retains mailbox limitations and receives no local filesystem, process,
+IPC bridge or phone credentials. Background browser visual checks use the same DOM
+components with labelled fixtures; they do not authorize live local-host actions.
+Exact verification and limitations: [w11-keys.md](../docs/desk/w11-keys.md).
+
 ## Pairing
 
 On the pc: tray → **pair a phone**, or settings → this pc. The window shows a QR code.

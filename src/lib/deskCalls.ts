@@ -1,4 +1,5 @@
 import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
+import { readKeySearch, type KeySearchRequest, type KeyPreviewRequest } from './deskKeySearch';
 import { readDeskRuns } from '@/lib/deskRunSnapshot';
 import type { DeskCommandDefinition, DeskJobStart, DeskProjectCommands } from '@/lib/deskCommands';
 
@@ -42,6 +43,12 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { 
 
 export function deskCalls(send: DeskTransport, local = false) {
   return {
+    keys: async (request: KeySearchRequest) => readKeySearch(await send('POST', '/keys-search', request)),
+    keyPreview: async (request: KeyPreviewRequest) => {
+      const result = await send('POST', '/keys-preview', request) as { text?: unknown };
+      if (typeof result?.text !== 'string' || result.text.length > 5000) throw new Error('Invalid file preview.');
+      return result.text;
+    },
     control: async (request: RunControl) => readControlReceipt(((await send('POST', '/run-controls', request)) as { receipt: unknown }).receipt, request),
     controlReceipt: async (request: RunControl): Promise<ControlReceipt | null> => {
       const row = ((await send('GET', `/run-controls/${encodeURIComponent(request.commandId)}`)) as { receipt: unknown }).receipt;

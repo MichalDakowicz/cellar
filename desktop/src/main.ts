@@ -73,7 +73,11 @@ function registerIpc(desk: DeskHost): void {
   );
 }
 
-app.on('second-instance', () => window && showWindow(window));
+app.on('second-instance', (_event, commandLine) => {
+  if (!window) return;
+  if (commandLine.includes('--tray')) window.hide();
+  else showWindow(window);
+});
 
 let hostStopped = false;
 app.on('before-quit', (event) => {
@@ -101,7 +105,7 @@ void app.whenReady().then(async () => {
     console.error('cellar desk could not listen', error);
   }
   registerIpc(host);
-  window = createWindow({ dev, isQuitting: () => quitting, fromCellar });
+  window = createWindow({ dev, startHidden: process.argv.includes('--tray'), isQuitting: () => quitting, fromCellar });
   createTray(window, app.isPackaged, () => {
     quitting = true;
     app.quit();

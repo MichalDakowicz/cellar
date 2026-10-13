@@ -70,7 +70,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const folder = folders.find((candidate) => candidate.projectId === projectId) ?? null;
   const projectName = projects.find((candidate) => candidate.id === entry?.projectId)?.name;
   const projectCommands = jobs.projects.find((project) => project.id === projectId || (!!folder && repoKey(project.cwd) === repoKey(folder.path)));
-  const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id));
+  const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id), { link, projectId });
   const starts = taskStarts({
     typed: text,
     picks: attached.map((thought) => ({ entryId: thought.id, line: agentPrompt(thought, projectName) })),

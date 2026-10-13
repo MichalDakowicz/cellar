@@ -17,7 +17,10 @@ export type ComposerKeys = {
   list: KeyListView | null;
   plan: KeyPlanLine[];
   onKey: (key: DeskKey) => void;
-  onSelection: (end: number) => void;
+  onSelection: (end: number, start?: number) => void;
+  selection?: { start: number; end: number };
+  onEdit?: (text: string) => void;
+  onKeyboard?: (key: string) => boolean;
   onCopy: (code: string) => void;
   onNudge: (code: string, lighter: boolean) => void;
 };
@@ -43,6 +46,7 @@ export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, mode
   const [model, setModel] = useState(sampleModels?.models[0] ?? '');
   const [effort, setEffort] = useState(sampleModels?.efforts.at(-1) ?? '');
   const previousCount = useRef(0);
+  const field = useRef<TextInput>(null);
   useEffect(() => {
     if (queued.length > previousCount.current) setTray('queue');
     else if (!queued.length && previousCount.current && tray === 'queue') setTray(null);
@@ -65,16 +69,19 @@ export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, mode
           <Text className="font-sans text-xs text-muted-foreground">Model switching is not connected yet.</Text>
         </>}
       </ComposerTray>}
-      {keys.list && <KeyList list={keys.list} />}
+      {keys.list && <KeyList list={{ ...keys.list, onPick: (id) => { keys.list?.onPick(id); field.current?.focus(); } }} />}
       <View className="rounded-xl border border-composer-edge bg-composer">
         <TextInput
+          ref={field}
           className="font-sans max-h-[124px] min-h-[52px] w-full px-3 pb-1 pt-3 text-sm text-foreground"
           style={[{ lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS]}
           placeholder="Message…"
           placeholderTextColor={COLORS.muted}
           value={draft}
-          onChangeText={onDraft}
-          onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end)}
+          onChangeText={keys.onEdit ?? onDraft}
+          selection={keys.selection}
+          onKeyPress={(event) => { if (keys.onKeyboard?.(event.nativeEvent.key)) event.preventDefault(); }}
+          onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end, nativeEvent.selection.start)}
           multiline
           accessibilityLabel="message for the agent"
         />

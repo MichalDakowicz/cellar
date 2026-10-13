@@ -29,15 +29,17 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
         placeholder="Describe a task…"
         placeholderTextColor={COLORS.muted}
         value={text}
-        onChangeText={onText}
-        onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end)}
+        onChangeText={keys.onEdit ?? onText}
+        selection={keys.selection}
+        onKeyPress={(event) => { if (keys.onKeyboard?.(event.nativeEvent.key)) event.preventDefault(); }}
+        onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end, nativeEvent.selection.start)}
         multiline
         autoFocus
         accessibilityLabel="what the agent should do"
       />
       {keys.list && (
         <View className="w-full">
-          <KeyList list={keys.list} />
+          <KeyList list={{ ...keys.list, onPick: (id) => { keys.list?.onPick(id); field.current?.focus(); } }} />
         </View>
       )}
       <View className="flex-row items-center gap-5">

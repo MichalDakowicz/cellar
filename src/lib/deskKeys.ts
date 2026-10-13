@@ -6,8 +6,7 @@ import { splitHex } from './hexChips';
  * phone and the pc, so both list the same things in the same order.
  *
  * Pure. The sources are handed in: `$` projects and entries are the cellar's
- * own, while files, skills and commands come from the sample desk until the pc
- * can search them (docs/desk/TASKS.md W2, W10).
+ * own; W11 supplies host-scoped files, skills and W2 commands.
  */
 
 export type DeskKey = '@' | '$' | '/';
@@ -20,7 +19,7 @@ export type KeySources = {
   entries: { id: string; projectId: string | null; text: string; kind: string; state: string; archived: boolean }[];
   commands: string[];
   files: { path: string; changed: boolean }[];
-  skills: { name: string; detail: string }[];
+  skills: { name: string; detail: string; description?: string }[];
 };
 
 export type KeySuggestion = {
@@ -47,6 +46,11 @@ export function keySlug(text: string, words = 6): string {
 
 /** The key word the caret is in, from the last space to the next one. */
 export function tokenAt(text: string, caret = text.length): KeyToken | null {
+  for (const match of text.matchAll(/(?:^|\s)@"([^"\r\n]*)"?(:\d*)?/g)) {
+    const start = match.index! + (match[0].startsWith('@') ? 0 : 1);
+    const end = match.index! + match[0].length;
+    if (caret > start && caret <= end) return { key: '@', query: `${match[1]}${match[2] ?? ''}`, start, end };
+  }
   const before = text.slice(0, caret);
   const start = before.search(/\S*$/);
   const word = before.slice(start);
@@ -127,11 +131,11 @@ function at(query: string, sources: KeySources): KeySuggestion[] {
     .slice(0, LIMIT)
     .map((file) => ({
       id: `file:${file.path}`,
-      insert: `@${file.path}${line}`,
-      label: `@${file.path}${line}`,
+      insert: `@${/\s/.test(file.path) ? `"${file.path}"` : file.path}${file.path.endsWith('/') ? '' : line}`,
+      label: `@${file.path}${file.path.endsWith('/') ? '' : line}`,
       detail: file.changed ? 'changed' : '',
       mono: true,
-      keepOpen: false,
+      keepOpen: file.path.endsWith('/'),
       group: file.changed ? 'changed in this run' : 'in the worktree',
     }));
 }
@@ -139,10 +143,10 @@ function at(query: string, sources: KeySources): KeySuggestion[] {
 function slash(query: string, sources: KeySources): KeySuggestion[] {
   const q = query.toLowerCase();
   return sources.skills
-    .filter((skill) => skill.name.includes(q))
+    .filter((skill) => skill.name.toLowerCase().includes(q))
     .sort((a, b) => Number(b.name.startsWith(q)) - Number(a.name.startsWith(q)))
     .slice(0, LIMIT)
-    .map((skill) => ({ id: `skill:${skill.name}`, insert: `/${skill.name}`, label: `/${skill.name}`, detail: '', mono: true, keepOpen: false, group: skill.detail }));
+    .map((skill) => ({ id: `skill:${skill.name}`, insert: `/${skill.name}`, label: `/${skill.name}`, detail: skill.description ?? '', mono: true, keepOpen: false, group: skill.detail }));
 }
 
 export function keySuggestions(token: KeyToken, sources: KeySources): KeySuggestion[] {
@@ -162,7 +166,7 @@ export function applySuggestion(text: string, token: KeyToken, pick: KeySuggesti
 /** One line of "what this will do", for each key word and colour in the message. */
 export type KeyPlanLine = { key: DeskKey | '#'; token: string; says: string };
 
-const WORD_RE = /(?<!\S)([@$/])(\S+)/g;
+const WORD_RE = /(?<!\S)([@$/])("[^"\r\n]+"(?::\d+)?|\S+)/g;
 
 function trimWord(word: string): string {
   return word.replace(/[.,;!?)]+$/, '').replace(/:$/, '');

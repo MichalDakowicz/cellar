@@ -20,6 +20,7 @@ export function appCapabilities(role: AppRole, via: DeskVia, info: DeskInfo | nu
     local: direct && role === 'phone-controller',
     pages: direct && advertised?.previews === true,
     commands: direct && advertised?.commands === true,
+    keys: direct && info?.keysProtocol === 1,
     screen: direct && advertised?.screen === true,
     downloads: direct && advertised?.downloads === true,
     worktrees: direct && info?.worktrees === true,

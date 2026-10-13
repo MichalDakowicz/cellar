@@ -19,7 +19,7 @@ export function Search({ cellar }: { cellar: Cellar }) {
         entries={query.trim() ? searchEntries(cellar.entries, query) : []}
       />
       <p className="muted">
-        Composer file/skill search remains unavailable until W11.
+        Type @, $ or / in a run composer for scoped files, commands and skills.
       </p>
     </div>
   );

@@ -89,6 +89,11 @@ export class Runs {
     renameSync(`${this.file}.tmp`, this.file);
     this.onChange();
   }
+  /** Historical external/ownerless sessions cannot authorize filesystem search. */
+  ownedForSearch(id: string, owner: string) {
+    const row = this.records.find((record) => record.id === id && record.owner === owner);
+    return row?.projectId ? { ...row } : null;
+  }
 
   async start(start: DeskStart & { branch?: string }): Promise<DeskRun> {
     const plan = spawnPlan(start);

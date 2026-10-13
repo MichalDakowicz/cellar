@@ -91,6 +91,7 @@ export function sampleData(phase: string, populated = false) {
       local: false,
       pages: false,
       commands: false,
+      keys: false,
       screen: false,
       downloads: false,
       worktrees: false,

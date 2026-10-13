@@ -1,5 +1,16 @@
 # Update notes
 
+## 1.14.0 — Unreleased
+
+### Added
+
+- Desk: search owned run files, installed agent skills and project commands with @, / and $
+- Desk: preview file lines and insert references with keyboard or touch
+
+### Changed
+
+- Desktop: start in the tray with --tray while keeping the paired host reachable
+
 ## 1.13.0 — Unreleased
 
 ### Changed

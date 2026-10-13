@@ -123,6 +123,7 @@ export function SampleChat({
           </div>
         ) : (
           <Composer
+            cellar={cellar}
             host={host}
             runId={runId}
             previewQueue={page === "queue" ? queue : []}

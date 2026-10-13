@@ -1,0 +1,7 @@
+.key-results { border: 1px solid hsl(var(--border)); border-radius: 16px; padding: 6px; background: hsl(var(--card)); max-height: 240px; overflow: auto; min-width: 0; }
+.key-results p, .key-results > small { padding: 6px 10px; }
+.key-result { display: flex; align-items: center; gap: 10px; min-height: 44px; width: 100%; border: 0; border-radius: 10px; padding: 8px 10px; text-align: left; }
+.key-result > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key-result > small { max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key-result.selected { background: hsl(var(--secondary)); }
+.key-preview { white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px 10px; font-size: 11px; }

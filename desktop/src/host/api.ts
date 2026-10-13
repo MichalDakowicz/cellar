@@ -1,4 +1,6 @@
 import type { RunEvents } from './runEvents.ts';
+import { searchKeys } from './keySearch.ts';
+import { previewKey } from './keyPreview.ts';
 import type { Approvals } from './approvals.ts';
 import type { Controls } from './controls.ts';
 import { realpathSync, statSync } from 'node:fs';
@@ -80,6 +82,7 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     ...(deps.events ? { eventProtocol: 1 as const } : {}),
     ...(deps.approvals ? { approvalProtocol: 1 as const } : {}),
     ...(deps.controls ? { dispatchProtocol: 1 as const } : {}),
+    keysProtocol: 1,
   };
 }
 
@@ -150,6 +153,10 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
   const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'POST /keys-search':
+        return ok(await searchKeys(deps, req.body));
+      case 'POST /keys-preview':
+        return ok(await previewKey(deps, req.body));
       case 'POST /run-controls':
         if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
         return ok({ receipt: await deps.controls.run(req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });

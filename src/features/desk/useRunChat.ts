@@ -74,7 +74,7 @@ export function useRunChat(id: string) {
   const canRunCommand = !!command && draft.trim() === `$${command}` && !!projectId && !!link.calls && !jobs.start.isPending;
   const saveText = /^\/save-command\s+(.+)$/s.exec(draft.trim())?.[1];
   const canSaveCommand = !!saveText && !!projectCommands && !!link.calls && !jobs.save.isPending;
-  const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id));
+  const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id), { link, projectId, runId: run?.id, sample: !!sample });
 
   const synchronized = stream.live && stream.state.runId === id;
   const delivery = useRunDispatch(link, id, synchronized && !sample, draft, setDraft);
