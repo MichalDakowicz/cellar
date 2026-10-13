@@ -11,6 +11,7 @@ import { Overline, Segmented, SwitchRow } from '@/components/ui/controls';
 import { useQuestionNotices } from '@/features/notifications/useQuestionNotices';
 import { AgentAccess } from '@/features/settings/AgentAccess';
 import { AgentTokens } from '@/features/settings/AgentTokens';
+import { DeskSettings } from '@/features/settings/DeskSettings';
 import { DisplaySettings } from '@/features/settings/DisplaySettings';
 import { NudgeSettings } from '@/features/settings/NudgeSettings';
 import { QrLoginControl } from '@/features/auth/qr/QrLoginControl';
@@ -148,6 +149,8 @@ export default function Settings() {
               shared with radar, lidar, sonar and pulsar — picking light here picks light there.
             </Text>
           </View>
+
+          <DeskSettings gutter={gutter} />
 
           <AgentAccess gutter={gutter} />
 

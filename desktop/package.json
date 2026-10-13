@@ -1,0 +1,40 @@
+{
+  "name": "cellar-desktop",
+  "productName": "Cellar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cellar on the pc: the app in a window, and the side of it the phone talks to — start agents, open the pc's local pages and screen, drop builds to install.",
+  "main": "build/main.js",
+  "scripts": {
+    "web": "npm --prefix .. run build:web",
+    "build": "node build.mjs",
+    "start": "node build.mjs && electron .",
+    "dev": "node build.mjs && electron . --dev",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "dist": "npm run web && node build.mjs && electron-builder --win --x64"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.20.6",
+    "typescript": "~6.0.3"
+  },
+  "build": {
+    "appId": "com.michaldakowicz.cellar.desktop",
+    "productName": "Cellar",
+    "directories": { "output": "release" },
+    "files": ["build/**", "package.json"],
+    "extraResources": [
+      { "from": "../dist", "to": "web" },
+      { "from": "../assets/images/icon.png", "to": "icon.png" }
+    ],
+    "win": { "target": ["nsis"], "icon": "../assets/images/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}

@@ -117,6 +117,8 @@ export function useEntryScreen(entryId: string | undefined) {
      * rather than in the route, because a screen composes (PING.md §13).
      */
     links,
+    /** The project it is filed under, null in the inbox — where "start on pc" runs it. */
+    project,
     projectName,
     stamp: entry ? dropStamp(entry.createdAt) : '',
     thread: yours,

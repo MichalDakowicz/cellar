@@ -46,6 +46,8 @@ Six tables, all namespaced, all with RLS keyed to `auth.uid()`:
 | `cellar_entry_lines` | the lines appended to an entry afterwards |
 | `cellar_settings` | Cellar-only preferences (gutter codes, raw default, default kind and view) |
 | `cellar_agent_tokens` | hashed tokens a hosted agent presents instead of signing in |
+| `cellar_desks` | the desktop app's heartbeat: where it is on the LAN, its agents, what it runs |
+| `cellar_desk_requests` | a start or stop sent to the pc through the cellar, claimed once by the pc |
 
 ## Cellar is private, and that is a design decision
 

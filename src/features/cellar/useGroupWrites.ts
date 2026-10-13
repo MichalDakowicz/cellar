@@ -1,7 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
-import { createGroup, deleteGroup, renameGroup, setGroupPinned, setProjectGroup } from '@/features/cellar/groupApi';
+import {
+  createGroup,
+  deleteGroup,
+  renameGroup,
+  setGroupFolder,
+  setGroupPinned,
+  setProjectGroup,
+} from '@/features/cellar/groupApi';
 import { GROUPS_KEY, PROJECTS_KEY } from '@/lib/cellarKeys';
 
 /**
@@ -35,7 +42,11 @@ export function useGroupWrites() {
     mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => setGroupPinned(id, pinned),
     onSuccess: refresh,
   });
+  const placeGroup = useMutation({
+    mutationFn: ({ id, repoPath }: { id: string; repoPath: string | null }) => setGroupFolder(id, repoPath),
+    onSuccess: refresh,
+  });
   const removeGroup = useMutation({ mutationFn: (id: string) => deleteGroup(id), onSuccess: refresh });
 
-  return { addGroup, groupProject, editGroup, pinGroup, removeGroup };
+  return { addGroup, groupProject, editGroup, pinGroup, placeGroup, removeGroup };
 }
