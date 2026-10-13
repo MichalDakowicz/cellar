@@ -38,7 +38,7 @@ tokens and assets cross their boundary.
 
 The packaged renderer retains `cellar-desk://app`, existing profile/auth storage and MMKV
 web preference namespaces. It alone refreshes the account session; main receives only
-an access token and user ID. IPC accepts only this window’s top-level renderer.
+an access token and user ID. IPC accepts only this windowâ€™s top-level renderer.
 Development `?sample=1` fixtures are isolated from account operations; production sample
 presenters remain labelled and never execute later unwired features.
 
@@ -153,7 +153,7 @@ and fixture boundaries are recorded in [`how-it-works.md` W9](../docs/desk/how-i
 Claude remains fixture-only.
 
 W10 implements the independent renderer and controller extraction described in
-[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence and remaining
-verification are tracked in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is
+[`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence is recorded
+in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is
 W11 and remains outside this migration. Windows packaging is exercised here; existing
 host platform interfaces remain available for future macOS/Linux adapters.

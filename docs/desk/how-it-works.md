@@ -455,3 +455,37 @@ hashes. This pass builds local web; website publication remains outside the requ
 scope. W10 is next: the desktop renderer/controller rebuild described in
 [desktop-rebuild.md](desktop-rebuild.md). Keys search follows as W11; this completed
 W9 build still uses the shared web export.
+
+## W10 — independent desktop and controllers
+
+Verified 2026-10-13. Mobile remains React Native/Expo; web remains a responsive
+controller. Their entry graphs no longer import local IPC/session handoff, host
+pairing issuance, receiver settings/routes or ADB presenters. Explicit app role and
+advertised host capabilities determine access; width selects layout. Browser keeps
+its authenticated mailbox limitations and receives no local bridge or phone key.
+
+The existing Electron/TypeScript/Node host now loads its own React DOM/Vite/CSS
+renderer. Root Expo export is not used in desktop builds or packaging. Pure
+contracts/domain/view models/tokens stay shared; platform component trees, auth,
+navigation and storage stay separate. Existing Cellar/Desk screens, settings and
+device presenters are ported; unwired later features stay sample/unavailable.
+
+The installed payload retains the original `cellar-desk` origin, app/profile identity,
+single refresh-token owner, host ID, pairing keys, SQLite stores, history/cursors,
+drafts, durable UUID controls and worktree ownership. Real physical-phone and
+preserved-profile desktop checks repeat approvals, queue edit/cancel/promotion,
+interrupt-before-delivery, Stop all, owned process containment, offline pending and
+restart unknown/no-replay behavior. Final native capture/chat/draft and light/dark
+checks pass; original theme restored. No reset, uninstall or firewall changes.
+
+Root 90 suites/883 tests and desktop 76 tests, lint/types, JDK 21 Android release,
+controller web and independent Windows x64/NSIS builds pass. Actual controller
+maps contain zero local-host imports; desktop graph/ASAR contain no Expo Router or
+mobile screen tree. All 36 protected references retain their initial hashes.
+Claude remains fixture-only; two online physical hosts and macOS/Linux remain
+unverified live. NSIS was built; the existing unpacked reachable payload was
+refreshed and launched without running the installer. No release or web publication.
+
+Exact live run/receipt evidence, artifact hashes, visual comparison limits and
+reachable path are in [w10-rebuild.md](w10-rebuild.md). Keys search is next as W11:
+[w11-prompt.md](w11-prompt.md). W11 has not started; SSH remains deferred W21.

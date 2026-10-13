@@ -397,7 +397,7 @@ Physical two-online-host behavior remains fixture coverage; Claude stays fixture
 Protected canvas/spec hashes unchanged. See `how-it-works.md` W9 and `w9-resume.md`.
 Controller/desktop rebuild is the next task, W10; it is not part of completed W9.
 
-### W10 · separate controller and desktop apps `[~]`
+### W10 · separate controller and desktop apps `[x]`
 
 Implement [desktop-rebuild.md](desktop-rebuild.md) before wiring more features. Mobile
 and web remain controllers; desktop keeps the existing Electron/TypeScript host and
@@ -419,18 +419,20 @@ on phone and the existing reachable desktop path. Claude remains fixture-only; c
 T3 for lifecycle changes. Complete and verify this rebuild before W11 keys search.
 Ready-to-paste task: [w10-prompt.md](w10-prompt.md).
 
-Implementation checkpoint (2026-10-13): independent DOM renderer/package and
+Verified complete (2026-10-13): independent DOM renderer/package and
 controller graph extraction are installed. Root 883 tests and desktop 76 tests,
 lint/types, actual artifact boundaries and protected hashes pass. Physical phone
 and preserved-profile desktop pass live Codex approvals, queue revision/edit/cancel/
-promotion, Stop all, process containment and crash/no-replay checks. Final packaged
-visual confirmation was interrupted by Escape; W10 stays in progress until that
-check is resumed. Evidence and exact remaining step: [w10-rebuild.md](w10-rebuild.md).
+promotion, Stop all, process containment and crash/no-replay checks. Final native
+capture/chat/draft, light/dark styling and route scroll checks pass at the original
+Windows path/profile; original theme restored. Verification boundaries and evidence:
+[w10-rebuild.md](w10-rebuild.md). No release or website publication performed.
 
 ### W11 · keys search `[ ]`
 
 `@` files from the run's worktree (changed first, `:42` line refs), `/` skills per agent (built
 in + the user's own skill folders), `$` commands from W2. One search used by phone and pc.
+Ready-to-paste task: [w11-prompt.md](w11-prompt.md). W11 has not started.
 
 ### W12 · previews and deploy `[ ]`
 

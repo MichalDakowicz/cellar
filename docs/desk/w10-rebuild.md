@@ -1,8 +1,8 @@
 # W10 rebuild — implementation and verification record
 
 Started from completed W9 at `2c3df94` on dedicated branch `feat/desk-w10`.
-W10 remains in progress pending final visual confirmation after Computer Use was
-stopped with Escape on 2026-10-13. Implementation, packaging and live W9 regression
+W10 verified complete on 2026-10-13. Implementation, independent packaging,
+preserved-profile migration, final native visual checks and live W9 regression
 checks below pass. W11 keys search has not started. No release or web publication
 is part of this task.
 
@@ -127,12 +127,20 @@ unchanged. Samples are presentation data: their IDs never subscribe to a provide
 and their commands/approvals/message delivery cannot execute. Unreadable preference
 envelopes show a recovery error without resetting saved records.
 
-## Remaining acceptance
+## Final packaged visual acceptance
 
-Computer Use was stopped with physical Escape during the final packaged-window
-check on 2026-10-13. No further UI actions were issued that turn. The final host is
-running and signed in at the original path; the artifact/profile checks above pass.
-Resume native visual inspection of capture/chat, the restored draft and dark/light
-scrollbars, then close the acceptance ledger. Final polish after live checks affects
-scrollbar styling and sample run labels/IDs only; provider semantics are unchanged.
-W10 remains unchecked until this last confirmation. Do not start W11 yet.
+After an Escape interruption, the user resumed Computer Use on 2026-10-13. The
+installed app at the documented path showed the original account/data/shelf and
+restored desktop draft, with synchronized host, unknown restarted run and unreplayed
+queue. Dark chat and light capture/settings were inspected; original dark theme
+was restored. Native proof screenshots are `native-final-chat-dark.jpg`,
+`native-final-capture-light.jpg` and `native-final-home-dark.jpg` in the QA folder.
+
+This pass found settings scroll carrying into Home. The main workspace now resets
+scroll when the route changes; chat's internal transcript follow behavior remains
+independent. The final Windows package was refreshed at the existing path, reloaded,
+and verified by scrolling settings then returning to Home: header and stop receipts
+remain visible at the top. Root/desktop tests, lint and types pass after this fix.
+Other final polish affects scrollbar styling and sample run labels/IDs only;
+provider semantics are unchanged. W10 acceptance is closed. W11 may start separately
+using [w11-prompt.md](w11-prompt.md), after normal branch triage.

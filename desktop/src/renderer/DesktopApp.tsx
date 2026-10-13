@@ -1,7 +1,7 @@
 import { LaterDesk } from "./LaterDesk";
 import { Share } from "./Share";
 import { Notifications } from "./Notifications";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useHost } from "./useHost";
 import { useCellar } from "./useCellar";
 import { useRoute, navigate } from "./useRoute";
@@ -42,6 +42,10 @@ export function DesktopApp({
 }) {
   const prefs = useAccountPreferences();
   const path = useRoute();
+  const workspace = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    workspace.current?.scrollTo({ top: 0, left: 0 });
+  }, [path]);
   const firstRoute = useRef(path === "/");
   useEffect(() => {
     if (prefs.loading || !firstRoute.current) return;
@@ -188,7 +192,7 @@ export function DesktopApp({
           name={profile.name}
           avatar={profile.avatar}
         />
-        <main className="workspace" aria-label="Cellar desktop">
+        <main ref={workspace} className="workspace" aria-label="Cellar desktop">
           {prefs.error && (
             <div className="data-error" role="status">
               Settings failed · {prefs.error}

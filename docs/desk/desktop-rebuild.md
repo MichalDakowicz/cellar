@@ -5,7 +5,7 @@ desktop host, with the web app remaining another controller. Windows comes first
 keep macOS/Linux practical. The user scheduled this rebuild as **W10**, immediately
 after completed W9, so fewer later features need moving. Keys search becomes W11;
 remaining tasks shift forward by one. W10 implementation and independent packaging
-are in place; final acceptance is tracked in [w10-rebuild.md](w10-rebuild.md).
+are verified; acceptance evidence is recorded in [w10-rebuild.md](w10-rebuild.md).
 The accepted Cellar appearance remains the visual contract.
 
 ## Technology choice

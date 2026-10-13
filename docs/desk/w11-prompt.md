@@ -6,6 +6,8 @@ Use only after W10's acceptance ledger is closed and TASKS.md marks W10 complete
 Continue Cellar W11 in C:\ping\cellar. Follow CLAUDE.md branch triage and use a
 feature branch dedicated to W11. First confirm W10 is verified in TASKS.md and
 w10-rebuild.md; if acceptance remains pending, finish W10 before starting keys work.
+Start from verified W10 code. If its PR is still open, use W10 as the branch base;
+do not merge that PR or reuse the W10 feature branch for W11.
 
 Read docs/desk/TASKS.md, how-it-works.md, keys.md, screens.md, visual-clone.md,
 t3code-notes.md, desktop-rebuild.md, w10-rebuild.md, relevant accepted Keys/Run/
