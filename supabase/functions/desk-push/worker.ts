@@ -2,16 +2,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { questionNote } from '@/lib/deskNotify';
 import { notificationTarget, DEFAULT_PINGS, type NoticePayload, type PingPreferences } from '../../../src/lib/deskNotificationRouting.ts';
 import { pushWake } from './fcm.ts';
+import { readAll } from './scan.ts';
 
 export async function work(client: SupabaseClient) {
   const now = Date.now();
-  const questions = await client.from('cellar_entry_questions').select('id,user_id,entry_id,question,options,agent,created_at').is('answered_at', null).is('dismissed_at', null).order('created_at').limit(500);
+  const questions = await readAll(client, 'cellar_entry_questions', 'id,user_id,entry_id,question,options,agent,created_at', true);
   if (questions.error) throw questions.error;
-  if (questions.data?.length === 500) throw new Error('Question backlog exceeds this worker page; refusing incomplete reconciliation.');
-  const existing = await client.from('cellar_notices').select('*').limit(2000);
+  questions.data.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+  const existing = await readAll(client, 'cellar_notices');
   if (existing.error) throw existing.error;
-  if (existing.data?.length === 2000) throw new Error('Notification backlog exceeds this worker page; refusing incomplete reconciliation.');
-  const desks = await client.from('cellar_desks').select('id,user_id,name,runs,seen_at');
+  const desks = await readAll(client, 'cellar_desks', 'id,user_id,name,runs,seen_at');
   if (desks.error) throw desks.error;
   const updates = new Map<string, { owner: string; id: string; payload: NoticePayload }>();
   for (const q of questions.data ?? []) {
@@ -34,8 +34,8 @@ export async function work(client: SupabaseClient) {
     const result = await client.rpc('cellar_publish_notice', { p_owner: u.owner, p_id: u.id, p_payload: u.payload }); if (result.error) throw result.error;
   }
   const [notes, devices, preferences, settings] = await Promise.all([
-    client.from('cellar_notices').select('*').limit(2000), client.from('cellar_notice_devices').select('*'),
-    client.from('cellar_notice_preferences').select('*'), client.from('cellar_settings').select('user_id,notify_questions'),
+    readAll(client, 'cellar_notices'), readAll(client, 'cellar_notice_devices'),
+    readAll(client, 'cellar_notice_preferences'), readAll(client, 'cellar_settings', 'user_id,notify_questions'),
   ]);
   for (const result of [notes, devices, preferences, settings]) if (result.error) throw result.error;
   let sent = 0;
