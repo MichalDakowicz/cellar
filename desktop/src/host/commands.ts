@@ -7,7 +7,7 @@ import type { Account } from './account.ts';
 import { DeskError } from './claudeRuns.ts';
 
 export type CommandProject = { projectId: string; name: string; path: string };
-export type CommandPlan = { cwd: string; gradle: string | null; steps: DeskCommandDefinition['steps'] };
+export type CommandPlan = { cwd: string; gradle: string | null; steps: DeskCommandDefinition['steps']; projectId?: string; args?: string[]; env?: Record<string, string> };
 
 export class Commands {
   private readonly file: string;
@@ -56,15 +56,16 @@ export class Commands {
     });
   }
 
-  async plan(projectId: string, commandId: string): Promise<CommandPlan> {
-    const found = this.read(await this.project(projectId));
+  async plan(projectId: string, commandId: string, validatedCwd?: string): Promise<CommandPlan> {
+    const project = await this.project(projectId);
+    const found = this.read(validatedCwd ? { ...project, path: validatedCwd } : project);
     const command = found.definitions.find((candidate) => candidate.id === commandId);
     if (!command) throw new DeskError('no command by that name in this project', 404);
     for (const step of command.steps) {
       if (step.runner === 'npm' && typeof found.scripts[step.task] !== 'string') throw new DeskError(`npm script ${step.task} is missing`, 409);
       if (step.runner === 'gradle' && !found.gradle) throw new DeskError('this project has no Gradle wrapper', 409);
     }
-    return { cwd: found.cwd, gradle: found.gradle, steps: command.steps };
+    return { cwd: found.cwd, gradle: found.gradle, steps: command.steps, projectId };
   }
 
   async save(projectId: string, raw: unknown): Promise<void> {

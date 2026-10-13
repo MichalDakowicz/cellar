@@ -27,7 +27,7 @@ export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, ou
   if (step.runner === 'npm') {
     const cli = await npmCli();
     executable = process.execPath;
-    args = [cli, 'run', step.task, '--'];
+    args = [cli, 'run', step.task, '--', ...(plan.args ?? [])];
   } else {
     if (!plan.gradle) throw new DeskError('no Gradle wrapper', 409);
     cwd = plan.gradle;
@@ -46,7 +46,7 @@ export async function launchJobStep(plan: CommandPlan, step: DeskCommandStep, ou
   // silently exit. POSIX still needs a process group for stopping the tree.
   const child = spawn(executable, args, { cwd, detached: process.platform !== 'win32', windowsHide: true,
     windowsVerbatimArguments: step.runner === 'gradle' && process.platform === 'win32',
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: ['ignore', 'pipe', 'pipe'] });
+    env: { ...process.env, ...plan.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout!.on('data', output);
   child.stderr!.on('data', output);
   await new Promise<void>((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); });

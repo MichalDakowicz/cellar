@@ -32,3 +32,15 @@ export function pickLanAddress(interfaces: Record<string, NetworkInterfaceInfo[]
   candidates.sort((a, b) => a.rank - b.rank);
   return candidates[0]?.address ?? null;
 }
+
+/** Only a named Tailscale adapter in its CGNAT range is advertised as a tailnet. */
+export function pickTailnetAddress(interfaces: Record<string, NetworkInterfaceInfo[] | undefined>): string | null {
+  for (const [name, infos] of Object.entries(interfaces)) {
+    if (!/tailscale/i.test(name)) continue;
+    for (const info of infos ?? []) {
+      const parts = info.address.split('.').map(Number);
+      if (info.family === 'IPv4' && !info.internal && parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return info.address;
+    }
+  }
+  return null;
+}

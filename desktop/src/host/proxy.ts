@@ -19,8 +19,9 @@ import { viewCookie, withoutViewCookie, type Tickets } from './tickets.ts';
 
 export class Proxies {
   private readonly servers = new Map<number, Promise<number>>();
+  private readonly listeners = new Set<Server>();
 
-  constructor(private readonly tickets: Tickets) {}
+  constructor(private readonly tickets: Tickets, private readonly onOpened: (port: number) => void = () => {}) {}
 
   /** The LAN port that shows `target`, opened on first use. */
   open(target: number): Promise<number> {
@@ -54,6 +55,7 @@ export class Proxies {
           headers: rewrite(req, target),
         },
         (answer) => {
+          if (req.method === 'GET' && (answer.statusCode ?? 500) < 400 && req.headers['sec-fetch-dest'] !== 'script') this.onOpened(target);
           res.writeHead(answer.statusCode ?? 502, answer.headers);
           answer.pipe(res);
         },
@@ -64,6 +66,7 @@ export class Proxies {
       });
       req.pipe(upstream);
     });
+    this.listeners.add(server);
 
     server.on('upgrade', (req: IncomingMessage, socket: Socket, head: Buffer) => {
       if (!this.tickets.validSession(viewCookie(req.headers.cookie), req.socket.remoteAddress ?? '')) {
@@ -91,6 +94,7 @@ export class Proxies {
       });
     });
   }
+  close() { for (const server of this.listeners) { server.closeAllConnections(); server.close(); } this.listeners.clear(); this.servers.clear(); }
 }
 
 function rewrite(req: IncomingMessage, target: number): Record<string, string | string[] | undefined> {
