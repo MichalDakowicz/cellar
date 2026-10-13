@@ -21,10 +21,13 @@ export type QuestionThreadProps = {
   pending: QuestionView[];
   settled: QuestionView[];
   onDraft: (id: string, text: string) => void;
-  onPick: (id: string, option: string) => void;
-  onHold: (id: string, option: string) => void;
-  onSendHeld: (id: string) => void;
+  onToggle: (id: string, option: string) => void;
+  onSeveral: (id: string) => void;
+  onOpenNote: (id: string) => void;
+  onNote: (id: string, note: string) => void;
+  onAnswer: (id: string) => void;
   onSubmit: (id: string) => void;
+  onLetDecide: (id: string) => void;
   onDismiss: (view: QuestionView) => void;
 };
 
@@ -32,10 +35,13 @@ export function QuestionThread({
   pending,
   settled,
   onDraft,
-  onPick,
-  onHold,
-  onSendHeld,
+  onToggle,
+  onSeveral,
+  onOpenNote,
+  onNote,
+  onAnswer,
   onSubmit,
+  onLetDecide,
   onDismiss,
 }: QuestionThreadProps) {
   if (pending.length === 0 && settled.length === 0) return null;
@@ -46,17 +52,25 @@ export function QuestionThread({
       question={view.question.question}
       options={view.question.options}
       answer={view.question.answer}
+      answerPicks={view.question.answerPicks}
+      sending={view.sending}
+      error={view.error}
       answeredVia={view.question.answeredVia}
       status={view.status}
       agent={view.question.agent}
       rel={view.rel}
       draft={view.draft}
-      held={view.held}
+      picked={view.picked}
+      several={view.several}
+      note={view.note}
       onDraft={(text) => onDraft(view.question.id, text)}
-      onPick={(option) => onPick(view.question.id, option)}
-      onHold={(option) => onHold(view.question.id, option)}
-      onSendHeld={() => onSendHeld(view.question.id)}
+      onToggle={(option) => onToggle(view.question.id, option)}
+      onSeveral={() => onSeveral(view.question.id)}
+      onOpenNote={() => onOpenNote(view.question.id)}
+      onNote={(text) => onNote(view.question.id, text)}
+      onAnswer={() => onAnswer(view.question.id)}
       onSubmit={() => onSubmit(view.question.id)}
+      onLetDecide={() => onLetDecide(view.question.id)}
       onDismiss={() => onDismiss(view)}
     />
   );

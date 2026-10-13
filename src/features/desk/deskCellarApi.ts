@@ -1,5 +1,8 @@
 import type { DeskAgent, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { supabase } from '@/lib/supabase';
+import { readDeskRuns } from '@/lib/deskRunSnapshot';
+import type { DeskReceipt } from '@/lib/deskReceipt';
+import { DeskRefusal } from './deskClient';
 
 /**
  * The pc through the cellar, for when it is not on this network: its
@@ -13,14 +16,15 @@ export type DeskRow = {
   host: string | null;
   port: number | null;
   agents: DeskAgent[];
-  runs: DeskRun[];
+  runs: DeskRun[] | null;
   seenAt: string;
+  taskProtocol?: number | null;
 };
 
 export async function fetchDesks(): Promise<DeskRow[]> {
   const { data, error } = await supabase
     .from('cellar_desks')
-    .select('id, name, host, port, agents, runs, seen_at')
+    .select('*')
     .order('seen_at', { ascending: false });
   if (error) throw error;
   return (data ?? []).map((row) => ({
@@ -29,17 +33,18 @@ export async function fetchDesks(): Promise<DeskRow[]> {
     host: (row.host as string | null) ?? null,
     port: (row.port as number | null) ?? null,
     agents: (row.agents as DeskAgent[] | null) ?? [],
-    runs: Array.isArray(row.runs) ? (row.runs as DeskRun[]) : [],
+    runs: readDeskRuns(row.runs),
     seenAt: row.seen_at as string,
+    taskProtocol: row.task_protocol as number | null,
   }));
 }
 
-type RequestState = { state: 'queued' | 'taken' | 'done' | 'failed'; error: string | null; runId: string | null };
+type RequestState = { state: 'queued' | 'taken' | 'done' | 'failed'; error: string | null; runId: string | null; receipt: DeskReceipt | null };
 
 async function readRequest(id: string): Promise<RequestState> {
-  const { data, error } = await supabase.from('cellar_desk_requests').select('state, error, run_id').eq('id', id).single();
+  const { data, error } = await supabase.from('cellar_desk_requests').select('*').eq('id', id).single();
   if (error) throw error;
-  return { state: data.state, error: data.error, runId: data.run_id };
+  return { state: data.state, error: data.error, runId: data.run_id, receipt: data.receipt ?? null };
 }
 
 const WAIT_MS = 45_000;
@@ -60,23 +65,33 @@ async function settled(id: string): Promise<string | null> {
   while (Date.now() < until) {
     const now = await readRequest(id);
     if (now.state === 'done') return now.runId;
-    if (now.state === 'failed') throw new Error(now.error ?? 'the pc could not do it');
+    if (now.state === 'failed' || now.receipt?.state === 'unknown') throw new DeskRefusal(now.error ?? 'The PC could not confirm this task.', now.receipt?.untrusted ?? null, now.receipt);
     await new Promise((resolve) => setTimeout(resolve, POLL_MS));
   }
   const { data } = await supabase
     .from('cellar_desk_requests')
-    .update({ state: 'failed', error: 'withdrawn — the pc did not pick it up' })
+    .update({ state: 'failed', error: 'withdrawn — the pc did not pick it up', receipt: { commandId: id, state: 'failed', error: 'withdrawn before pickup' } })
     .eq('id', id)
     .eq('state', 'queued')
     .select('id');
-  if (data?.length) throw new Error('the pc did not pick it up — it may be asleep. nothing was started.');
+  if (data?.length) throw new DeskRefusal('The PC did not pick it up. Nothing started.', null, { commandId: id, state: 'failed' });
   throw new Error('the pc took it but has not said how it went yet — check its runs in a moment');
 }
 
 export async function sendStart(deskId: string, start: DeskStart): Promise<string | null> {
+  if (!start.commandId) throw new Error('A durable commandId is required.');
+  const existing = await supabase.from('cellar_desk_requests').select('id, payload, desk_id').eq('id', start.commandId).maybeSingle();
+  if (existing.error) throw existing.error;
+  if (existing.data) {
+    const saved = existing.data.payload as DeskStart;
+    if (existing.data.desk_id !== deskId || Object.keys(start).some((key) => JSON.stringify(saved?.[key as keyof DeskStart]) !== JSON.stringify(start[key as keyof DeskStart]))) throw new Error('commandId belongs to another task.');
+    return settled(start.commandId);
+  }
   const { data, error } = await supabase
     .from('cellar_desk_requests')
     .insert({
+      id: start.commandId,
+      payload: start,
       desk_id: deskId,
       kind: 'start',
       agent: start.agent,
@@ -87,6 +102,7 @@ export async function sendStart(deskId: string, start: DeskStart): Promise<strin
     })
     .select('id')
     .single();
+  if (error?.code === '23505') return sendStart(deskId, start);
   if (error) throw error;
   return settled(data.id as string);
 }

@@ -38,7 +38,7 @@ const shared = {
   platform: 'node',
   format: 'cjs',
   target: 'node22',
-  external: ['electron'],
+  external: ['electron', '@anthropic-ai/claude-agent-sdk'],
   logLevel: 'warning',
   sourcemap: 'linked',
 };

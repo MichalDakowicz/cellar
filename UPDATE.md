@@ -1,9 +1,25 @@
 # Update notes
 
+## 1.13.0 — Unreleased
+
+### Changed
+
+- Phone and browser keep remote controls; local host settings move to the desktop app
+- Desktop has its own renderer, with Cellar views and Desk controls preserved across upgrades
+
 ## 1.12.0 — Unreleased
 
 ### Added
 
+- Desk: queue chat messages, edit or send them now, and track stop results per PC
+- Desk: answer real Claude and Codex approvals, with durable receipts and first answer wins
+- Desk: follow real agent turns live, with full tool output and durable run history
+- Desk: reconnect without duplicate turns; open labelled saved chats while the PC is offline
+
+- Desk: start tasks in worktrees from main; keep, review merges or remove finished workspaces
+- Desk: run project commands as jobs, with readable test results and raw output
+- Questions: keep exact choices and a separate note, with drafts retained on failed saves
+- Desk: send complete tasks, claim all attached thoughts and recover starts without duplicates
 - Project: a dump field at the top files a thought straight into that project
 - Project: add a picture to a thought from the dump field, as its cover
 - Entry: edit rewords the thought, and the trail keeps what it said before
@@ -16,9 +32,45 @@
 - Your pc: on the same wi-fi, open its local pages, watch its screen and install its app builds
 - Projects: a group has a folder of its own, set under where it lives on the group
 - Your pc: start in a group's folder, and trust a new folder for claude from the phone
+- Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
+- Settings: show a sample desk, to see the desk's coming screens filled in
+- Desk: new task — say what to do, pick the project, agent and how much it may do, send it to your pc
+- Desk: a run opens as a chat, with its tool steps folded and stop at the top
+- Desk: an agent's replies show as formatted text — code, lists, tables, bold and links
+- Desk: preview a page from your pc at phone, tablet or desktop size, with its checks and deploy
+- Desk: type $ in a task to pick a project, then one of its entries, from a list over the field
+- Desk: under a task, a line per $, @, / and colour says what each will do before you send
+- Desk: tap a colour under a task to copy it or nudge it lighter or darker
+- Desk: your pc's screen opens sideways in the app, edge to edge, with its control modes drawn
+- Desk: on a wide window, a capture bar files a thought on enter and hands it off on shift+enter
+- Desk: on a wide window, waiting on you, runs, your pc, commands and today sit side by side
+- Desk: stop all agents stops every run you started from cellar
+- Desk: on a wide window, a run opens beside every run grouped by project, searchable and filtered
+- Project: hold thoughts and hand them to an agent on your pc, as one run or one run each
+- Project, inbox, search: a thought shows which agent is on it
+- Project: on a wide window, the aside shows the project's checkout on your pc
+- Settings: in sections — dump, agents, hosts, recipes, keys, devices, notifications, night shift, usage, account
+- Settings: agents picks the agent and how much it may do for every new task
+- Settings: keys, where pings go, usage, recipes, hosts and night shift show what is coming
+- Settings: see how desk notifications will look, built from your live runs and waiting questions
+- Desk: file it into cellar — type a thing, its kind is guessed, pick a project and hand it off
+- Desk: with the sample desk on, see races, the night shift, group runs and the phone over adb
 
 ### Changed
 
+- Desk: shared real counts across navigation and headers; unavailable reads hide totals,
+  retry and reconnect wait for confirmed results, and remote counts show snapshot freshness
+- Desk: match canvas layouts, typography, task sheet, chat composer and desktop sample panels
+
+- Entry: start on pc opens the new task screen with the thought attached
+- Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
+- Desk: the right plate of the bar is now your pc, badged with what is waiting on you
+- Settings: your account and the size of your cellar moved here from profile
+- Your pc: its local pages open in the desk's preview instead of the browser
+- Settings: on a wide window, a column of sections sits beside the page
+- Desktop: the sidebar has a desk section — home, chat, commands, previews, phone — and pinned projects
+- Settings: show a sample desk moved into devices and pairing
+- Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
 - Dump: file it puts each group's own project first, then pinned projects
 - Projects: a group is a tile in the grid that opens in place, with one outline round its projects
 - Projects: a tile inside an open group says which group it is in
@@ -26,6 +78,7 @@
 
 ### Fixed
 
+- Desk: stop new runs while another PC still has an earlier Stop all pending
 - Sign-in screen: continuing with an app that is already open now signs you in
 - The app icon, splash and web favicon are the same size as the other Ping apps
 

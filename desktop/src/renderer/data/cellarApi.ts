@@ -1,0 +1,295 @@
+import {
+  ENTRY_COLUMNS,
+  LINE_COLUMNS,
+  normalizeEntry,
+  normalizeLine,
+  normalizeProject,
+  normalizeQuestion,
+  normalizeShelf,
+  PROJECT_COLUMNS,
+  QUESTION_COLUMNS,
+  SHELF_COLUMNS,
+  type EntryRow,
+  type LineRow,
+  type ProjectRow,
+  type QuestionRow,
+  type ShelfRow,
+} from "@/lib/rows";
+import type { NewPicture } from "@/lib/entryPicture";
+import { addCovers } from "./pictureApi";
+import { pinnedFirst } from "@/lib/projectOrder";
+import { supabase } from "../auth";
+import type {
+  AnsweredVia,
+  Entry,
+  EntryLine,
+  EntryQuestion,
+  Kind,
+  LineSource,
+  Project,
+  Shelf,
+} from "@/types/cellar";
+
+/**
+ * Every query the app makes, and nothing else.
+ *
+ * The row shapes and their normalizers live in `lib/rows.ts` — the MCP server
+ * reads the same tables and has to produce the same objects, and it cannot
+ * import this file because this file holds the client.
+ *
+ * No React import — this is the transport, not a hook.
+ */
+
+export async function fetchShelves(): Promise<Shelf[]> {
+  // Seeds "apps" and "side projects" on a brand new cellar. Called on the read
+  // rather than from a signup trigger, because Radar owns signup and a new
+  // Cellar user may have had the account for a year.
+  const { error: seedError } = await supabase.rpc("cellar_seed_shelves");
+  if (seedError) throw seedError;
+
+  const { data, error } = await supabase
+    .from("cellar_shelves")
+    .select(SHELF_COLUMNS)
+    .order("position")
+    .order("created_at");
+  if (error) throw error;
+  return (data as ShelfRow[]).map(normalizeShelf);
+}
+
+export async function fetchProjects(): Promise<Project[]> {
+  const { data, error } = await supabase
+    .from("cellar_projects")
+    .select(`${PROJECT_COLUMNS}, icon`)
+    .order("position")
+    .order("created_at");
+  if (error) throw error;
+  return pinnedFirst((data as ProjectRow[]).map(normalizeProject));
+}
+
+/**
+ * The whole cellar in one read.
+ *
+ * It is one user's own one-line thoughts — a heavy user is in the low
+ * thousands of rows — and every screen in the app is a different cut of the
+ * same set: the shelf counts them, stats tallies them, search scans them, the
+ * inbox is the ones with no project. Paging this would mean five queries that
+ * disagree with each other about the same number.
+ */
+export async function fetchEntries(): Promise<Entry[]> {
+  const { data, error } = await supabase
+    .from("cellar_entries")
+    .select(ENTRY_COLUMNS)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as EntryRow[]).map(normalizeEntry);
+}
+
+export type NewEntry = { text: string; kind: Kind; projectId: string | null };
+
+/**
+ * A thought and the notes typed under it, which is what a normal dump is now.
+ * `picture` becomes the thought's cover.
+ */
+export type NewDrop = NewEntry & { lines: string[]; picture?: NewPicture };
+
+/** One insert for a whole raw dump — many lines in, many entries out, one round trip. */
+export async function createEntries(
+  userId: string,
+  entries: NewEntry[],
+): Promise<Entry[]> {
+  const { data, error } = await supabase
+    .from("cellar_entries")
+    .insert(
+      entries.map((e) => ({
+        user_id: userId,
+        text: e.text,
+        kind: e.kind,
+        project_id: e.projectId,
+      })),
+    )
+    .select(ENTRY_COLUMNS);
+  if (error) throw error;
+  return (data as EntryRow[]).map(normalizeEntry);
+}
+
+/**
+ * A whole dump, however many entries and notes it turned out to be.
+ *
+ * Entries with no notes go in one insert, because that is the raw dump and it
+ * is forty rows on a bad day. An entry that *has* notes is inserted on its own
+ * so its lines can be hung off the id that comes back — there is at most one of
+ * those per dump, since only normal mode makes them.
+ */
+export async function dropEntries(
+  userId: string,
+  drops: NewDrop[],
+): Promise<{ pictureFailed: boolean }> {
+  const covers: { entryId: string; picture: NewPicture }[] = [];
+
+  const plain = drops.filter((drop) => drop.lines.length === 0);
+  if (plain.length > 0) {
+    const made = await createEntries(userId, plain);
+    plain.forEach((drop, index) => {
+      if (drop.picture && made[index])
+        covers.push({ entryId: made[index].id, picture: drop.picture });
+    });
+  }
+
+  for (const drop of drops.filter((candidate) => candidate.lines.length > 0)) {
+    const [entry] = await createEntries(userId, [drop]);
+    if (drop.picture) covers.push({ entryId: entry.id, picture: drop.picture });
+    await appendNotes(userId, entry.id, drop.lines);
+  }
+
+  // The thoughts are already in by now, so a picture that will not attach must
+  // not fail the drop — the caller would keep the draft and the next try would
+  // drop every thought twice. It says so instead.
+  try {
+    await addCovers(userId, covers);
+    return { pictureFailed: false };
+  } catch {
+    return { pictureFailed: true };
+  }
+}
+
+/**
+ * The notes under a thought, in the order they were typed.
+ *
+ * Stamped a millisecond apart rather than left to the column default. A thread
+ * is ordered by `created_at` alone (lib/rows), and every row of one insert gets
+ * the same transaction timestamp — so a batch would come back in whatever order
+ * the read felt like, which for "a title with the detail under it" is the one
+ * thing that must not happen.
+ */
+async function appendNotes(
+  userId: string,
+  entryId: string,
+  texts: string[],
+): Promise<void> {
+  const start = Date.now();
+  const { error } = await supabase.from("cellar_entry_lines").insert(
+    texts.map((text, index) => ({
+      user_id: userId,
+      entry_id: entryId,
+      text,
+      source: "user" as const,
+      created_at: new Date(start + index).toISOString(),
+    })),
+  );
+  if (error) throw error;
+}
+
+export type EntryPatch = Partial<
+  Pick<
+    Entry,
+    | "text"
+    | "kind"
+    | "state"
+    | "importance"
+    | "archived"
+    | "projectId"
+    | "agent"
+  >
+>;
+
+export async function patchEntry(id: string, patch: EntryPatch): Promise<void> {
+  const row: Record<string, unknown> = {};
+  if (patch.text !== undefined) row.text = patch.text;
+  if (patch.kind !== undefined) row.kind = patch.kind;
+  if (patch.state !== undefined) row.state = patch.state;
+  if (patch.importance !== undefined) row.importance = patch.importance;
+  if (patch.archived !== undefined) row.archived = patch.archived;
+  if (patch.projectId !== undefined) row.project_id = patch.projectId;
+  if (patch.agent !== undefined) row.agent = patch.agent;
+  const { error } = await supabase
+    .from("cellar_entries")
+    .update(row)
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteEntry(id: string): Promise<void> {
+  const { error } = await supabase.from("cellar_entries").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function appendLine(
+  userId: string,
+  entryId: string,
+  text: string,
+  source: LineSource = "user",
+  /**
+   * Only ever set by undo, which is putting a line back where it was. The
+   * thread is ordered by this, so restoring with `now()` would drop the line at
+   * the bottom and quietly rewrite when it was thought.
+   */
+  createdAt?: string,
+): Promise<EntryLine> {
+  const { data, error } = await supabase
+    .from("cellar_entry_lines")
+    .insert({
+      user_id: userId,
+      entry_id: entryId,
+      text,
+      source,
+      ...(createdAt ? { created_at: createdAt } : null),
+    })
+    .select(LINE_COLUMNS)
+    .single();
+  if (error) throw error;
+  return normalizeLine(data as LineRow);
+}
+
+/**
+ * Takes a line off an entry.
+ *
+ * The one destructive write below entry level, and it exists because a line
+ * dumped into the wrong thought otherwise sits there forever — the thought
+ * itself is immutable on purpose, its lines are not the same promise. The
+ * screen confirms first and keeps the row in memory for undo until you leave.
+ */
+export async function deleteLine(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("cellar_entry_lines")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
+
+/**
+ * Answering a question an agent asked.
+ *
+ * The stamp is set here rather than by a default, because the same row is
+ * written a second time when you change your mind — and `answered_at` is what
+ * the status is read from, so it has to move with the answer.
+ */
+export async function answerQuestion(
+  id: string,
+  answer: ReturnType<typeof import("@/lib/questionAnswer").questionAnswer>,
+  via: AnsweredVia = "app",
+): Promise<EntryQuestion> {
+  const { data, error } = await supabase
+    .from("cellar_entry_questions")
+    .update({
+      ...answer,
+      answered_at: new Date().toISOString(),
+      answered_via: via,
+    })
+    .eq("id", id)
+    .select(QUESTION_COLUMNS)
+    .single();
+  if (error) throw error;
+  return normalizeQuestion(data as QuestionRow);
+}
+
+/**
+ * Waved off. The question stays — it is still the record that something was
+ * asked, and what you did about it was nothing.
+ */
+export async function dismissQuestion(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("cellar_entry_questions")
+    .update({ dismissed_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}

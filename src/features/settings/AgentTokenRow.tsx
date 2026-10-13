@@ -25,12 +25,12 @@ export function AgentTokenRow({
     <View className="flex-row items-center gap-3 py-2">
       <View className="flex-1">
         <Text
-          className={`text-sm text-foreground ${revoked ? 'line-through opacity-50' : ''}`}
+          className={`font-sans text-sm text-foreground ${revoked ? 'line-through opacity-50' : ''}`}
           numberOfLines={1}
         >
           {token.name}
         </Text>
-        <Text className="text-xs text-muted-foreground">
+        <Text className="font-sans text-xs text-muted-foreground">
           {revoked ? `revoked ${longRel(token.revokedAt!)}` : `${used} · made ${longRel(token.createdAt)}`}
         </Text>
       </View>
@@ -41,7 +41,7 @@ export function AgentTokenRow({
           onPress={() => onRevoke(token.id)}
           className="h-9 justify-center rounded-full border border-border px-4 active:opacity-70"
         >
-          <Text className="text-xs font-semibold text-foreground">revoke</Text>
+          <Text className="font-sans text-xs font-semibold text-foreground">revoke</Text>
         </Pressable>
       )}
     </View>

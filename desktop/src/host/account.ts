@@ -1,6 +1,9 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { folderAllowed } from '@/lib/deskFolders';
+import { deskFolders } from '@/lib/deskFolders';
+import type { DeskStart } from '@/lib/deskProtocol';
+import { DeskError } from './claudeRuns.ts';
 
 /**
  * The account this pc acts for — borrowed from Cellar's own window.
@@ -96,5 +99,27 @@ export class Account {
   async allows(cwd: string): Promise<boolean> {
     const { rows, groups } = await this.places();
     return folderAllowed(cwd, rows, groups);
+  }
+
+  async commandProjects() {
+    const { rows, groups } = await this.places();
+    return deskFolders(rows, groups);
+  }
+
+  async claimTaskEntries(start: DeskStart): Promise<void> {
+    if (!start.entryIds?.length) return;
+    const { error } = await this.client().rpc('cellar_claim_run_entries', { p_ids: start.entryIds,
+      p_command_id: start.commandId, p_agent: start.agent, p_project_id: start.projectId });
+    if (error) {
+      // A Postgres/PostgREST refusal rolls back the claim. Transport failures
+      // may have committed it, so they must keep the original command ID.
+      if (/^(?:[0-9A-Z]{5}|PGRST\d+)$/.test(error.code)) throw new DeskError(error.message, 409, { notStarted: true });
+      throw new Error(`Attachment claim outcome is unconfirmed: ${error.message}`);
+    }
+  }
+  async releaseTaskEntries(start: DeskStart): Promise<void> {
+    if (!start.entryIds?.length) return;
+    const { error } = await this.client().rpc('cellar_release_run_entries', { p_ids: start.entryIds, p_command_id: start.commandId });
+    if (error) throw new Error(`Reservation release is unconfirmed: ${error.message}`);
   }
 }

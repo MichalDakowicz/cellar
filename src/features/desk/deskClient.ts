@@ -1,46 +1,11 @@
 import * as Crypto from 'expo-crypto';
-
 import type { DeskPair } from '@/lib/deskPair';
-import type { DeskApk, DeskInfo, DeskLogLine, DeskPort, DeskRun, DeskStart } from '@/lib/deskProtocol';
 import { hex, signDeskRequest, type Sha256 } from '@/lib/deskSign';
+import { DeskUnreachable, refusal, type DeskTransport } from '@/lib/deskCalls';
+export { deskCalls, DeskRefusal, DeskUnreachable, type DeskCalls, type TicketFor } from '@/lib/deskCalls';
 
-import type { DeskBridge } from './bridge';
-
-/**
- * The pc's API, over whichever wire reaches it: the LAN, signed with the
- * paired key, or the desktop window's bridge. Both answer the same paths with the same
- * bodies, so everything above this file is written once.
- */
-
-export type DeskTransport = (method: 'GET' | 'POST', path: string, body?: unknown) => Promise<unknown>;
-
-/** The pc did not answer at all — off, asleep, or on another network. Not the same as a refusal. */
-export class DeskUnreachable extends Error {}
-
-/** A question gets a few seconds; a start waits for the agent to come up, which for `claude --bg` is several. */
 const ASK_TIMEOUT_MS = 6000;
 const START_TIMEOUT_MS = 120_000;
-
-/**
- * The pc said no, and said why. `untrusted` is the folder claude wants trusted
- * before it will start there — the one refusal the phone can do something about.
- */
-export class DeskRefusal extends Error {
-  constructor(
-    message: string,
-    readonly untrusted: string | null,
-  ) {
-    super(message);
-  }
-}
-
-function refusal(status: number, body: unknown): Error {
-  const said = body as { error?: unknown; untrusted?: unknown } | null;
-  return new DeskRefusal(
-    typeof said?.error === 'string' ? said.error : `the pc answered ${status}`,
-    typeof said?.untrusted === 'string' ? said.untrusted : null,
-  );
-}
 
 // A copy into a fresh ArrayBuffer: expo-crypto's types want an ArrayBuffer-backed view, never a shared one.
 const sha256: Sha256 = async (data) =>
@@ -69,7 +34,7 @@ async function signedFetch(pair: DeskPair, method: string, path: string, text: s
   const controller = new AbortController();
   const timer = setTimeout(
     () => controller.abort(),
-    method === 'POST' && path === '/runs' ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
+    method === 'POST' && (path === '/runs' || path.startsWith('/worktrees/')) ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
   );
   try {
     const response = await fetch(`http://${pair.host}:${pair.port}${path}`, {
@@ -78,7 +43,9 @@ async function signedFetch(pair: DeskPair, method: string, path: string, text: s
       body: text || undefined,
       signal: controller.signal,
     });
-    return { status: response.status, body: await response.json().catch(() => null) };
+    const body: unknown = await response.json();
+    if (!body || typeof body !== 'object') throw new Error('invalid host response');
+    return { status: response.status, body };
   } catch {
     throw new DeskUnreachable(`${pair.name} is not answering on this network`);
   } finally {
@@ -103,34 +70,9 @@ export function lanTransport(pair: DeskPair): DeskTransport {
         answer = await signedFetch(pair, method, path, text);
       }
     }
-    if (answer.status === 401) throw new Error(`${pair.name} no longer knows this phone — pair it again`);
+    if (answer.status === 401) throw new Error(`${pair.name} refused the request signature — retry or check pairing`);
     if (answer.status < 200 || answer.status >= 300) throw refusal(answer.status, answer.body);
     return answer.body;
   };
 }
 
-export function bridgeTransport(bridge: DeskBridge): DeskTransport {
-  return async (method, path, body) => {
-    const { status, body: answer } = await bridge.request(method, path, body);
-    if (status < 200 || status >= 300) throw refusal(status, answer);
-    return answer;
-  };
-}
-
-export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { kind: 'apk'; app: string };
-
-export function deskCalls(send: DeskTransport) {
-  return {
-    info: async () => (await send('GET', '/desk')) as DeskInfo,
-    runs: async () => ((await send('GET', '/runs')) as { runs: DeskRun[] }).runs,
-    start: async (start: DeskStart) => ((await send('POST', '/runs', start)) as { run: DeskRun }).run,
-    stop: async (id: string) => void (await send('POST', `/runs/${encodeURIComponent(id)}/stop`)),
-    log: async (id: string) => ((await send('GET', `/runs/${encodeURIComponent(id)}/log`)) as { lines: DeskLogLine[] }).lines,
-    ports: async () => ((await send('GET', '/ports')) as { ports: DeskPort[] }).ports,
-    apks: async () => ((await send('GET', '/apks')) as { apks: DeskApk[] }).apks,
-    ticket: async (what: TicketFor) => ((await send('POST', '/tickets', what)) as { url: string }).url,
-    trust: async (cwd: string) => ((await send('POST', '/trust', { cwd })) as { trusted: string }).trusted,
-  };
-}
-
-export type DeskCalls = ReturnType<typeof deskCalls>;

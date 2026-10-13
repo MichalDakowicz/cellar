@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — hosts, notifications, night shift</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.set-a{height:34px;padding:0 12px;border-radius:8px;display:flex;align-items:center;color:#a3a3a3;text-decoration:none;font-size:14px}
+.set-a:hover{color:#fafafa;background:hsl(0 0% 12%)}
+.set-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.inp{height:40px;box-sizing:border-box;border-radius:8px;border:1px solid hsl(var(--border));background:hsl(var(--secondary));color:#fafafa;padding:0 12px;font-size:13px;width:100%}
+.rule{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:#171717}
+.edit{height:32px;padding:0 12px;border-radius:99px;border:0;background:transparent;color:#a3a3a3;cursor:pointer;font-size:13px}
+</style>
+</helmet>
+<div data-app="cellar" style="min-height: 1300px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px"><p class="text-lg font-bold">cellar</p><span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span></div>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump">dump</a><a class="side-a" href="DeskProjects.dc.html">projects</a><a class="side-a" href="#inbox">inbox<span class="side-n">4</span></a><a class="side-a" href="#stats">stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html">home</a><a class="side-a" href="DeskChat.dc.html">chat<span class="ping-island-badge" style="margin-left: auto">2</span></a><a class="side-a" href="#commands">commands</a><a class="side-a" href="#previews">previews</a><a class="side-a" href="DeskPhone.dc.html">pixel</a>
+</nav>
+<div style="margin-top: auto"><a class="side-a" href="DeskUsage.dc.html" aria-current="page">settings</a></div>
+</aside>
+
+<nav aria-label="settings" style="flex: 1 1 200px; box-sizing: border-box; padding: 24px 12px; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 2px">
+<p class="text-xl font-bold" style="padding: 0 12px 12px">settings</p>
+<a class="set-a" href="#agents">agents</a>
+<a class="set-a" href="DeskHosts.dc.html" aria-current="page">hosts</a>
+<a class="set-a" href="DeskRecipes.dc.html">recipes and rules</a>
+<a class="set-a" href="#keys">keys</a>
+<a class="set-a" href="#devices">devices and pairing</a>
+<a class="set-a" href="#notifications">notifications</a>
+<a class="set-a" href="#night">night shift</a>
+<a class="set-a" href="DeskUsage.dc.html">usage and accounts</a>
+<a class="set-a" href="#account">account</a>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 36px 48px; display: flex; flex-direction: column; gap: 40px">
+<header style="display: flex; flex-direction: column; gap: 4px">
+<h1 class="text-2xl font-bold tracking-tight">hosts</h1>
+<p class="text-sm text-muted-foreground">where agents and commands actually run. any machine you can reach over ssh can be one.</p>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0"><p class="text-base font-bold">this pc</p><p class="text-xs text-muted-foreground clamp1">local · 4 slots · every project</p></div>
+<p class="text-xs" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>online · 2 busy</p>
+</div>
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0"><p class="text-base font-bold">home-server</p><p class="text-xs text-muted-foreground clamp1"><span class="mono">ssh://me@home-server:22</span> · 6 slots · night shift · daemon up to date</p></div>
+<p class="text-xs" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>online · idle</p>
+</div>
+<div class="ping-row" style="align-items: center">
+<div style="flex: 1; min-width: 0"><p class="text-base font-bold">laptop</p><p class="text-xs text-muted-foreground clamp1"><span class="mono">ssh://me@laptop:22</span> · 2 slots · only the work shelf</p></div>
+<p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #737373"></span>offline · seen yesterday</p>
+</div>
+
+<div style="margin-top: 10px; border-radius: 16px; border: 1px solid hsl(var(--border)); padding: 18px; display: flex; flex-direction: column; gap: 14px; max-width: 760px">
+<p class="text-base font-bold">add a host</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="hname" class="text-xs text-muted-foreground">name</label><input id="hname" class="inp" type="text" value="build-box"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="hlink" class="text-xs text-muted-foreground">ssh link</label><input id="hlink" class="inp mono" type="text" value="ssh://me@build-box.local:22"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="hkey" class="text-xs text-muted-foreground">key</label><input id="hkey" class="inp mono" type="text" value="~/.ssh/id_ed25519 · or your ssh agent"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="hslots" class="text-xs text-muted-foreground">agent slots</label><input id="hslots" class="inp" type="text" value="4"></div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="ping-chip" aria-pressed="true" style="min-height: 34px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">install the daemon there</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 34px; border: 1px solid transparent; box-sizing: border-box">use it for night shift</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 34px; border: 1px solid transparent; box-sizing: border-box">only some projects…</button>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<button type="button" onClick="{{test}}" style="height: 40px; padding: 0 18px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; cursor: pointer" class="text-sm font-semibold">test the connection</button>
+<p class="text-sm" style="color: {{testColor}}">{{testLine}}</p>
+</div>
+</div>
+</section>
+
+<section id="notifications" style="display: flex; flex-direction: column; gap: 12px; padding-top: 28px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<h2 class="text-xl font-bold">where pings go</h2>
+<p class="text-sm text-muted-foreground">one device at a time. checked top to bottom; the first rule that fits wins.</p>
+<div class="rule"><span class="mono text-xs" style="color: #8a8a8a">1</span><span class="text-sm">quiet hours 23:00–07:00</span><span class="text-sm" style="color: #d4d4d4">only approvals and questions, to the phone</span><button type="button" class="edit">edit</button></div>
+<div class="rule"><span class="mono text-xs" style="color: #8a8a8a">2</span><span class="text-sm">desktop app in use</span><span class="text-sm" style="color: #d4d4d4">the desk only</span><button type="button" class="edit">edit</button></div>
+<div class="rule"><span class="mono text-xs" style="color: #8a8a8a">3</span><span class="text-sm">not answered on the desk in 2 min</span><span class="text-sm" style="color: #d4d4d4">the phone too</span><button type="button" class="edit">edit</button></div>
+<div class="rule"><span class="mono text-xs" style="color: #8a8a8a">4</span><span class="text-sm">idle 5 min, locked, or away</span><span class="text-sm" style="color: #d4d4d4">the phone</span><button type="button" class="edit">edit</button></div>
+<p class="lbl" style="margin-top: 8px">what pings at all</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">approvals</span>
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">questions</span>
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">run finished</span>
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">checks failed</span>
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">plan ran out</span>
+<span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">crash filed</span>
+<span class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box">every turn</span>
+</div>
+</section>
+
+<section id="night" style="display: flex; flex-direction: column; gap: 14px; padding-top: 28px; border-top: 1px solid hsl(var(--border) / 0.5); max-width: 860px">
+<h2 class="text-xl font-bold">night shift</h2>
+<div style="display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 14px 16px; align-items: center">
+<span class="text-sm text-muted-foreground">window</span><span class="text-sm"><span class="tok">01:00</span> to <span class="tok">06:00</span></span>
+<span class="text-sm text-muted-foreground">runs on</span><span style="display: flex; gap: 8px; flex-wrap: wrap"><span class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box">home-server</span><span class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box">this pc, if awake</span></span>
+<span class="text-sm text-muted-foreground">never at night</span><span style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><span class="tok">$deploy</span><span class="tok">$apk</span><span class="text-xs text-muted-foreground">anything marked “ships”</span></span>
+<span class="text-sm text-muted-foreground">stops when</span><span class="text-sm">20% of the week is left on the account it uses</span>
+<span class="text-sm text-muted-foreground">digest</span><span class="text-sm">07:30, to the phone</span>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    return {
+      testLine: s.tested ? 'connected · node and git found · daemon installed · no agent signed in yet — sign in from usage and accounts' : 'checks the link, the key, node and git, then installs the daemon',
+      testColor: s.tested ? '#22c55e' : '#a3a3a3',
+      test: () => this.setState({ tested: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

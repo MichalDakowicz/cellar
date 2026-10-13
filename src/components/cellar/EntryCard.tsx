@@ -8,6 +8,7 @@ import { StateBadge } from '@/components/cellar/StateBadge';
 import { KIND_GUTTER, KindGlyph, kindLabel } from '@/components/media/Glyphs';
 import { useRowStyle } from '@/components/cellar/rowStyle';
 import { useHover, webTransition } from '@/hooks/useResponsive';
+import { claimedBy } from '@/lib/agentWork';
 import { isDimmed } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
 import { COLORS } from '@/theme/colors';
@@ -61,6 +62,7 @@ export const EntryCard = memo(function EntryCard({
   // an archived `open` thought would otherwise sit in the quietest part of the
   // list at full strength (lib/entryState).
   const dimmed = isDimmed(entry);
+  const claimer = claimedBy(entry);
   const grown = entry.lines.length;
   const { hovered, bind } = useHover();
   // Density and text size (settings). The first-line box the gutter, the copy
@@ -134,6 +136,13 @@ export const EntryCard = memo(function EntryCard({
 
         {grown > 0 && <Text className="pt-px text-xs text-muted-foreground">+{grown}</Text>}
         <ImportanceMark importance={entry.importance} />
+        {/* Who has it, while an agent works it or waits on you — so a board
+            shows which agent has what (`DeskProjects.dc.html`). */}
+        {!!claimer && (
+          <Text className="max-w-[80px] pt-px font-mono text-xs text-muted-foreground" numberOfLines={1}>
+            {claimer}
+          </Text>
+        )}
         <StateBadge state={entry.state} />
         {variant !== 'hit' && <Text className="pt-px text-xs text-muted-foreground">{shortRel(entry.createdAt)}</Text>}
         {!!where && (

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>notes — how t3code delegates</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.tok{display:inline-block;font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;line-height:16px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,0.06);color:#d4d4d4;white-space:nowrap}
+.note p+p{margin-top:8px}
+.note ul{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+</style>
+</helmet>
+<div data-app="cellar" style="min-height: 2800px; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display); padding: 56px 32px 72px; box-sizing: border-box">
+<div class="ping-shell-detail" style="display: flex; flex-direction: column; gap: 56px">
+
+<header style="display: flex; flex-direction: column; gap: 12px; max-width: 820px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">notes · read from t3code's source at commit 784b5625</p>
+<h1 class="text-4xl font-bold tracking-tight leading-tight">how t3code hands work to agents — and keeps the chat in its own app</h1>
+<p class="text-base" style="color: #d4d4d4">no agent ever gets a visible terminal. the server starts each agent cli as a hidden background process and talks to it over pipes: json-rpc for codex, the claude agent sdk for claude. the chat you see is not the agent's output — it is the server's own event log, saved in sqlite and streamed to every client. the phone, the web app and the desktop app are all thin clients of that log.</p>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 16px">
+<h2 class="text-xl font-bold">the loop, end to end</h2>
+<div style="overflow-x: auto; border-radius: 16px; border: 1px solid hsl(var(--border)); padding: 16px 8px">
+<div style="position: relative; width: 1144px; height: 392px">
+<svg width="47" height="8" viewBox="0 0 47 8" preserveAspectRatio="none" style="position: absolute; left: 200px; top: 88px; width: 47px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 43 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg width="47" height="8" viewBox="0 0 47 8" preserveAspectRatio="none" style="position: absolute; left: 432px; top: 88px; width: 47px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 43 4" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg width="47" height="8" viewBox="0 0 47 8" preserveAspectRatio="none" style="position: absolute; left: 664px; top: 88px; width: 47px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 43 4" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg width="47" height="8" viewBox="0 0 47 8" preserveAspectRatio="none" style="position: absolute; left: 896px; top: 88px; width: 47px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 0 4 L 43 4" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 1032px; top: 144px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 4 0 L 4 115" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+<svg width="341" height="8" viewBox="0 0 341 8" preserveAspectRatio="none" style="position: absolute; left: 603px; top: 312px; width: 341px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 0 4 L 341 4"></path></svg>
+<svg width="8" height="171" viewBox="0 0 8 171" preserveAspectRatio="none" style="position: absolute; left: 599px; top: 145px; width: 8px; height: 171px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 4 171 L 4 4" marker-end="url(#dc-arrow-head-filled-6)"></path></svg>
+<svg width="8" height="172" viewBox="0 0 8 172" preserveAspectRatio="none" style="position: absolute; left: 537px; top: 144px; width: 8px; height: 172px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 4 0 L 4 172"></path></svg>
+<svg width="108" height="8" viewBox="0 0 108 8" preserveAspectRatio="none" style="position: absolute; left: 433px; top: 312px; width: 108px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 108 4 L 4 4" marker-end="url(#dc-arrow-head-filled-7)"></path></svg>
+<svg width="140" height="8" viewBox="0 0 140 8" preserveAspectRatio="none" style="position: absolute; left: 108px; top: 312px; width: 140px; height: 8px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 0 4 L 140 4"></path></svg>
+<svg width="8" height="171" viewBox="0 0 8 171" preserveAspectRatio="none" style="position: absolute; left: 104px; top: 145px; width: 8px; height: 171px; overflow: visible; fill: none; stroke: #737373; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-8" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#737373" stroke="none" style="stroke: none; fill: #737373; fill: context-stroke"></path></marker></defs><path d="M 4 171 L 4 4" marker-end="url(#dc-arrow-head-filled-8)"></path></svg>
+<div style="position: absolute; left: 16px; top: 40px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>phone / web / desktop</b><br>message.dispatch<br>with its own commandId</span></div>
+<div style="position: absolute; left: 248px; top: 40px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>orchestrator</b><br>one command at a time;<br>decides events, no i/o</span></div>
+<div style="position: absolute; left: 480px; top: 40px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>one sqlite write</b><br>events + read model<br>+ receipt + outbox job</span></div>
+<div style="position: absolute; left: 712px; top: 40px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>effect worker</b><br>takes the outbox job,<br>calls adapter.startTurn</span></div>
+<div style="position: absolute; left: 944px; top: 40px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid hsl(var(--primary)); border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>hidden agent process</b><br>codex app-server (stdio)<br>or claude sdk query()</span></div>
+<div style="position: absolute; left: 944px; top: 264px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>event ingestor</b><br>deltas, tool calls and<br>approvals → turn items</span></div>
+<div style="position: absolute; left: 248px; top: 264px; width: 184px; height: 104px; box-sizing: border-box; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; background: #171717; border: 1px solid #262626; border-radius: 12px; font-size: 13px; line-height: 18px"><span><b>subscribeThread</b><br>snapshot → numbered<br>events → synchronized</span></div>
+<div style="position: absolute; left: 658px; top: 288px; width: 230px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">provider events → domain events</div>
+<div style="position: absolute; left: 439px; top: 328px; width: 96px; text-align: center; font-size: 13px; line-height: 16px; color: #a3a3a3">live stream</div>
+</div>
+</div>
+<p class="text-sm text-muted-foreground" style="max-width: 820px">the important split: the orchestrator only decides what happened, and every side effect (start a turn, interrupt, answer an approval) is a queued outbox job written in the same transaction. if the server dies between deciding and doing, the job is still there.</p>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 40px 48px">
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">01 · no terminal, just pipes</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p><b style="color: #fafafa">codex</b> — the server spawns <span class="mono">codex app-server</span> as a child process and wires stdin/stdout straight into a typed json-rpc client; stderr is dropped. <span class="mono">shell: false</span> everywhere except windows. no pty.</p>
+<p><b style="color: #fafafa">claude</b> — <span class="mono">@anthropic-ai/claude-agent-sdk</span> <span class="mono">query()</span> in streaming-input mode: prompts are pushed into a queue the sdk reads as a live input stream. the sdk starts the claude cli itself.</p>
+<p><b style="color: #fafafa">others</b> — acp agents, <span class="mono">opencode serve</span>, <span class="mono">pi --mode rpc</span>, the cursor sdk. nine provider drivers in total.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">02 · one adapter shape for every agent</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p><span class="mono">ProviderAdapterV2.openSession()</span> returns a runtime with <span class="mono">ensureThread</span>, <span class="mono">resumeThread</span>, <span class="mono">startTurn</span>, <span class="mono">steerTurn</span>, <span class="mono">interruptTurn</span>, <span class="mono">respondToRuntimeRequest</span>, <span class="mono">rollbackThread</span>, <span class="mono">forkThread</span> and an <span class="mono">events</span> stream.</p>
+<p>codex shares one process across many threads; claude gets one session per app thread. the capability flag <span class="mono">supportsMultipleProviderThreadsPerSession</span> decides.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">03 · a message becomes a run</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>the model: <span class="mono">AppThread</span> → <span class="mono">Run</span> (one user-visible turn) → a tree of <span class="mono">ExecutionNode</span>s, plus <span class="mono">ProviderThread</span>, <span class="mono">ProviderTurn</span>, <span class="mono">TurnItem</span>, <span class="mono">RuntimeRequest</span>, <span class="mono">Checkpoint</span>.</p>
+<p>clients only send commands: <span class="mono">thread.create</span>, <span class="mono">message.dispatch</span>, <span class="mono">run.interrupt</span>, <span class="mono">thread.stop</span>, <span class="mono">runtime-request.respond</span>, <span class="mono">checkpoint.rollback</span>, <span class="mono">thread.fork</span>, <span class="mono">provider.switch</span>.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">04 · talking to a busy agent</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p><span class="mono">message.dispatch</span> carries a <span class="mono">dispatchMode</span>:</p>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px"><span class="tok">start_immediately</span><span class="tok">queue_after_active</span><span class="tok">steer_active</span><span class="tok">restart_active</span><span class="tok">defer_start</span></div>
+<p style="margin-top: 10px">on the phone this is the “steer it now / queue after this turn” pair above the composer.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">05 · what the chat is made of</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>every provider is normalised into one list of turn items:</p>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px"><span class="tok">user_message</span><span class="tok">assistant_message</span><span class="tok">reasoning</span><span class="tok">command_execution</span><span class="tok">file_change</span><span class="tok">dynamic_tool</span><span class="tok">web_search</span><span class="tok">file_search</span><span class="tok">todo_list</span><span class="tok">proposed_plan</span><span class="tok">approval_request</span><span class="tok">user_input_request</span><span class="tok">subagent</span><span class="tok">checkpoint</span><span class="tok">error</span><span class="tok">compaction</span><span class="tok">handoff</span></div>
+<p style="margin-top: 10px">assistant text is split into display chunks only at markdown-safe boundaries, and tool updates are coalesced so only the latest per call is kept — cheap to stream to a phone.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">06 · approvals</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>runtime modes: <span class="mono">approval-required</span>, <span class="mono">auto-accept-edits</span>, <span class="mono">auto</span>, <span class="mono">full-access</span> (the default). codex asks through <span class="mono">item/commandExecution/requestApproval</span> and friends; claude through the sdk's <span class="mono">canUseTool</span> callback.</p>
+<p>the adapter emits a runtime request and waits. a client answers with <span class="mono">runtime-request.respond</span>: <span class="mono">accept</span>, <span class="mono">acceptForSession</span>, <span class="mono">acceptAlways</span>, <span class="mono">decline</span> or <span class="mono">cancel</span>. pending requests are stored, so they survive a reconnect.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">07 · surviving flaky networks</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>storage is sqlite through <span class="mono">node:sqlite</span>: an events table with a sequence number, projection tables, the outbox and command receipts.</p>
+<p><span class="mono">subscribeThread{threadId, afterSequence}</span> sends a snapshot, then numbered events, then a <span class="mono">synchronized</span> marker. a client that drops resumes from its last sequence. resending the same <span class="mono">commandId</span> returns the stored receipt and runs nothing twice.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">08 · lifecycle</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>sessions open lazily on the first turn and are released after 30 idle minutes — later while background work is pending, up to a 4-hour cap.</p>
+<p>a crashed session is deliberately not restarted. unfinished work is marked finished; the next command opens a fresh session and resumes the agent's own conversation (<span class="mono">resume</span> / <span class="mono">thread/resume</span>).</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">09 · worktrees and checkpoints</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>each thread has a <span class="mono">branch</span> and a <span class="mono">worktreePath</span>; a launch picks <span class="mono">root</span>, <span class="mono">existing_worktree</span> or a new <span class="mono">worktree{baseRef}</span>.</p>
+<p>checkpoints are hidden git refs (<span class="mono">refs/t3/orchestration-v2/checkpoints</span>) built with a temporary <span class="mono">GIT_INDEX_FILE</span>, <span class="mono">write-tree</span> and <span class="mono">commit-tree</span>. diffs come from them; rollback restores the files and asks the provider to roll back its conversation too.</p>
+</div>
+</div>
+
+<div class="note" style="display: flex; flex-direction: column; gap: 10px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">10 · reaching it from elsewhere</p>
+<div class="text-sm" style="color: #d4d4d4">
+<p>pairing links and qr codes (<span class="mono">t3 pair</span>, <span class="mono">t3 serve --host</span>), scoped tokens, short-lived websocket tickets so long-lived tokens stay out of socket urls, and a scope check on every rpc.</p>
+<p>transport: tailscale, ssh tunnels, or a relay with sign-in. mobile push and live activities go through the relay. the in-app terminal is a separate <span class="mono">node-pty</span> feature, not how agents are run.</p>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 820px">
+<h2 class="text-xl font-bold">what cellar desk takes from it</h2>
+<p class="text-sm text-muted-foreground">left: what t3code does. right: the cellar version. rows marked “new” are not in t3code.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">server on the pc owns processes, files and sqlite</p><p class="text-sm" style="flex: 2 1 420px">a small cellar desk daemon (node, tray app) owns the agents, the worktrees and its own event log. the phone is a thin client.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">one websocket rpc + http snapshots</p><p class="text-sm" style="flex: 2 1 420px">the same, over tailscale. when the pc can't be reached, the phone drops the task into cellar's supabase as a row and the daemon picks it up — the mcp edge function and per-machine agent tokens already exist.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">thread → run → turn items</p><p class="text-sm" style="flex: 2 1 420px">a run can start from a cellar entry: the agent claims it, appends lines marked as its own, and asks questions through the same “waiting on you” inbox.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">runtime request → respond</p><p class="text-sm" style="flex: 2 1 420px">the approval panel pinned above the nav islands, plus a push. answer on the phone or the pc — the first answer wins, retries are safe because of the commandId.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">runtime modes</p><p class="text-sm" style="flex: 2 1 420px">three words on the new-task sheet: ask first · edits ok · full access.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">new · quick commands</p><p class="text-sm" style="flex: 2 1 420px">rebuild, deploy and apk are plain jobs, not agent turns. they go through the same outbox and stream back as command_execution items, so the phone renders them like any other run.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">new · previews</p><p class="text-sm" style="flex: 2 1 420px">the dev server runs on the pc and is exposed to the phone's webview over the tailnet. deploy runs <span class="mono">npm run deploy:web</span> only after you've looked.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">new · live screen</p><p class="text-sm" style="flex: 2 1 420px">a separate video channel (screen out, touch and keys in), opened only when the phone asks and the pc allows it. kept apart from the event log so a dropped stream never touches a run.</p></div>
+<div class="ping-row" style="flex-wrap: wrap; gap: 8px 24px"><p class="text-sm mono" style="flex: 1 1 300px; color: #a3a3a3">in-app terminal (node-pty)</p><p class="text-sm" style="flex: 2 1 420px">left out on purpose. from the toilet or the stove you want results and decisions, not a shell.</p></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px; max-width: 820px">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">not confirmed from source</p>
+<p class="text-sm" style="color: #d4d4d4">whether spawns on windows set <span class="mono">windowsHide</span> (that lives inside the effect library, not in t3code), and the claude cli's exact stdio settings (inside the agent sdk). worth testing on your pc that no console window flashes.</p>
+</section>
+
+<footer style="display: flex; flex-direction: column; gap: 6px; padding-top: 24px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<p class="text-xs text-muted-foreground">source: <a href="https://github.com/pingdotgg/t3code">github.com/pingdotgg/t3code</a> at 784b5625 · cellar notes from <a href="https://github.com/MichalDakowicz/cellar">github.com/MichalDakowicz/cellar</a> at 8fc76df</p>
+<p class="text-xs text-muted-foreground mono">apps/server/src/provider/codexLaunchArgs.ts · CodexAdapterV2.ts · ClaudeAdapterV2.ts · Orchestrator.ts · EventSink.ts · EffectOutbox.ts · ProviderSessionManager.ts · packages/contracts/src/orchestrationV2.ts · providerPolicy.ts · apps/server/src/vcs/GitVcsDriver.ts</p>
+</footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

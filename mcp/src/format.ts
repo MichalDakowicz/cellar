@@ -1,9 +1,9 @@
 import { shortEntryId } from '@/lib/agentPrompt';
+import { answerPicks } from '@/lib/questionAnswer';
 import { askRule, ASK_WHERE, kindWork, LINE_VOICE, splitThread } from '@/lib/agentWork';
 import {
   optionLabel,
   pendingQuestions,
-  pickedOptions,
   questionStatus,
   settledQuestions,
 } from '@/lib/entryQuestions';
@@ -198,10 +198,12 @@ function questionBlocks(questions: EntryQuestion[], now: number): string[] {
  */
 export function settledLines(question: EntryQuestion, indent: string): string[] {
   const out = [`${indent}? ${question.question}`];
-  const taken = pickedOptions(question.answer, question.options);
+  const taken = answerPicks(question);
   question.options.forEach((option, index) =>
     out.push(`${indent}  ${taken.includes(option) ? '✓' : ' '} ${optionLabel(index)}) ${option}`),
   );
+  if (taken.length > 1) out.push(`${indent}  user chose several options (${taken.length})`);
+  if (question.answerNote) out.push(`${indent}  note: ${question.answerNote}`);
   out.push(
     questionStatus(question) === 'dismissed'
       ? `${indent}= waved off${question.answer ? ` (was: ${question.answer})` : ' — they chose not to answer, so use your judgement'}`
@@ -235,12 +237,7 @@ export function answeredBlock(
   for (const { entry, questions } of answered) {
     out.push('', entryRow(entry, projects, now));
     for (const question of questions) {
-      out.push(`  ? ${question.question}`);
-      out.push(
-        questionStatus(question) === 'dismissed'
-          ? `  = waved off${question.answer ? ` (was: ${question.answer})` : ' — use your judgement'}`
-          : `  = ${question.answer ?? '(no answer recorded)'}`,
-      );
+      out.push(...settledLines(question, '  '));
     }
   }
   return out.join('\n');

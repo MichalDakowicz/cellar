@@ -16,11 +16,12 @@ import type { DeskLink } from './useDeskLink';
  */
 export function useDeskLocal(link: DeskLink) {
   const calls = link.can.local ? link.calls : null;
+  const pageCalls = link.can.pages ? link.calls : null;
 
   const ports = useQuery({
     queryKey: ['desk', 'ports'],
-    queryFn: () => calls!.ports(),
-    enabled: calls !== null,
+    queryFn: () => pageCalls!.ports(),
+    enabled: pageCalls !== null,
     refetchInterval: 15_000,
     retry: false,
   });
@@ -44,6 +45,8 @@ export function useDeskLocal(link: DeskLink) {
 
   return {
     available: calls !== null,
+    /** The pc's pages can be listed and opened — on its own window too. */
+    pagesAvailable: pageCalls !== null,
     ports: ports.data ?? [],
     apks: apks.data ?? [],
     open,

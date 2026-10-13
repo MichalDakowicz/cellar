@@ -48,14 +48,14 @@ export function NudgeSettings() {
       />
       {on && (
         <View className="gap-3 pb-4">
-          <Text className="text-xs text-muted-foreground">untouched for</Text>
+          <Text className="font-sans text-xs text-muted-foreground">untouched for</Text>
           <Segmented<string>
             label="untouched for"
             value={String(settings.nudgeDays)}
             onChange={(value) => void updateSettings({ nudgeDays: Number(value) })}
             options={NUDGE_DAYS.map((days) => ({ value: String(days), label: `${days}d` }))}
           />
-          <Text className="text-xs text-muted-foreground">at most a day — more than that go out as one</Text>
+          <Text className="font-sans text-xs text-muted-foreground">at most a day — more than that go out as one</Text>
           <Segmented<string>
             label="nudges a day"
             value={String(settings.nudgesPerDay)}

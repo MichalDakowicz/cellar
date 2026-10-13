@@ -14,8 +14,8 @@ import type { Entry, EntryQuestion, QuestionStatus } from '@/types/cellar';
  * entry or a question you decided was noise would block the thought forever.
  */
 
-/** a, b, c, d and on. The tap target's label, and how a question reads aloud. */
-const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+/** A, B, C, D and on — the canvas's letter tiles. The tap target's label, and how a question reads aloud. */
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function optionLabel(index: number): string {
   return LETTERS[index] ?? String(index + 1);
@@ -56,6 +56,22 @@ export function joinAnswers(options: string[]): string {
   const picked = options.filter((option) => option.trim().length > 0);
   if (picked.length <= 1) return picked[0] ?? '';
   return `${picked.slice(0, -1).join(', ')} and ${picked[picked.length - 1]}`;
+}
+
+/**
+ * The picks and the note that goes with them, as the one line stored as the
+ * answer (docs/desk/screens.md, "question card").
+ *
+ * "B, but keep the total visible" — the note rides after the picks, set off by
+ * a dash so it reads as a qualifier on the choice rather than as another
+ * option. A note alone is an answer in your own words. The picks stay verbatim
+ * so `pickedOptions` still ticks them when the question is read back.
+ */
+export function composeAnswer(picked: string[], note: string | null | undefined): string {
+  const choice = joinAnswers(picked);
+  const extra = (note ?? '').replace(/\s+/g, ' ').trim();
+  if (!choice) return extra;
+  return extra ? `${choice} — ${extra}` : choice;
 }
 
 /**
@@ -174,4 +190,17 @@ export function answeredForAgent<T extends Pick<Entry, 'state' | 'archived' | 'q
     if (mine.length > 0) out.push({ entry, questions: mine });
   }
   return out;
+}
+
+/**
+ * An option as the card draws it (`QuestionCard.dc.html`): its label, the
+ * line under it, and whether the agent recommended it. Agents write all three
+ * in one line — "from the bottom — a sheet with the total pinned — recommended"
+ * — so the dashes are where it splits.
+ */
+export function optionParts(text: string): { label: string; detail: string | null; recommended: boolean } {
+  const pieces = text.split(/\s+[—–-]\s+/).map((piece) => piece.trim()).filter(Boolean);
+  const recommended = pieces.length > 1 && /^\(?recommended\)?$/i.test(pieces[pieces.length - 1]);
+  const kept = recommended ? pieces.slice(0, -1) : pieces;
+  return { label: kept[0] ?? text, detail: kept.length > 1 ? kept.slice(1).join(' — ') : null, recommended };
 }

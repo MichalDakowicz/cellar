@@ -228,12 +228,12 @@ export async function deleteLine(id: string): Promise<void> {
  */
 export async function answerQuestion(
   id: string,
-  answer: string,
+  answer: ReturnType<typeof import('@/lib/questionAnswer').questionAnswer>,
   via: AnsweredVia = 'app',
 ): Promise<EntryQuestion> {
   const { data, error } = await supabase
     .from('cellar_entry_questions')
-    .update({ answer, answered_at: new Date().toISOString(), answered_via: via })
+    .update({ ...answer, answered_at: new Date().toISOString(), answered_via: via })
     .eq('id', id)
     .select(QUESTION_COLUMNS)
     .single();

@@ -30,17 +30,18 @@ export function Chip({ label, selected, onPress, disabled }: ChipProps) {
       disabled={disabled}
       onPress={onPress}
       {...bind}
+      // The one chip (PING.md §9.6): accent soft with an accent edge when on,
+      // the faint white ground and no edge when off.
       style={[
         webTransition('background-color'),
-        hovered && !disabled && !selected ? { backgroundColor: COLORS.chipGround } : null,
+        {
+          borderColor: selected ? COLORS.accent : 'transparent',
+          backgroundColor: selected ? COLORS.accentSoft : hovered && !disabled ? COLORS.rowHover : COLORS.chipGround,
+        },
       ]}
-      className={[
-        'rounded-full border px-3.5 py-2',
-        selected ? 'border-primary bg-primary/15' : 'border-border bg-transparent',
-        disabled ? 'opacity-40' : '',
-      ].join(' ')}
+      className={['min-h-9 justify-center rounded-full border px-3 py-1.5', disabled ? 'opacity-40' : ''].join(' ')}
     >
-      <Text className={['text-xs font-semibold', selected ? 'text-primary' : 'text-muted-foreground'].join(' ')}>
+      <Text className={selected ? 'font-sans text-sm' : 'font-sans text-sm text-muted-foreground'} style={selected ? { color: COLORS.accentText } : undefined}>
         {label}
       </Text>
     </Pressable>
@@ -85,7 +86,7 @@ function SegmentOption({ label, active, onPress }: { label: string; active: bool
       className={['flex-1 items-center rounded-lg py-2.5', active ? 'bg-white/10' : ''].join(' ')}
     >
       <Text
-        className={['text-sm font-semibold', active ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
+        className={['font-sans text-sm font-semibold', active ? 'text-foreground' : 'text-muted-foreground'].join(' ')}
         numberOfLines={1}
       >
         {label}
@@ -111,9 +112,9 @@ export function SwitchRow({ label, sub, value, onChange, disabled }: SwitchRowPr
   return (
     <View className="flex-row items-center gap-3 py-4">
       <View className="min-w-0 flex-1">
-        <Text className="text-base font-semibold text-foreground">{label}</Text>
+        <Text className="font-sans text-base font-semibold text-foreground">{label}</Text>
         {!!sub && (
-          <Text className="text-xs text-muted-foreground" numberOfLines={2}>
+          <Text className="font-sans text-xs text-muted-foreground" numberOfLines={2}>
             {sub}
           </Text>
         )}
@@ -195,14 +196,14 @@ export function Field({ error, style, multiline, onFocus, onBlur, ...props }: Fi
           onBlur?.(event);
         }}
         className={[
-          'rounded-lg border bg-secondary px-3.5 text-foreground',
+          'font-sans rounded-lg border bg-secondary px-3.5 text-foreground',
           error ? 'border-destructive' : 'border-input',
           multiline ? 'py-3' : 'py-3.5',
         ].join(' ')}
         style={[{ fontSize: 16, lineHeight: undefined }, ANDROID_METRICS, webFocusRing(focused), style]}
         {...props}
       />
-      {!!error && <Text className="mt-1.5 text-xs text-destructive-foreground">{error}</Text>}
+      {!!error && <Text className="font-sans mt-1.5 text-xs text-destructive-foreground">{error}</Text>}
     </View>
   );
 }
@@ -211,7 +212,7 @@ export function Field({ error, style, multiline, onFocus, onBlur, ...props }: Fi
 export function Overline({ children, className = '' }: { children: string; className?: string }) {
   return (
     <Text
-      className={['text-[11px] font-semibold uppercase tracking-widest text-muted-foreground', className].join(' ')}
+      className={['font-sans text-xs font-bold uppercase tracking-widest text-muted-foreground', className].join(' ')}
     >
       {children}
     </Text>

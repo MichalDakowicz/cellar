@@ -2,6 +2,7 @@ import { BrowserWindow, shell } from 'electron';
 import { join } from 'node:path';
 
 import { APP_ORIGIN } from './web.ts';
+import { RENDERER_DEV_ORIGIN } from './ipcBoundary.ts';
 
 /**
  * The one window. It opens on Cellar; closing it hides it, because the pc has
@@ -55,7 +56,7 @@ export function createWindow(options: {
     if (/^https?:/i.test(url)) void shell.openExternal(url);
   });
 
-  void window.loadURL(options.dev ? 'http://localhost:8081' : `${APP_ORIGIN}/`);
+  void window.loadURL(options.dev ? RENDERER_DEV_ORIGIN : `${APP_ORIGIN}/`);
   return window;
 }
 

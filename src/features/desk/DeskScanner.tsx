@@ -36,7 +36,7 @@ export function DeskScanner({ onPair }: { onPair: (pair: DeskPair) => void }) {
   if (!permission.granted) {
     return (
       <View className="items-center gap-4 rounded-2xl border border-border bg-card p-6">
-        <Text className="text-center text-sm text-muted-foreground">
+        <Text className="font-sans text-center text-sm text-muted-foreground">
           {permission.canAskAgain
             ? 'cellar needs the camera to read the code on the pc'
             : 'the camera is off for cellar — turn it on in android settings, or scan the code with the camera app'}
@@ -47,7 +47,7 @@ export function DeskScanner({ onPair }: { onPair: (pair: DeskPair) => void }) {
             accessibilityRole="button"
             className="rounded-full bg-primary px-5 py-2.5 active:opacity-80"
           >
-            <Text className="font-semibold text-primary-foreground">allow the camera</Text>
+            <Text className="font-sans font-semibold text-primary-foreground">allow the camera</Text>
           </Pressable>
         )}
       </View>
@@ -67,7 +67,7 @@ export function DeskScanner({ onPair }: { onPair: (pair: DeskPair) => void }) {
           <View className="h-3/5 w-3/5 rounded-2xl border-2 border-white/70" />
         </View>
       </View>
-      <Text className="text-center text-sm text-muted-foreground">point it at the code on the pc</Text>
+      <Text className="font-sans text-center text-sm text-muted-foreground">point it at the code on the pc</Text>
     </View>
   );
 }

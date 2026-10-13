@@ -43,8 +43,8 @@ export function AppUpdateControl() {
     >
       {icon()}
       <View className="flex-1">
-        <Text className="text-sm font-semibold text-foreground">{hasUpdate ? 'Download update' : 'Cellar'}</Text>
-        <Text className="text-xs text-muted-foreground">{subtitle()}</Text>
+        <Text className="font-sans text-sm font-semibold text-foreground">{hasUpdate ? 'Download update' : 'Cellar'}</Text>
+        <Text className="font-sans text-xs text-muted-foreground">{subtitle()}</Text>
       </View>
     </Pressable>
   );

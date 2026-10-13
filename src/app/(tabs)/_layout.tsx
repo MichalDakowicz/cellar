@@ -34,7 +34,7 @@ export default function TabsLayout() {
         <Tabs.Screen name="shelf" options={{ title: 'projects' }} />
         <Tabs.Screen name="inbox" options={{ title: 'inbox' }} />
         <Tabs.Screen name="stats" options={{ title: 'stats' }} />
-        <Tabs.Screen name="profile" options={{ title: 'profile' }} />
+        <Tabs.Screen name="desk" options={{ title: 'desk' }} />
       </Tabs>
       {/* One instance of each sheet for the whole app, so the nav island and a
           row's own button open the same one (PING.md §9.8). */}

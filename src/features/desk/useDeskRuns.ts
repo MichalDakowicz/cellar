@@ -1,3 +1,4 @@
+import { useDeskStream } from './useDeskStream';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { sortRuns, type DeskRun, type DeskStart } from '@/lib/deskProtocol';
@@ -16,26 +17,40 @@ import { DESK_KEYS, type DeskLink } from './useDeskLink';
 export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean } = {}) {
   const client = useQueryClient();
   const direct = link.calls;
+  const stream = useDeskStream(link, null, watch);
 
   const live = useQuery({
-    queryKey: [...DESK_KEYS.runs, link.via],
+    queryKey: [...DESK_KEYS.runs, link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none'],
     queryFn: () => direct!.runs(),
-    enabled: direct !== null && watch,
+    enabled: direct !== null && watch && !stream.supported,
     refetchInterval: 5_000,
     retry: false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
-  const runs: DeskRun[] = direct ? (live.data ?? []) : link.via === 'cellar' ? sortRuns(link.desk?.runs ?? []) : [];
+  const snapshotError = link.via === 'cellar' ? link.cellarError ?? (link.desk?.runs === null ? 'the pc did not return a valid run snapshot' : null) : null;
+  const available = direct ? stream.supported ? stream.live : live.isSuccess && live.isFetchedAfterMount : link.via === 'cellar' && link.desk !== null && !snapshotError;
+  const runs: DeskRun[] = !available ? [] : direct ? (stream.supported ? stream.state.runs : live.data ?? []) : sortRuns(link.desk?.runs ?? []);
 
   const refresh = () => {
+    if (stream.supported && stream.state.phase !== 'live') stream.retry();
     void client.invalidateQueries({ queryKey: DESK_KEYS.runs });
     void client.invalidateQueries({ queryKey: DESK_KEYS.desks });
   };
 
   const start = useMutation({
     mutationFn: async (request: DeskStart): Promise<string | null> => {
-      if (direct) return (await direct.start(request)).id;
-      if (link.via === 'cellar' && link.desk) return sendStart(link.desk.id, request);
+      if (direct) {
+        if (link.info?.taskProtocol !== 2) throw new Error('Update Cellar on the PC before sending tasks.');
+        const receipt = request.commandId ? await direct.receipt(request.commandId) : null;
+        if (receipt?.state === 'confirmed' && receipt.run) return receipt.run.id;
+        return (await direct.start(request)).id;
+      }
+      if (link.via === 'cellar' && link.desk) {
+        if (link.desk.taskProtocol !== 2) throw new Error('Update Cellar on the PC before sending tasks through the mailbox.');
+        return sendStart(link.desk.id, request);
+      }
       throw new Error(`${link.name} is not reachable right now`);
     },
     onSuccess: refresh,
@@ -60,8 +75,10 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
 
   return {
     runs,
-    loading: direct !== null && live.isLoading,
-    error: live.error ? (live.error as Error).message : null,
+    available,
+    refresh,
+    loading: direct !== null && !available && (stream.supported ? stream.state.phase === 'connecting' : !live.isError),
+    error: direct && stream.supported ? stream.state.error ?? (stream.state.phase === 'disconnected' ? 'PC live stream disconnected — reconnect.' : null) : direct && live.error ? (live.error as Error).message : snapshotError,
     /** Through the cellar the list is the pc's last heartbeat, not a live read. */
     snapshotAt: direct ? null : (link.desk?.seenAt ?? null),
     start,
@@ -73,10 +90,12 @@ export function useDeskRuns(link: DeskLink, { watch = true }: { watch?: boolean 
 /** One run's own words. Direct wires only — the cellar heartbeat carries the list, not the transcripts. */
 export function useDeskLog(link: DeskLink, id: string | null) {
   return useQuery({
-    queryKey: ['desk', 'log', id],
+    queryKey: ['desk', 'log', link.ownerId, link.via, link.info?.id ?? link.pair?.id ?? link.desk?.id ?? 'none', id],
     queryFn: () => link.calls!.log(id!),
-    enabled: id !== null && link.calls !== null,
+    enabled: id !== null && link.calls !== null && link.info?.eventProtocol !== 1,
     refetchInterval: 4_000,
     retry: false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }

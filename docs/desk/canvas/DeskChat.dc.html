@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — chat</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+[data-app='cellar'] .ping-chip[aria-pressed='true']{color:hsl(215 20% 75%)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button,input{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.pin{width:20px;height:20px;border-radius:6px;background:#262626;color:#d4d4d4;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tok{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.08);color:#e5e5e5;white-space:nowrap}
+.hex{font-family:'IBM Plex Mono',var(--font-mono);font-size:12px;font-weight:600;padding:1px 7px;border-radius:5px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.thread{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:12px;text-decoration:none;color:#fafafa}
+.thread:hover{background:hsl(0 0% 12%)}
+.thread[aria-current='page']{background:#262626}
+.ibtn{width:36px;height:36px;flex:none;border-radius:99px;border:1px solid hsl(var(--border));background:transparent;color:#fafafa;display:flex;align-items:center;justify-content:center;cursor:pointer}
+@media (max-width: 900px){.shell{height:auto !important}}
+</style>
+</helmet>
+<div data-app="cellar" class="shell" style="height: 100vh; min-height: 900px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px; overflow-y: auto">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<p class="text-lg font-bold">cellar</p>
+<span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span>
+</div>
+<a href="#jump" style="height: 36px; padding: 0 10px; border-radius: 8px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; gap: 8px; text-decoration: none" class="text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="flex: 1">jump to anything</span><span class="kbd">ctrl k</span></a>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>dump</a>
+<a class="side-a" href="DeskProjects.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>projects</a>
+<a class="side-a" href="#inbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>inbox<span class="side-n">4</span></a>
+<a class="side-a" href="#stats"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>home</a>
+<a class="side-a" href="DeskChat.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>chat<span class="ping-island-badge" style="margin-left: auto">2</span></a>
+<a class="side-a" href="#commands"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>commands</a>
+<a class="side-a" href="#previews"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>previews<span class="side-n">2 up</span></a>
+<a class="side-a" href="DeskPhone.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg>pixel<span class="dot" style="margin-left: auto; background: #22c55e"></span></a>
+</nav>
+<nav aria-label="pinned projects" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">pinned</p>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">c</span>cellar<span class="side-n">12</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">s</span>solar<span class="side-n">7</span></a>
+<a class="side-a" href="DeskProjects.dc.html"><span class="pin">r</span>radar<span class="side-n">3</span></a>
+</nav>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px">
+<span style="width: 32px; height: 32px; border-radius: 99px; background: hsl(var(--secondary)); color: #a3a3a3; display: flex; align-items: center; justify-content: center; flex: none" class="text-xs font-semibold">MI</span>
+<div style="flex: 1; min-width: 0"><p class="text-sm font-semibold">michu</p><p class="text-xs text-muted-foreground clamp1">2 of 4 agent slots busy</p></div>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; height: 100%; display: flex; flex-wrap: wrap">
+
+<section aria-label="runs" style="flex: 1 1 272px; height: 100%; box-sizing: border-box; border-right: 1px solid hsl(var(--border) / 0.5); padding: 20px 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px">
+<h1 class="text-xl font-bold">chat</h1>
+<button type="button" class="ibtn" aria-label="new run"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button>
+</div>
+<label for="runsearch" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">search runs</label>
+<input id="runsearch" type="text" placeholder="search runs — try $solar or claude" style="height: 40px; box-sizing: border-box; border-radius: 8px; border: 1px solid hsl(var(--border)); background: hsl(var(--secondary)); color: #fafafa; padding: 0 12px; font-size: 13px">
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<button type="button" class="ping-chip" aria-pressed="true" style="min-height: 32px; border: 1px solid hsl(var(--primary)); box-sizing: border-box; font-size: 13px">all</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">waiting 2</button>
+<button type="button" class="ping-chip" aria-pressed="false" style="min-height: 32px; border: 1px solid transparent; box-sizing: border-box; font-size: 13px">running 2</button>
+</div>
+<p class="side-h" style="padding-left: 12px">$cellar</p>
+<a href="DeskChat.dc.html" class="thread" aria-current="page"><span class="text-sm font-semibold clamp1">add the desk tab</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #ef4444"></span>codex · waiting on you · 9m</span></a>
+<a href="#t2" class="thread"><span class="text-sm font-semibold clamp1">fix the sticky inbox swipe</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #f59e0b"></span>claude · testing on the pixel · 6m</span></a>
+<a href="#t3" class="thread"><span class="text-sm font-semibold clamp1">rename shelves to rooms?</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #ef4444"></span>claude · asked you something</span></a>
+<a href="#t4" class="thread"><span class="text-sm font-semibold clamp1">write the 1.12 release notes</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>codex · yesterday</span></a>
+<p class="side-h" style="padding-left: 12px">$solar</p>
+<a href="#t5" class="thread"><span class="text-sm font-semibold clamp1">port lidar's shelf grid</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>claude · merged · 2h ago</span></a>
+<a href="#t6" class="thread"><span class="text-sm font-semibold clamp1">pick a cosmic accent</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #737373"></span>queued after the grid run</span></a>
+<p class="side-h" style="padding-left: 12px">$radar</p>
+<a href="#t7" class="thread"><span class="text-sm font-semibold clamp1">episode list crashes on rotate</span><span class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #22c55e"></span>codex · 3d ago</span></a>
+</section>
+
+<section aria-label="add the desk tab" style="flex: 999 1 420px; min-width: 0; height: 100%; display: flex; flex-direction: column">
+<header style="flex: none; padding: 18px 24px 14px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid hsl(var(--border) / 0.5)">
+<div style="display: flex; align-items: center; gap: 10px">
+<h2 class="text-lg font-bold clamp1" style="flex: 1; min-width: 0">add the desk tab</h2>
+<a href="#diff" style="height: 36px; padding: 0 12px; border-radius: 99px; border: 1px solid hsl(var(--border)); color: #fafafa; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; box-sizing: border-box" class="text-xs font-semibold"><span class="mono" style="color: #22c55e">+212</span><span class="mono" style="color: #ef4444">−40</span><span style="color: #a3a3a3">6 files</span></a>
+<button type="button" class="ibtn" aria-label="open the worktree in your editor"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></button>
+<button type="button" class="ibtn" aria-label="open a pull request"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" x2="6" y1="9" y2="21"></line></svg></button>
+<button type="button" class="ibtn" aria-label="stop this run"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect width="14" height="14" x="5" y="5" rx="2"></rect></svg></button>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+<span class="tok">$cellar</span><span class="tok">$cellar/desk-tab-on-the-phone</span><span class="tok">wt/desk-tab</span><span class="text-xs text-muted-foreground" style="margin-left: 4px">codex · edits ok · started from your phone at 14:02</span>
+</div>
+</header>
+
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 20px 24px 120px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+<div class="text-sm" style="max-width: 440px; padding: 10px 14px; border-radius: 16px; background: hsl(var(--secondary)); line-height: 22px">replace the profile tab with a desk tab on the phone — reuse the nav islands. take <span class="tok">$cellar/desk-tab-on-the-phone</span> as the brief, keep the plate <span class="hex" style="background: #64748B; color: #ffffff">#64748B</span>, then <span class="tok">$apk</span> and <span class="tok">$try-on-phone</span></div>
+<p class="text-[11px] text-muted-foreground">you · from your phone · 14:02</p>
+</div>
+
+<p class="text-sm" style="max-width: 560px">on it. i read the tabs layout and the nav islands; here's the plan.</p>
+
+<div style="border-radius: 12px; background: var(--ping-row-ground); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; max-width: 560px">
+<p class="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">plan · 3 of 5</p>
+<p class="text-sm" style="display: flex; gap: 8px; color: #a3a3a3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>swap the right island's avatar for a desk glyph</p>
+<p class="text-sm" style="display: flex; gap: 8px; color: #a3a3a3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>move settings onto the desk screen</p>
+<p class="text-sm" style="display: flex; gap: 8px; color: #a3a3a3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>runs list with waiting / running / lately</p>
+<p class="text-sm" style="display: flex; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg>voice tasks — needs expo-av</p>
+<p class="text-sm" style="display: flex; gap: 8px; color: #a3a3a3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg><span><span class="tok">$apk</span>, then <span class="tok">$try-on-phone</span> to click through on the pixel</span></p>
+</div>
+
+<div style="border-radius: 12px; background: var(--ping-row-ground); overflow: hidden; max-width: 560px">
+<div style="height: 36px; padding: 0 14px; display: flex; align-items: center; gap: 8px"><span class="text-xs mono clamp1" style="flex: 1; color: #d4d4d4">src/components/layout/NavIslands.tsx</span><span class="text-xs mono" style="color: #22c55e">+34</span><span class="text-xs mono" style="color: #ef4444">−12</span></div>
+<div class="mono" style="font-size: 12px; line-height: 20px; padding-bottom: 6px">
+<p style="padding: 0 14px; color: #737373">@@ right island @@</p>
+<p style="padding: 0 14px; background: rgba(239,68,68,0.10); color: #fca5a5">−   &lt;Avatar size={44} user={me} /&gt;</p>
+<p style="padding: 0 14px; background: rgba(34,197,94,0.10); color: #86efac">+   &lt;DeskPlate waiting={waitingCount} /&gt;</p>
+<p style="padding: 0 14px; background: rgba(34,197,94,0.10); color: #86efac">+   {waitingCount &gt; 0 &amp;&amp; &lt;IslandBadge n={waitingCount} /&gt;}</p>
+</div>
+</div>
+
+<p class="text-xs text-muted-foreground" style="display: flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><line x1="3" x2="9" y1="12" y2="12"></line><line x1="15" x2="21" y1="12" y2="12"></line></svg>checkpoint 3 · 14:05 · <a href="#rollback">roll back to here</a></p>
+
+<p class="text-sm" style="max-width: 560px">voice tasks need <span class="mono">expo-av</span>. ok to install it in the worktree?</p>
+
+<div style="border-radius: 12px; border: 1px solid hsl(var(--border)); padding: 14px; display: flex; flex-direction: column; gap: 10px; max-width: 560px">
+<p class="text-xs font-bold uppercase tracking-widest" style="color: #ef4444; display: flex; align-items: center; gap: 6px"><span class="dot" style="background: #ef4444"></span>waiting on you · also on your phone</p>
+<div class="mono text-sm" style="padding: 8px 12px; border-radius: 8px; background: var(--ping-row-ground)">npm install expo-av</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" style="height: 36px; padding: 0 16px; border-radius: 99px; border: 0; background: hsl(var(--primary)); color: #ffffff; cursor: pointer" class="text-sm font-semibold">allow</button>
+<button type="button" style="height: 36px; padding: 0 16px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">allow installs for this run</button>
+<button type="button" style="height: 36px; padding: 0 16px; border-radius: 99px; border: 0; background: transparent; color: #d4d4d4; cursor: pointer" class="text-sm">deny</button>
+</div>
+</div>
+</div>
+
+<div style="flex: none; position: relative; padding: 0 24px 20px">
+<div role="listbox" aria-label="{{keyTitle}}" style="position: absolute; left: 24px; bottom: calc(100% + 8px); width: 460px; max-width: calc(100% - 48px); box-sizing: border-box; border-radius: 16px; border: 1px solid hsl(var(--border)); background: #121212; padding: 8px; display: flex; flex-direction: column; gap: 2px">
+<div style="display: flex; gap: 4px; padding: 2px 2px 8px">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{k.on}}" onClick="{{k.pick}}" style="height: 30px; padding: 0 10px; border-radius: 99px; border: 1px solid {{k.border}}; background: {{k.ground}}; color: {{k.color}}; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px"><span class="mono" style="font-weight: 600">{{k.key}}</span>{{k.name}}</button>
+</sc-for>
+</div>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<p class="text-[11px] font-semibold uppercase tracking-widest" style="color: #8a8a8a; padding: 6px 10px 2px">{{g.title}}</p>
+<sc-for list="{{g.items}}" as="it" hint-placeholder-count="3">
+<div role="option" aria-selected="{{it.selected}}" style="display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; background: {{it.ground}}">
+<span class="mono text-sm" style="color: #fafafa; white-space: nowrap">{{it.k}}</span>
+<span class="text-xs text-muted-foreground clamp1" style="flex: 1; min-width: 0; text-align: right">{{it.sub}}</span>
+</div>
+</sc-for>
+</sc-for>
+<sc-if value="{{hasCreate}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-top: 4px; border-radius: 10px; border: 1px dashed #333; color: #d4d4d4" class="text-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>{{createLabel}}</div>
+</sc-if>
+<p class="text-[11px]" style="color: #8a8a8a; padding: 8px 10px 2px">↑↓ move · tab puts it in · esc closes · # plus a hex code becomes a colour chip</p>
+</div>
+
+<div style="border-radius: 16px; border: 1px solid hsl(var(--primary)); background: hsl(var(--secondary)); padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 10px">
+<div role="textbox" tabindex="0" aria-multiline="true" aria-label="message to codex" class="text-sm" style="min-height: 44px; line-height: 22px; outline: none">after <span class="tok">$apk</span>, make the badge <span class="hex" style="background: #EF4444; color: #0a0a0a">#EF4444</span> and {{before}}<span class="mono" style="color: #fafafa">{{typed}}</span><span style="display: inline-block; width: 2px; height: 16px; margin-left: 1px; vertical-align: -3px; background: #fafafa"></span></div>
+<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+<button type="button" aria-label="agent: codex" style="height: 30px; padding: 0 10px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #d4d4d4; cursor: pointer; font-size: 12px">codex ▾</button>
+<button type="button" style="height: 30px; padding: 0 10px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #d4d4d4; cursor: pointer; font-size: 12px">edits ok ▾</button>
+<button type="button" style="height: 30px; padding: 0 10px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #d4d4d4; cursor: pointer; font-size: 12px">steer now ▾</button>
+<span style="flex: 1"></span>
+<button type="button" aria-label="attach a file" style="width: 32px; height: 32px; border: 0; border-radius: 99px; background: transparent; color: #a3a3a3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg></button>
+<button type="button" aria-label="attach a screenshot from pixel" style="width: 32px; height: 32px; border: 0; border-radius: 99px; background: transparent; color: #a3a3a3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg></button>
+<button type="button" aria-label="dictate" style="width: 32px; height: 32px; border: 0; border-radius: 99px; background: transparent; color: #a3a3a3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></button>
+<button type="button" aria-label="send" style="width: 36px; height: 36px; border: 0; border-radius: 99px; background: hsl(var(--foreground)); color: hsl(var(--background)); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button>
+</div>
+</div>
+</div>
+</section>
+
+<aside aria-label="pixel and this run" style="flex: 1 1 320px; height: 100%; box-sizing: border-box; border-left: 1px solid hsl(var(--border) / 0.5); padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto">
+<div style="display: flex; align-items: center; gap: 8px">
+<p class="text-sm font-bold">pixel</p><span class="dot" style="background: #22c55e"></span><span class="text-xs text-muted-foreground" style="flex: 1">usb · live · you're in control</span>
+<a href="DeskPhone.dc.html" class="text-xs font-semibold">open →</a>
+</div>
+<div aria-label="pixel screen, mirrored over adb" style="align-self: center; width: 220px; height: 452px; box-sizing: border-box; border-radius: 30px; border: 6px solid #1c1c1c; background: #0a0a0a; overflow: hidden; position: relative; padding: 30px 12px 0; display: flex; flex-direction: column; gap: 9px">
+<p style="font-size: 15px; font-weight: 700">your desk</p>
+<p style="font-size: 8px; color: #a3a3a3; margin-top: -6px">michu-pc is awake · 1 waiting on you</p>
+<div style="height: 54px; border-radius: 8px; background: #171717"></div>
+<div style="display: flex; gap: 4px"><span style="flex: 1; height: 34px; border-radius: 7px; background: #171717"></span><span style="flex: 1; height: 34px; border-radius: 7px; background: #171717"></span><span style="flex: 1; height: 34px; border-radius: 7px; background: #171717"></span><span style="flex: 1; height: 34px; border-radius: 7px; background: #171717"></span></div>
+<p style="font-size: 7px; font-weight: 700; letter-spacing: 0.1em; color: #a3a3a3">WAITING ON YOU</p>
+<div style="height: 44px; border-radius: 8px; background: #262626; padding: 0 8px; display: flex; flex-direction: column; justify-content: center; gap: 2px"><p style="font-size: 9px; font-weight: 700">add the desk tab</p><p style="font-size: 7px; color: #a3a3a3">wants to run npm i expo-av</p></div>
+<p style="font-size: 7px; font-weight: 700; letter-spacing: 0.1em; color: #a3a3a3">RUNNING</p>
+<div style="height: 44px; border-radius: 8px; background: #171717"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 5px">
+<span style="width: 26px; height: 26px; border-radius: 99px; background: rgba(38,38,38,0.9)"></span>
+<span style="width: 92px; height: 26px; border-radius: 99px; background: rgba(38,38,38,0.9)"></span>
+<span style="width: 26px; height: 26px; border-radius: 99px; background: rgba(38,38,38,0.9); border: 1px solid hsl(var(--primary)); box-sizing: border-box"></span>
+</div>
+<span aria-hidden="true" style="position: absolute; left: 150px; top: 232px; width: 22px; height: 22px; border-radius: 99px; border: 2px solid rgba(255,255,255,0.6); box-sizing: border-box"></span>
+</div>
+<div style="display: flex; justify-content: center; gap: 8px">
+<button type="button" class="ibtn" aria-label="screenshot into this chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg></button>
+<button type="button" class="ibtn" aria-label="record 30 seconds"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg></button>
+<button type="button" class="ibtn" aria-label="install the newest apk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg></button>
+<button type="button" class="ibtn" aria-label="rotate"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg></button>
+<button type="button" class="ibtn" aria-label="logcat into this chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid hsl(var(--border) / 0.5)">
+<p class="text-xs font-bold uppercase tracking-widest text-muted-foreground">this run</p>
+<p class="text-xs" style="display: flex; gap: 8px"><span class="mono clamp1" style="flex: 1; color: #d4d4d4">NavIslands.tsx</span><span class="mono" style="color: #22c55e">+34</span><span class="mono" style="color: #ef4444">−12</span></p>
+<p class="text-xs" style="display: flex; gap: 8px"><span class="mono clamp1" style="flex: 1; color: #d4d4d4">(tabs)/_layout.tsx</span><span class="mono" style="color: #22c55e">+18</span><span class="mono" style="color: #ef4444">−6</span></p>
+<p class="text-xs" style="display: flex; gap: 8px"><span class="mono clamp1" style="flex: 1; color: #d4d4d4">(tabs)/desk.tsx</span><span class="mono" style="color: #22c55e">+160</span><span class="mono" style="color: #ef4444">−0</span></p>
+<p class="text-xs text-muted-foreground">3 checkpoints · preview on :8082 · <a href="#preview">open on pixel</a></p>
+</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const key = s.key || '$';
+    const data = {
+      '@': {
+        name: 'files',
+        before: 'move the badge logic into ',
+        groups: [
+          { title: 'changed in this run', items: [
+            { k: '@NavIslands.tsx', sub: '+34 −12' },
+            { k: '@(tabs)/desk.tsx', sub: 'new' },
+            { k: '@(tabs)/_layout.tsx', sub: '+18 −6' }
+          ] },
+          { title: 'in wt/desk-tab', items: [
+            { k: '@(tabs)/profile.tsx', sub: 'being removed' },
+            { k: '@app.json', sub: '' }
+          ] }
+        ],
+        create: ''
+      },
+      '$': {
+        name: 'cellar',
+        before: 'then ',
+        groups: [
+          { title: 'commands · this project · also buttons', items: [
+            { k: '$try-on-phone', sub: 'install, open, screenshot back' },
+            { k: '$preview', sub: 'expo start --web · on the tailnet' },
+            { k: '$deploy', sub: 'npm run deploy:web' }
+          ] },
+          { title: 'projects · pick one, then / for its entries', items: [
+            { k: '$cellar/', sub: '12 open' },
+            { k: '$solar/', sub: '7 open' },
+            { k: '$radar/', sub: '3 open' }
+          ] }
+        ],
+        create: 'new project'
+      },
+      '$cellar/': {
+        name: 'entries',
+        before: 'file anything odd under ',
+        groups: [
+          { title: 'entries in cellar', items: [
+            { k: '$cellar/inbox-swipe-feels-sticky', sub: 'glitch · claude on it' },
+            { k: '$cellar/archive-needs-an-undo', sub: 'idea · open' },
+            { k: '$cellar/streak-pill-clips', sub: 'glitch · open' }
+          ] },
+          { title: "cellar's commands", items: [
+            { k: '$cellar/deploy', sub: 'npm run deploy:web' }
+          ] }
+        ],
+        create: 'new entry in cellar — keep typing its words'
+      },
+      '/': {
+        name: 'skills',
+        before: 'check it with ',
+        groups: [
+          { title: 'codex · built in', items: [
+            { k: '/review', sub: 'review the changes in this worktree' },
+            { k: '/init', sub: 'write an AGENTS.md for the repo' },
+            { k: '/compact', sub: 'summarise the chat to free up context' }
+          ] },
+          { title: 'codex · yours', items: [
+            { k: '/frontend-design', sub: 'ping look, nav islands, no gradients' },
+            { k: '/release-notes', sub: 'notes from merged runs' }
+          ] }
+        ],
+        create: 'write a new skill for codex'
+      }
+    };
+    const current = data[key];
+    let first = true;
+    const groups = current.groups.map((g) => ({
+      title: g.title,
+      items: g.items.map((it) => {
+        const sel = first;
+        first = false;
+        return { k: it.k, sub: it.sub, selected: sel, ground: sel ? '#262626' : 'transparent' };
+      })
+    }));
+    return {
+      typed: key,
+      before: current.before,
+      keyTitle: current.name,
+      groups: groups,
+      hasCreate: !!current.create,
+      createLabel: current.create,
+      keys: ['@', '$', '$cellar/', '/'].map((k) => ({
+        key: k,
+        name: data[k].name,
+        on: k === key,
+        border: k === key ? 'hsl(var(--primary))' : 'transparent',
+        ground: k === key ? 'hsl(var(--primary) / 0.16)' : 'rgba(255,255,255,0.06)',
+        color: k === key ? 'hsl(215 20% 80%)' : '#d4d4d4',
+        pick: () => this.setState({ key: k })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

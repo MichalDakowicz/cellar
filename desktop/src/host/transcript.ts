@@ -10,6 +10,12 @@ import type { DeskLogLine } from '@/lib/deskProtocol';
  */
 
 const LINE_MAX = 600;
+/**
+ * An agent's reply is markdown the phone now draws (`components/cellar/Markdown`),
+ * and a list or a table cut at 600 characters loses the half that answers. It is
+ * still capped, so one runaway reply cannot make the log the size of a file.
+ */
+const REPLY_MAX = 6000;
 
 function cut(text: string, max = LINE_MAX): string {
   const clean = text.trim();
@@ -52,7 +58,7 @@ export function claudeTranscript(jsonl: string): DeskLogLine[] {
       }
     } else if (row.type === 'assistant' && Array.isArray(content)) {
       for (const block of content) {
-        if (block.type === 'text' && block.text?.trim()) out.push({ who: 'agent', text: cut(block.text) });
+        if (block.type === 'text' && block.text?.trim()) out.push({ who: 'agent', text: cut(block.text, REPLY_MAX) });
         else if (block.type === 'tool_use' && block.name) out.push({ who: 'tool', text: toolSummary(block.name, block.input) });
       }
     }

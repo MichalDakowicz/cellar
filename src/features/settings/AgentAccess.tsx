@@ -66,11 +66,11 @@ export function AgentAccess({ gutter }: { gutter: string }) {
           password.length < 6 || state === 'saving' ? 'opacity-50' : '',
         ].join(' ')}
       >
-        <Text className="text-sm font-semibold text-foreground">
+        <Text className="font-sans text-sm font-semibold text-foreground">
           {state === 'saving' ? 'setting it…' : 'set the password'}
         </Text>
       </Pressable>
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-xs text-muted-foreground">
         {state === 'done'
           ? `done. run npm run login in cellar/mcp and use ${user?.email ?? 'this email'} with it.`
           : 'the mcp server has no browser to sign in through, so it needs an email and a password. google sign-in keeps working here either way.'}

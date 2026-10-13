@@ -34,10 +34,10 @@ describe('pickDesk', () => {
 });
 
 describe('deskCan', () => {
-  it('keeps pages, screen and builds to the lan', () => {
-    expect(deskCan('lan')).toEqual({ start: true, log: true, local: true });
-    expect(deskCan('cellar')).toEqual({ start: true, log: false, local: false });
-    expect(deskCan('bridge')).toEqual({ start: true, log: true, local: false });
+  it('keeps the screen and builds to the lan, and pages to either direct wire', () => {
+    expect(deskCan('lan')).toEqual({ start: true, log: true, local: true, pages: true });
+    expect(deskCan('cellar')).toEqual({ start: true, log: false, local: false, pages: false });
+    expect(deskCan('bridge')).toEqual({ start: true, log: true, local: false, pages: true });
     expect(deskCan('none').start).toBe(false);
   });
 });

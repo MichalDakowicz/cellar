@@ -21,10 +21,10 @@ export function DeskLocalRow({
   return (
     <View className="flex-row items-center gap-3 py-2.5">
       <View className="min-w-0 flex-1">
-        <Text className="text-sm text-foreground" numberOfLines={1}>
+        <Text className="font-sans text-sm text-foreground" numberOfLines={1}>
           {title}
         </Text>
-        <Text className="mt-0.5 text-xs text-muted-foreground" numberOfLines={1}>
+        <Text className="font-sans mt-0.5 text-xs text-muted-foreground" numberOfLines={1}>
           {detail}
         </Text>
       </View>
@@ -36,7 +36,7 @@ export function DeskLocalRow({
         onPress={onPress}
         className={['rounded-full border border-border px-3 py-1.5 active:opacity-70', busy ? 'opacity-50' : ''].join(' ')}
       >
-        <Text className="text-xs font-semibold text-foreground">{busy ? '…' : verb}</Text>
+        <Text className="font-sans text-xs font-semibold text-foreground">{busy ? '…' : verb}</Text>
       </Pressable>
     </View>
   );

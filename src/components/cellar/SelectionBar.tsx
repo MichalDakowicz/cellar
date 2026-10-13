@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { Copy, FolderInput, X } from 'lucide-react-native';
+import { Bot, Copy, FolderInput, X } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,7 +10,8 @@ import { COLORS } from '@/theme/colors';
 const BLUR_METHOD = Platform.OS === 'android' ? 'dimezisBlurView' : 'none';
 
 /**
- * What a held selection can have done to it: file it, copy it, drop it.
+ * What a held selection can have done to it: file it, hand it to an agent on
+ * the pc, copy it, drop it.
  *
  * A fourth floating island rather than a bar across the screen, so it belongs
  * to the same family as the nav below it (PING.md §8). It rides directly above
@@ -26,11 +27,14 @@ export function SelectionBar({
   onFile,
   onCopy,
   onClear,
+  onHandoff,
 }: {
   count: number;
   onFile: () => void;
   onCopy: () => void;
   onClear: () => void;
+  /** One run, or one run each, on the pc (`DeskProjects.dc.html`); absent where it makes no sense. */
+  onHandoff?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const isDesktop = useIsDesktop();
@@ -50,6 +54,11 @@ export function SelectionBar({
         <Action label={`file ${count === 1 ? 'it' : 'them'}`} onPress={onFile}>
           <FolderInput size={17} color={COLORS.accent} strokeWidth={2} />
         </Action>
+        {onHandoff && (
+          <Action label={`hand ${count === 1 ? 'it' : 'them'} to an agent`} onPress={onHandoff}>
+            <Bot size={17} color={COLORS.foreground} strokeWidth={2} />
+          </Action>
+        )}
         <Action label="copy a prompt for them" onPress={onCopy}>
           <Copy size={16} color={COLORS.foreground} strokeWidth={2} />
         </Action>

@@ -1,3 +1,6 @@
+import type { RunEvents } from './runEvents.ts';
+import type { Approvals } from './approvals.ts';
+import type { Controls } from './controls.ts';
 import { realpathSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -14,6 +17,13 @@ import type { Proxies } from './proxy.ts';
 import type { Runs } from './runs.ts';
 import type { Ticket, Tickets } from './tickets.ts';
 import { installedAgents } from './tools.ts';
+import type { Commands } from './commands.ts';
+import type { Jobs } from './jobs.ts';
+import { sortRuns } from '@/lib/deskProtocol';
+import type { Receipts } from './receipts.ts';
+import { startTask } from './startTask.ts';
+import type { Worktrees } from './worktrees.ts';
+import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -25,10 +35,13 @@ import { installedAgents } from './tools.ts';
  * which is here, and are served by the LAN server.
  */
 
-export type ApiRequest = { method: string; path: string; body?: unknown };
+export type ApiRequest = { method: string; path: string; body?: unknown; source?: 'phone' | 'pc' };
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  controls?: Controls;
+  approvals?: Approvals;
+  events?: RunEvents;
   identity: () => Identity;
   account: Account;
   runs: Runs;
@@ -36,9 +49,17 @@ export type HostDeps = {
   proxies: Proxies;
   lanHost: () => string | null;
   version: string;
+  commands?: Commands;
+  jobs?: Jobs;
+  receipts?: Receipts;
+  worktrees?: Worktrees;
 };
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
+
+export async function hostRuns(deps: HostDeps) {
+  return sortRuns([...(await deps.runs.list()), ...(deps.jobs?.list() ?? [])]);
+}
 
 export async function hiddenPorts(deps: HostDeps): Promise<Set<number>> {
   return new Set([deps.identity().port, ...(await deps.proxies.ports())]);
@@ -52,6 +73,13 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     version: deps.version,
     agents: await installedAgents(),
     signedIn: deps.account.current !== null,
+    capabilities: { commands: !!deps.commands, previews: true, screen: true, downloads: true,
+      worktrees: !!deps.worktrees, events: !!deps.events, approvals: !!deps.approvals, dispatch: !!deps.controls },
+    ...(deps.receipts ? { taskProtocol: 2 as const } : {}),
+    ...(deps.worktrees ? { worktrees: true as const } : {}),
+    ...(deps.events ? { eventProtocol: 1 as const } : {}),
+    ...(deps.approvals ? { approvalProtocol: 1 as const } : {}),
+    ...(deps.controls ? { dispatchProtocol: 1 as const } : {}),
   };
 }
 
@@ -75,6 +103,7 @@ export async function startRun(deps: HostDeps, body: unknown) {
   const parsed = parseDeskStart(body);
   if (!parsed.ok) throw new DeskError(parsed.error);
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
+  if (deps.receipts) return deps.receipts.start(deps.account.current.userId, parsed.value, () => startTask(deps, parsed.value));
   const cwd = realFolder(parsed.value.cwd);
   if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
   return deps.runs.start({ ...parsed.value, cwd });
@@ -90,12 +119,12 @@ async function trust(deps: HostDeps, body: unknown): Promise<string> {
   if (typeof raw.cwd !== 'string' || !raw.cwd.trim()) throw new DeskError('which folder?');
   if (!deps.account.current) throw new DeskError('cellar is signed out on the pc — open it there and sign in', 409);
   const cwd = realFolder(raw.cwd);
-  if (!(await deps.account.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
+  if (!(await deps.account.allows(cwd)) && !(await deps.worktrees?.allows(cwd))) throw new DeskError(`${cwd} is not a project folder in your cellar`, 403);
   trustFolder(cwd);
   return cwd;
 }
 
-async function ticket(deps: HostDeps, body: unknown): Promise<string> {
+async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'phone'): Promise<string> {
   const raw = (body ?? {}) as { kind?: string; port?: unknown; app?: unknown };
   let wanted: Ticket;
   if (raw.kind === 'screen') {
@@ -111,33 +140,91 @@ async function ticket(deps: HostDeps, body: unknown): Promise<string> {
   } else {
     throw new DeskError('what is the ticket for?');
   }
-  const host = deps.lanHost();
+  const host = source === 'pc' ? '127.0.0.1' : deps.lanHost();
   if (!host) throw new DeskError('this pc is not on a network the phone can reach', 409);
   return `http://${host}:${deps.identity().port}/t/${deps.tickets.issue(wanted)}`;
 }
 
 export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiResponse> {
   const parts = req.path.split('?')[0].split('/').filter(Boolean);
-  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (parts[0] === 'runs' && i === 1 ? ':id' : part)).join('/')}`;
+  const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'POST /run-controls':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ receipt: await deps.controls.run(req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });
+      case 'GET /run-controls/:id':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ receipt: await deps.controls.receipt(parts[1]) });
+      case 'GET /runs/:id/queue':
+        if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
+        return ok({ queue: deps.controls.queue(parts[1]) });
+      case 'POST /approval-answers':
+        if (!deps.approvals || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for approvals.', 409);
+        return ok({ receipt: await deps.approvals.answer(deps.account.current.userId,
+          req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });
+      case 'GET /approval-answers/:id':
+        if (!deps.approvals || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for approvals.', 409);
+        return ok({ receipt: deps.approvals.receipt(deps.account.current.userId, parts[1]) });
       case 'GET /desk':
         return ok(await deskInfo(deps));
+      case 'POST /event-ticket': {
+        if (!deps.events || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for live events.', 409);
+        const host = (req.body as { local?: boolean } | null)?.local === true ? '127.0.0.1' : deps.lanHost() ?? '127.0.0.1';
+        const token = deps.tickets.issue({ kind: 'events', owner: deps.account.current.userId, key: deps.identity().key });
+        return ok({ url: 'ws://' + host + ':' + deps.identity().port + '/events/' + token });
+      }
       case 'GET /runs':
-        return ok({ runs: await deps.runs.list() });
+        return ok({ runs: await hostRuns(deps) });
+      case 'GET /requests/:id': {
+        if (!deps.account.current || !deps.receipts) throw new DeskError('Sign in and update Cellar on the PC.', 409);
+        return ok({ receipt: deps.receipts.get(deps.account.current.userId, parts[1]) });
+      }
+      case 'GET /commands':
+        if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
+        return ok({ projects: await deps.commands.list() });
+      case 'GET /worktrees':
+        if (!deps.worktrees) throw new DeskError('Update Cellar on the PC for worktrees.', 409);
+        return ok({ projects: await deps.worktrees.list() });
+      case 'GET /worktree-requests/:id':
+        if (!deps.worktrees || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC.', 409);
+        return ok({ receipt: deps.worktrees.receipts.get(deps.account.current.userId, parts[1]) });
+      case 'POST /worktrees/:id/review': {
+        const action = (req.body as { action?: unknown } | null)?.action;
+        if (!deps.worktrees || !['keep', 'merge', 'remove'].includes(String(action))) throw new DeskError('Select a worktree action.', 409);
+        return ok({ review: await deps.worktrees.review(parts[1], action as WorktreeAction) });
+      }
+      case 'POST /worktrees/:id': {
+        const raw = req.body as Partial<WorktreeRequest> | null;
+        if (!deps.worktrees || !raw || raw.worktreeId !== parts[1] || !['keep', 'merge', 'remove'].includes(String(raw.action))
+          || typeof raw.commandId !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(raw.commandId)
+          || typeof raw.token !== 'string' || !/^[a-f0-9]{64}$/.test(raw.token)) throw new DeskError('Invalid worktree action.', 409);
+        return ok({ receipt: await deps.worktrees.act(raw as WorktreeRequest) });
+      }
+      case 'POST /commands': {
+        if (!deps.commands || !deps.jobs) throw new DeskError('update cellar on the pc for jobs', 409);
+        const body = req.body as { projectId?: unknown; command?: unknown } | null;
+        if (typeof body?.projectId !== 'string' || typeof body.command !== 'string') throw new DeskError('pick a project command');
+        return ok({ run: await deps.jobs.start(await deps.commands.plan(body.projectId, body.command), body.command) });
+      }
+      case 'POST /commands/:id/settings':
+        if (!deps.commands) throw new DeskError('update cellar on the pc for project commands', 409);
+        await deps.commands.save(parts[1], (req.body as { commands?: unknown } | null)?.commands);
+        return ok({ saved: true });
       case 'POST /runs':
         return ok({ run: await startRun(deps, req.body) });
       case 'POST /runs/:id/stop':
-        await deps.runs.stop(parts[1]);
+        if (deps.jobs?.has(parts[1])) await deps.jobs.stop(parts[1]);
+        else await deps.runs.stop(parts[1]);
         return ok({ stopped: parts[1] });
       case 'GET /runs/:id/log':
-        return ok({ lines: await deps.runs.log(parts[1]) });
+        return ok({ lines: deps.jobs?.has(parts[1]) ? await deps.jobs.log(parts[1]) : await deps.runs.log(parts[1]) });
       case 'GET /ports':
         return ok({ ports: await readPorts(await hiddenPorts(deps)) });
       case 'GET /apks':
         return ok({ apks: await findApks(deps.identity().workspace) });
       case 'POST /tickets':
-        return ok({ url: await ticket(deps, req.body) });
+        return ok({ url: await ticket(deps, req.body, req.source) });
       case 'POST /trust':
         return ok({ trusted: await trust(deps, req.body) });
       default:

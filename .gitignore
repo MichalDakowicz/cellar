@@ -57,3 +57,4 @@ supabase/.temp/
 # Desktop app build output
 /desktop/build
 /desktop/release
+/desktop/renderer-dist

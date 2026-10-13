@@ -1,0 +1,90 @@
+/**
+ * Ping — space, radius, elevation, motion, layout.
+ * PING.md §6 (space/radius/borders), §7 (motion), §8.2–§8.3 (shell).
+ *
+ * Spacing is Tailwind's 4px scale; in practice a small vocabulary, listed in
+ * README.md with what each step is for. The tokens here are for the values that
+ * are *not* reachable as a class: grid gap maths, content caps, breakpoints,
+ * nav-island geometry, durations.
+ */
+
+:root {
+  /* ── Gutters (§6) */
+  --ping-gutter-phone: 1rem;     /* px-4 — the standard screen gutter on phone */
+  --ping-gutter-desktop: 2rem;   /* px-8 */
+  --ping-gutter-modal: 1.5rem;   /* px-6 — modal / auth padding */
+
+  /* ── Grid gaps (§6). One table, not classes: half pads the container and half
+   * pads each item, so edge gaps equal inter-card gaps. */
+  --ping-grid-gap-compact: 16px;
+  --ping-grid-gap-normal: 24px;
+
+  /* ── Radius (§6). Artwork gets small radii, containers get large radii,
+   * controls are fully round. A square-cornered element anywhere is a bug. */
+  --ping-radius-badge: 4px;      /* rounded — tiny badge over artwork */
+  --ping-radius-tile: 6px;       /* rounded-md — cover / poster / sleeve */
+  --ping-radius-control: 8px;    /* rounded-lg — inputs, segments, row thumb, toast */
+  --ping-radius-card: 12px;      /* rounded-xl — row card, banner, hero thumb */
+  --ping-radius-panel: 16px;     /* rounded-2xl — feed card, dialog, auth card */
+  --ping-radius-sheet: 20px;     /* phone bottom sheet, top corners only */
+  --ping-radius-pill: 99px;      /* every button, chip, pill, avatar, island */
+
+  /* ── Borders & elevation (§6). Hairline is the only structural weight;
+   * border-2 is a selected state. Depth comes from blur and translucency —
+   * shadow-lg on the toast and shadow-2xl on the hero cover thumbnail are the
+   * entire shadow budget, and there are no shadows on phone. */
+  --ping-hairline: 1px;
+  --ping-border-selected: 2px;
+  --ping-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --ping-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* ── Motion (§7). Small, purposeful. One marker travels; four states do not
+   * fade in place. Press feedback is opacity, never a scale on touch. */
+  --ping-duration-nav: 260ms;        /* marker slide + glyph crossfade, matched */
+  --ping-duration-nav-toggle: 160ms; /* marker show/hide */
+  --ping-duration-sheet-in: 260ms;
+  --ping-duration-sheet-out: 200ms;
+  --ping-duration-artwork: 200ms;    /* 0 for rapid source swaps */
+  --ping-duration-avatar: 150ms;
+  --ping-duration-hover: 160ms;      /* web hover transform / colour */
+  --ping-ease-out: cubic-bezier(0.33, 1, 0.68, 1);   /* ≈ Easing.out(Easing.cubic) */
+  --ping-ease-in: cubic-bezier(0.32, 0, 0.67, 0);    /* ≈ Easing.in(Easing.cubic) */
+  --ping-hover-lift: 1.035;          /* cover tile; 1.04 on a compact tile */
+
+  /* ── Nav islands (§8.3). Three glass plates in a 1–4–1 rhythm, centred,
+   * absolutely positioned — so they reserve no layout and every scrolling body
+   * pads for them with --ping-nav-space. */
+  --ping-island-height: 52px;
+  --ping-island-edge-gap: 10px;      /* from screen edge and from content */
+  --ping-island-gap: 9px;            /* between islands */
+  --ping-island-slot-w: 46px;
+  --ping-island-slot-h: 42px;
+  --ping-island-slot-gap: 2px;
+  --ping-island-pill-pad: 4px;
+  --ping-island-icon: 20px;          /* 21 at strokeWidth 2.2 for the action */
+  --ping-island-icon-on: #fafafa;
+  --ping-island-icon-off: #a3a3a3;
+  --ping-island-avatar: 44px;        /* you, in the right island — 4px of glass all round */
+  --ping-island-dot: 8px;            /* alert dot: accent, 1.5px ring */
+  --ping-island-badge: 18px;         /* count badge: accent, 9.5px/700 white, 1.5px ring */
+  --ping-island-ring: #161616;       /* the ring on both — the opaque form of the glass fill */
+  --ping-nav-space: calc(
+    var(--ping-safe-bottom, 0px) + (var(--ping-island-edge-gap) * 2) + var(--ping-island-height)
+  );
+
+  /* ── Content caps (§8.2). Never hard-code a max width; pick one of these. */
+  --ping-max-grid: 1800px;   /* tile grids, discovery feeds */
+  --ping-max-detail: 1180px; /* detail pages, stats */
+  --ping-max-text: 920px;    /* settings, friends, prose */
+  --ping-max-form: 460px;    /* auth card, dialogs */
+
+  /* ── Breakpoints (§8.2), for reference in media queries. Desktop starts at
+   * lg — and on native, tablets keep the phone layout. */
+  --ping-bp-sm: 640px;
+  --ping-bp-md: 768px;
+  --ping-bp-lg: 1024px;      /* DESKTOP_MIN_WIDTH */
+  --ping-bp-xl: 1280px;
+  --ping-bp-2xl: 1536px;
+  --ping-bp-3xl: 1920px;
+  --ping-bp-4xl: 2400px;
+}

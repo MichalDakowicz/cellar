@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cellar desktop — usage</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/ping-f543d9/styles.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0a0a0a}
+[data-app='cellar']{--primary:215 16% 47%;--ring:215 16% 47%;--ping-accent-soft:hsl(215 16% 47% / 0.15)}
+p,h1,h2,h3,ul{margin:0}
+a{color:hsl(215 20% 70%)}a:hover{color:#fafafa}
+button{font:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',var(--font-mono)}
+.clamp1{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kbd{font-family:'IBM Plex Mono',var(--font-mono);font-size:11px;line-height:16px;padding:1px 6px;border-radius:4px;border:1px solid #333;color:#a3a3a3;white-space:nowrap}
+.side-h{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;padding:10px 12px 4px}
+.side-a{height:36px;padding:0 12px;border-radius:99px;display:flex;align-items:center;gap:10px;color:#a3a3a3;text-decoration:none;font-size:14px}
+.side-a:hover{background:hsl(0 0% 12%);color:#fafafa}
+.side-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.side-n{margin-left:auto;font-size:12px;color:#8a8a8a}
+.pin{width:20px;height:20px;border-radius:6px;background:#262626;color:#d4d4d4;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.set-a{height:34px;padding:0 12px;border-radius:8px;display:flex;align-items:center;color:#a3a3a3;text-decoration:none;font-size:14px}
+.set-a:hover{color:#fafafa;background:hsl(0 0% 12%)}
+.set-a[aria-current='page']{background:hsl(0 0% 16%);color:#fafafa;font-weight:600}
+.bar{height:8px;border-radius:99px;background:hsl(var(--secondary));overflow:hidden}
+.bar span{display:block;height:100%;border-radius:99px}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a}
+</style>
+</helmet>
+<div data-app="cellar" style="min-height: 1340px; display: flex; flex-wrap: wrap; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: 'Spline Sans', var(--font-display)">
+
+<aside style="flex: 1 1 232px; box-sizing: border-box; padding: 18px 12px; background: #0f0f10; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px"><p class="text-lg font-bold">cellar</p><span class="text-[11px] font-semibold" style="color: #a3a3a3">on michu-pc</span></div>
+<nav aria-label="cellar" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">cellar</p>
+<a class="side-a" href="#dump">dump</a><a class="side-a" href="DeskProjects.dc.html">projects</a><a class="side-a" href="#inbox">inbox<span class="side-n">4</span></a><a class="side-a" href="#stats">stats</a>
+</nav>
+<nav aria-label="desk" style="display: flex; flex-direction: column; gap: 2px">
+<p class="side-h">desk</p>
+<a class="side-a" href="DeskHome.dc.html">home</a><a class="side-a" href="DeskChat.dc.html">chat<span class="ping-island-badge" style="margin-left: auto">2</span></a><a class="side-a" href="#commands">commands</a><a class="side-a" href="#previews">previews</a><a class="side-a" href="DeskPhone.dc.html">pixel</a>
+</nav>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px">
+<a class="side-a" href="DeskUsage.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg>settings</a>
+</div>
+</aside>
+
+<nav aria-label="settings" style="flex: 1 1 200px; box-sizing: border-box; padding: 24px 12px; border-right: 1px solid hsl(var(--border) / 0.5); display: flex; flex-direction: column; gap: 2px">
+<p class="text-xl font-bold" style="padding: 0 12px 12px">settings</p>
+<a class="set-a" href="#agents">agents</a>
+<a class="set-a" href="DeskHosts.dc.html">hosts</a>
+<a class="set-a" href="DeskRecipes.dc.html">recipes and rules</a>
+<a class="set-a" href="#keys">keys</a>
+<a class="set-a" href="#devices">devices and pairing</a>
+<a class="set-a" href="DeskHosts.dc.html">notifications</a>
+<a class="set-a" href="DeskHosts.dc.html">night shift</a>
+<a class="set-a" href="DeskUsage.dc.html" aria-current="page">usage</a>
+<a class="set-a" href="#account">account</a>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 36px 48px; display: flex; flex-direction: column; gap: 36px">
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px">
+<div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 4px">
+<h1 class="text-2xl font-bold tracking-tight">usage</h1>
+<p class="text-sm text-muted-foreground">per agent · updated a minute ago</p>
+</div>
+<div aria-label="the compact meter, as in the chat header" style="height: 32px; padding: 0 12px; border-radius: 99px; border: 1px solid hsl(var(--border)); display: flex; align-items: center; gap: 12px" class="text-xs mono">
+<span>ctx <b style="color: #fafafa">59%</b></span><span style="color: #525252">·</span><span>5h <b style="color: #fafafa">42%</b></span><span style="color: #525252">·</span><span>week <b style="color: #f59e0b">81%</b></span>
+</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<p class="lbl">this chat · make the cart work on small phones · claude</p>
+<div class="bar" style="height: 12px"><span style="width: 59%; background: #fafafa; opacity: 0.8"></span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center">
+<p class="text-sm"><b>118k</b> of 200k tokens in context · 59%</p>
+<p class="text-sm text-muted-foreground" style="flex: 1">at 80% cellar offers <span class="mono">/compact</span> — the agent's own way of shrinking the chat</p>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">compact now</button>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 14px">
+<p class="lbl">plan limits</p>
+<div style="display: flex; flex-wrap: wrap; gap: 32px">
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 12px">
+<p class="text-base font-bold">claude <span class="text-xs text-muted-foreground" style="font-weight: 400">· your plan</span></p>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between" class="text-sm"><span>5-hour window</span><span class="text-muted-foreground">42% · resets in 2h 14m</span></div><div class="bar"><span style="width: 42%; background: #fafafa; opacity: 0.8"></span></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between" class="text-sm"><span>this week</span><span style="color: #f59e0b">81% · resets mon 09:00</span></div><div class="bar"><span style="width: 81%; background: #f59e0b"></span></div></div>
+</div>
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 12px">
+<p class="text-base font-bold">codex <span class="text-xs text-muted-foreground" style="font-weight: 400">· your plan</span></p>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between" class="text-sm"><span>5-hour window</span><span class="text-muted-foreground">12% · resets in 4h 02m</span></div><div class="bar"><span style="width: 12%; background: #fafafa; opacity: 0.8"></span></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between" class="text-sm"><span>this week</span><span class="text-muted-foreground">28% · resets thu 18:00</span></div><div class="bar"><span style="width: 28%; background: #fafafa; opacity: 0.8"></span></div></div>
+</div>
+</div>
+<p class="text-xs text-muted-foreground">numbers come from each agent where it reports them; anything marked ≈ is cellar's own count</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<p class="lbl" style="flex: 1">accounts</p>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid hsl(var(--border)); background: transparent; color: #fafafa; cursor: pointer" class="text-sm font-semibold">add an account</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+<sc-for list="{{agents}}" as="a" hint-placeholder-count="3">
+<div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<p class="text-base font-bold">{{a.name}} <span class="text-xs text-muted-foreground" style="font-weight: 400">· {{a.note}}</span></p>
+<sc-for list="{{a.accounts}}" as="ac" hint-placeholder-count="2">
+<div class="ping-row" style="align-items: center; padding: 10px 12px; background: {{ac.ground}}">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<p class="text-sm font-semibold clamp1">{{ac.label}}</p>
+<p class="text-xs text-muted-foreground clamp1">{{ac.meta}}</p>
+<p class="text-xs mono" style="color: {{ac.usageColor}}">{{ac.usage}}</p>
+</div>
+<button type="button" onClick="{{ac.use}}" aria-pressed="{{ac.active}}" style="height: 32px; padding: 0 12px; border-radius: 99px; border: 1px solid {{ac.btnBorder}}; background: transparent; color: {{ac.btnColor}}; cursor: pointer; flex: none" class="text-xs font-semibold">{{ac.action}}</button>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px">
+<p class="text-base font-semibold">when a plan runs out mid-run</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{policies}}" as="p" hint-placeholder-count="5">
+<button type="button" class="ping-chip" aria-pressed="{{p.on}}" onClick="{{p.pick}}" style="min-height: 36px; cursor: pointer; border: 1px solid {{p.border}}; box-sizing: border-box; color: {{p.color}}">{{p.label}}</button>
+</sc-for>
+</div>
+<p class="text-sm" style="color: #d4d4d4">{{policyLine}}</p>
+<p class="text-xs text-muted-foreground">each run gets its own sign-in folder, so two runs can use two accounts at once and switching never logs the agent's other windows out. for accounts you own — personal, work, an api key; providers' terms may not allow rotating accounts just to get around limits.</p>
+</div>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+<div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px">
+<p class="lbl">this week by day</p>
+<div style="height: 140px; display: flex; align-items: flex-end; gap: 10px">
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 30%; border-radius: 8px 8px 0 0; background: #fafafa; opacity: 0.8"></span><span class="text-xs text-muted-foreground">mon</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 55%; border-radius: 8px 8px 0 0; background: #fafafa; opacity: 0.8"></span><span class="text-xs text-muted-foreground">tue</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 40%; border-radius: 8px 8px 0 0; background: #fafafa; opacity: 0.8"></span><span class="text-xs text-muted-foreground">wed</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 80%; border-radius: 8px 8px 0 0; background: #fafafa; opacity: 0.8"></span><span class="text-xs text-muted-foreground">thu</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 62%; border-radius: 8px 8px 0 0; background: #fafafa; opacity: 0.8"></span><span class="text-xs text-muted-foreground">fri</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 4%; border-radius: 8px 8px 0 0; background: hsl(0 0% 16%)"></span><span class="text-xs text-muted-foreground">sat</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><span style="width: 100%; height: 4%; border-radius: 8px 8px 0 0; background: hsl(0 0% 16%)"></span><span class="text-xs text-muted-foreground">sun</span></div>
+</div>
+</div>
+<div style="flex: 2 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<p class="lbl">where it went</p>
+<p class="text-sm" style="display: flex; gap: 12px"><span class="clamp1" style="flex: 1">make the cart work on small phones</span><span class="text-muted-foreground">claude</span><span class="mono" style="width: 64px; text-align: right">118k</span></p>
+<p class="text-sm" style="display: flex; gap: 12px"><span class="clamp1" style="flex: 1">race · cart drawer (both runs)</span><span class="text-muted-foreground">2 agents</span><span class="mono" style="width: 64px; text-align: right">90k</span></p>
+<p class="text-sm" style="display: flex; gap: 12px"><span class="clamp1" style="flex: 1">night shift · 4 runs</span><span class="text-muted-foreground">mixed</span><span class="mono" style="width: 64px; text-align: right">≈ 76k</span></p>
+<p class="text-sm" style="display: flex; gap: 12px"><span class="clamp1" style="flex: 1">group run · new radius tokens</span><span class="text-muted-foreground">claude</span><span class="mono" style="width: 64px; text-align: right">64k</span></p>
+<p class="text-sm" style="display: flex; gap: 12px"><span class="clamp1" style="flex: 1">update dependencies</span><span class="text-muted-foreground">codex</span><span class="mono" style="width: 64px; text-align: right">31k</span></p>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
+<p class="lbl">limits</p>
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 16px">
+<div style="flex: 1; min-width: 0"><p class="text-base font-semibold">{{r.label}}</p><p class="text-xs text-muted-foreground">{{r.desc}}</p></div>
+<button type="button" role="switch" aria-checked="{{r.on}}" aria-label="{{r.label}}" onClick="{{r.toggle}}" style="width: 44px; height: 26px; flex: none; border-radius: 99px; border: 0; padding: 3px; background: {{r.track}}; cursor: pointer; display: flex; justify-content: {{r.side}}"><span style="width: 20px; height: 20px; border-radius: 99px; background: #fafafa"></span></button>
+</div>
+</sc-for>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1340}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const on = s.on || { pause: true, reserve: true, ping: true, meter: true };
+    const list = [
+      { id: 'pause', label: 'hold new runs at 90% of a 5-hour window', desc: 'running ones finish; new ones wait for the reset' },
+      { id: 'reserve', label: 'keep 20% of the week for daytime', desc: 'night shift and group runs stop before they eat into it' },
+      { id: 'ping', label: 'ping my phone at 80%', desc: 'once per window, not per run' },
+      { id: 'meter', label: 'show the meter in chat and on the desk tab', desc: 'context, 5-hour and week in one small pill' }
+    ];
+    const active = s.active || { claude: 'c1', codex: 'x1', antigravity: '' };
+    const policy = s.policy || 'ask';
+    const agents = [
+      { id: 'claude', name: 'claude', note: 'claude code', accounts: [
+        { id: 'c1', label: 'personal', meta: 'subscription · signed in on this pc', usage: '5h 42% · week 81%', warn: true },
+        { id: 'c2', label: 'work', meta: 'team seat · only for projects on the work shelf', usage: '5h 3% · week 22%' },
+        { id: 'c3', label: 'api key', meta: 'pay as you go · fallback only', usage: '[THIS MONTH] spent' }
+      ] },
+      { id: 'codex', name: 'codex', note: 'codex cli', accounts: [
+        { id: 'x1', label: 'personal', meta: 'subscription · signed in on this pc', usage: '5h 12% · week 28%' },
+        { id: 'x2', label: 'api key', meta: 'pay as you go · fallback only', usage: 'not used this month' }
+      ] },
+      { id: 'antigravity', name: 'antigravity', note: 'if it can run without its window', accounts: [
+        { id: 'g1', label: 'google account', meta: 'not connected yet', usage: '—', disabled: true }
+      ] }
+    ];
+    const lines = {
+      ask: 'the run pauses and asks you — on the phone if you are away — with the other accounts as options',
+      next: 'the run moves to the next account in the list that has room, then tells you which',
+      api: 'the run carries on with the api key; cellar shows what it costs as it goes',
+      agent: 'the run is handed to the other agent with a summary of the plan and the diff so far',
+      wait: 'the run waits for the reset and picks up on its own'
+    };
+    return {
+      policyLine: lines[policy],
+      policies: [
+        { id: 'ask', label: 'ask me' }, { id: 'next', label: 'next account' }, { id: 'api', label: 'use the api key' },
+        { id: 'agent', label: 'hand to the other agent' }, { id: 'wait', label: 'wait for the reset' }
+      ].map((p) => ({
+        label: p.label,
+        on: p.id === policy,
+        border: p.id === policy ? 'hsl(var(--primary))' : 'transparent',
+        color: p.id === policy ? 'hsl(215 20% 75%)' : '#fafafa',
+        pick: () => this.setState({ policy: p.id })
+      })),
+      agents: agents.map((a) => ({
+        name: a.name,
+        note: a.note,
+        accounts: a.accounts.map((ac) => {
+          const on = active[a.id] === ac.id;
+          return {
+            label: ac.label,
+            meta: ac.meta,
+            usage: ac.usage,
+            active: on,
+            ground: on ? '#262626' : '#171717',
+            usageColor: ac.warn ? '#f59e0b' : '#a3a3a3',
+            action: ac.disabled ? 'connect' : (on ? 'in use' : 'use this'),
+            btnBorder: on ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+            btnColor: on ? 'hsl(215 20% 75%)' : '#fafafa',
+            use: ac.disabled ? undefined : () => this.setState({ active: Object.assign({}, active, { [a.id]: ac.id }) })
+          };
+        })
+      })),
+      rules: list.map((r) => {
+        const v = !!on[r.id];
+        return {
+          label: r.label,
+          desc: r.desc,
+          on: v,
+          track: v ? 'hsl(215 16% 47%)' : '#404040',
+          side: v ? 'flex-end' : 'flex-start',
+          toggle: () => this.setState({ on: Object.assign({}, on, { [r.id]: !v }) })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

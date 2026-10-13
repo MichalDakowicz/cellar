@@ -1,3 +1,4 @@
+import { eventSockets } from './eventSocket.ts';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 
 import { handle, type HostDeps } from './api.ts';
@@ -53,6 +54,7 @@ async function redeem(deps: HostDeps, token: string, req: IncomingMessage, res: 
     res.writeHead(410, { 'content-type': 'text/plain' }).end('this link was used or is too old — open it again from cellar');
     return;
   }
+  if (ticket.kind === 'events') return void res.writeHead(403).end();
   if (ticket.kind === 'apk') {
     const workspace = deps.identity().workspace;
     const apk = (await findApks(workspace)).find((candidate) => candidate.app === ticket.app);
@@ -67,7 +69,7 @@ async function redeem(deps: HostDeps, token: string, req: IncomingMessage, res: 
 export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line: string) => void = () => {}): Server {
   const signatures = new Signatures();
 
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     // One line per request, after it is answered: who, what, and how it went —
     // never a header or a body. It is how "the button did nothing" gets an answer.
     res.on('finish', () => log(`${from(req)} ${req.method} ${(req.url ?? '/').split('?')[0]} ${res.statusCode}`));
@@ -115,13 +117,15 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
       } catch {
         return send(res, 400, { error: 'not json' });
       }
-      const answer = await handle(deps, { method, path, body });
+      const answer = await handle(deps, { method, path, body, source: 'phone' });
       if (answer.status >= 400) log(`  ${(answer.body as { error?: string } | null)?.error ?? ''}`);
       send(res, answer.status, answer.body);
     })().catch((error) => {
       if (!res.headersSent) send(res, 500, { error: String(error) });
     });
   });
+  eventSockets(server, deps);
+  return server;
 }
 
 /** Listen on the configured port, or the next free one of the ten after it. */

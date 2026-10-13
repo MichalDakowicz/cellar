@@ -9,8 +9,8 @@ import { Pressable, Text, View } from 'react-native';
 export function TrustAsk({ folder, busy, onTrust }: { folder: string; busy: boolean; onTrust: () => void }) {
   return (
     <View className="gap-2 rounded-2xl border border-border bg-card p-4">
-      <Text className="text-sm font-semibold text-foreground">claude has not worked in {folder} before</Text>
-      <Text className="text-xs text-muted-foreground">
+      <Text className="font-sans text-sm font-semibold text-foreground">claude has not worked in {folder} before</Text>
+      <Text className="font-sans text-xs text-muted-foreground">
         it asks once per folder whether you trust it — saying yes lets claude load that folder&apos;s settings, hooks and mcp
         servers and act on them. the same question it asks at the pc.
       </Text>
@@ -21,7 +21,7 @@ export function TrustAsk({ folder, busy, onTrust }: { folder: string; busy: bool
         onPress={onTrust}
         className={['mt-1 h-10 items-center justify-center rounded-full bg-primary active:opacity-80', busy ? 'opacity-50' : ''].join(' ')}
       >
-        <Text className="text-sm font-semibold text-primary-foreground">{busy ? 'trusting…' : 'trust it and start'}</Text>
+        <Text className="font-sans text-sm font-semibold text-primary-foreground">{busy ? 'trusting…' : 'trust it and start'}</Text>
       </Pressable>
     </View>
   );

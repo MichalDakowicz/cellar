@@ -11,7 +11,7 @@ test('a ticket redeems once and not after a minute', () => {
   assert.equal(tickets.redeem(once), null);
 
   const late = tickets.issue({ kind: 'view', port: 8081 });
-  now = 61_000;
+  now = 60_000;
   assert.equal(tickets.redeem(late), null);
 });
 

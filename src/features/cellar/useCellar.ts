@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
+import { questionAnswer } from '@/lib/questionAnswer';
 
 import {
   answerQuestion,
@@ -161,8 +162,10 @@ export function useCellarWrites() {
   );
 
   const answer = useMutation({
-    mutationFn: async ({ entry, questionId, text }: { entry: Entry; questionId: string; text: string }) => {
-      await answerQuestion(questionId, text);
+    mutationFn: async ({ entry, questionId, text }: { entry: Entry; questionId: string; text: string | import('@/lib/questionAnswer').QuestionAnswer }) => {
+      const question = entry.questions.find((one) => one.id === questionId);
+      if (!question) throw new Error('Question is no longer on this entry. Refresh and try again.');
+      await answerQuestion(questionId, questionAnswer(text, question.options));
       await settle(entry, questionId);
     },
     onSuccess: () => invalidate(ENTRIES_KEY),
