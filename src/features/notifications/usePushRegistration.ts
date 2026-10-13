@@ -29,9 +29,13 @@ async function categories() {
 export function usePushRegistration(owner: string | null, wanted: boolean) {
   useEffect(() => {
     const native = pushNative(); if (!native) return;
-    let active = true;
-    const register = () => void queue(async () => {
-      if (!active || !owner) return;
+    let active = true, registering = false;
+    let registeredToken: string | null = null;
+    const register = (provided?: Notifications.DevicePushToken) => {
+      if (!active || !owner || registering) return;
+      registering = true;
+      void queue(async () => {
+      if (!active) { registering = false; return; }
       try {
         const granted = (await Notifications.getPermissionsAsync()).granted;
         if (!granted) { usePushStatus.getState().set('off', 'Allow notifications in Android settings.'); return; }
@@ -40,15 +44,18 @@ export function usePushRegistration(owner: string | null, wanted: boolean) {
         const oldIds = JSON.parse(legacy.getString('shownQuestions') ?? '[]');
         if (Array.isArray(oldIds)) await Promise.all(oldIds.filter((id): id is string => typeof id === 'string').map((id) => Notifications.dismissNotificationAsync(id)));
         await ensureNotificationChannels(); await categories();
-        const token = await Notifications.getDevicePushTokenAsync();
+        const token = provided ?? await Notifications.getDevicePushTokenAsync();
+        if (registeredToken === String(token.data)) { usePushStatus.getState().set('ready'); return; }
         const result = await supabase.functions.invoke('desk-push', { body: { kind: 'register', deviceId: pushDeviceId(), token: String(token.data), utcOffset: -new Date().getTimezoneOffset() } });
         if (result.error) throw result.error;
         if (!active) return;
         if (typeof result.data?.secret !== 'string' || typeof result.data.endpoint !== 'string') throw new Error('Push registration was not confirmed.');
         await native.configure(result.data.endpoint, pushDeviceId(), result.data.secret, owner);
+        registeredToken = String(token.data);
         if (active) usePushStatus.getState().set('ready');
       } catch (e) { if (active) usePushStatus.getState().set('failed', e instanceof Error ? e.message : String(e)); }
-    });
+      finally { registering = false; }
+    }); };
     register();
     const app = AppState.addEventListener('change', (state) => { if (state === 'active') register(); });
     const tokens = Notifications.addPushTokenListener(register);
