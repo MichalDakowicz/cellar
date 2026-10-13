@@ -58,3 +58,6 @@ supabase/.temp/
 /desktop/build
 /desktop/release
 /desktop/renderer-dist
+
+# Local QA evidence and logs — keep them inside this repository
+/artifacts/

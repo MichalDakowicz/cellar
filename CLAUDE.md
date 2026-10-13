@@ -142,6 +142,23 @@ prebuild output, so its `versionName`/`versionCode` are regenerated, never hand-
   testable rather than reaching for a renderer.
 - Also clean before committing: `npm run lint` and `npx tsc --noEmit`.
 
+## Build output and retention
+
+- Keep all build output inside this repository, in Git-ignored folders: desktop
+  packages in `desktop/release/`, Android APKs in
+  `android/app/build/outputs/apk/release/`, and web exports in `dist/`.
+- Never create sibling output folders such as `../cellar-wN-qa` or
+  `../cellar-desktop-wN-final`. Keep QA evidence and logs in `artifacts/qa/`
+  inside this repository; `artifacts/` is Git-ignored.
+- Keep only the most recent successfully verified build for each target. After
+  verifying its replacement, delete older builds and duplicate copies, including
+  versioned APK copies and temporary packaging/export folders. An installer and
+  its matching unpacked app count as one desktop build.
+- Run the packaged desktop app from `desktop/release/win-unpacked/Cellar.exe`.
+  Quit the running host before replacing its package, then restart with the
+  existing profile. Do not delete profile data, QA evidence, or source code when
+  pruning builds.
+
 ## 7. Build and push to the phone after every change, then deploy web
 
 A device is usually connected over ADB (`adb devices` to confirm). Never call a change

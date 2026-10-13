@@ -30,6 +30,11 @@ Run `npm run renderer:dev` in one terminal and `npm run dev` in another for Vite
 `npm run dist` packages that output as `resources/renderer` and builds a Windows
 installer into `release/`. No root Expo export is consumed.
 
+Keep only the latest verified desktop package in `release/` and launch
+`release/win-unpacked/Cellar.exe` from there. Build output must stay inside this
+repository in Git-ignored folders; QA evidence and logs belong in `../artifacts/qa/`.
+Do not create sibling `cellar-desktop-wN*` or `cellar-wN*` output folders.
+
 Checks: `npm test`, `npm run lint`, `npm run check`, `npm run renderer:check`.
 Vite validates every transitive renderer module and emits `module-graph.json`.
 Controller source maps are checked with `node scripts/controllerBoundary.mjs <output>`

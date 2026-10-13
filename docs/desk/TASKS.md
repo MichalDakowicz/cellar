@@ -262,13 +262,13 @@ User instruction on 2026-10-10 replaces the sequential canvas review with a visu
 all current boards. Main revision 5, NewTask revision 2 and Run R1b/R1c are the latest targets.
 Match shared typography and grounds, phone layouts, desktop layouts and sample previews.
 Keep all W tasks unchecked: new model, attachment, queue, voice and host controls are drawn
-only. Record the visual coverage and verification in `canvas/updates.md`.
+only. Record visual coverage and verification in `how-it-works.md`.
 
 Implemented shared canvas fonts/grounds, revised Main/NewTask/Run layouts, sample previews,
 phone and group panels, desktop sidebar and settings typography. Validation: 811 tests,
 types, lint, web export and Android release build pass; APK installed and launched on the
 connected phone. Main and NewTask keyboard layout checked on-device. New host behavior
-remains in Pass 2. See `visual-clone.md` for coverage and review entry.
+remains in Pass 2. Historical visual coverage remains in Git history.
 
 ## Pass 2 — the wiring
 
@@ -394,7 +394,7 @@ stops remain possible after local results settle while an earlier remote stop is
 86 app suites / 871 tests, 68 desktop tests, lint, both types, web/desktop/Android builds
 pass; standalone APK installed/launched and rebuilt desktop running at the paired path.
 Physical two-online-host behavior remains fixture coverage; Claude stays fixture-only.
-Protected canvas/spec hashes unchanged. See `how-it-works.md` W9 and `w9-resume.md`.
+Protected canvas/spec hashes unchanged. See `how-it-works.md` W9; historical ledgers remain in Git history.
 Controller/desktop rebuild is the next task, W10; it is not part of completed W9.
 
 ### W10 · separate controller and desktop apps `[x]`
@@ -417,7 +417,7 @@ Verify visual parity and controller/host boundaries, run app and desktop checks,
 independent controller web/Android and desktop artifacts, replacement-install and launch
 on phone and the existing reachable desktop path. Claude remains fixture-only; consult
 T3 for lifecycle changes. Complete and verify this rebuild before W11 keys search.
-Ready-to-paste task: [w10-prompt.md](w10-prompt.md).
+Build specification: [desktop-rebuild.md](desktop-rebuild.md).
 
 Verified complete (2026-10-13): independent DOM renderer/package and
 controller graph extraction are installed. Root 883 tests and desktop 76 tests,
@@ -426,7 +426,7 @@ and preserved-profile desktop pass live Codex approvals, queue revision/edit/can
 promotion, Stop all, process containment and crash/no-replay checks. Final native
 capture/chat/draft, light/dark styling and route scroll checks pass at the original
 Windows path/profile; original theme restored. Verification boundaries and evidence:
-[w10-rebuild.md](w10-rebuild.md). No release or website publication performed.
+[how-it-works.md](how-it-works.md). No release or website publication performed.
 
 ### W11 · keys search `[x]`
 
@@ -438,7 +438,7 @@ independent web/Android/Windows builds and graph boundaries pass. Paired physica
 phone and preserved-profile desktop verify real file/line/skill/command search,
 insertion/focus, colour chips and disconnect/draft recovery. Browser retains its
 mailbox limits; host runs hidden in tray. Protected references unchanged. Exact
-live boundaries, artifact evidence and limitations: [w11-keys.md](w11-keys.md).
+live boundaries, artifact evidence and limitations: [how-it-works.md](how-it-works.md).
 
 ### W12 · previews and deploy `[x]`
 
@@ -449,7 +449,7 @@ opened.
 Verified 2026-10-14: owned worktree server, native phone/desktop preview, real
 passed/failed checks, once-only local deploy and reviewed cleanup. Tailnet adapter
 and address behavior have fixture coverage; actual tailnet traversal unavailable
-on this PC. See [w12-w14.md](w12-w14.md).
+on this PC. See [how-it-works.md](how-it-works.md).
 
 ### W13 · voice `[x]`
 
@@ -459,7 +459,7 @@ Speech to text on the new task sheet and the composer; "B" / "the second one" an
 Verified 2026-10-14: user confirmed recognition on installed phone; exact question
 choice and command-text parsing tests pass. Drafts remain editable and require
 normal send/answer actions. Windows acoustic success remains unverified. See
-[w12-w14.md](w12-w14.md).
+[how-it-works.md](how-it-works.md).
 
 ### W14 · notifications that answer `[x]`
 
@@ -472,7 +472,7 @@ Verified 2026-10-14: real background Android push, exact B answer receipt,
 acknowledged phone↔desk handoff and unanswered escalation, live Codex approval
 mailbox/provider deny, owner RLS and first-answer safeguards. Original launch-only
 bug settled; app/desktop/MCP tests, native builds and approved web publish pass.
-Physical approval-button and Windows speech boundaries: [w12-w14.md](w12-w14.md).
+Physical approval-button and Windows speech boundaries: [how-it-works.md](how-it-works.md).
 
 ### W15 · checkpoints `[ ]`
 
