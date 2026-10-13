@@ -1,5 +1,17 @@
 # Update notes
 
+## 1.15.0 — Unreleased
+
+### Added
+
+- Desk: start worktree previews, run project checks and deploy with durable action receipts
+- Desk: dictate tasks, chat messages and question choices into editable drafts
+- Notifications: answer approvals and questions from phone actions or routed desk banners
+
+### Fixed
+
+- Questions arrive through background push instead of waiting for the next app launch
+
 ## 1.14.0 — Unreleased
 
 ### Added

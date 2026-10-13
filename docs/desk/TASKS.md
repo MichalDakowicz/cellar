@@ -461,12 +461,18 @@ choice and command-text parsing tests pass. Drafts remain editable and require
 normal send/answer actions. Windows acoustic success remains unverified. See
 [w12-w14.md](w12-w14.md).
 
-### W14 · notifications that answer `[~]`
+### W14 · notifications that answer `[x]`
 
 Actionable notifications for approvals and questions, one per run updated in place, routed by
 where you are (desk in use → desk; idle 5 min or locked → phone; unanswered 2 min → phone),
 never on two devices at once. Read the open bug "notifications arrive only on app launch" first —
 it is the same delivery path.
+
+Verified 2026-10-14: real background Android push, exact B answer receipt,
+acknowledged phone↔desk handoff and unanswered escalation, live Codex approval
+mailbox/provider deny, owner RLS and first-answer safeguards. Original launch-only
+bug settled; app/desktop/MCP tests, native builds and approved web publish pass.
+Physical approval-button and Windows speech boundaries: [w12-w14.md](w12-w14.md).
 
 ### W15 · checkpoints `[ ]`
 

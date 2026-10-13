@@ -1,6 +1,6 @@
 # Desk — how it works
 
-Reviewed 2026-10-12 through W9. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-14 through W14. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -10,13 +10,13 @@ adds behavior through the existing view models, host API and transports.
 | Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W21) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
-| Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W12 |
+| Manage worktrees | W5: Git-confirmed catalogue and reviewed Keep/Merge/Remove; W12 runs previews/checks/deploy in the owned worktree | Merge requires clean checked-out main and fast-forward history |
 | Follow a run | W6/W7 synchronized events and saved history; W8 runtime approvals; W9 retained chats, queue/edit/cancel/Send now, single stop and account-wide Stop all | Restarted/legacy provider chats explain unavailability; offline host stops remain pending |
-| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W14 |
+| Answer an entry | Exact picks and note; first-answer safeguards; W14 notification actions and conditional SQL settlement; hosted/local MCP share answered state | Native provider question tools remain explicitly refused |
 | Commands and keys | W2 jobs/catalogue; W11 shared file/skill/command search, line previews, project/entry references and hex chips | Host sources require signed LAN or desktop IPC; browser retains mailbox limits. New-task files require a selected existing run |
-| Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W12), remote input or real phone panel (W19) |
+| Preview, screen, builds | W12 managed worktree server, allocated port, real check/deploy jobs and durable receipts; ticketed LAN/tailnet addressing; screen/APK discovery | Actual tailnet traversal unverified on this PC; remote input remains W19 |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
-| Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W13–W18 |
+| Settings | Durable defaults; W13 voice drafts; W14 real ping kinds, quiet hours, push registration and receipts | Checkpoints, recipes/rules, usage/accounts and share/crash automation remain W15–W18 |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
 real header or navigation totals. Sample actions do not confirm host execution.
@@ -24,7 +24,7 @@ real header or navigation totals. Sample actions do not confirm host execution.
 ## Agreed wiring order
 
 W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 rebuild → W11 keys search
-→ W12 previews/deploy, then W13–W20.
+→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W20.
 W21 stays deferred. Counts establish trustworthy status first; project commands are
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.

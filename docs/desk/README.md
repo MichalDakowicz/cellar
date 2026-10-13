@@ -49,3 +49,9 @@ desktop renderer builds while retaining the accepted appearance. It is now W10; 
 search follows as W11 and later tasks shift forward by one. Canvas/spec and old source
 task references keep their original numbering; use the mapping in `TASKS.md`.
 See `desktop-rebuild.md`.
+
+W12–W14 now wire managed worktree previews/checks/deploy, voice drafts and
+actionable background notifications in both separated apps. Existing entry
+question cards, MCP answer writers, settings and pairing share the same exact
+answer/receipt boundaries. Verification, touched surfaces, setup and live limits:
+[w12-w14.md](w12-w14.md).

@@ -36,7 +36,7 @@ all (see below), so a privacy switch here would be a control with nothing behind
 
 ## What Cellar owns
 
-Six tables, all namespaced, all with RLS keyed to `auth.uid()`:
+Cellar-owned tables, all namespaced, all with RLS keyed to `auth.uid()`:
 
 | Table | Holds |
 | --- | --- |
@@ -48,6 +48,11 @@ Six tables, all namespaced, all with RLS keyed to `auth.uid()`:
 | `cellar_agent_tokens` | hashed tokens a hosted agent presents instead of signing in |
 | `cellar_desks` | the desktop app's heartbeat: where it is on the LAN, its agents, what it runs |
 | `cellar_desk_requests` | a start or stop sent to the pc through the cellar, claimed once by the pc |
+| `cellar_entry_questions` | offered choices, first answer and dismissal state |
+| `cellar_notice_devices` | owner-scoped push tokens, hashed device secret and desk activity |
+| `cellar_notice_preferences` | notification kinds, quiet hours and UTC offset |
+| `cellar_notices` | canonical per-run notification, revision, recipient and transfer acknowledgment |
+| `cellar_notice_actions` | durable UUID decisions and original PC/question receipts |
 
 ## Cellar is private, and that is a design decision
 
