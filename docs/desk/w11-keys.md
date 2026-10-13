@@ -117,3 +117,26 @@ Computer Use stopped and remaining UI work moved to background browser checks.
 `Cellar.exe --tray` now starts the normal profile renderer hidden while keeping
 the single auth owner and host reachable. No later wiring, firewall changes,
 release or website publication is included.
+
+## Native retest, 2026-10-13
+
+At the user's request, the installed Windows app was tested again through native
+Computer Use and phone `00166152F003681` through ADB. Desktop initially was stopped;
+the same installed path/profile was launched. Phone initially showed disconnected
+search explicitly, then reconnected with the original pairing after Reconnect/polls.
+An unsigned TCP probe reached the existing listener and correctly returned 401;
+no firewall, pairing or transport changes were made.
+
+Both native clients again returned changed-first `@w11-keys-qa.txt:42`, the actual
+worktree skill `/w11-qa`, and W2 `$test`. Desktop Tab inserted all three; phone taps
+inserted all three, and text after the file reference retained caret/focus. Phone
+long-press again returned exact lines 40–47; an unmatched file query explicitly
+reported no result. The skill plan changed from unselected to the selected actual
+skill after insertion. No message, command, skill or worktree action was submitted.
+Saved history/event epoch and unknown queue revision 0 remain unchanged.
+
+Retest captures live outside Git: `phone-retest-preview.png`, corresponding XML
+states, and `desktop-retest-command.jpg` in `C:/ping/cellar-w11-qa`. On separate user
+request, Android's USB-only stay-awake setting was enabled and read back as `2`;
+unplugged sleep behavior is unchanged. Cellar idea `fbe73d60` records a future
+Settings toggle; W11 adds no such product setting.
