@@ -51,6 +51,11 @@ mode. This entry mounts no authentication, database or host clients.
 
 ## Setup
 
+Desk W12–W14 adds owned worktree previews/checks/deploy, editable voice drafts,
+and background question/approval notifications routed between desk and phone.
+Notification infrastructure setup and verified device boundaries are recorded in
+[docs/desk/how-it-works.md](docs/desk/how-it-works.md).
+
 1. Run Radar's `supabase/schema.sql` first — it owns the shared tables.
 2. Run this repo's `supabase/schema.sql` (Dashboard → SQL Editor → paste → Run). It is
    idempotent and refuses to run before Radar's.

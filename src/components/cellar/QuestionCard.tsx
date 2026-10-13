@@ -1,4 +1,5 @@
-import { Square, SquareCheck, X } from 'lucide-react-native';
+import { Mic, Square, SquareCheck, X } from 'lucide-react-native';
+import type { VoiceView } from '@/lib/deskVoiceView';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
@@ -29,6 +30,7 @@ import { COLORS } from '@/theme/colors';
 const RECOMMENDED = runChip('done');
 
 export type QuestionCardProps = {
+  voice?: VoiceView;
   question: string;
   options: string[];
   answer: string | null;
@@ -104,6 +106,7 @@ function OpenCard(props: QuestionCardProps) {
         <Text className="font-sans text-xs text-muted-foreground">{rel}</Text>
       </View>
       <Text className="font-sans text-base font-bold text-foreground">{question}</Text>
+      {props.voice && <Pressable accessibilityRole="button" accessibilityLabel="speak an answer" onPress={props.voice.toggle} className="min-h-11 flex-row items-center gap-2"><Mic size={18} color={COLORS.foreground} /><Text className="text-xs text-muted-foreground">{props.voice.error ?? props.voice.interim ?? (props.voice.listening ? 'listening…' : 'say B or the second one · review before answering')}</Text></Pressable>}
 
       <View className="gap-2">
         {options.map((option, index) => (

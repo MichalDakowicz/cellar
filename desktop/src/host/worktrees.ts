@@ -116,6 +116,15 @@ export class Worktrees {
     await this.checked(row, owner);
     return true;
   }
+  /** Search must bind all three identities, not merely accept any owned path. */
+  async searchPath(id: string, projectId: string, cwd: string): Promise<string> {
+    const owner = this.owner();
+    const row = this.record(id, owner);
+    if (row.projectId !== projectId || repoKey(row.path) !== repoKey(cwd)) refused('Run worktree scope does not match.');
+    await this.checked(row, owner);
+    this.unchanged(owner);
+    return row.path;
+  }
   private async inspect(row: Managed, action: WorktreeAction, owner: string): Promise<WorktreeReview> {
     const tree = await this.checked(row, owner);
     const trees = await gitTrees(row.root);

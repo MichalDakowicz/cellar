@@ -62,7 +62,9 @@ async function redeem(deps: HostDeps, token: string, req: IncomingMessage, res: 
     return sendApk(res, apkPath(workspace, apk), apk);
   }
   const cookie = sessionCookie(deps.tickets.openSession(from(req)));
-  const where = ticket.kind === 'screen' ? '/screen' : `http://${deps.lanHost()}:${await deps.proxies.open(ticket.port)}/`;
+  const requestedHost = (req.headers.host ?? '').split(':')[0];
+  const address = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(requestedHost) ? requestedHost : deps.lanHost();
+  const where = ticket.kind === 'screen' ? '/screen' : `http://${address}:${await deps.proxies.open(ticket.port)}/`;
   res.writeHead(302, { 'set-cookie': cookie, location: where, 'cache-control': 'no-store' }).end();
 }
 
@@ -117,7 +119,8 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
       } catch {
         return send(res, 400, { error: 'not json' });
       }
-      const answer = await handle(deps, { method, path, body, source: 'phone' });
+      const address = req.socket.localAddress?.replace(/^::ffff:/, '');
+      const answer = await handle(deps, { method, path, body, source: 'phone', address });
       if (answer.status >= 400) log(`  ${(answer.body as { error?: string } | null)?.error ?? ''}`);
       send(res, answer.status, answer.body);
     })().catch((error) => {

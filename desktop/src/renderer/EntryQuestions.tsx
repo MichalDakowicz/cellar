@@ -9,6 +9,8 @@ import {
 import type { Entry } from "@/types/cellar";
 import { supabase } from "./auth";
 import { dismissQuestion } from "./data/cellarApi";
+import { useDictation } from './useDictation';
+import { voiceOption, voiceText } from '@/lib/deskVoice';
 
 export function EntryQuestions({
   entry,
@@ -27,6 +29,11 @@ export function EntryQuestions({
     (question) => questionStatus(question) === "unanswered",
   );
   const question = pending[0];
+  const voice = useDictation((speech) => {
+    if (!question || busy) return;
+    const option = voiceOption(speech, question.options);
+    if (option) setPicked((was) => several ? [...new Set([...was, option])] : [option]); else setNote(voiceText(speech));
+  });
   useEffect(() => {
     setPicked([]);
     setNote("");
@@ -41,11 +48,7 @@ export function EntryQuestions({
         entry.state === "blocked" &&
         unblocksEntry(entry.questions, question.id)
       ) {
-        const result = await supabase
-          .from("cellar_entries")
-          .update({ state: "open" })
-          .eq("id", entry.id)
-          .eq("state", "blocked");
+        const result = await supabase.rpc('cellar_settle_questions', { p_entry: entry.id });
         if (result.error) throw result.error;
       }
       await refresh();
@@ -75,6 +78,8 @@ export function EntryQuestions({
           answered_via: "app",
         })
         .eq("id", question.id)
+        .is('answered_at', null)
+        .is('dismissed_at', null)
         .select(QUESTION_COLUMNS)
         .single();
       if (result.error) throw result.error;
@@ -83,11 +88,7 @@ export function EntryQuestions({
         unblocksEntry(entry.questions, next.id) &&
         entry.state === "blocked"
       ) {
-        const changed = await supabase
-          .from("cellar_entries")
-          .update({ state: "open" })
-          .eq("id", entry.id)
-          .eq("state", "blocked");
+        const changed = await supabase.rpc('cellar_settle_questions', { p_entry: entry.id });
         if (changed.error) throw changed.error;
       }
       setPicked([]);
@@ -115,6 +116,8 @@ export function EntryQuestions({
     <section className="approval stack">
       <span className="overline">question · {pending.length} waiting</span>
       <h3>{question.question}</h3>
+      <button disabled={busy} onClick={() => void voice.toggle()}>{voice.listening ? 'stop dictation' : 'say B or the second one'}</button>
+      {voice.error && <p role="status">{voice.error}</p>}
       {question.options.map((option, index) => (
         <button
           key={option}

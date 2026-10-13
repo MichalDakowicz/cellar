@@ -1,5 +1,28 @@
 # Update notes
 
+## 1.15.0 — Unreleased
+
+### Added
+
+- Desk: start worktree previews, run project checks and deploy with durable action receipts
+- Desk: dictate tasks, chat messages and question choices into editable drafts
+- Notifications: answer approvals and questions from phone actions or routed desk banners
+
+### Fixed
+
+- Questions arrive through background push instead of waiting for the next app launch
+
+## 1.14.0 — Unreleased
+
+### Added
+
+- Desk: search owned run files, installed agent skills and project commands with @, / and $
+- Desk: preview file lines and insert references with keyboard or touch
+
+### Changed
+
+- Desktop: start in the tray with --tray while keeping the paired host reachable
+
 ## 1.13.0 — Unreleased
 
 ### Changed

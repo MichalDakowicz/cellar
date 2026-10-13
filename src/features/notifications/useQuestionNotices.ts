@@ -68,7 +68,7 @@ export function useQuestionNotices() {
     : granted === false
       ? 'android is blocking notifications for cellar — tap to open its settings'
       : settings.notifyQuestions
-        ? 'a banner when a blocked question appears, checked hourly in the background'
+        ? 'agent questions arrive by background push when registration is ready'
         : 'questions still wait in the inbox with a badge, just quietly';
 
   return { granted, set, sub };

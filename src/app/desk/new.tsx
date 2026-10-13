@@ -65,7 +65,7 @@ export default function NewTask() {
         </View>
       }
     >
-      <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} />
+      <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} voice={task.voice} />
       <NewTaskChoices {...task} />
       <AttachedThought thoughts={task.attached} onDetach={task.onDetach} />
     </DeskSheet>

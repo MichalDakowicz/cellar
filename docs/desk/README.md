@@ -13,9 +13,7 @@ written half, moved here so they version with the code.
 | [t3code-notes.md](t3code-notes.md) | how t3code hands work to agents, and what cellar takes from it |
 | [TASKS.md](TASKS.md) | the build order: every screen drawn first, then the wiring, easiest to hardest |
 | [how-it-works.md](how-it-works.md) | current real/sample/missing flows, agreed wiring order and W1–W9 verification |
-| [w9-resume.md](w9-resume.md) | completed W9 handoff, environment and next-task boundaries |
 | [desktop-rebuild.md](desktop-rebuild.md) | W10 controller/desktop separation, technology choice, UI parity and migration/build steps |
-| [w10-prompt.md](w10-prompt.md) | ready-to-paste W10 controller/desktop rebuild task |
 
 The canvas stays the source for **how it looks** — open an artboard before building its
 screen. A copy lives in [`canvas/`](canvas/): one `*.dc.html` per artboard (inline styles, and its
@@ -49,3 +47,9 @@ desktop renderer builds while retaining the accepted appearance. It is now W10; 
 search follows as W11 and later tasks shift forward by one. Canvas/spec and old source
 task references keep their original numbering; use the mapping in `TASKS.md`.
 See `desktop-rebuild.md`.
+
+W12–W14 now wire managed worktree previews/checks/deploy, voice drafts and
+actionable background notifications in both separated apps. Existing entry
+question cards, MCP answer writers, settings and pairing share the same exact
+answer/receipt boundaries. Verification, touched surfaces, setup and live limits:
+[how-it-works.md](how-it-works.md).

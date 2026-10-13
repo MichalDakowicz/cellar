@@ -17,11 +17,13 @@ import { handle, type ApiRequest, type ApiResponse, type HostDeps } from './api.
 import { CellarFallback } from './fallback.ts';
 import { lanServer, listen } from './http.ts';
 import { loadIdentity, rotateKey, saveIdentity, type Identity } from './identity.ts';
-import { pickLanAddress } from './network.ts';
+import { pickLanAddress, pickTailnetAddress } from './network.ts';
 import { Proxies } from './proxy.ts';
 import { Runs } from './runs.ts';
 import { Commands } from './commands.ts';
 import { Jobs } from './jobs.ts';
+import { Previews } from './previews.ts';
+import { HostNotifications, type DeskActivity } from './notifications.ts';
 import { Receipts } from './receipts.ts';
 import { Worktrees } from './worktrees.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
@@ -56,6 +58,7 @@ function requestLog(file: string): (line: string) => void {
 }
 
 export type HostOptions = {
+  activity?: () => DeskActivity;
   dataDir: string;
   version: string;
   supabaseUrl: string;
@@ -87,12 +90,14 @@ export class DeskHost {
       jobs: new Jobs(options.dataDir, () => this.account.current?.userId ?? null),
       receipts: new Receipts(options.dataDir),
       tickets,
-      proxies: new Proxies(tickets),
+      proxies: new Proxies(tickets, (port) => this.deps.previews?.opened(port)),
       lanHost: () => pickLanAddress(networkInterfaces()),
       version: options.version,
     };
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
+    this.deps.previews = new Previews(options.dataDir, this.deps);
+    this.deps.notifications = new HostNotifications(this.deps, options.activity ?? (() => ({ idleSeconds: 300, locked: true })));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
     this.deps.runs.onChange = () => this.deps.events!.invalidate();
     this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
@@ -114,16 +119,20 @@ export class DeskHost {
     // become the pc's address for good, and every paired phone would lose it.
     this.boundPort = port;
     this.deps.events!.start();
+    this.deps.notifications?.start();
     return port;
   }
 
   stop(): Promise<void> {
     if (this.stopping) return this.stopping;
     this.fallback.stop();
+    this.deps.notifications?.stop();
     this.server?.close();
     this.stopping = (async () => {
       // Providers must release callbacks while the event store can still publish expiry.
       await this.deps.runs.runtime?.close();
+      await this.deps.previews?.close();
+      this.deps.proxies.close();
       await this.deps.events?.stop();
       this.deps.approvals?.close();
       this.deps.controls?.dispatch.store.close();
@@ -140,12 +149,13 @@ export class DeskHost {
   setSession(session: DeskSession | null): void {
     const previous = this.account.current?.userId;
     if (previous && previous !== session?.userId) void this.deps.runs.runtime?.stopOwner(previous);
+    if (previous && previous !== session?.userId) void this.deps.jobs?.stopOwner(previous).catch((error) => console.error('Jobs could not stop after account change', error));
     this.account.setSession(session);
   }
 
   /** What the QR code on the pc says. Only ever handed to this pc's own window, never served. */
-  pairing(): Pairing {
-    const host = this.deps.lanHost();
+  pairing(network: 'lan' | 'tailnet' = 'lan'): Pairing {
+    const host = network === 'tailnet' ? pickTailnetAddress(networkInterfaces()) : this.deps.lanHost();
     if (!host) return { url: null, reason: 'this pc is not on a network a phone can reach' };
     const identity = this.deps.identity();
     const pair: DeskPair = { id: identity.id, name: identity.name, host, port: identity.port, key: identity.key };

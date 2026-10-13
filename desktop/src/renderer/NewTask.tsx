@@ -5,6 +5,11 @@ import type { Cellar } from "./useCellar";
 import type { Host } from "./useHost";
 import { EntryList } from "./EntryList";
 import { useNewTask } from "./useNewTask";
+import { useKeys } from './useKeys';
+import { KeyResults } from './KeyResults';
+import { ComposerColors } from './ComposerColors';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 
 export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
   const {
@@ -24,6 +29,9 @@ export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
     invalid,
     start,
   } = useNewTask(cellar, host);
+  const write = (value: string) => save('desktop-new-task', 'text', value);
+  const keys = useKeys(text, write, host, cellar, projectId, agent);
+  const voice = useDictation((speech) => { if (!task.pending && !task.busy) write(insertVoice(text, speech, keys.field.current ? { start: keys.field.current.selectionStart, end: keys.field.current.selectionEnd } : undefined)); });
   return (
     <section className="page task-page stack">
       <header className="row">
@@ -34,15 +42,20 @@ export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
         <button onClick={() => navigate("/desk")}>close</button>
       </header>
       <textarea
+        ref={keys.field}
         className="task-input"
         aria-label="task prompt"
         placeholder="what should it do?"
         value={text}
         readOnly={task.pending || task.busy}
-        onChange={(event) =>
-          save("desktop-new-task", "text", event.target.value)
-        }
+        onChange={(event) => keys.edit(event.target.value)}
+        onSelect={(event) => keys.select(event.currentTarget.selectionEnd)}
+        onKeyDown={(event) => { if (!event.nativeEvent.isComposing && keys.keyboard(event.key)) event.preventDefault(); }}
       />
+      <KeyResults list={keys.list} />
+      <button disabled={task.pending || task.busy} onClick={() => void voice.toggle()}>{voice.listening ? 'stop dictation' : 'dictate task'}</button>
+      {voice.error && <p role="status">{voice.error}</p>}
+      <ComposerColors text={text} write={write} />
       <div className="chips">
         {folders.map((row) => (
           <button

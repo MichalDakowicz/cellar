@@ -17,13 +17,15 @@ export type DeskPairing =
   | { url: null; reason: string };
 
 export type DeskBridge = {
+  dictate?: (id: string) => Promise<{ text?: string; error?: string }>;
+  stopDictation?: (id: string) => Promise<void>;
   version: number;
   request: (
     method: string,
     path: string,
     body?: unknown,
   ) => Promise<{ status: number; body: unknown }>;
-  pairing: () => Promise<DeskPairing>;
+  pairing: (network?: 'lan' | 'tailnet') => Promise<DeskPairing>;
   setSession: (
     session: { accessToken: string; userId: string } | null,
   ) => Promise<void>;

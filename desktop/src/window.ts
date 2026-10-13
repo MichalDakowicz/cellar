@@ -19,6 +19,7 @@ export function iconPath(packaged: boolean): string {
 
 export function createWindow(options: {
   dev: boolean;
+  startHidden?: boolean;
   isQuitting: () => boolean;
   fromCellar: (url: string) => boolean;
 }): BrowserWindow {
@@ -39,7 +40,7 @@ export function createWindow(options: {
     },
   });
 
-  window.once('ready-to-show', () => window.show());
+  window.once('ready-to-show', () => { if (!options.startHidden) window.show(); });
   window.on('close', (event) => {
     if (options.isQuitting()) return;
     event.preventDefault();

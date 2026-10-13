@@ -1,4 +1,4 @@
-import { optionLabel } from './entryQuestions';
+import { optionLabel } from '@/lib/deskOptionLabel';
 
 /**
  * Notifications that answer (docs/desk/screens.md, `PhoneNotify.dc.html`): one

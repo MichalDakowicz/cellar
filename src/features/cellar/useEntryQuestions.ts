@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useDictation } from '@/features/desk/useDictation';
+import { voiceOption, voiceText } from '@/lib/deskVoice';
+import type { VoiceView } from '@/lib/deskVoiceView';
 
 import { useCellarWrites } from '@/features/cellar/useCellar';
 import { pendingQuestions, questionStatus, settledQuestions } from '@/lib/entryQuestions';
@@ -23,6 +26,7 @@ import type { Entry, EntryQuestion } from '@/types/cellar';
  */
 
 export type QuestionView = {
+  voice?: VoiceView;
   question: EntryQuestion;
   status: ReturnType<typeof questionStatus>;
   rel: string;
@@ -50,10 +54,19 @@ export function useEntryQuestions(entry: Entry | null) {
   const [confirming, setConfirming] = useState<EntryQuestion | null>(null);
 
   const questions = entry?.questions ?? EMPTY;
+  const [voiceId, setVoiceId] = useState<string | null>(null);
+  const voice = useDictation((speech) => {
+    const question = questions.find((q) => q.id === voiceId && questionStatus(q) === 'unanswered');
+    if (!question) return;
+    const option = voiceOption(speech, question.options);
+    if (option) update(setPicks, question.id, (was) => ({ ...was, picked: was.several ? [...new Set([...was.picked, option])] : [option] }));
+    else setDrafts((was) => ({ ...was, [question.id]: voiceText(speech) }));
+  });
 
   const view = useCallback(
     (question: EntryQuestion): QuestionView => ({
       question,
+      voice: { ...voice, listening: voice.listening && voiceId === question.id, toggle: () => { setVoiceId(question.id); void voice.toggle(); } },
       status: questionStatus(question),
       rel: shortRel(question.createdAt),
       draft: drafts[question.id] ?? '',
@@ -61,7 +74,7 @@ export function useEntryQuestions(entry: Entry | null) {
       sending: answer.isPending,
       error: answer.variables?.questionId === question.id && answer.error ? readError(answer.error) : null,
     }),
-    [drafts, picks, answer.isPending, answer.variables, answer.error],
+    [drafts, picks, answer.isPending, answer.variables, answer.error, voice, voiceId],
   );
 
   const pending = useMemo(() => pendingQuestions(questions).map(view), [questions, view]);

@@ -1,5 +1,7 @@
 import { useRouter, type Href } from 'expo-router';
-import { Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
+import { ManagedPreviewRows } from '@/components/desk/ManagedPreviewRows';
+import { useManagedPreviews } from '@/features/desk/useManagedPreviews';
 
 import { DeskLocalRow } from '@/components/desk/DeskLocalRow';
 import { LaterScreen } from '@/features/desk/LaterScreen';
@@ -15,6 +17,7 @@ export default function DeskPreviews() {
   const router = useRouter();
   const link = useDeskLink();
   const local = useDeskLocal(link);
+  const managed = useManagedPreviews();
 
   return (
     <LaterScreen
@@ -25,6 +28,9 @@ export default function DeskPreviews() {
       sampleOnly={false}
       waitsOn=""
     >
+      {managed.enabled && <ManagedPreviewRows runs={managed.data?.agentRuns ?? []} previews={managed.data?.previews ?? []} busy={managed.busy} onAction={managed.act} onOpen={(p) => router.push(`/desk/preview/${p}` as Href)} />}
+      {managed.error && <Text className="text-destructive">{managed.error}</Text>}
+      {managed.recover && <Pressable onPress={() => void managed.recover?.()}><Text className="text-foreground">check original preview receipt</Text></Pressable>}
       {!local.pagesAvailable && (
         <Text className="font-sans text-sm text-muted-foreground">{`${link.name} is not on this network — its pages open over the same wi-fi`}</Text>
       )}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "440901727657",
+    "project_id": "cellar-stash",
+    "storage_bucket": "cellar-stash.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440901727657:android:4d6dc508bfd2d77dfb00b8",
+        "android_client_info": {
+          "package_name": "com.michaldakowicz.cellar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDm2CFvTsvQ-NGs1L-M0sm8vx-xtN9Otq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

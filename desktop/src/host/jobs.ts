@@ -48,7 +48,7 @@ export class Jobs {
     const owner = this.owner();
     if (!owner) throw new DeskError('sign in on the pc first', 409);
     const id = `j${randomBytes(8).toString('hex')}`;
-    const run: DeskRun = { id, agent: 'job', name: `$${command}`, cwd: plan.cwd, startedAt: Date.now(), state: 'running', origin: 'phone', entryId: null, ...(parentRunId ? { parentRunId } : {}) };
+    const run: DeskRun = { id, agent: 'job', name: `$${command}`, cwd: plan.cwd, startedAt: Date.now(), state: 'running', origin: 'phone', entryId: null, ...(plan.projectId ? { projectId: plan.projectId } : {}), ...(parentRunId ? { parentRunId } : {}) };
     const job = { run, owner, log: join(this.dir, `${id}.log`) };
     this.jobs.push(job);
     this.save();
@@ -63,6 +63,7 @@ export class Jobs {
     appendFileSync(job.log, `\n$ ${step.runner} ${step.task}\n`);
     try {
       const child = await launchJobStep(plan, step, (chunk) => appendFileSync(job.log, chunk));
+      if (this.owner() !== job.owner) { await stopJobProcess(child); throw new DeskError('Account changed while launching job.', 409); }
       this.active.set(job.run.id, { child, stopping: false });
       return child;
     } catch (error) {
@@ -88,6 +89,13 @@ export class Jobs {
 
   async stop(id: string): Promise<void> {
     const job = this.get(id);
+    await this.stopHeld(job);
+  }
+  async stopOwner(owner: string): Promise<void> {
+    for (const job of this.jobs.filter((j) => j.owner === owner && this.active.has(j.run.id))) await this.stopHeld(job);
+  }
+  private async stopHeld(job: Job): Promise<void> {
+    const id = job.run.id;
     if (job.run.state === 'stopped') return;
     const active = this.active.get(id);
     if (!active) throw new DeskError('job process is not held by this host — check it at the pc', 409);

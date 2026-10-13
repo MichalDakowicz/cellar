@@ -48,9 +48,9 @@ import { defaultRecipe } from '@/lib/deskSettings';
 import { deskSections } from '@/lib/deskView';
 import { SAMPLE_CHATS, SAMPLE_FIGURES, SAMPLE_GROUP, SAMPLE_NIGHT, SAMPLE_PREVIEW, SAMPLE_PROJECTS, SAMPLE_QUESTION, SAMPLE_RACE, SAMPLE_RAIL, SAMPLE_RULES, SAMPLE_RUNS, SAMPLE_USAGE } from '@/lib/deskSample';
 import { COLORS, rawThemeVars, themeVars } from '@/theme/colors';
+import { usePreviewKeys } from './usePreviewKeys';
 
 const noop = () => {};
-const keys = { list: null, plan: [], onKey: noop, onSelection: noop, onCopy: noop, onNudge: noop };
 const sections = deskSections(SAMPLE_RUNS);
 const host = { name: 'michu-pc', online: true, line: 'on this network · sample desk', figures: SAMPLE_FIGURES, onScreen: noop };
 const params = new URLSearchParams(location.search);
@@ -70,7 +70,8 @@ function Islands() {
 
 function Preview() {
   const [loaded, fontError] = useFonts({ SplineSans: require('../../assets/fonts/SplineSans.ttf'), IBMPlexMono: require('../../assets/fonts/IBMPlexMono-Regular.ttf') });
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(params.get('draft') ?? '');
+  const keys = usePreviewKeys(draft, setDraft, params.get('transport') === 'browser');
   const [scope, setScope] = useState<'all' | 'project'>('all');
   const [project, setProject] = useState('sample-app');
   const [size, setSize] = useState<'phone' | 'tablet' | 'desktop'>('phone');

@@ -2,10 +2,15 @@ import assert from 'node:assert/strict';
 import type { NetworkInterfaceInfo } from 'node:os';
 import { test } from 'node:test';
 
-import { pickLanAddress } from './network.ts';
+import { pickLanAddress, pickTailnetAddress } from './network.ts';
 
 const v4 = (address: string, internal = false) =>
   ({ address, family: 'IPv4', internal, netmask: '255.255.255.0', mac: '', cidr: null }) as NetworkInterfaceInfo;
+test('tailnet advertisement requires Tailscale adapter and valid CGNAT address', () => {
+  assert.equal(pickTailnetAddress({ Tailscale: [v4('100.100.5.6')], Ethernet: [v4('192.168.1.2')] }), '100.100.5.6');
+  assert.equal(pickTailnetAddress({ VPN: [v4('100.100.5.6')] }), null);
+  assert.equal(pickTailnetAddress({ Tailscale: [v4('100.128.5.6')] }), null);
+});
 
 test('prefers the wi-fi address over virtual switches', () => {
   assert.equal(

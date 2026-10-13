@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
@@ -70,7 +72,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const folder = folders.find((candidate) => candidate.projectId === projectId) ?? null;
   const projectName = projects.find((candidate) => candidate.id === entry?.projectId)?.name;
   const projectCommands = jobs.projects.find((project) => project.id === projectId || (!!folder && repoKey(project.cwd) === repoKey(folder.path)));
-  const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id));
+  const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id), { link, projectId });
   const starts = taskStarts({
     typed: text,
     picks: attached.map((thought) => ({ entryId: thought.id, line: agentPrompt(thought, projectName) })),
@@ -113,7 +115,9 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     if (ready.length === built.length) starting.begin(ready);
   };
 
+  const voice = useDictation((speech) => setText(insertVoice(text, speech, keys.selection)));
   return {
+    voice,
     host: link.name,
     online: link.can.start,
     text,

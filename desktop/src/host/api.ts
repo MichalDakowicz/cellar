@@ -1,4 +1,6 @@
 import type { RunEvents } from './runEvents.ts';
+import { searchKeys } from './keySearch.ts';
+import { previewKey } from './keyPreview.ts';
 import type { Approvals } from './approvals.ts';
 import type { Controls } from './controls.ts';
 import { realpathSync, statSync } from 'node:fs';
@@ -24,6 +26,8 @@ import type { Receipts } from './receipts.ts';
 import { startTask } from './startTask.ts';
 import type { Worktrees } from './worktrees.ts';
 import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
+import type { Previews } from './previews.ts';
+import type { HostNotifications } from './notifications.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -35,10 +39,12 @@ import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
  * which is here, and are served by the LAN server.
  */
 
-export type ApiRequest = { method: string; path: string; body?: unknown; source?: 'phone' | 'pc' };
+export type ApiRequest = { method: string; path: string; body?: unknown; source?: 'phone' | 'pc'; address?: string };
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  notifications?: HostNotifications;
+  previews?: Previews;
   controls?: Controls;
   approvals?: Approvals;
   events?: RunEvents;
@@ -80,6 +86,8 @@ export async function deskInfo(deps: HostDeps): Promise<DeskInfo> {
     ...(deps.events ? { eventProtocol: 1 as const } : {}),
     ...(deps.approvals ? { approvalProtocol: 1 as const } : {}),
     ...(deps.controls ? { dispatchProtocol: 1 as const } : {}),
+    keysProtocol: 1,
+    ...(deps.previews ? { previewProtocol: 1 as const } : {}),
   };
 }
 
@@ -124,7 +132,7 @@ async function trust(deps: HostDeps, body: unknown): Promise<string> {
   return cwd;
 }
 
-async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'phone'): Promise<string> {
+async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'phone', address?: string): Promise<string> {
   const raw = (body ?? {}) as { kind?: string; port?: unknown; app?: unknown };
   let wanted: Ticket;
   if (raw.kind === 'screen') {
@@ -140,7 +148,7 @@ async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'p
   } else {
     throw new DeskError('what is the ticket for?');
   }
-  const host = source === 'pc' ? '127.0.0.1' : deps.lanHost();
+  const host = source === 'pc' ? '127.0.0.1' : address ?? deps.lanHost();
   if (!host) throw new DeskError('this pc is not on a network the phone can reach', 409);
   return `http://${host}:${deps.identity().port}/t/${deps.tickets.issue(wanted)}`;
 }
@@ -150,6 +158,25 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
   const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'GET /notice-deliveries':
+        if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
+        return ok({ deliveries: await deps.notifications.deliveries(), error: deps.notifications.error });
+      case 'POST /notice-ack':
+        if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
+        return ok(await deps.notifications.ack(req.body));
+      case 'GET /previews':
+        if (!deps.previews) throw new DeskError('Update the PC for managed previews.', 409);
+        return ok({ previews: deps.previews.list() });
+      case 'POST /preview-actions':
+        if (!deps.previews) throw new DeskError('Update the PC for managed previews.', 409);
+        return ok({ receipt: await deps.previews.act(req.body) });
+      case 'POST /preview-receipt':
+        if (!deps.previews || typeof (req.body as { commandId?: unknown })?.commandId !== 'string') throw new DeskError('Invalid preview receipt request.');
+        return ok({ receipt: deps.previews.receipt((req.body as { commandId: string }).commandId) });
+      case 'POST /keys-search':
+        return ok(await searchKeys(deps, req.body));
+      case 'POST /keys-preview':
+        return ok(await previewKey(deps, req.body));
       case 'POST /run-controls':
         if (!deps.controls) throw new DeskError('Update Cellar on the PC for chat controls.', 409);
         return ok({ receipt: await deps.controls.run(req.body && typeof req.body === 'object' ? { ...req.body, source: req.source ?? 'phone' } : req.body) });
@@ -170,7 +197,7 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
         return ok(await deskInfo(deps));
       case 'POST /event-ticket': {
         if (!deps.events || !deps.account.current) throw new DeskError('Sign in and update Cellar on the PC for live events.', 409);
-        const host = (req.body as { local?: boolean } | null)?.local === true ? '127.0.0.1' : deps.lanHost() ?? '127.0.0.1';
+        const host = req.source === 'pc' ? '127.0.0.1' : req.address ?? deps.lanHost() ?? '127.0.0.1';
         const token = deps.tickets.issue({ kind: 'events', owner: deps.account.current.userId, key: deps.identity().key });
         return ok({ url: 'ws://' + host + ':' + deps.identity().port + '/events/' + token });
       }
@@ -224,7 +251,7 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
       case 'GET /apks':
         return ok({ apks: await findApks(deps.identity().workspace) });
       case 'POST /tickets':
-        return ok({ url: await ticket(deps, req.body, req.source) });
+        return ok({ url: await ticket(deps, req.body, req.source, req.address) });
       case 'POST /trust':
         return ok({ trusted: await trust(deps, req.body) });
       default:

@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { PreviewChecks } from '@/components/desk/PreviewChecks';
 import { PreviewDeployBar } from '@/components/desk/PreviewDeployBar';
@@ -64,6 +64,9 @@ export default function PreviewScreen() {
               page={{ reloads: preview.reloads, ...preview.page }}
             />
             <PreviewChecks host={preview.host} checks={preview.checks} empty={preview.checksEmpty} />
+            {preview.onChecks && <Pressable className="min-h-11 justify-center" onPress={preview.onChecks}><Text className="text-foreground">run checks</Text></Pressable>}
+            {preview.actionError && <Text className="text-muted-foreground">{preview.actionError}</Text>}
+            {preview.recover && <Pressable className="min-h-11 justify-center" onPress={() => void preview.recover?.()}><Text className="text-foreground">check original receipt</Text></Pressable>}
           </View>
         </ContentShell>
       </ScrollView>

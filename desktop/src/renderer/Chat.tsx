@@ -210,7 +210,7 @@ export function Chat({
                 {pending[Math.min(waiting, pending.length - 1)]?.node}
               </div>
             ) : (
-              <Composer host={host} runId={runId} />
+              <Composer key={runId} host={host} runId={runId} cellar={cellar} />
             )}
           </>
         ) : (

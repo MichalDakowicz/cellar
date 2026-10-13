@@ -7,6 +7,7 @@
     "@/lib/dump": "../../../src/lib/dump.ts",
     "@/lib/entryDocs": "../../../src/lib/entryDocs.ts",
     "@/lib/entryQuestions": "../../../src/lib/entryQuestions.ts",
+    "@/lib/deskOptionLabel": "../../../src/lib/deskOptionLabel.ts",
     "@/lib/questionAnswer": "../../../src/lib/questionAnswer.ts",
     "@/lib/entryState": "../../../src/lib/entryState.ts",
     "@/lib/entryTrail": "../../../src/lib/entryTrail.ts",

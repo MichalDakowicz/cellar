@@ -42,6 +42,7 @@ export function useQuestionTaps(ready: boolean): void {
     // A question carries the entry it is on; a nudge carries a route — one
     // thought, or the list a grouped nudge covers.
     const data = response.notification.request.content.data ?? {};
+    if (data.noticeId) return; // Routed/actioned by the W14 durable response handler.
     const route =
       typeof data.entryId === 'string' && data.entryId
         ? `/entry/${data.entryId}`

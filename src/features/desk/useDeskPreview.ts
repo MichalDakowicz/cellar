@@ -7,6 +7,8 @@ import { SAMPLE_PREVIEW } from '@/lib/deskSample';
 import { readError } from '@/lib/utils';
 
 import { useDeskLink } from './useDeskLink';
+import { useManagedPreviews } from './useManagedPreviews';
+import { managedChecks } from '@/lib/deskManagedPreview';
 
 /**
  * The preview screen (`Preview.dc.html`): one page the pc serves, framed at a
@@ -21,6 +23,7 @@ import { useDeskLink } from './useDeskLink';
 export function useDeskPreview(param: string) {
   const router = useRouter();
   const link = useDeskLink();
+  const managed = useManagedPreviews();
   const sample = param === 'sample';
   const port = sample ? SAMPLE_PREVIEW.port : Number(param);
   const calls = !sample && link.can.local ? link.calls : null;
@@ -59,8 +62,13 @@ export function useDeskPreview(param: string) {
   }, [deployingSince]);
 
   const process = ports.data?.find((candidate) => candidate.port === port)?.process ?? null;
+  const real = managed.data?.previews.find((p) => p.port === port) ?? null;
+  const job = managed.data?.runs.find((r) => r.id === real?.deployJobId);
   const deploy: PreviewDeploy = !sample
-    ? { kind: 'blocked', reason: "deploy comes once the pc can run this project's $deploy" }
+    ? !real || !managed.enabled ? { kind: 'blocked', reason: 'Start a managed preview from Desk › previews to use $deploy.' }
+      : managed.busy ? { kind: 'blocked', reason: managed.error ?? 'Preview action pending; check its receipt.' }
+      : job?.state === 'running' ? { kind: 'deploying', command: '$deploy', seconds: Math.max(0, Math.round((now - job.startedAt) / 1000)) }
+      : { kind: 'ready', target: '$deploy in this checkout' }
     : deployingSince === null
       ? { kind: 'ready', target: SAMPLE_PREVIEW.deployTarget }
       : { kind: 'deploying', command: SAMPLE_PREVIEW.deployCommand, seconds: Math.max(0, Math.round((now - deployingSince) / 1000)) };
@@ -98,12 +106,15 @@ export function useDeskPreview(param: string) {
       else void ticket.refetch();
     },
     host: link.name,
-    checks: sample ? SAMPLE_PREVIEW.checks : [],
-    checksEmpty: "checks come once the pc runs this project's own check commands",
+    checks: sample ? SAMPLE_PREVIEW.checks : managedChecks(real, managed.data?.runs ?? []),
+    checksEmpty: 'Run this project’s check commands below.',
+    onChecks: real && managed.enabled && !managed.busy ? () => managed.act(real.projectId, real.runId, 'checks') : null,
+    actionError: managed.error ?? (job ? `$deploy: ${job.state}` : null),
+    recover: managed.recover,
     deploy,
-    onDeploy: () => sample && setDeployingSince(Date.now()),
+    onDeploy: () => { if (sample) setDeployingSince(Date.now()); else if (real) managed.act(real.projectId, real.runId, 'deploy', !real.openedAt); },
     /** Back to the run that served it, or a new task when no run did. */
     tellAgent: () =>
-      router.push((sample ? `/desk/run/${SAMPLE_PREVIEW.runId}` : '/desk/new') as Href),
+      router.push((sample ? `/desk/run/${SAMPLE_PREVIEW.runId}` : real ? `/desk/run/${real.runId}` : '/desk/new') as Href),
   };
 }

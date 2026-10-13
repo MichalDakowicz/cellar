@@ -151,6 +151,8 @@ export type DeskApk = { app: string; file: string; version: string | null; size:
 
 /** What `GET /desk` answers. */
 export type DeskInfo = {
+  previewProtocol?: 1;
+  keysProtocol?: 1;
   capabilities?: import('./deskAppRole').HostCapabilities;
   dispatchProtocol?: 1;
   approvalProtocol?: 1;

@@ -1,6 +1,6 @@
 # Desk — how it works
 
-Reviewed 2026-10-12 through W9. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-14 through W14. The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -10,13 +10,13 @@ adds behavior through the existing view models, host API and transports.
 | Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W21) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
-| Manage worktrees | W5: Git-confirmed project catalogue; finished runs offer reviewed Keep/Merge/Remove with durable lifecycle receipts | Merge requires a clean checked-out main and fast-forward history; previews/checks/deploy remain W12 |
+| Manage worktrees | W5: Git-confirmed catalogue and reviewed Keep/Merge/Remove; W12 runs previews/checks/deploy in the owned worktree | Merge requires clean checked-out main and fast-forward history |
 | Follow a run | W6/W7 synchronized events and saved history; W8 runtime approvals; W9 retained chats, queue/edit/cancel/Send now, single stop and account-wide Stop all | Restarted/legacy provider chats explain unavailability; offline host stops remain pending |
-| Answer an entry | W3: exact stored picks and separate note; confirmed writes unblock entries; W8 linked entry questions share the waiting dock; hosted MCP reads both | Native provider question tools are explicitly refused; actionable notifications remain W14 |
-| Commands and keys | W2: real project command catalogue, jobs, saved chains and readable test reports; `$` also finds projects/entries; hex chips copy/nudge | Command delivery needs LAN/IPC. `@` files and `/` skills remain samples (W11) |
-| Preview, screen, builds | LAN port list and preview, view-only PC screen, APK discovery/download | No managed worktree dev servers/checks/deploy (W12), remote input or real phone panel (W19) |
+| Answer an entry | Exact picks and note; first-answer safeguards; W14 notification actions and conditional SQL settlement; hosted/local MCP share answered state | Native provider question tools remain explicitly refused |
+| Commands and keys | W2 jobs/catalogue; W11 shared file/skill/command search, line previews, project/entry references and hex chips | Host sources require signed LAN or desktop IPC; browser retains mailbox limits. New-task files require a selected existing run |
+| Preview, screen, builds | W12 managed worktree server, allocated port, real check/deploy jobs and durable receipts; ticketed LAN/tailnet addressing; screen/APK discovery | Actual tailnet traversal unverified on this PC; remote input remains W19 |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
-| Settings | Durable local defaults and sample toggle; existing account and notification plumbing | Voice, actionable delivery/routing, recipes/rule sync, usage/account policy, checkpoints and share/crash automation remain W13–W18 |
+| Settings | Durable defaults; W13 voice drafts; W14 real ping kinds, quiet hours, push registration and receipts | Checkpoints, recipes/rules, usage/accounts and share/crash automation remain W15–W18 |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
 real header or navigation totals. Sample actions do not confirm host execution.
@@ -24,7 +24,7 @@ real header or navigation totals. Sample actions do not confirm host execution.
 ## Agreed wiring order
 
 W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 rebuild → W11 keys search
-→ W12 previews/deploy, then W13–W20.
+→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W20.
 W21 stays deferred. Counts establish trustworthy status first; project commands are
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
@@ -486,6 +486,150 @@ Claude remains fixture-only; two online physical hosts and macOS/Linux remain
 unverified live. NSIS was built; the existing unpacked reachable payload was
 refreshed and launched without running the installer. No release or web publication.
 
-Exact live run/receipt evidence, artifact hashes, visual comparison limits and
-reachable path are in [w10-rebuild.md](w10-rebuild.md). Keys search is next as W11:
-[w11-prompt.md](w11-prompt.md). W11 has not started; SSH remains deferred W21.
+Historical live evidence and artifact ledgers remain in Git history. W11 keys
+search follows below; SSH remains deferred W21.
+
+## W11 — scoped keys search
+
+Phone and DOM desktop use shared pure token/search contracts over the existing
+authenticated host API. `@` searches the selected run's owned checkout/worktree,
+changed files first, with folders, quoted paths and line references. Read-only
+previews are bounded and recheck scope/path containment. `/` follows the installed
+agent's built-ins and configured home/project skill folders; `$` uses W2 commands
+alongside existing Cellar projects/entries. Selection inserts text without effects.
+
+Search lifetime guards hide mismatched scopes and drop late successes/failures.
+Unavailable sources, disconnection, unsupported browser transport and empty results
+are explicit. Width still selects layout only. No browser filesystem/process/IPC
+bridge, credential copying, provider lifecycle change or later wiring is added.
+Tray startup keeps the existing profile renderer as the only refresh-token owner.
+
+Root 889 tests and desktop 83 tests pass with lint/types. Standalone Android,
+controller web and independent Windows builds pass their graph checks. Native
+phone and preserved-profile desktop verify live file/skill/command suggestions,
+line preview, insertion/focus, colour chips and reconnect/draft retention. Current
+source tests retain W1–W10 regression coverage; exact live limits, artifact paths,
+protected hashes and browser/platform restrictions remain recorded in Git history.
+
+## W12–W14 verification
+
+### W12 — managed previews and deploy
+
+Completed 2026-10-14. The native phone starts one dev server in an owned run's
+worktree; desktop and phone open the same allocated port through signed,
+one-use tickets. Checks execute that worktree's project commands. Deploy executes
+its `$deploy`; an unopened preview requires explicit confirmation. Durable UUID
+receipts fence retries and record restart uncertainty without replaying effects.
+
+Live Codex run `56be88f9` created a separate managed QA worktree. Phone started
+preview port `57840`; phone WebView and original-profile packaged desktop rendered
+its HTML. Desktop tablet width reached 768px. Actual npm check exited 7 and test
+exited 0; both native UIs showed failed/passed accurately. Desktop `$deploy` ran
+the disposable local marker script once. Server stop and reviewed clean worktree
+removal both returned confirmed receipts; branch remains recoverable.
+
+Integration fixtures cover concurrent starts, wrong ownership, unopened deploy
+refusal before effects, duplicate deploy UUIDs, restart unknowns and stop. No
+production deployment was performed. Tailscale adapter selection and socket-based
+ticket addressing are implemented and tested; this PC has no Tailscale adapter,
+so actual tailnet traversal remains unverified. Unsupported dev runners refuse
+explicitly instead of claiming an allocated port they do not honor.
+
+Touched surfaces: phone preview list/detail, desktop preview list/detail and
+pairing, shared capability/contracts, project command jobs and owned lifecycle.
+Browser keeps its existing mailbox limits. Provider lifecycle remains unchanged.
+
+### W13 — voice drafts
+
+Completed 2026-10-14. Android uses the OS recognizer after an explicit microphone
+tap and permission request. Windows uses its installed System.Speech recognizer
+through guarded local IPC. New-task sheets, chat composers and entry questions
+receive editable drafts; dictation never sends a task or runs a command.
+Interim text, cancellation, permission failures and unavailable recognizers remain
+visible. Only one field owns a recognition session at a time.
+
+The user confirmed recognition works on the installed physical phone. Pure tests
+verify “B” / “the second one” selects an offered option and “dollar deploy” inserts
+literal `$deploy`. Ambiguous speech stays draft text. Multi-pick choices remain
+additive. Windows recognizer invocation and cancellation are implemented; the
+synthetic speaker-to-microphone probe returned no speech, so successful acoustic
+recognition on Windows is not claimed.
+
+Touched surfaces: native phone/desktop new-task sheet, run composer, entry question
+cards, shared speech parsing, microphone permission and guarded desktop bridge.
+
+### W14 — actionable, routed notifications
+
+Completed 2026-10-14. The original launch-only bug used foreground checks and
+hourly OS polling. A 15-second server worker now enqueues canonical notices and
+sends data-only FCM wakes. Android fetches the current owner/recipient/generation
+before showing anything, even without the React app running. Native OS dismissal
+is confirmed before acknowledgment. Expo's token-fetch event no longer causes
+recursive registration or repeated device-secret rotation.
+
+An active unlocked desk receives in-app actionable banners. Five-minute idle,
+lock, quiet hours or two-minute unanswered urgent requests select one phone.
+Transfers wait for the old recipient's dismissal acknowledgment. Desktop banners
+have a renewed 45-second lease so an unavailable renderer cannot block delivery
+forever. Phone notices remain fenced until actual OS removal. Per-run tags update
+in place; exact notification categories advertise only supported actions.
+
+Live evidence on the paired Android phone and original-profile packaged desktop:
+
+- Background question arrived while Cellar was on Home, without launching it.
+  Notification B stored exactly `beta`; original UUID receipt was confirmed.
+- A second question moved phone → active desk only after phone dismissal. The
+  desk visibly showed its A/B/More banner. Aging only that fixture's waiting time
+  beyond 120 seconds moved it desk → phone; desk banner disappeared first and
+  phone delivery was acknowledged. Original quiet-hour preferences were restored.
+- Live Codex run `c863e3a7` produced a genuine command approval and phone push.
+  The exact phone-mailbox deny payload was submitted from the original
+  authenticated desktop context, then confirmed by the live provider through
+  request `e6dc1604-ded9-48af-a433-b73bbfe71410` and command receipt
+  `9a9318df-4a50-4c6d-91aa-be94b2042fc1`. The marker was never written.
+  This verifies mailbox/provider delivery; a physical approval-button tap is not
+  claimed. The physical question-button tap is verified separately above.
+
+SQL fixtures verify rerunnable migration, owner RLS, unavailable service RPCs,
+first-answer wins, durable replay checks, dismissal fences and stale-generation
+rejection. Routing tests cover idle/lock/quiet rules; the edge pagination test
+retains all 1001 rows and reapplies pending filters across pages. Claude remains
+fixture-only; no provider lifecycle change or live Claude task was introduced.
+T3's pinned `CodexAdapterV2` reference at
+`bed923986fbcbe8279f23b9367efde1596bde1f9` informed receipt/callback boundaries.
+
+Touched surfaces: phone Android push service, root notification sync, notification
+actions/settings/receipts, desktop activity/banners/settings, existing entry
+question writers, local/hosted MCP, and owner-scoped Supabase outbox/RPCs. Existing
+entry writes now refuse already answered/dismissed questions; conditional SQL
+settlement cannot reopen a finished entry or ignore a newer pending question.
+
+### Build, deployment and setup
+
+Root: 95 suites / 899 tests; desktop: 88 tests; MCP: 37 tests. App, desktop host,
+desktop renderer and MCP types pass; both app/desktop lint pass. Both edge bundles
+typecheck; edge scan test passes. Web export, independent Windows NSIS/unpacked
+package and JDK 21 Android release pass. Standalone Android 1.15.0 / 17 is installed
+and launched. Desktop uses its original path/profile and pairing identity.
+Controller Android maps have zero host imports; web map verification also passed;
+desktop's 2002-module graph contains no Expo/mobile screen tree. All 35 surviving
+protected references match their baseline hashes; pre-existing document deletions
+and user edits remain untouched. Database advisors have no new findings.
+
+`supabase/schema.sql` includes the rerunnable `desk-w14.sql` companion. Four new
+`cellar_notice_*` tables use owner RLS. Delivery/route/timezone RPCs are restricted
+to service_role. No sibling-owned tables or shared preferences were changed.
+`desk-push` and hosted `mcp` are deployed to the existing shared Ping project.
+
+Android public Firebase client configuration is `config/google-services.json`.
+The dedicated sender has only Firebase Cloud Messaging administration access.
+Private sender key and cron secret are server secrets, never shipped in a client
+or committed. Operator setup helpers prepare ignored secret files and the Vault /
+pg_cron wake schedule; keep those files private. Deploy `desk-push` with its own
+request authentication (`verify_jwt=false`), set `CELLAR_FCM_SERVICE_ACCOUNT` and
+`CELLAR_PUSH_CRON_SECRET`, and activate the prepared cron SQL. Fresh Android
+prebuilds install the native service through `plugins/withCellarPush.js`.
+
+The user explicitly approved web publication after the build checks. Firebase
+Hosting deployment succeeded at <https://cellar-stash.web.app>. No release tag,
+GitHub release, production project `$deploy`, or merge was performed.

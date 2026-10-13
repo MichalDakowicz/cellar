@@ -55,6 +55,7 @@ export function QuestionThread({
       answerPicks={view.question.answerPicks}
       sending={view.sending}
       error={view.error}
+      voice={view.voice}
       answeredVia={view.question.answeredVia}
       status={view.status}
       agent={view.question.agent}

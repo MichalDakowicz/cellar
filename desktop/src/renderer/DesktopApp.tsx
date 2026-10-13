@@ -1,4 +1,5 @@
 import { LaterDesk } from "./LaterDesk";
+import { NoticeDock } from './NoticeDock';
 import { Share } from "./Share";
 import { Notifications } from "./Notifications";
 import { useEffect, useLayoutEffect, useRef } from "react";
@@ -193,6 +194,7 @@ export function DesktopApp({
           avatar={profile.avatar}
         />
         <main ref={workspace} className="workspace" aria-label="Cellar desktop">
+          <NoticeDock host={host} />
           {prefs.error && (
             <div className="data-error" role="status">
               Settings failed · {prefs.error}

@@ -3,6 +3,7 @@ import { calls } from "./client";
 import { navigate } from "./useRoute";
 import { useHostQuery } from "./useHostQuery";
 import type { Host } from "./useHost";
+import { ManagedPreviews } from './ManagedPreviews';
 
 export function Previews({ host, port }: { host: Host; port?: string }) {
   const result = useHostQuery(
@@ -43,6 +44,7 @@ export function Previews({ host, port }: { host: Host; port?: string }) {
     <div className="page stack">
       <h1>{port ? `localhost:${port}` : "previews"}</h1>
       <p className="muted">what this pc is serving</p>
+      <ManagedPreviews host={host} port={port} />
       {result.error && <p role="status">{result.error}</p>}
       {!host.live && <p className="muted">reconnect to host</p>}
       {!port && (
@@ -92,9 +94,6 @@ export function Previews({ host, port }: { host: Host; port?: string }) {
             </div>
           )}
           {!url && <p>{error ?? "preview unavailable or connecting…"}</p>}
-          <p className="muted">
-            Managed checks and deploy unavailable until W12.
-          </p>
         </>
       )}
       {!port && (

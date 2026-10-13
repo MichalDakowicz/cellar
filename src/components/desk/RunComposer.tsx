@@ -12,18 +12,23 @@ import { ComposerQueue, type QueuedPreview } from './ComposerQueue';
 import type { QueuedMessage } from '@/lib/deskDispatch';
 import { KeyList, type KeyListView } from './KeyList';
 import { KeyPlan } from './KeyPlan';
+import type { VoiceView } from '@/lib/deskVoiceView';
 
 export type ComposerKeys = {
   list: KeyListView | null;
   plan: KeyPlanLine[];
   onKey: (key: DeskKey) => void;
-  onSelection: (end: number) => void;
+  onSelection: (end: number, start?: number) => void;
+  selection?: { start: number; end: number };
+  onEdit?: (text: string) => void;
+  onKeyboard?: (key: string) => boolean;
   onCopy: (code: string) => void;
   onNudge: (code: string, lighter: boolean) => void;
 };
 
 /** RUN-R1b/R1c: text above one toolbar; popouts open upward. Host actions wait for W9/W12. */
-export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, modelLabel = 'model', finished = false, sampleModels, sampleQueue = [], queued = [], queueBusy, onPromote, onCancel, onEdit, deliveryMessage, onRecover }: {
+export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, voice, modelLabel = 'model', finished = false, sampleModels, sampleQueue = [], queued = [], queueBusy, onPromote, onCancel, onEdit, deliveryMessage, onRecover }: {
+  voice?: VoiceView;
   draft: string;
   onDraft: (text: string) => void;
   dispatch: 'steer' | 'queue';
@@ -43,6 +48,7 @@ export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, mode
   const [model, setModel] = useState(sampleModels?.models[0] ?? '');
   const [effort, setEffort] = useState(sampleModels?.efforts.at(-1) ?? '');
   const previousCount = useRef(0);
+  const field = useRef<TextInput>(null);
   useEffect(() => {
     if (queued.length > previousCount.current) setTray('queue');
     else if (!queued.length && previousCount.current && tray === 'queue') setTray(null);
@@ -65,22 +71,25 @@ export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, mode
           <Text className="font-sans text-xs text-muted-foreground">Model switching is not connected yet.</Text>
         </>}
       </ComposerTray>}
-      {keys.list && <KeyList list={keys.list} />}
+      {keys.list && <KeyList list={{ ...keys.list, onPick: (id) => { keys.list?.onPick(id); field.current?.focus(); } }} />}
       <View className="rounded-xl border border-composer-edge bg-composer">
         <TextInput
+          ref={field}
           className="font-sans max-h-[124px] min-h-[52px] w-full px-3 pb-1 pt-3 text-sm text-foreground"
           style={[{ lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS]}
           placeholder="Message…"
           placeholderTextColor={COLORS.muted}
           value={draft}
-          onChangeText={onDraft}
-          onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end)}
+          onChangeText={keys.onEdit ?? onDraft}
+          selection={keys.selection}
+          onKeyPress={(event) => { if (keys.onKeyboard?.(event.nativeEvent.key)) event.preventDefault(); }}
+          onSelectionChange={({ nativeEvent }) => keys.onSelection(nativeEvent.selection.end, nativeEvent.selection.start)}
           multiline
           accessibilityLabel="message for the agent"
         />
         <View className="flex-row items-center gap-0.5 px-1.5 pb-1.5 pt-0.5">
           <Pressable accessibilityRole="button" accessibilityLabel="add file or image" accessibilityState={{ expanded: tray === 'attach' }} onPress={() => setTray(tray === 'attach' ? null : 'attach')} className="h-11 w-11 items-center justify-center rounded-lg"><Plus size={20} color={COLORS.foregroundSoft} /></Pressable>
-          <View accessibilityLabel="voice comes soon" className="h-11 w-11 items-center justify-center rounded-lg"><Mic size={20} color={COLORS.foregroundSoft} /></View>
+          <Pressable accessibilityRole="button" accessibilityLabel={voice?.listening ? 'stop dictation' : 'dictate message'} disabled={!voice} onPress={voice?.toggle} className="h-11 w-11 items-center justify-center rounded-lg"><Mic size={20} color={voice?.listening ? COLORS.accent : COLORS.foregroundSoft} /></Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="model and reasoning" accessibilityState={{ expanded: tray === 'model' }} onPress={() => setTray(tray === 'model' ? null : 'model')} className="h-11 min-w-0 flex-1 flex-row items-center justify-end gap-1 px-1">
             <Text className="font-sans min-w-0 shrink text-xs text-muted-foreground" numberOfLines={1}>{sampleModels ? `${model} · ${effort}` : modelLabel}</Text><ChevronDown size={14} color={COLORS.muted} />
           </Pressable>
@@ -90,6 +99,7 @@ export function RunComposer({ draft, onDraft, disabledReason, onSend, keys, mode
         </View>
       </View>
       <KeyPlan lines={keys.plan} onCopy={keys.onCopy} onNudge={keys.onNudge} />
+      {(voice?.error || voice?.interim || voice?.listening) && <Text className="text-xs text-muted-foreground">{voice.error ?? voice.interim ?? 'listening…'}</Text>}
       {!!disabledReason && <Text className="font-sans text-[11px] leading-4 text-muted-foreground">{disabledReason}</Text>}
       {!!deliveryMessage && <Text className="font-sans text-[11px] leading-4 text-muted-foreground">{deliveryMessage}</Text>}
       {onRecover && <Pressable accessibilityRole="button" accessibilityLabel="check original message receipt" onPress={onRecover} className="min-h-11 justify-center"><Text className="font-sans text-xs text-foreground">Check original receipt</Text></Pressable>}

@@ -235,6 +235,8 @@ export async function answerQuestion(
     .from('cellar_entry_questions')
     .update({ ...answer, answered_at: new Date().toISOString(), answered_via: via })
     .eq('id', id)
+    .is('answered_at', null)
+    .is('dismissed_at', null)
     .select(QUESTION_COLUMNS)
     .single();
   if (error) throw error;
@@ -249,7 +251,7 @@ export async function dismissQuestion(id: string): Promise<void> {
   const { error } = await supabase
     .from('cellar_entry_questions')
     .update({ dismissed_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id).is('answered_at', null).is('dismissed_at', null);
   if (error) throw error;
 }
 

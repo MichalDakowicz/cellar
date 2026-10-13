@@ -15,11 +15,7 @@ import type { Entry, EntryQuestion, QuestionStatus } from '@/types/cellar';
  */
 
 /** A, B, C, D and on — the canvas's letter tiles. The tap target's label, and how a question reads aloud. */
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-export function optionLabel(index: number): string {
-  return LETTERS[index] ?? String(index + 1);
-}
+export { optionLabel } from '@/lib/deskOptionLabel';
 
 /**
  * More than this and the list stops being a choice and becomes a form. Eight is

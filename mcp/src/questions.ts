@@ -91,13 +91,16 @@ export async function answerQuestion(
     .from('cellar_entry_questions')
     .update({ ...body, answered_at: new Date().toISOString(), answered_via: 'chat' })
     .eq('id', questionId)
+    .is('answered_at', null)
+    .is('dismissed_at', null)
     .select(QUESTION_COLUMNS)
     .single();
   if (error) throw error;
 
   if (entry.state === 'blocked' && unblocksEntry(entry.questions, questionId)) {
-    await client.from('cellar_entries').update({ state: 'open', agent: null }).eq('id', entry.id);
-    await logMoves(client, who.userId, entry.id, patchEvents(entry, { state: 'open' }, { source: 'agent', agent: who.agent }));
+    const settled = await client.rpc('cellar_settle_questions', { p_entry: entry.id });
+    if (settled.error) throw settled.error;
+    if (settled.data) await logMoves(client, who.userId, entry.id, patchEvents(entry, { state: 'open' }, { source: 'agent', agent: who.agent }));
   }
   return normalizeQuestion(data as QuestionRow);
 }
