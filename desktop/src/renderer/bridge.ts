@@ -17,6 +17,8 @@ export type DeskPairing =
   | { url: null; reason: string };
 
 export type DeskBridge = {
+  dictate?: (id: string) => Promise<{ text?: string; error?: string }>;
+  stopDictation?: (id: string) => Promise<void>;
   version: number;
   request: (
     method: string,

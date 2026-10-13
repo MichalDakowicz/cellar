@@ -27,6 +27,7 @@ import { startTask } from './startTask.ts';
 import type { Worktrees } from './worktrees.ts';
 import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
 import type { Previews } from './previews.ts';
+import type { HostNotifications } from './notifications.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -42,6 +43,7 @@ export type ApiRequest = { method: string; path: string; body?: unknown; source?
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  notifications?: HostNotifications;
   previews?: Previews;
   controls?: Controls;
   approvals?: Approvals;
@@ -156,6 +158,12 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
   const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'GET /notice-deliveries':
+        if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
+        return ok({ deliveries: await deps.notifications.deliveries(), error: deps.notifications.error });
+      case 'POST /notice-ack':
+        if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
+        return ok(await deps.notifications.ack(req.body));
       case 'GET /previews':
         if (!deps.previews) throw new DeskError('Update the PC for managed previews.', 409);
         return ok({ previews: deps.previews.list() });

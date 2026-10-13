@@ -23,6 +23,7 @@ import { Runs } from './runs.ts';
 import { Commands } from './commands.ts';
 import { Jobs } from './jobs.ts';
 import { Previews } from './previews.ts';
+import { HostNotifications, type DeskActivity } from './notifications.ts';
 import { Receipts } from './receipts.ts';
 import { Worktrees } from './worktrees.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
@@ -57,6 +58,7 @@ function requestLog(file: string): (line: string) => void {
 }
 
 export type HostOptions = {
+  activity?: () => DeskActivity;
   dataDir: string;
   version: string;
   supabaseUrl: string;
@@ -95,6 +97,7 @@ export class DeskHost {
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
     this.deps.previews = new Previews(options.dataDir, this.deps);
+    this.deps.notifications = new HostNotifications(this.deps, options.activity ?? (() => ({ idleSeconds: 300, locked: true })));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
     this.deps.runs.onChange = () => this.deps.events!.invalidate();
     this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
@@ -116,12 +119,14 @@ export class DeskHost {
     // become the pc's address for good, and every paired phone would lose it.
     this.boundPort = port;
     this.deps.events!.start();
+    this.deps.notifications?.start();
     return port;
   }
 
   stop(): Promise<void> {
     if (this.stopping) return this.stopping;
     this.fallback.stop();
+    this.deps.notifications?.stop();
     this.server?.close();
     this.stopping = (async () => {
       // Providers must release callbacks while the event store can still publish expiry.

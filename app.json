@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cellar",
     "slug": "cellar",
-    "version": "1.14.0",
+    "version": "1.15.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cellar",
@@ -15,7 +15,8 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.michaldakowicz.cellar",
-      "versionCode": 16
+      "googleServicesFile": "./config/google-services.json",
+      "versionCode": 17
     },
     "web": {
       "output": "single",
@@ -39,6 +40,7 @@
         }
       ],
       "expo-background-task",
+      ["expo-speech-recognition", { "microphonePermission": "Cellar uses the microphone when you dictate a task or answer.", "speechRecognitionPermission": "Cellar transcribes your words into editable task and answer drafts." }],
       [
         "expo-notifications",
         {
@@ -48,7 +50,8 @@
       ],
       "./plugins/withPingSiblings",
       "./plugins/withPingSigning",
-      "./plugins/withDeskCleartext"
+      "./plugins/withDeskCleartext",
+      "./plugins/withCellarPush"
     ],
     "experiments": {
       "typedRoutes": false,

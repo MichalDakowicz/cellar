@@ -6,7 +6,6 @@ import { notifyNudges } from '@/features/notifications/nudgeNotifier';
 import { normalizeCellarSettings, type CellarSettingsRow } from '@/lib/cellarSettings';
 import { isKind } from '@/lib/kinds';
 import type { NudgeCandidate } from '@/lib/nudges';
-import { notifyBlockedQuestions } from '@/lib/questionNotifier';
 import { ENTRY_COLUMNS, normalizeEntry, normalizeProject, PROJECT_COLUMNS, type EntryRow, type ProjectRow } from '@/lib/rows';
 import { supabase } from '@/lib/supabase';
 
@@ -96,8 +95,7 @@ if (supported) {
       // One wake, two passes, each behind its own switch: turning questions off
       // must not silence nudges, and the other way round.
       const settings = await switchesNow();
-      const { entries, projects } = await blockedNow();
-      if (settings.notifyQuestions) await notifyBlockedQuestions(entries, projects);
+      const { projects } = await blockedNow();
       if (settings.notifyNudges) {
         const names = new Map(projects.map((project) => [project.id, project.name]));
         await notifyNudges(await openNow(), {

@@ -1,6 +1,7 @@
-import { app, BrowserWindow, desktopCapturer, ipcMain, screen } from 'electron';
+import { app, BrowserWindow, desktopCapturer, ipcMain, screen, powerMonitor } from 'electron';
 
 import { DeskHost } from './host/host.ts';
+import { DesktopVoice } from './voice.ts';
 import { signInInBrowser } from './oauth.ts';
 import { readSession } from './session.ts';
 import { createTray } from './tray.ts';
@@ -24,6 +25,8 @@ const dev = process.argv.includes('--dev');
 let quitting = false;
 let host: DeskHost | null = null;
 let window: BrowserWindow | null = null;
+const voice = new DesktopVoice();
+let locked = false;
 
 // A second copy only hands focus to the first. It must not get as far as
 // building a host: it would bind the next port and confuse every phone.
@@ -55,6 +58,8 @@ function registerIpc(desk: DeskHost): void {
     };
 
   ipcMain.handle('desk:request', guard((raw: unknown) => desk.request(readIpcRequest(raw))));
+  ipcMain.handle('desk:voice', guard((id: unknown) => voice.listen(id)));
+  ipcMain.handle('desk:voice-stop', guard((id: unknown) => voice.stop(id)));
   ipcMain.handle('desk:pairing', guard((network?: unknown) => desk.pairing(network === 'tailnet' ? 'tailnet' : 'lan')));
   ipcMain.handle('desk:session', guard((raw: unknown) => desk.setSession(readSession(raw))));
   ipcMain.handle('desk:forget', guard(() => desk.forgetPhones()));
@@ -82,6 +87,7 @@ app.on('second-instance', (_event, commandLine) => {
 let hostStopped = false;
 app.on('before-quit', (event) => {
   quitting = true;
+  voice.stop();
   if (!host || hostStopped) return;
   event.preventDefault();
   void host.stop().finally(() => { hostStopped = true; app.quit(); });
@@ -90,12 +96,16 @@ app.on('before-quit', (event) => {
 void app.whenReady().then(async () => {
   if (!first) return;
   serveWeb(app.isPackaged);
+  powerMonitor.on('lock-screen', () => { locked = true; });
+  powerMonitor.on('unlock-screen', () => { locked = false; });
+  locked = powerMonitor.getSystemIdleState(300) === 'locked';
   host = new DeskHost({
     dataDir: app.getPath('userData'),
     version: app.getVersion(),
     supabaseUrl: process.env.CELLAR_SUPABASE_URL ?? '',
     supabaseAnonKey: process.env.CELLAR_SUPABASE_ANON_KEY ?? '',
     frames: frame,
+    activity: () => ({ idleSeconds: powerMonitor.getSystemIdleTime(), locked }),
   });
   try {
     const port = await host.start();

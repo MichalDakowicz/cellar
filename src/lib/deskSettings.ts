@@ -21,7 +21,7 @@ export const EXTRA_KEYS: { key: string; name: string; searches: string; example:
 export const PING_RULES: { when: string; where: string }[] = [
   { when: 'quiet hours 23:00–07:00', where: 'only approvals and questions, to the phone' },
   { when: 'desktop app in use', where: 'the desk only' },
-  { when: 'not answered on the desk in 2 min', where: 'the phone too' },
+  { when: 'not answered on the desk in 2 min', where: 'move to the phone' },
   { when: 'idle 5 min, locked, or away', where: 'the phone' },
 ];
 

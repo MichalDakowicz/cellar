@@ -2,6 +2,7 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 import { supabase } from '@/lib/supabase';
+import { pushNative } from '@/features/notifications/pushNative';
 
 /**
  * Sign-in, against the account shared with Radar, Lidar and Sonar. There is no
@@ -77,6 +78,7 @@ export async function setPassword(password: string) {
 export type SignOutScope = 'local' | 'global';
 
 export async function signOut(scope: SignOutScope) {
+  await pushNative()?.clear();
   const { error } = await supabase.auth.signOut({ scope });
   if (error) throw new Error(error.message);
 }

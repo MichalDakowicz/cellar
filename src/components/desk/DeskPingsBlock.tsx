@@ -1,8 +1,7 @@
 import { ChevronRight } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
-import { Chip, Overline } from '@/components/ui/controls';
-import { PING_KINDS, PING_RULES } from '@/lib/deskSettings';
+import { PING_RULES } from '@/lib/deskSettings';
 import { COLORS } from '@/theme/colors';
 
 /**
@@ -25,16 +24,10 @@ export function DeskPingsBlock({ onPreview }: { onPreview: () => void }) {
           <Text className="font-sans px-3 text-[13px] text-muted-foreground opacity-60">edit</Text>
         </View>
       ))}
-      <Overline className="mt-2">what pings at all</Overline>
-      <View className="flex-row flex-wrap gap-2">
-        {PING_KINDS.map((kind) => (
-          <Chip key={kind.label} label={kind.label} selected={kind.on} onPress={() => {}} disabled />
-        ))}
-      </View>
       <Pressable accessibilityRole="button" onPress={onPreview} className="mt-1 flex-row items-center gap-3 py-2 active:opacity-70">
         <View className="min-w-0 flex-1">
           <Text className="font-sans text-sm text-foreground">see what they look like</Text>
-          <Text className="font-sans mt-0.5 text-xs text-muted-foreground">routing comes with notifications that answer — these show what is real now</Text>
+          <Text className="font-sans mt-0.5 text-xs text-muted-foreground">approvals and questions use the same actions in the shade</Text>
         </View>
         <ChevronRight size={16} color={COLORS.muted} strokeWidth={2} />
       </Pressable>
