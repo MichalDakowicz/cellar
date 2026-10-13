@@ -440,18 +440,23 @@ insertion/focus, colour chips and disconnect/draft recovery. Browser retains its
 mailbox limits; host runs hidden in tray. Protected references unchanged. Exact
 live boundaries, artifact evidence and limitations: [w11-keys.md](w11-keys.md).
 
-### W12 · previews and deploy `[ ]`
+### W12 · previews and deploy `[x]`
 
 One dev server per worktree on the host, ports allocated and reached over the tailnet; checks =
 the project's check commands; deploy = its `$deploy`, asking first if the preview was never
 opened.
 
-### W13 · voice `[ ]`
+Verified 2026-10-14: owned worktree server, native phone/desktop preview, real
+passed/failed checks, once-only local deploy and reviewed cleanup. Tailnet adapter
+and address behavior have fixture coverage; actual tailnet traversal unavailable
+on this PC. See [w12-w14.md](w12-w14.md).
+
+### W13 · voice `[~]`
 
 Speech to text on the new task sheet and the composer; "B" / "the second one" answers a question;
 "dollar deploy" types `$deploy`.
 
-### W14 · notifications that answer `[ ]`
+### W14 · notifications that answer `[~]`
 
 Actionable notifications for approvals and questions, one per run updated in place, routed by
 where you are (desk in use → desk; idle 5 min or locked → phone; unanswered 2 min → phone),
