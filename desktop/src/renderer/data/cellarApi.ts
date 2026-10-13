@@ -276,6 +276,8 @@ export async function answerQuestion(
       answered_via: via,
     })
     .eq("id", id)
+      .is('answered_at', null)
+      .is('dismissed_at', null)
     .select(QUESTION_COLUMNS)
     .single();
   if (error) throw error;

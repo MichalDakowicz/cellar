@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { questionAnswer } from '@/lib/questionAnswer';
+import { supabase } from '@/lib/supabase';
 
 import {
   answerQuestion,
@@ -155,7 +156,9 @@ export function useCellarWrites() {
     async (entry: Entry, questionId: string) => {
       if (entry.state !== 'blocked') return;
       if (!unblocksEntry(entry.questions, questionId)) return;
-      await patchEntry(entry.id, { state: 'open', agent: null });
+      const settled = await supabase.rpc('cellar_settle_questions', { p_entry: entry.id });
+      if (settled.error) throw settled.error;
+      if (!settled.data) return;
       if (userId) await logEvents(userId, entry.id, patchEvents(entry, { state: 'open' }, BY_YOU));
     },
     [userId],

@@ -8,3 +8,8 @@ project_id = "cellar"
 # the platform's own check would reject every request before the function ran.
 # The function does its own, against cellar_agent_tokens.
 verify_jwt = false
+
+[functions.desk-push]
+# Authenticated registrations validate getUser; worker uses a separate secret;
+# native deliveries validate a per-device secret hash and the persisted route fence.
+verify_jwt = false

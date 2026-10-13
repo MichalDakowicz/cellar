@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.0",
+    "@/lib/deskNotify": "../../../src/lib/deskNotify.ts",
+    "@/lib/deskOptionLabel": "../../../src/lib/deskOptionLabel.ts"
+  }
+}
