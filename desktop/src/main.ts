@@ -55,7 +55,7 @@ function registerIpc(desk: DeskHost): void {
     };
 
   ipcMain.handle('desk:request', guard((raw: unknown) => desk.request(readIpcRequest(raw))));
-  ipcMain.handle('desk:pairing', guard(() => desk.pairing()));
+  ipcMain.handle('desk:pairing', guard((network?: unknown) => desk.pairing(network === 'tailnet' ? 'tailnet' : 'lan')));
   ipcMain.handle('desk:session', guard((raw: unknown) => desk.setSession(readSession(raw))));
   ipcMain.handle('desk:forget', guard(() => desk.forgetPhones()));
   ipcMain.handle('desk:rename', guard((name: unknown) => typeof name === 'string' && desk.rename(name)));

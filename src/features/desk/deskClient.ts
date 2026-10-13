@@ -34,7 +34,7 @@ async function signedFetch(pair: DeskPair, method: string, path: string, text: s
   const controller = new AbortController();
   const timer = setTimeout(
     () => controller.abort(),
-    method === 'POST' && (path === '/runs' || path.startsWith('/worktrees/')) ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
+    method === 'POST' && (path === '/runs' || path === '/preview-actions' || path.startsWith('/worktrees/')) ? START_TIMEOUT_MS : ASK_TIMEOUT_MS,
   );
   try {
     const response = await fetch(`http://${pair.host}:${pair.port}${path}`, {

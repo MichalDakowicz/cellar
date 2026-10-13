@@ -90,6 +90,7 @@ export function sampleData(phase: string, populated = false) {
       log: false,
       local: false,
       pages: false,
+      managedPreviews: false,
       commands: false,
       keys: false,
       screen: false,

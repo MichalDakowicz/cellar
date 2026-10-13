@@ -23,7 +23,7 @@ export type DeskBridge = {
     path: string,
     body?: unknown,
   ) => Promise<{ status: number; body: unknown }>;
-  pairing: () => Promise<DeskPairing>;
+  pairing: (network?: 'lan' | 'tailnet') => Promise<DeskPairing>;
   setSession: (
     session: { accessToken: string; userId: string } | null,
   ) => Promise<void>;

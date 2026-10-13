@@ -13,7 +13,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('cellarDesk', {
   version: 1,
   request: (method: string, path: string, body?: unknown) => ipcRenderer.invoke('desk:request', { method, path, body }),
-  pairing: () => ipcRenderer.invoke('desk:pairing'),
+  pairing: (network?: 'lan' | 'tailnet') => ipcRenderer.invoke('desk:pairing', network),
   setSession: (session: { accessToken: string; userId: string } | null) => ipcRenderer.invoke('desk:session', session),
   forgetPhones: () => ipcRenderer.invoke('desk:forget'),
   rename: (name: string) => ipcRenderer.invoke('desk:rename', name),

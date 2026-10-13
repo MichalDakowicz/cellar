@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import qrcode from "qrcode-generator";
 import { bridge } from "./client";
 import type { DeskPairing } from "./bridge";
@@ -8,13 +8,14 @@ export function Pairing() {
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [confirm, setConfirm] = useState(false);
-  async function load() {
+  const [network, setNetwork] = useState<'lan' | 'tailnet'>('lan');
+  const load = useCallback(async () => {
     try {
-      setPairing(await bridge!.pairing());
+      setPairing(await bridge!.pairing(network));
     } catch (error) {
       setError(String(error));
     }
-  }
+  }, [network]);
   useEffect(() => {
     if (!bridge) return;
     void load();
@@ -22,7 +23,7 @@ export function Pairing() {
       void load();
     }, 30_000);
     return () => clearInterval(timer);
-  }, []);
+  }, [load]);
   const qr = pairing?.url ? qrcode(0, "M") : null;
   if (qr && pairing?.url) {
     qr.addData(pairing.url);
@@ -32,6 +33,7 @@ export function Pairing() {
     <section className="stack">
       <h2>this pc</h2>
       <p className="muted">pair a phone with this host</p>
+      <div className="chips">{(['lan', 'tailnet'] as const).map((value) => <button key={value} className={network === value ? 'selected' : ''} onClick={() => setNetwork(value)}>{value === 'lan' ? 'Wi-Fi' : 'Tailscale'}</button>)}</div>
       {qr && (
         <img
           className="pair-code"
