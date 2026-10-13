@@ -44,6 +44,7 @@ export function Sidebar({
 }) {
   useSaved();
   const shelfId = saved<string | null>("cellar-prefs", "shelfId", null);
+  const activeShelfId = shelfId ?? cellar.shelves[0]?.id ?? "";
   return (
     <aside className="sidebar">
       <div className="sidebar-scroll">
@@ -61,12 +62,11 @@ export function Sidebar({
           <span className="overline">shelf</span>
           <select
             aria-label="switch shelf"
-            value={shelfId ?? ""}
+            value={activeShelfId}
             onChange={(event) =>
               save("cellar-prefs", "shelfId", event.target.value || null)
             }
           >
-            <option value="">every shelf</option>
             {cellar.shelves.map((shelf) => (
               <option key={shelf.id} value={shelf.id}>
                 {shelf.name}
@@ -117,8 +117,7 @@ export function Sidebar({
           <span className="overline">pinned</span>
           {cellar.projects
             .filter(
-              (project) =>
-                project.pinned && (!shelfId || project.shelfId === shelfId),
+              (project) => project.pinned && project.shelfId === activeShelfId,
             )
             .map((project) => (
               <button

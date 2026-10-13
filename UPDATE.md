@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Phone and browser focus on controlling your PC; host pairing and USB phone tools live in the desktop app
+- Phone and browser keep remote controls; local host settings move to the desktop app
 - Desktop has its own renderer, with Cellar views and Desk controls preserved across upgrades
 
 ## 1.12.0 — Unreleased

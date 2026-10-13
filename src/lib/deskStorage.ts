@@ -17,7 +17,7 @@ export function desktopStreamKey(ownerId: string, hostId: string): string {
 export function updateStoredState(storage: KeyStorage, name: string, field: string, value: unknown) {
   const raw = storage.getItem(name);
   const envelope = raw ? JSON.parse(raw) : { state: {}, version: 0 };
-  if (!envelope || typeof envelope.state !== 'object' || !envelope.state) throw new Error('Saved preferences are unreadable. Nothing overwritten.');
+  if (!envelope || typeof envelope.state !== 'object' || !envelope.state || Array.isArray(envelope.state)) throw new Error('Saved preferences are unreadable. Nothing overwritten.');
   const next = { ...envelope, state: { ...envelope.state, [field]: value } };
   storage.setItem(name, JSON.stringify(next));
   return next.state;

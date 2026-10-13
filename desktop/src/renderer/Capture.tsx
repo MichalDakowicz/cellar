@@ -26,7 +26,7 @@ export function Capture({
             <header className="row capture-header">
               <h1>dump</h1>
               <small className="muted">
-                {capture.today} today � {cellar.entries.length} entries in the
+                {capture.today} today · {cellar.entries.length} entries in the
                 cellar
               </small>
               <button onClick={() => save("cellar-prefs", "raw", !capture.raw)}>

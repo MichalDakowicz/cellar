@@ -4,7 +4,8 @@ Decision recorded 2026-10-12. The user wants two app roles: a phone controller a
 desktop host, with the web app remaining another controller. Windows comes first;
 keep macOS/Linux practical. The user scheduled this rebuild as **W10**, immediately
 after completed W9, so fewer later features need moving. Keys search becomes W11;
-remaining tasks shift forward by one. This is planned work until W10 is implemented.
+remaining tasks shift forward by one. W10 implementation and independent packaging
+are in place; final acceptance is tracked in [w10-rebuild.md](w10-rebuild.md).
 The accepted Cellar appearance remains the visual contract.
 
 ## Technology choice
@@ -42,12 +43,12 @@ bridge. Remote control remains useful: removing receiver responsibilities must n
 remote run chat, approvals, Stop all, files, commands, worktrees, previews or build downloads.
 Daemon capabilities remain host-owned even when a controller asks to use them.
 
-## Current coupling to remove
+## Original coupling removed in W10
 
-The actual receiver already lives in `desktop/src/host/`. It is not compiled into the
-Android app. The coupling is the **shared renderer**: `desktop/package.json` packages
-the root Expo `dist/` as `resources/web`, so desktop and controllers share routes,
-platform branches, navigation and PC-only presenters.
+The receiver lives in `desktop/src/host/`. It was never compiled into the Android
+app. Before W10, `desktop/package.json` packaged root Expo `dist/` as `resources/web`,
+coupling routes, platform branches, navigation and PC-only presenters. W10 replaces
+this with its own React DOM renderer and `resources/renderer` artifact.
 
 Move these responsibilities into the desktop renderer, then remove their imports from
 mobile/web controller entry graphs:
@@ -142,10 +143,13 @@ record any intended visual change separately instead of silently updating the ba
    identity/profile in place; preserve pairing keys, host ID, account binding, SQLite files,
    drafts, receipts, event cursors and worktree ownership. Verify without uninstall/reset.
 
-Current commands (before this migration): root `npm run build:web`; `desktop/` `npm run build`
-and `npx electron-builder --win --x64`; Android JDK 21 `assembleRelease` plus replacement ADB
-install. The desktop currently consumes the web export. Future desktop build must work
-without running that export. Pin new renderer dependencies only when implementing it.
+Current commands: root `npm run build:web` builds the controller web artifact.
+In `desktop/`, `npm run build` bundles host/preload and its independent Vite renderer;
+`npm run renderer:dev` serves the isolated renderer preview; `npm run check`,
+`npm run renderer:check`, `npm run lint` and `npm test` check that package.
+`npx electron-builder --win --x64` packages its own `renderer-dist` output.
+Android uses JDK 21 `assembleRelease` plus replacement ADB install. Desktop builds
+and Windows packaging have passed with root `dist/` absent.
 
 ## Acceptance and scope
 

@@ -31,7 +31,7 @@ export function SampleChat({
   const card = SAMPLE_RUNS.find((row) => row.id === runId) ?? SAMPLE_RUNS[0];
   const queue: QueuedMessage[] = SAMPLE_COMPOSER_QUEUE.map((row, index) => ({
     id: `00000000-0000-4000-8000-00000000000${index}`,
-    runId: "sample-1",
+    runId,
     text: row.text,
     revision: 1,
     createdAt: 0,
@@ -75,7 +75,9 @@ export function SampleChat({
                     ? "unknown"
                     : page === "approval"
                       ? "waiting"
-                      : "running"
+                      : runId === "sample-1"
+                        ? "running"
+                        : card.state
               }
             />
             <button disabled>stop</button>
@@ -108,7 +110,7 @@ export function SampleChat({
               host={host}
               request={{
                 id: "11111111-1111-4111-8111-111111111111",
-                runId: "sample-1",
+                runId,
                 agent: "codex",
                 what: "run a command",
                 subject: "npm i expo-av",
@@ -122,7 +124,7 @@ export function SampleChat({
         ) : (
           <Composer
             host={host}
-            runId="sample-1"
+            runId={runId}
             previewQueue={page === "queue" ? queue : []}
           />
         )}

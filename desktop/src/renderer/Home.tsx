@@ -157,11 +157,11 @@ export function Home({
               {page} · sample
             </button>
           ))}
-          <button onClick={() => navigate("/desk/share")}>
-            file shared words
-          </button>
         </div>
       )}
+      <button className="quiet" onClick={() => navigate("/desk/share")}>
+        file it into cellar
+      </button>
     </div>
   );
 }

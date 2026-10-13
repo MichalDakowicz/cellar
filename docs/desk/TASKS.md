@@ -419,6 +419,14 @@ on phone and the existing reachable desktop path. Claude remains fixture-only; c
 T3 for lifecycle changes. Complete and verify this rebuild before W11 keys search.
 Ready-to-paste task: [w10-prompt.md](w10-prompt.md).
 
+Implementation checkpoint (2026-10-13): independent DOM renderer/package and
+controller graph extraction are installed. Root 883 tests and desktop 76 tests,
+lint/types, actual artifact boundaries and protected hashes pass. Physical phone
+and preserved-profile desktop pass live Codex approvals, queue revision/edit/cancel/
+promotion, Stop all, process containment and crash/no-replay checks. Final packaged
+visual confirmation was interrupted by Escape; W10 stays in progress until that
+check is resumed. Evidence and exact remaining step: [w10-rebuild.md](w10-rebuild.md).
+
 ### W11 · keys search `[ ]`
 
 `@` files from the run's worktree (changed first, `:42` line refs), `/` skills per agent (built

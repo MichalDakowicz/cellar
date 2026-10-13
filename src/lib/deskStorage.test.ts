@@ -1,4 +1,16 @@
 import { desktopPreferenceStorage, desktopStreamKey, updateStoredState } from './deskStorage';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+test('adapter matches the installed MMKV web separator rather than an assumed fixture', () => {
+  const source = readFileSync(join(process.cwd(), 'node_modules/react-native-mmkv/src/web/getLocalStorage.ts'), 'utf8');
+  const literal = source.match(/LOCAL_STORAGE_KEY_WILDCARD = '([^']+)'/)![1];
+  const separator = JSON.parse(`"${literal}"`);
+  expect(separator.length).toBe(1);
+  const setItem = jest.fn();
+  desktopPreferenceStorage({ getItem: () => null, setItem }).setItem('desk-approvals', 'saved');
+  expect(setItem).toHaveBeenCalledWith(`cellar${separator}desk-approvals`, 'saved');
+});
 
 test('desktop upgrades preferences in place and never touches auth/phone keys', () => {
   const map = new Map<string, string>([['cellar\\desk-approvals', JSON.stringify({ version: 3,
@@ -13,6 +25,8 @@ test('desktop upgrades preferences in place and never touches auth/phone keys', 
 test('malformed legacy data fails closed without overwriting', () => {
   const setItem = jest.fn();
   expect(() => updateStoredState({ getItem: () => '{bad', setItem }, 'prefs', 'drafts', {})).toThrow();
+  expect(setItem).not.toHaveBeenCalled();
+  expect(() => updateStoredState({ getItem: () => '{"state":[]}', setItem }, 'prefs', 'drafts', {})).toThrow();
   expect(setItem).not.toHaveBeenCalled();
 });
 
