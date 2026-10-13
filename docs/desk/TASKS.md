@@ -451,10 +451,15 @@ passed/failed checks, once-only local deploy and reviewed cleanup. Tailnet adapt
 and address behavior have fixture coverage; actual tailnet traversal unavailable
 on this PC. See [w12-w14.md](w12-w14.md).
 
-### W13 · voice `[~]`
+### W13 · voice `[x]`
 
 Speech to text on the new task sheet and the composer; "B" / "the second one" answers a question;
 "dollar deploy" types `$deploy`.
+
+Verified 2026-10-14: user confirmed recognition on installed phone; exact question
+choice and command-text parsing tests pass. Drafts remain editable and require
+normal send/answer actions. Windows acoustic success remains unverified. See
+[w12-w14.md](w12-w14.md).
 
 ### W14 · notifications that answer `[~]`
 
