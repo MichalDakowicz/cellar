@@ -7,6 +7,7 @@ import { COLORS } from '@/theme/colors';
 
 import { KeyList } from './KeyList';
 import type { ComposerKeys } from './RunComposer';
+import type { VoiceView } from '@/lib/deskVoiceView';
 
 /** The field is the sheet's whole point; a browser's focus ring around it is noise. */
 const NO_OUTLINE = Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null;
@@ -17,7 +18,7 @@ const NO_OUTLINE = Platform.OS === 'web' ? ({ outlineWidth: 0 } as const) : null
  * typed — and type instead · the mic · clear. Speech arrives with W12, so the
  * mic says so and typing is the working path; a key word opens its list.
  */
-export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (text: string) => void; keys: ComposerKeys }) {
+export function NewTaskVoice({ text, onText, keys, voice }: { text: string; onText: (text: string) => void; keys: ComposerKeys; voice?: VoiceView }) {
   const field = useRef<TextInput>(null);
 
   return (
@@ -43,21 +44,15 @@ export function NewTaskVoice({ text, onText, keys }: { text: string; onText: (te
         </View>
       )}
       <View className="flex-row items-center gap-5">
-        <View
-          accessibilityRole="image"
-          accessibilityLabel="speaking a task comes soon — type it for now"
-          className="h-12 w-12 items-center justify-center rounded-full border border-border"
-        >
-          <Mic size={20} color={COLORS.foreground} strokeWidth={2} />
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="type task" onPress={() => field.current?.focus()} className="h-[76px] w-[76px] items-center justify-center rounded-full bg-primary">
-          <Keyboard size={28} color={COLORS.accentInk} strokeWidth={2} />
+        <Round label="type task" onPress={() => field.current?.focus()}><Keyboard size={20} color={COLORS.foreground} /></Round>
+        <Pressable accessibilityRole="button" accessibilityLabel={voice?.listening ? 'stop dictation' : 'dictate task'} disabled={!voice} onPress={voice?.toggle} className="h-[76px] w-[76px] items-center justify-center rounded-full bg-primary">
+          <Mic size={28} color={COLORS.accentInk} strokeWidth={2} />
         </Pressable>
         <Round label="clear and start over" onPress={() => onText('')}>
           <RotateCcw size={20} color={COLORS.foreground} strokeWidth={2} />
         </Round>
       </View>
-      <Text className="font-sans text-xs text-muted-foreground">keyboard · voice comes soon</Text>
+      <Text className="font-sans text-xs text-muted-foreground">{voice?.error ?? voice?.interim ?? (voice?.listening ? 'listening… tap mic to finish' : 'type instead · speak · clear')}</Text>
     </View>
   );
 }

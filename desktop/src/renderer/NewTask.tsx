@@ -8,6 +8,8 @@ import { useNewTask } from "./useNewTask";
 import { useKeys } from './useKeys';
 import { KeyResults } from './KeyResults';
 import { ComposerColors } from './ComposerColors';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 
 export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
   const {
@@ -29,6 +31,7 @@ export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
   } = useNewTask(cellar, host);
   const write = (value: string) => save('desktop-new-task', 'text', value);
   const keys = useKeys(text, write, host, cellar, projectId, agent);
+  const voice = useDictation((speech) => { if (!task.pending && !task.busy) write(insertVoice(text, speech, keys.field.current ? { start: keys.field.current.selectionStart, end: keys.field.current.selectionEnd } : undefined)); });
   return (
     <section className="page task-page stack">
       <header className="row">
@@ -50,6 +53,8 @@ export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
         onKeyDown={(event) => { if (!event.nativeEvent.isComposing && keys.keyboard(event.key)) event.preventDefault(); }}
       />
       <KeyResults list={keys.list} />
+      <button disabled={task.pending || task.busy} onClick={() => void voice.toggle()}>{voice.listening ? 'stop dictation' : 'dictate task'}</button>
+      {voice.error && <p role="status">{voice.error}</p>}
       <ComposerColors text={text} write={write} />
       <div className="chips">
         {folders.map((row) => (

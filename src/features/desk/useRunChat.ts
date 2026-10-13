@@ -1,4 +1,6 @@
 import { turnLines } from '@/lib/deskEvents';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 import { useDeskHistory } from '@/store/deskHistory';
 import { useDeskPrefs } from '@/store/deskPrefs';
 import { useDeskStream } from './useDeskStream';
@@ -76,6 +78,7 @@ export function useRunChat(id: string) {
   const canSaveCommand = !!saveText && !!projectCommands && !!link.calls && !jobs.save.isPending;
   const keys = useDeskKeys(draft, setDraft, run?.agent ?? (sample?.meta.includes('codex') ? 'codex' : 'claude'), projectCommands?.commands.map((item) => item.id), { link, projectId, runId: run?.id, sample: !!sample });
 
+  const voice = useDictation((speech) => setDraft(insertVoice(draft, speech, keys.selection)));
   const synchronized = stream.live && stream.state.runId === id;
   const delivery = useRunDispatch(link, id, synchronized && !sample, draft, setDraft);
   const runtimeRequests = !sample && synchronized && link.info?.approvalProtocol === 1
@@ -143,6 +146,7 @@ export function useRunChat(id: string) {
         onError: (error) => say(readError(error)),
       }),
     composer: {
+      voice,
       ...delivery,
       draft,
       onDraft: setDraft,

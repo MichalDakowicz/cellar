@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 
 import { useToast } from '@/components/ui/Toast';
 import { useCellar } from '@/features/cellar/useCellar';
@@ -113,7 +115,9 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     if (ready.length === built.length) starting.begin(ready);
   };
 
+  const voice = useDictation((speech) => setText(insertVoice(text, speech, keys.selection)));
   return {
+    voice,
     host: link.name,
     online: link.can.start,
     text,

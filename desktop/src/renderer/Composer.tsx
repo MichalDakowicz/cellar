@@ -12,6 +12,8 @@ import { useKeys } from './useKeys';
 import { KeyResults } from './KeyResults';
 import { ComposerColors } from './ComposerColors';
 import type { Cellar } from './useCellar';
+import { useDictation } from './useDictation';
+import { insertVoice } from '@/lib/deskVoice';
 
 export function Composer({
   host,
@@ -32,6 +34,7 @@ export function Composer({
   const write = (text: string) => saveRecord('desk-approvals', 'drafts', key, text);
   const run = host.live ? host.state.runs.find((row) => row.id === runId) : undefined;
   const keys = useKeys(draft, write, host, cellar, run?.projectId, run?.agent ?? '', runId);
+  const voice = useDictation((speech) => write(insertVoice(draft, speech, keys.field.current ? { start: keys.field.current.selectionStart, end: keys.field.current.selectionEnd } : undefined)));
   const [error, setError] = useState<string | null>(null);
   const [tray, setTray] = useState<"files" | "models" | null>(null);
   const action = useControl(host, `chat:${runId}`);
@@ -173,8 +176,8 @@ export function Composer({
           </button>
           <button
             className="icon quiet"
-            disabled
-            aria-label="voice unavailable"
+            aria-label={voice.listening ? 'stop dictation' : 'dictate message'}
+            onClick={() => void voice.toggle()}
           >
             <Mic size={17} />
           </button>
@@ -228,6 +231,7 @@ export function Composer({
         )}
       </div>
       <ComposerColors text={draft} write={write} />
+      {(voice.error || voice.listening) && <small role="status">{voice.error ?? 'listening…'}</small>}
       {disabled && <small className="muted">{disabled}</small>}
     </div>
   );
