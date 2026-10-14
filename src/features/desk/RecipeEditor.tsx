@@ -8,12 +8,14 @@ import type { Kind } from '@/types/cellar';
 import { useCellar } from '@/features/cellar/useCellar';
 import { useDeskLink } from './useDeskLink';
 import { COLORS } from '@/theme/colors';
+import { RuleDocument } from './RuleDocument';
+import type { DeskCalls } from './deskClient';
 
 export function RecipeEditor() {
   const link = useDeskLink(); const client = useQueryClient(); const cellar = useCellar();
   const [kind, setKind] = useState<Kind>('glitch'); const [draft, setDraft] = useState<DeskAutomation | null>(null); const [status, setStatus] = useState<string | null>(null); const [busy, setBusy] = useState(false);
   const [entryId, setEntry] = useState(''); const [scope, setScope] = useState<DeskRule['scope']>('everywhere'); const [scopeId, setScopeId] = useState<string | null>(null); const [projectId, setProject] = useState('');
-  const [review, setReview] = useState<{ projectId: string; token: string; files: { name: string; diff: string }[] } | null>(null);
+  const [review, setReview] = useState<Awaited<ReturnType<DeskCalls['rulesReview']>> | null>(null);
   const queryKey = ['desk-automation', link.ownerId, link.info?.id];
   const query = useQuery({ queryKey, queryFn: () => link.calls!.automation(), enabled: !!link.calls, retry: false });
   const config = draft ?? query.data; const recipe = config?.recipes[kind] ?? defaultRecipe('claude', 'edits');
@@ -41,7 +43,7 @@ export function RecipeEditor() {
     {config?.rules.map((r, index) => <View key={index}><Text className="font-sans text-sm text-foreground">{cellar.entries.find((e) => e.id === r.entryId)?.text ?? r.entryId} · {r.scope}</Text>{button(`remove rule ${index + 1} from draft`, () => setDraft({ ...config, rules: config.rules.filter((_, n) => n !== index) }))}</View>)}
     <Text className="font-sans text-sm text-foreground">sync checkout</Text>{cellar.projects.filter((p) => p.repoPath).map((p) => button(p.name, () => { setProject(p.id); setReview(null); }, projectId === p.id))}
     {projectId && button('save rules and review file diffs', () => void act('review'))}
-    {review && <>{review.files.map((f) => <Text key={f.name} selectable className="font-mono text-xs text-foreground">{f.diff}</Text>)}{button('write reviewed instruction blocks', () => void act('apply'))}{button('cancel review', () => setReview(null))}</>}
+    {review && <>{review.files.map((f) => <RuleDocument key={f.name} file={f} />)}{button('write reviewed instruction blocks', () => void act('apply'))}{button('cancel review', () => setReview(null))}</>}
     {(status || query.error) && <Text className="font-sans text-sm text-muted-foreground">{status ?? String(query.error)}</Text>}
   </View>;
 }

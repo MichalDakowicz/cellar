@@ -474,24 +474,26 @@ mailbox/provider deny, owner RLS and first-answer safeguards. Original launch-on
 bug settled; app/desktop/MCP tests, native builds and approved web publish pass.
 Physical approval-button and Windows speech boundaries: [how-it-works.md](how-it-works.md).
 
-### W15 · checkpoints `[-]`
+### W15 · checkpoints `[x]`
 
 Hidden git refs per turn, diffs from them, one-click roll back that also rolls the agent's
 conversation back.
 
 Implemented 2026-10-14: hidden snapshots, reviewed combined file/context restore,
 durable receipts and controller/desktop tools. Real signed Codex host check restores
-file and remembered marker. Phone acceptance deferred; see [test ledger](w15-w18-testing.md).
+file and remembered marker. Phone receipt recovery and live queued-during-restore wakeup
+verified; remaining platform boundaries in [test ledger](w15-w18-testing.md).
 
-### W16 · recipes and rules `[-]`
+### W16 · recipes and rules `[x]`
 
 A recipe per entry kind (agent, mode, skills, prompt template, commands after) feeds the new task
 defaults; rule entries sync into a managed block in AGENTS.md / CLAUDE.md, scoped everywhere →
 shelf → project, each write shown as a diff first.
 
 Implemented: per-kind recipes, explicit-choice precedence, scoped existing thoughts,
-reviewed managed blocks and successful-turn command jobs. Phone and live after-command
-acceptance remain in [test ledger](w15-w18-testing.md).
+reviewed managed blocks and successful-turn command jobs. Phone save/review/write and
+live after-command jobs verified. Instruction files render first with source/changes
+controls; originals restored after acceptance. See [test ledger](w15-w18-testing.md).
 
 ### W17 · usage and accounts `[-]`
 
@@ -501,16 +503,18 @@ dirs and keychain secrets; when a plan runs out, "ask me" is the default.
 
 Implemented: real/estimated context, windows/resets, guarded compact and encrypted named
 API accounts with per-run directories. Default subscription sign-in remains provider-owned;
-named OAuth profiles unsupported. Real credentials/compaction and phone checks pending.
+named OAuth profiles unsupported. Real context/windows rendered on phone; actual named
+credentials/encryption restart and 80% compaction remain pending in the test ledger.
 
-### W18 · share and crashes `[-]`
+### W18 · share and crashes `[x]`
 
 Cellar as an android share target; kind guessed from what was shared; crashes of debug builds
 filed as glitches with stack, screenshot and log, repeats counted.
 
 Implemented: Android text/link shares, owner-scoped drafts and reviewed/idempotent
-Cellar-debug-only crash reports. Release builds pass. Real share/crash recovery awaits
-phone; binary shares unsupported and screenshots optional when capture fails.
+Cellar-debug-only crash reports. Physical cold/warm shares, full draft restart, lost-response
+filing, JS/native crash review/filing and release capture guard verified. Binary shares
+unsupported and screenshots optional when capture fails; see the test ledger.
 
 ### W19 · screens both ways `[ ]`
 
@@ -523,9 +527,16 @@ deep links, logcat, dev toggles.
 Two runs off one commit and a pick; tonight's queue in a window with a digest; one task across a
 shelf of projects.
 
-### W21 · other hosts over ssh `[-]`
+### W21 · rendered documents and media `[ ]`
 
-**W21 · other hosts over ssh** — **Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
+Render Markdown, AsciiDoc and other supported documents in chat and other file-opening
+surfaces, with a button to view the exact source. Preview images and other supported media
+visually; offer source only for formats where it makes sense. Keep filenames visible and
+use bounded viewers. Added 2026-10-14 before SSH; W16 instruction-file review is rendered now.
+
+### W22 · other hosts over ssh `[-]`
+
+**W22 · other hosts over ssh** — **Deferred until the server is actually set up** — tracked by cellar entry `2246c7b8` on the
 cellar project. A host = user@host:port + key; cellar installs and updates the daemon over ssh; per host:
 slots, night shift, which projects; runs pick a free host. Until then, everything assumes one
 host: this pc.

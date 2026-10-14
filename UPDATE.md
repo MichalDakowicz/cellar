@@ -13,6 +13,8 @@
 
 - Shared drafts keep chosen kind/project after restart and retry filing without duplicates
 - Desk: queued messages resume after reviewed checkpoint restores
+- Desktop: completion notifications stay above the page without pushing chat off-screen
+- Rules review names instruction files, renders Markdown first, and offers source and focused changes
 - Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
 
 ## 1.15.0 — Unreleased

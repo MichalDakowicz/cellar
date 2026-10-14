@@ -3,6 +3,7 @@ import { lstat, readFile, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { EMPTY_AUTOMATION, parseAutomation, managedRules, scopedRules, type DeskAutomation } from '@/lib/deskRecipes';
+import { instructionDiff } from '@/lib/deskRuleDocument';
 import type { HostDeps } from './api.ts';
 import { DeskError } from './claudeRuns.ts';
 
@@ -36,7 +37,7 @@ export class Automation {
       try { const stat = await lstat(path); if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink > 1 || stat.size > 200_000) throw new Error('Instruction file is linked, special or too large.'); before = await readFile(path, 'utf8'); }
       catch (e) { if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e; }
       const after = managedRules(before, lines);
-      return { name, before, after, diff: `--- ${name}\n+++ ${name}\n${before.split('\n').map((l) => '- ' + l).join('\n')}\n${after.split('\n').map((l) => '+ ' + l).join('\n')}` };
+      return { name, before, after, diff: instructionDiff(name, before, after) };
     }));
     if (this.owner() !== owner) throw new DeskError('Account changed.', 409);
     const token = createHash('sha256').update(JSON.stringify([owner, cwd, config, files])).digest('hex');

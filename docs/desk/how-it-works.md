@@ -8,7 +8,7 @@ adds behavior through the existing view models, host API and transports.
 
 | Flow | Works now | Sample or missing |
 | --- | --- | --- |
-| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W21) |
+| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W22) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
 | Manage worktrees | W5: Git-confirmed catalogue and reviewed Keep/Merge/Remove; W12 runs previews/checks/deploy in the owned worktree | Merge requires clean checked-out main and fast-forward history |
@@ -30,8 +30,8 @@ configuration/rule sync require direct PC access; browser retains its mailbox bo
 ## Agreed wiring order
 
 W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 rebuild → W11 keys search
-→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W20.
-W21 stays deferred. Counts establish trustworthy status first; project commands are
+→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W21.
+W22 stays deferred. Counts establish trustworthy status first; project commands are
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
@@ -493,7 +493,7 @@ unverified live. NSIS was built; the existing unpacked reachable payload was
 refreshed and launched without running the installer. No release or web publication.
 
 Historical live evidence and artifact ledgers remain in Git history. W11 keys
-search follows below; SSH remains deferred W21.
+search follows below; SSH remains deferred W22.
 
 ## W11 — scoped keys search
 
@@ -639,3 +639,38 @@ prebuilds install the native service through `plugins/withCellarPush.js`.
 The user explicitly approved web publication after the build checks. Firebase
 Hosting deployment succeeded at <https://cellar-stash.web.app>. No release tag,
 GitHub release, production project `$deploy`, or merge was performed.
+
+## W15–W18 verification
+
+W15 restores reviewed file snapshots and provider context behind one maintenance guard.
+Durable request fingerprints and receipts preserve original commands across timeouts and
+controller/host restart. Physical phone receipt recovery and live queued-during-restore
+wakeup pass. Restored conversation/file marker both return to ALPHA; retained transcript
+history is explicitly labelled. Real Codex forks at saved lastTurnId; Claude uses an
+isolated real SDK transcript fixture, without live Claude.
+
+W16 fills per-kind task defaults, preserves explicit choices and orders rules from
+everywhere through shelf to project. Phone save and reviewed instruction writes pass;
+original recipe/file settings restored. Instruction reviews name AGENTS.md/CLAUDE.md,
+render proposed Markdown first in bounded viewers, and offer source plus focused changes.
+Three normal turns produce three successful after-command jobs; restore maintenance
+produces none. Desktop completion notices float without pushing chat out of view.
+
+W17 exposes real Codex context/limit windows and labelled Claude estimates, guarded
+compaction, and owner-scoped encrypted named API accounts. Physical usage display passes;
+actual named API credentials, vault restart, live Claude and 80% compaction remain untested.
+Named subscription OAuth management is unsupported; no silent account switching.
+
+W18 receives Android text/link shares and stores full owner-scoped drafts. Frozen
+submissions use deterministic IDs for committed-response-loss recovery. Physical
+cold/warm SEND, restart/retry, reviewed JS/native crash filing and release capture guard
+pass. Final signed 1.16.0 release installed and launched with original pairing/data.
+Binary shares remain unsupported; evidence capture remains Cellar-debug-only.
+
+917 app tests, 96 desktop tests, types/lint, Windows package and Android release pass.
+No schema migration or MCP contract change. Earlier web build remains deployed; latest
+rendered-review publication waits for Cellar approval after automatic review rejected
+external publishing without explicit destination/payload authorization. Full evidence
+and remaining checks: [w15-w18-testing.md](w15-w18-testing.md).
+
+General rendered document/media previews are future W21; SSH is now deferred W22.

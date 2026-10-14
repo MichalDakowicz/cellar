@@ -8,7 +8,7 @@ against the packaged desktop. Evidence: ignored `artifacts/qa/w15-w18/`.
 
 ## Available checks
 
-- [x] Root: 101 Jest suites / 913 tests; TypeScript and lint
+- [x] Root: 102 Jest suites / 917 tests; TypeScript and lint
 - [x] Desktop: 96 tests; host/renderer TypeScript, lint and production build
 - [x] Windows installer and unpacked application
 - [x] Controller export with source maps: 3,971 modules, zero desktop-host imports
@@ -35,7 +35,8 @@ authorization. Native checks below supplement desktop/browser checks.
 - [x] Duplicate/lost-reply/restart, owner isolation and directory-swap tests
 - [x] Desktop/controller list, diff and confirmation UI; retained history labelled clearly
 - [x] Phone reviewed rollback: file and remembered marker restored; pending request survives restart
-- [ ] Final phone receipt-button recovery after reconnect (intermittent transport; UI work interrupted)
+- [x] Final phone receipt-button recovery after reconnect; original pending command cleared
+- [x] Live queued message during restore wakes after applied receipt, without manual nudge
 
 Live run `eb4a0875`: answers `W15_ALPHA`, `W15_BETA`, then `W15_ALPHA` after rollback.
 Reviewed restore changed `qa-marker.txt` from `file-beta` to `file-alpha`; duplicate request
@@ -59,7 +60,9 @@ links are refused; diffs above 100 KB cannot be confirmed. Excluded secrets rema
 - [x] Unmanaged instructions preserved; malformed blocks/links/redirected paths refused
 - [x] Successful-turn host wiring starts existing project command jobs in run checkout
 - [x] Phone editor agent/mode save; persisted PC configuration verified; original settings restored
-- [ ] Live recipe-after-job and physical phone rule-write acceptance
+- [x] Live after-command job once per normal turn; no extra job for restore maintenance
+- [x] Physical phone reviewed instruction write; exact empty blocks verified, originals restored
+- [x] Named, bounded Markdown rule previews with source/changes controls on phone and desktop
 
 Cellar question `66ace317`: user chose “your call”. Existing thoughts carry scope, preserving
 seven capture kinds. Rules use thought text. Missing command IDs report follow-up failure;
@@ -148,3 +151,39 @@ installed and launched again after debug testing (PID 21823 at final verificatio
 Computer use was stopped with physical Escape during final desktop relaunch. No further app
 input was issued. Final desktop package is built but was not relaunched/verified after that
 interruption. Remaining checks stay unchecked above. Phone test artifacts are under `phone/`.
+
+## Resumed verification and instruction previews
+
+User reauthorized computer use after explaining Escape came from gaming. Final Windows
+package relaunched with original sign-in. Run `c4303f76` queued a marker question during a
+live restore; applied receipt returned, queue resumed without a wake message, and answers
+were ALPHA → BETA → ALPHA. File returned to phone-alpha. Exactly three successful
+normal turns produced three done after-command jobs containing W16_AFTER_OK; restore
+produced no extra job. Evidence: `phone/resumed-result.json`.
+
+Phone reopened original run `27a02762` over a temporary USB localhost connection. The
+physical “check rollback result” button read original applied receipt `0f6f6abf`, cleared
+the durable pending request, and issued no new rollback. LAN remained unavailable on
+this PC; automatic cloud address replacement was paused only in the temporary debug
+runtime for USB testing. Original pairing and normal runtime restored before final release.
+
+Completed-job notices exposed a missing desktop overlay style. Bounded floating cards now
+leave chat in place; packaged desktop shows successful job output and keeps its run list.
+
+User reported the raw instruction diff wall. Phone/desktop rules review now names AGENTS.md
+and CLAUDE.md, renders proposed Markdown first in bounded viewers, and offers exact source
+and focused changes. Phone toggles verified. Empty managed blocks were explicitly reviewed
+and written from phone; both files matched expected content, then original instructions and
+recipes were restored. Nonempty scopes/stale writes retain fixture coverage. Evidence:
+`phone/rules-result.json`, `rendered-rules-*.png`/XML.
+
+Root 917 tests and desktop 96 tests pass; types/lint/build/package pass. Initial sandboxed
+desktop fixture run failed child cleanup; rerun with process access passed all 96. JDK 21
+Android release rebuilt, installed and launched (PID 15623 at final verification), with no
+own-process ReactNativeJS/AndroidRuntime errors. Temporary pairing backup and USB forwards
+removed. No live API keys, account switch/sign-out, live Claude or 80% compact test.
+
+General Markdown/AsciiDoc/document/media previews remain future W21, before SSH W22.
+The earlier web deployment remains live. Publishing this rendered-review update was rejected
+by automatic approval review because external destination/payload need explicit user approval;
+Cellar question `6f586c5f` records that approval request.

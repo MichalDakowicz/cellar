@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { DeskAutomation, DeskRule } from '@/lib/deskRecipes';
 import type { Cellar } from './useCellar';
 import { calls } from './client';
+import { RuleDocument } from './RuleDocument';
 
 export function RuleSettings({ cellar, config, onChange }: { cellar: Cellar; config: DeskAutomation; onChange: (config: DeskAutomation) => void }) {
   const [entryId, setEntry] = useState(''); const [scope, setScope] = useState<DeskRule['scope']>('everywhere'); const [scopeId, setScopeId] = useState('');
@@ -22,7 +23,7 @@ export function RuleSettings({ cellar, config, onChange }: { cellar: Cellar; con
     {config.rules.map((r, i) => <div className="settings-row" key={i}><span>{cellar.entries.find((e) => e.id === r.entryId)?.text ?? r.entryId} · {r.scope}</span><button onClick={() => onChange({ ...config, rules: config.rules.filter((_, n) => n !== i) })}>remove from draft</button></div>)}
     <label>sync checkout<select value={projectId} onChange={(e) => { setProject(e.target.value); setReview(null); }}><option value="">choose project</option>{cellar.projects.filter((p) => p.repoPath).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
     <button disabled={!projectId || busy} onClick={() => void act(false)}>save rules and review file diffs</button>
-    {review && <div className="card stack">{review.files.map((f) => <div key={f.name}><h3>{f.name}</h3><pre className="mono">{f.diff}</pre></div>)}<button disabled={busy} onClick={() => void act(true)}>write reviewed instruction blocks</button><button onClick={() => setReview(null)}>cancel</button></div>}
+    {review && <div className="stack">{review.files.map((f) => <RuleDocument key={f.name} file={f} />)}<button disabled={busy} onClick={() => void act(true)}>write reviewed instruction blocks</button><button onClick={() => setReview(null)}>cancel</button></div>}
     {error && <p role="alert">{error}</p>}
   </section>;
 }
