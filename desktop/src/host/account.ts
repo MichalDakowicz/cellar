@@ -106,6 +106,18 @@ export class Account {
     return deskFolders(rows, groups);
   }
 
+  async ruleContext(ids: string[]) {
+    if (!this.current) throw new DeskError('Sign in on the PC.', 403);
+    const [projects, entries] = await Promise.all([
+      this.client().from('cellar_projects').select('id,shelf_id,repo_path'),
+      ids.length ? this.client().from('cellar_entries').select('id,text,archived').in('id', ids) : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (projects.error || entries.error) throw new Error(projects.error?.message ?? entries.error?.message);
+    if (new Set(ids).size !== (entries.data ?? []).length) throw new DeskError('Some rule thoughts are unavailable to this account.', 403);
+    return { projects: (projects.data ?? []).map((p) => ({ id: p.id as string, shelfId: p.shelf_id as string, repoPath: p.repo_path as string | null })),
+      entries: (entries.data ?? []).map((e) => ({ id: e.id as string, text: e.text as string, archived: e.archived as boolean })) };
+  }
+
   async claimTaskEntries(start: DeskStart): Promise<void> {
     if (!start.entryIds?.length) return;
     const { error } = await this.client().rpc('cellar_claim_run_entries', { p_ids: start.entryIds,

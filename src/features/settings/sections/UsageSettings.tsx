@@ -6,6 +6,7 @@ import { useDeskSettings } from '@/features/desk/useDeskSettings';
 import { PLAN_OUT_POLICIES, USAGE_LIMITS } from '@/lib/deskSettings';
 import { SAMPLE_USAGE_MORE } from '@/lib/deskSample';
 import { COLORS } from '@/theme/colors';
+import { UsageLive } from '@/features/desk/UsageLive';
 
 import { SettingsGroup } from '../SettingsGroup';
 import { SettingsPage } from '../SettingsPage';
@@ -20,6 +21,7 @@ export function UsageSettings() {
   const desk = useDeskSettings();
   const sample = desk.devices.sample;
   const more = sample ? SAMPLE_USAGE_MORE : null;
+  if (!sample) return <SettingsPage title="usage and accounts" sub="provider-reported limits, context and account choices"><SettingsGroup><UsageLive /></SettingsGroup></SettingsPage>;
 
   return (
     <SettingsPage title="usage and accounts" sub={more ? `per agent · ${more.meter}` : 'per agent · numbers once the agents report them'}>

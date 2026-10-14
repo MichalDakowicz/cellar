@@ -474,27 +474,43 @@ mailbox/provider deny, owner RLS and first-answer safeguards. Original launch-on
 bug settled; app/desktop/MCP tests, native builds and approved web publish pass.
 Physical approval-button and Windows speech boundaries: [how-it-works.md](how-it-works.md).
 
-### W15 · checkpoints `[ ]`
+### W15 · checkpoints `[-]`
 
 Hidden git refs per turn, diffs from them, one-click roll back that also rolls the agent's
 conversation back.
 
-### W16 · recipes and rules `[ ]`
+Implemented 2026-10-14: hidden snapshots, reviewed combined file/context restore,
+durable receipts and controller/desktop tools. Real signed Codex host check restores
+file and remembered marker. Phone acceptance deferred; see [test ledger](w15-w18-testing.md).
+
+### W16 · recipes and rules `[-]`
 
 A recipe per entry kind (agent, mode, skills, prompt template, commands after) feeds the new task
 defaults; rule entries sync into a managed block in AGENTS.md / CLAUDE.md, scoped everywhere →
 shelf → project, each write shown as a diff first.
 
-### W17 · usage and accounts `[ ]`
+Implemented: per-kind recipes, explicit-choice precedence, scoped existing thoughts,
+reviewed managed blocks and successful-turn command jobs. Phone and live after-command
+acceptance remain in [test ledger](w15-w18-testing.md).
+
+### W17 · usage and accounts `[-]`
 
 First check what each agent actually exposes (5h / weekly windows, resets); estimate and say so
 where it does not. Context meter with `/compact` at 80%. Accounts per agent with per-run config
 dirs and keychain secrets; when a plan runs out, "ask me" is the default.
 
-### W18 · share and crashes `[ ]`
+Implemented: real/estimated context, windows/resets, guarded compact and encrypted named
+API accounts with per-run directories. Default subscription sign-in remains provider-owned;
+named OAuth profiles unsupported. Real credentials/compaction and phone checks pending.
+
+### W18 · share and crashes `[-]`
 
 Cellar as an android share target; kind guessed from what was shared; crashes of debug builds
 filed as glitches with stack, screenshot and log, repeats counted.
+
+Implemented: Android text/link shares, owner-scoped drafts and reviewed/idempotent
+Cellar-debug-only crash reports. Release builds pass. Real share/crash recovery awaits
+phone; binary shares unsupported and screenshots optional when capture fails.
 
 ### W19 · screens both ways `[ ]`
 

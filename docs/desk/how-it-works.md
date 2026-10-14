@@ -1,6 +1,7 @@
 # Desk — how it works
 
-Reviewed 2026-10-14 through W14. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-14 through W18 implementation; device acceptance pending for W15–W18.
+The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
@@ -16,10 +17,15 @@ adds behavior through the existing view models, host API and transports.
 | Commands and keys | W2 jobs/catalogue; W11 shared file/skill/command search, line previews, project/entry references and hex chips | Host sources require signed LAN or desktop IPC; browser retains mailbox limits. New-task files require a selected existing run |
 | Preview, screen, builds | W12 managed worktree server, allocated port, real check/deploy jobs and durable receipts; ticketed LAN/tailnet addressing; screen/APK discovery | Actual tailnet traversal unverified on this PC; remote input remains W19 |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
-| Settings | Durable defaults; W13 voice drafts; W14 real ping kinds, quiet hours, push registration and receipts | Checkpoints, recipes/rules, usage/accounts and share/crash automation remain W15–W18 |
+| Settings and run tools | W15 checkpoints, W16 recipes/scoped rules, W17 usage/compact/encrypted API accounts | Named OAuth profiles and phone acceptance pending |
+| Android capture | W18 text/link shares, owner-scoped drafts and reviewed debug crash evidence | Physical share/crash tests pending; binary shares unsupported |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
 real header or navigation totals. Sample actions do not confirm host execution.
+
+See [w15-w18-testing.md](w15-w18-testing.md) for exact behavior, provider constraints and
+remaining checks. Desktop run tools are available at small window widths. PC-local recipe
+configuration/rule sync require direct PC access; browser retains its mailbox boundary.
 
 ## Agreed wiring order
 

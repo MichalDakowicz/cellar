@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { recipePrompt, recipeChoices } from '@/lib/deskRecipes';
 import { useDictation } from './useDictation';
 import { insertVoice } from '@/lib/deskVoice';
 
@@ -51,6 +53,9 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   );
   const attached = handed.filter((candidate) => attachedIds.includes(candidate.id));
   const entry = handed[0] ?? null;
+  const automation = useQuery({ queryKey: ['desk-automation', link.ownerId, link.info?.id], queryFn: () => link.calls!.automation(), enabled: !!link.calls, retry: false });
+  const recipe = attached.length === 1 ? automation.data?.recipes[attached[0].kind] : undefined;
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   // Words handed off from the desktop's capture bar, taken once.
   const [text, setText] = useState(() => useDeskHandoff.getState().text);
@@ -59,13 +64,14 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const [where, setWhere] = useState<DeskWhere>('worktree');
   // Started from the defaults in settings › desk; the agent falls back to one
   // the pc actually has.
-  const [chosen, setAgent] = useState<DeskAgent>(() => useDeskPrefs.getState().defaultAgent);
-  const [mode, setMode] = useState<DeskMode>(() => useDeskPrefs.getState().defaultMode);
+  const [chosen, setAgent] = useState<DeskAgent | null>(null);
+  const [pickedMode, setMode] = useState<DeskMode | null>(null);
+  const mode = pickedMode ?? recipe?.mode ?? useDeskPrefs.getState().defaultMode;
   const installed = link.info
     ? link.info.agents.filter((candidate) => candidate.installed).map((candidate) => candidate.id)
     : (link.desk?.agents ?? null);
   const offered = offeredAgents(installed);
-  const agent = startingAgent(chosen, offered);
+  const agent = startingAgent(chosen ?? (recipe?.agent !== 'default' ? recipe?.agent : undefined) ?? useDeskPrefs.getState().defaultAgent, offered);
 
   // An attached thought brings its project with it, until you pick another.
   const projectId = picked ?? entry?.projectId ?? commandsProject ?? null;
@@ -75,7 +81,7 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const keys = useDeskKeys(text, setText, agent, projectCommands?.commands.map((command) => command.id), { link, projectId });
   const starts = taskStarts({
     typed: text,
-    picks: attached.map((thought) => ({ entryId: thought.id, line: agentPrompt(thought, projectName) })),
+    picks: attached.map((thought) => ({ entryId: thought.id, line: recipePrompt(automation.data?.recipes[thought.kind], thought, projectName ?? '', agentPrompt(thought, projectName)) })),
     together: agentPromptMany(attached, projectName),
     split,
   });
@@ -89,7 +95,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
   const workspace = worktrees.projects.find((project) => project.projectId === projectId);
   const worktreeReason = worktrees.error ?? (worktrees.loading ? 'Checking project Git support…' : workspace?.reason
     ?? (!workspace?.available ? 'Select a linked Git project; worktrees require local main.' : null));
-  const blocker = starting.pending ? (starting.busy ? `checking ${link.name}…` : null) : (where === 'worktree' ? worktreeReason : null) ?? taskBlocker({
+  const recipeBlocker = attached.length && link.calls && !automation.data ? (automation.error ? `Recipes unavailable: ${readError(automation.error)}` : 'Loading saved recipes…') : null;
+  const blocker = starting.pending ? (starting.busy ? `checking ${link.name}…` : null) : recipeBlocker ?? (where === 'worktree' ? worktreeReason : null) ?? taskBlocker({
     prompt,
     hasFolder: folder !== null,
     canStart: link.can.start,
@@ -109,8 +116,13 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
       jobs.start.mutate({ projectId: projectCommands?.id ?? folder.projectId, command }, { onSuccess: () => { say(`job started on ${link.name}`); onSent(); } });
       return;
     }
-    const built = starts.map((one) => deskStartFrom({ prompt: one.prompt, repoPath: folder.path, agent, entryId: one.entryId,
-      projectId: folder.projectId, where, mode, entryIds: split === 'each' && one.entryId ? [one.entryId] : attached.map((entry) => entry.id) }));
+    const built = starts.map((one) => {
+      const entry = attached.find((e) => e.id === one.entryId);
+      const eachRecipe = split === 'each' && entry ? automation.data?.recipes[entry.kind] : recipe;
+      const choices = recipeChoices(eachRecipe, { agent: useDeskPrefs.getState().defaultAgent, mode: useDeskPrefs.getState().defaultMode }, { agent: chosen, mode: pickedMode });
+      return deskStartFrom({ prompt: one.prompt, repoPath: folder.path, ...choices, entryId: one.entryId,
+        projectId: folder.projectId, where, accountId: choices.agent === agent ? accountId ?? undefined : undefined, entryIds: split === 'each' && one.entryId ? [one.entryId] : attached.map((entry) => entry.id) });
+    });
     const ready = built.flatMap((one) => (one.ok ? [one.start] : []));
     if (ready.length === built.length) starting.begin(ready);
   };
@@ -132,7 +144,8 @@ export function useNewTask(entryIds: string[], onSent: () => void) {
     folder: folder?.path ?? null,
     agents: offered,
     agent,
-    onAgent: setAgent,
+    onAgent: (agent: DeskAgent) => { setAgent(agent); setAccountId(null); },
+    accountId, onAccount: setAccountId,
     mode,
     onMode: setMode,
     modeHint: modeHint(mode),

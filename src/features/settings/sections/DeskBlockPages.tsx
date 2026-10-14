@@ -3,6 +3,7 @@ import { DeskKeysBlock } from '@/components/desk/DeskKeysBlock';
 import { DeskRecipesBlock } from '@/components/desk/DeskRecipesBlock';
 import { useDeskSettings } from '@/features/desk/useDeskSettings';
 import { CommandSettings } from '@/features/desk/CommandSettings';
+import { RecipeEditor } from '@/features/desk/RecipeEditor';
 
 import { SettingsGroup } from '../SettingsGroup';
 import { SettingsPage } from '../SettingsPage';
@@ -27,7 +28,7 @@ export function RecipesSettings() {
   return (
     <SettingsPage title="recipes and rules" sub="what an agent does when you hand it an entry — and what it always has to follow">
       <SettingsGroup title="recipes · one per entry kind">
-        <DeskRecipesBlock {...desk.recipes} />
+        {desk.devices.sample ? <DeskRecipesBlock {...desk.recipes} /> : <RecipeEditor />}
       </SettingsGroup>
     </SettingsPage>
   );

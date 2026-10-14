@@ -18,6 +18,7 @@ import { COLORS } from '@/theme/colors';
 import type { useRunChat } from './useRunChat';
 import { WorktreeActions } from './WorktreeActions';
 import { RunWaitingDock } from './RunWaitingDock';
+import { RunTools } from './RunTools';
 
 /**
  * One run's chat (`Run.dc.html`): the header, what it said, and at the bottom in
@@ -61,6 +62,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
       >
         <ContentShell maxWidth={MAX_W.text}>
           <View className="gap-4 px-4 pt-4">
+            {chat.runId && <RunTools key={chat.runId} runId={chat.runId} />}
             {!chat.found && (
               <Text className="font-sans text-sm text-muted-foreground">
                 {chat.history ? 'Viewing saved chat; reconnect to check current run state.' : chat.loading ? 'reading…' : chat.missing ? 'this run is not on the pc any more' : 'Run data unavailable until the PC synchronizes.'}

@@ -1,5 +1,18 @@
 # Update notes
 
+## 1.16.0 — Unreleased
+
+### Added
+
+- Desk: review turn checkpoints and restore files with the agent conversation
+- Desk: save per-kind recipes and review scoped rules before syncing instruction files
+- Desk: view provider usage, compact context and select encrypted API accounts
+- Capture: share Android text into Cellar and review debug crashes with evidence
+
+### Fixed
+
+- Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
+
 ## 1.15.0 — Unreleased
 
 ### Added

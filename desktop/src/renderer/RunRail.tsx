@@ -55,9 +55,7 @@ export function RunRail({
             </small>
           </>
         ) : (
-          <small className="muted">
-            files and checkpoints unavailable · later host capability
-          </small>
+          run && <small className="muted">Usage and checkpoints are in the run tools panel.</small>
         )}
       </section>
       <button

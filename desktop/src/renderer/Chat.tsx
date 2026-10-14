@@ -13,6 +13,8 @@ import { ApprovalDock } from "./ApprovalDock";
 import { useControl } from "./useControl";
 import { RunRail } from "./RunRail";
 import { EntryQuestions } from "./EntryQuestions";
+import { Checkpoints } from './Checkpoints';
+import { RunUsage } from './RunUsage';
 
 export function Chat({
   host,
@@ -134,7 +136,7 @@ export function Chat({
                 <small className="muted">
                   {run?.worktreeId && finishedWorktreeRun(run.state)
                     ? "Review worktree in project panel."
-                    : "Changed files/checkpoints unavailable until host reports them."}
+                    : "Review files and conversation checkpoints in run tools."}
                 </small>
               </details>
               {stop.message && <small role="status">{stop.message}</small>}
@@ -147,6 +149,7 @@ export function Chat({
                 </button>
               )}
             </header>
+            {host.live && run && <details className="run-tools"><summary>usage and checkpoints</summary><div className="stack"><RunUsage key={'usage:' + host.key + run.id} runId={run.id} /><Checkpoints key={host.key + run.id} scope={host.key} runId={run.id} /></div></details>}
             <div
               className="transcript stack"
               ref={scroll}

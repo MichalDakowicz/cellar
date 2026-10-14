@@ -28,6 +28,10 @@ import type { Worktrees } from './worktrees.ts';
 import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
 import type { Previews } from './previews.ts';
 import type { HostNotifications } from './notifications.ts';
+import type { Checkpoints } from './checkpoints.ts';
+import type { Automation } from './automation.ts';
+import type { ProviderAccounts } from './providerAccounts.ts';
+import { runUsage } from './usage.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -43,6 +47,9 @@ export type ApiRequest = { method: string; path: string; body?: unknown; source?
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  providerAccounts?: ProviderAccounts;
+  automation?: Automation;
+  checkpoints?: Checkpoints;
   notifications?: HostNotifications;
   previews?: Previews;
   controls?: Controls;
@@ -158,6 +165,43 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
   const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'GET /provider-accounts':
+        if (!deps.providerAccounts) throw new DeskError('Provider accounts unavailable.', 409);
+        return ok({ accounts: deps.providerAccounts.list() });
+      case 'POST /provider-accounts':
+        if (!deps.providerAccounts || req.source !== 'pc') throw new DeskError('Enter credentials on this PC only.', 403);
+        return ok({ accounts: deps.providerAccounts.save(req.body) });
+      case 'POST /usage':
+      case 'POST /compact': {
+        const runId = (req.body as { runId?: unknown })?.runId;
+        if (typeof runId !== 'string') throw new DeskError('Choose a provider run.');
+        return ok(await runUsage(deps, runId, route === 'POST /compact'));
+      }
+      case 'GET /automation':
+        if (!deps.automation) throw new DeskError('Recipes unavailable.', 409);
+        return ok(deps.automation.read());
+      case 'POST /automation':
+        if (!deps.automation) throw new DeskError('Recipes unavailable.', 409);
+        return ok(await deps.automation.save(req.body));
+      case 'POST /rules-review':
+      case 'POST /rules-apply': {
+        const raw = req.body as { projectId?: string; token?: string };
+        if (!deps.automation || typeof raw?.projectId !== 'string') throw new DeskError('Select a project.');
+        if (route === 'POST /rules-review') { const { cwd: _cwd, ...review } = await deps.automation.review(raw.projectId); return ok(review); }
+        if (typeof raw.token !== 'string') throw new DeskError('Review the rules diff first.');
+        return ok(await deps.automation.apply(raw.projectId, raw.token));
+      }
+      case 'POST /checkpoints': {
+        const raw = req.body as { runId?: string; checkpointId?: string };
+        if (!deps.checkpoints || typeof raw?.runId !== 'string') throw new DeskError('Checkpoints unavailable.', 409);
+        return ok(raw.checkpointId ? await deps.checkpoints.review(raw.runId, raw.checkpointId) : { checkpoints: await deps.checkpoints.list(raw.runId) });
+      }
+      case 'POST /checkpoint-rollback':
+        if (!deps.checkpoints) throw new DeskError('Checkpoints unavailable.', 409);
+        return ok({ receipt: await deps.checkpoints.rollback(req.body) });
+      case 'POST /checkpoint-receipt':
+        if (!deps.checkpoints) throw new DeskError('Checkpoints unavailable.', 409);
+        return ok({ receipt: deps.checkpoints.receipt(req.body) });
       case 'GET /notice-deliveries':
         if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
         return ok({ deliveries: await deps.notifications.deliveries(), error: deps.notifications.error });

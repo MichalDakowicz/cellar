@@ -25,6 +25,8 @@ import '@/lib/blockedWatchTask';
 import { queryClient } from '@/lib/queryClient';
 import { useCaptureFocus } from '@/store/cellarPrefs';
 import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ShareReceiver } from '@/features/capture/ShareReceiver';
+import { DebugCrashReports } from '@/features/capture/DebugCrashReports';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -82,6 +84,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
       {children}
       <UpdateNotice />
       <HandoffReplay />
+      <ShareReceiver />
+      <DebugCrashReports />
     </>
   );
 }

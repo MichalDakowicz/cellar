@@ -159,7 +159,7 @@ export function Settings({
           </>
         )}
         {section === "usage" && <UsageSettings sample={sample} />}
-        {section === "recipes" && <RecipeSettings sample={sample} />}
+        {section === "recipes" && <RecipeSettings key={host.key} sample={sample} cellar={cellar} />}
         {section === "keys" && (
           <>
             <p className="muted">

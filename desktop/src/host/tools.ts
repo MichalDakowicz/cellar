@@ -1,5 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { DESK_AGENTS, type DeskAgent } from '@/lib/deskProtocol';
 
@@ -16,6 +18,12 @@ const OUTPUT_MAX = 16 * 1024 * 1024;
  */
 
 const found = new Map<DeskAgent, string | null>();
+export function executableCandidates(name: string, paths: string[], localAppData?: string) {
+  const native = paths.filter((path) => /\.exe$/i.test(path));
+  if (name !== 'codex') return native;
+  const cli = localAppData ? join(localAppData, 'Programs', 'OpenAI', 'Codex', 'bin', 'codex.exe') : null;
+  return [...new Set([...(cli && existsSync(cli) ? [cli] : []), ...native.filter((path) => !/[/\\]app[/\\]codex\.exe$/i.test(path))])];
+}
 
 async function locate(name: string): Promise<string | null> {
   const finder = process.platform === 'win32' ? 'where' : 'which';
@@ -23,7 +31,7 @@ async function locate(name: string): Promise<string | null> {
     const { stdout } = await run(finder, [name], { windowsHide: true, timeout: 5000 });
     const paths = stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     if (process.platform !== 'win32') return paths[0] ?? null;
-    return paths.find((path) => /\.exe$/i.test(path)) ?? null;
+    return executableCandidates(name, paths, process.env.LOCALAPPDATA)[0] ?? null;
   } catch {
     return null;
   }

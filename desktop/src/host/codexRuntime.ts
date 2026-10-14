@@ -5,12 +5,14 @@ import { CodexRpc, type RpcRow } from './codexRpc.ts';
 import { codexLogItem, codexPermissionRequest } from './codexApprovals.ts';
 import type { ManagedSession, TurnChanged } from './managedSession.ts';
 import { stopJobProcess } from './jobProcess.ts';
+import { DeskError } from './claudeRuns.ts';
 
 export type { ManagedSession } from './managedSession.ts';
 export async function startCodex(path: string, start: DeskStart, runId: string, owner: string, approvals: Approvals,
   env: NodeJS.ProcessEnv, log: (row: unknown) => void, done: (code: number | null) => void, turnChanged: TurnChanged = () => {}): Promise<ManagedSession> {
   const items = new Map<string, any>(); const waiting = new Map<string | number, { id: string; resolve?: () => void; reject?: (error: Error) => void }>();
-  let threadId = ''; let turnId = ''; let finished = false; let busy = true; let restarting = false;
+  let threadId = ''; let turnId = ''; let finished = false; let busy = true; let restarting = false; let turns = 0;
+  let tokenUsage: unknown = null; const turnIds: string[] = [];
   const finish = (code: number | null) => {
     if (finished) return; finished = true;
     approvals.expireRun(owner, runId);
@@ -19,6 +21,8 @@ export async function startCodex(path: string, start: DeskStart, runId: string, 
   };
   const receive = (row: RpcRow) => {
     const p = row.params ?? {};
+    if (row.method === 'thread/tokenUsage/updated' && p.threadId === threadId) tokenUsage = p.tokenUsage;
+    if (row.method === 'thread/compacted' && p.threadId === threadId) { busy = false; tokenUsage = null; turnChanged(0, true); }
     if (row.method && row.id !== undefined) {
       const spec = codexPermissionRequest(row, start.cwd);
       if (!spec || p.threadId !== threadId) { void rpc.send({ id: row.id, error: { code: -32601, message: 'Unsupported runtime request; use Cellar entry questions for structured answers.' } }); return; }
@@ -60,7 +64,7 @@ export async function startCodex(path: string, start: DeskStart, runId: string, 
       const status = p.turn?.status;
       if (status === 'failed') log({ type: 'turn.failed', error: p.turn.error });
       // Resolved notifications normally precede completion; an unresolved response stays unknown.
-      busy = false;
+      busy = false; turns++; turnIds.push(p.turn?.id ?? turnId);
       approvals.expireRun(owner, runId);
       turnChanged(status === 'completed' ? 0 : status === 'interrupted' ? null : 1);
     }
@@ -81,12 +85,14 @@ export async function startCodex(path: string, start: DeskStart, runId: string, 
   const close = async () => {
     await stopJobProcess(rpc.child); await closed; finish(null);
   };
+  let turnAttempted = false;
   try {
     await connect();
     const approvalPolicy = start.mode === 'full' ? 'never' : start.mode === 'ask' ? 'untrusted' : 'on-request';
+    turnAttempted = true;
     const turn = await rpc.call('turn/start', { threadId, input: [{ type: 'text', text: start.prompt }], approvalPolicy, approvalsReviewer: 'user' });
     turnId = turn.turn.id;
-  } catch (error) { await close(); throw error; }
+  } catch (error) { await close(); if (!turnAttempted) throw new DeskError(`Codex failed before starting a turn: ${String(error)}`, 409, { notStarted: true }); throw error; }
   const interrupt = async (resume = true) => {
     if (!busy) return;
     await rpc.call('turn/interrupt', { threadId, turnId });
@@ -109,6 +115,18 @@ export async function startCodex(path: string, start: DeskStart, runId: string, 
     finally { restarting = false; }
   };
   return { busy: () => busy, close, interrupt: () => interrupt(), stop: async () => { await interrupt(false); await close(); },
+    point: () => ({ turns, sessionId: threadId, ...(turnIds.at(-1) ? { anchor: turnIds.at(-1) } : {}) }),
+    rollback: async (point) => {
+      if (busy || finished || point.turns > turns || (point.turns && !point.anchor)) throw new Error('Codex checkpoint conversation unavailable.');
+      const approvalPolicy = start.mode === 'full' ? 'never' : start.mode === 'ask' ? 'untrusted' : 'on-request';
+      const sandbox = start.mode === 'full' ? 'danger-full-access' : start.mode === 'ask' ? 'read-only' : 'workspace-write';
+      // Installed 0.162.1 removed thread/rollback. Fork through an exact completed turn instead.
+      const reply = await rpc.call(point.turns ? 'thread/fork' : 'thread/start', { ...(point.turns ? { threadId: point.sessionId ?? threadId, lastTurnId: point.anchor, deferGoalContinuation: true } : {}), cwd: start.cwd, approvalPolicy, approvalsReviewer: 'user', sandbox });
+      if (!reply.thread?.id || reply.thread.id === threadId) throw new Error('Codex did not confirm a new conversation at the checkpoint.');
+      threadId = reply.thread.id; turns = point.turns; turnIds.length = 0; if (point.anchor) turnIds.push(point.anchor); tokenUsage = null;
+    },
+    usage: async () => ({ agent: 'codex', context: tokenUsage, limits: await rpc.call('account/rateLimits/read', {}).catch(() => null) }),
+    compact: async () => { if (busy || finished) throw new Error('Wait for an idle Codex run.'); busy = true; try { await rpc.call('thread/compact/start', { threadId }); } catch (e) { busy = false; throw e; } },
     send: async (text, id, displayText = text) => {
       if (finished || busy) throw new Error('Codex chat is unavailable or still busy.');
       busy = true; turnChanged(undefined);

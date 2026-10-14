@@ -6,6 +6,9 @@ inside the app — and its main process is the half a phone talks to:
 - **start agents** — claude, codex or antigravity, in a project's folder, from a thought, a
   project or a typed prompt
 - **follow runs** — what is running, what it said, stop it
+- **restore checkpoints** — review file diff, restore files and agent context; retain recovery evidence
+- **configure recipes and rules** — per-kind task defaults and reviewed scoped instruction blocks
+- **read usage** — provider limits, context, explicit compact and encrypted named API accounts
 - **manage worktrees** — start in a separate branch from local main, read Git workspaces
   per project, and review Keep/Merge/Remove after every source run finishes
 - **open the pc's pages** — anything listening on localhost (a dev server, `expo start --web`),

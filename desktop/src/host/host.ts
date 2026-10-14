@@ -28,6 +28,9 @@ import { Receipts } from './receipts.ts';
 import { Worktrees } from './worktrees.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
 import { Tickets } from './tickets.ts';
+import { Checkpoints } from './checkpoints.ts';
+import { Automation } from './automation.ts';
+import { ProviderAccounts, type SecretVault } from './providerAccounts.ts';
 
 /**
  * The pc side, put together: one identity, one run list, one LAN server, one
@@ -58,6 +61,7 @@ function requestLog(file: string): (line: string) => void {
 }
 
 export type HostOptions = {
+  vault?: SecretVault;
   activity?: () => DeskActivity;
   dataDir: string;
   version: string;
@@ -103,6 +107,16 @@ export class DeskHost {
     this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
     this.deps.approvals = new Approvals(join(options.dataDir, 'approvals.sqlite'), (owner, rows) => this.deps.events!.store.approvals(owner, rows));
     this.deps.runs.runtime = new ManagedRuns(this.deps.approvals);
+    this.deps.checkpoints = new Checkpoints(options.dataDir, this.deps);
+    this.deps.automation = new Automation(options.dataDir, this.deps);
+    this.deps.providerAccounts = new ProviderAccounts(options.dataDir, () => this.account.current?.userId ?? null, options.vault);
+    this.deps.runs.environment = (start, runId, base) => this.deps.providerAccounts!.environment(start, runId, base);
+    this.deps.runs.runtime.checkpoints = this.deps.checkpoints;
+    this.deps.runs.runtime.afterTurn = async (owner, runId, start) => {
+      if (this.account.current?.userId !== owner || !start.projectId) throw new Error('Account changed before recipe commands.');
+      const plans = await Promise.all((start.afterCommands ?? []).map((command) => this.deps.commands!.plan(start.projectId!, command, start.cwd)));
+      if (plans.length) await this.deps.jobs!.start({ ...plans[0], steps: plans.flatMap((p) => p.steps) }, 'recipe-after', runId);
+    };
     this.deps.controls = new Controls(this.deps, new Dispatch(new ControlStore(join(options.dataDir, 'controls.sqlite')), this.deps.runs.runtime, (item, start) => dispatchCommand(this.deps, item, start)));
     this.fallback = new CellarFallback(this.deps);
   }

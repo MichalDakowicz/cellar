@@ -9,6 +9,7 @@ import { NewTaskChoices } from '@/components/desk/NewTaskChoices';
 import { NewTaskVoice } from '@/components/desk/NewTaskVoice';
 import { TrustAsk } from '@/components/desk/TrustAsk';
 import { useNewTask } from '@/features/desk/useNewTask';
+import { ProviderAccountPicker } from '@/features/desk/ProviderAccountPicker';
 import { COLORS } from '@/theme/colors';
 
 /**
@@ -67,6 +68,7 @@ export default function NewTask() {
     >
       <NewTaskVoice text={task.text} onText={task.onText} keys={task.keys} voice={task.voice} />
       <NewTaskChoices {...task} />
+      <ProviderAccountPicker agent={task.agent} value={task.accountId} onChange={task.onAccount} />
       <AttachedThought thoughts={task.attached} onDetach={task.onDetach} />
     </DeskSheet>
   );

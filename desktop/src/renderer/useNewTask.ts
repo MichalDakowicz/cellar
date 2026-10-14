@@ -11,6 +11,7 @@ import type { Cellar } from "./useCellar";
 import type { Host } from "./useHost";
 import { useTaskStart } from "./useTaskStart";
 import { useHostQuery } from "./useHostQuery";
+import { recipePrompt, recipeChoices } from '@/lib/deskRecipes';
 
 export function useNewTask(cellar: Cellar, host: Host) {
   useSaved();
@@ -22,24 +23,24 @@ export function useNewTask(cellar: Cellar, host: Host) {
   );
   const folders = deskFolders(cellar.projects, cellar.groups);
   const folder = folders.find((row) => row.projectId === projectId);
+  const automation = useHostQuery(host.live, calls.automation, host.key);
+  const entryIds = saved<string[]>("desktop-new-task", "entryIds", []);
+  const attached = cellar.entries.filter((entry) => entryIds.includes(entry.id));
+  const recipe = attached.length === 1 ? automation.data?.recipes[attached[0].kind] : undefined;
   const agent = saved<DeskAgent>(
     "desktop-new-task",
     "agent",
-    saved("cellar-desk-prefs", "defaultAgent", "claude"),
+    recipe && recipe.agent !== 'default' ? recipe.agent : saved("cellar-desk-prefs", "defaultAgent", "claude"),
   );
   const mode = saved<DeskMode>(
     "desktop-new-task",
     "mode",
-    saved("cellar-desk-prefs", "defaultMode", "edits"),
+    recipe?.mode ?? saved("cellar-desk-prefs", "defaultMode", "edits"),
   );
   const where = saved<"main" | "worktree">(
     "desktop-new-task",
     "where",
     "worktree",
-  );
-  const entryIds = saved<string[]>("desktop-new-task", "entryIds", []);
-  const attached = cellar.entries.filter((entry) =>
-    entryIds.includes(entry.id),
   );
   const split = saved<DeskSplit>("desktop-new-task", "split", "one");
   const [jobBusy, setJobBusy] = useState(false);
@@ -61,6 +62,8 @@ export function useNewTask(cellar: Cellar, host: Host) {
       ? "Update host before sending tasks."
       : !folder
         ? "Pick a project with a folder."
+        : attached.length && (automation.loading || !automation.data)
+          ? (automation.error ?? 'Loading saved recipes before sending attached thoughts.')
         : !text.trim() && !attached.length
           ? "Write a task or attach a thought."
           : attached.some((entry) => entry.projectId !== projectId)
@@ -101,12 +104,16 @@ export function useNewTask(cellar: Cellar, host: Host) {
       typed: text,
       picks: attached.map((entry) => ({
         entryId: entry.id,
-        line: agentPrompt(entry, folder.name),
+        line: recipePrompt(automation.data?.recipes[entry.kind], entry, folder.name, agentPrompt(entry, folder.name)),
       })),
       together: agentPromptMany(attached, folder.name),
       split,
     });
     const requests: DeskStart[] = starts.map((start) => {
+      const entry = attached.find((e) => e.id === start.entryId);
+      const eachRecipe = split === 'each' && entry ? automation.data?.recipes[entry.kind] : recipe;
+      const choices = recipeChoices(eachRecipe, { agent: saved('cellar-desk-prefs', 'defaultAgent', 'claude'), mode: saved('cellar-desk-prefs', 'defaultMode', 'edits') },
+        { agent: saved<DeskAgent | null>('desktop-new-task', 'agent', null), mode: saved<DeskMode | null>('desktop-new-task', 'mode', null) });
       const commandId = crypto.randomUUID();
       const ids =
         split === "each" && start.entryId
@@ -114,8 +121,8 @@ export function useNewTask(cellar: Cellar, host: Host) {
           : attached.map((row) => row.id);
       return {
         commandId,
-        agent,
-        mode,
+        ...choices,
+        ...(saved<string>('desktop-new-task', `account:${choices.agent}`, '') ? { accountId: saved<string>('desktop-new-task', `account:${choices.agent}`, '') } : {}),
         where,
         projectId,
         cwd: folder.path,

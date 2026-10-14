@@ -8,12 +8,14 @@ import { plan } from '@/lib/dump';
 import { readError } from '@/lib/utils';
 import { useDeskHandoff } from '@/store/deskHandoff';
 import type { Kind } from '@/types/cellar';
+import { useSharedCapture } from '@/store/sharedCapture';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 /**
  * "File it into cellar" (`PhoneShare.dc.html`): the words, the kind guessed
  * from them until you pick one, the project, and whether it goes straight to
  * an agent. Filing is real; arriving here from another app's share sheet waits
- * for cellar to be a share target (docs/desk/TASKS.md W17).
+ * for Android's text/link share target (docs/desk/TASKS.md W18).
  */
 export function useDeskShare() {
   const router = useRouter();
@@ -21,7 +23,9 @@ export function useDeskShare() {
   const { drop } = useCellarWrites();
   const hand = useDeskHandoff((state) => state.hand);
   const { say } = useToast();
-  const [text, setText] = useState('');
+  const owner = useAuth().user?.id ?? '';
+  const pending = useSharedCapture((state) => state.pending[owner]?.[0]);
+  const [text, setText] = useState(() => useSharedCapture.getState().pending[owner]?.[0] ?? '');
   const [picked, setPicked] = useState<Kind | null>(null);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [handoff, setHandoff] = useState(false);
@@ -31,7 +35,7 @@ export function useDeskShare() {
 
   return {
     text,
-    onText: setText,
+    onText: (text: string) => { setText(text); if (pending !== undefined) useSharedCapture.getState().edit(owner, text); },
     kind,
     guessed: picked === null,
     onKind: (next: string) => setPicked(next as Kind),
@@ -49,6 +53,7 @@ export function useDeskShare() {
         filed.drops.map((entry) => ({ ...entry, kind, projectId })),
         {
           onSuccess: () => {
+            if (pending !== undefined) useSharedCapture.getState().consume(owner);
             say(projectId ? 'filed' : 'filed in the inbox');
             if (handoff) {
               hand(text.trim());

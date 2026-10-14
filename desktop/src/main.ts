@@ -1,4 +1,4 @@
-import { app, BrowserWindow, desktopCapturer, ipcMain, screen, powerMonitor } from 'electron';
+import { app, BrowserWindow, desktopCapturer, ipcMain, screen, powerMonitor, safeStorage } from 'electron';
 
 import { DeskHost } from './host/host.ts';
 import { DesktopVoice } from './voice.ts';
@@ -100,6 +100,7 @@ void app.whenReady().then(async () => {
   powerMonitor.on('unlock-screen', () => { locked = false; });
   locked = powerMonitor.getSystemIdleState(300) === 'locked';
   host = new DeskHost({
+    vault: { available: () => safeStorage.isEncryptionAvailable(), encrypt: (text) => safeStorage.encryptString(text), decrypt: (value) => safeStorage.decryptString(value) },
     dataDir: app.getPath('userData'),
     version: app.getVersion(),
     supabaseUrl: process.env.CELLAR_SUPABASE_URL ?? '',

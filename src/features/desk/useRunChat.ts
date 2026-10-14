@@ -102,6 +102,7 @@ export function useRunChat(id: string) {
       : '';
 
   return {
+    runId: !sample && run && run.agent !== 'job' ? run.id : null,
     found: sample !== null || run !== null,
     connection: `${link.name} · ${sample ? 'sample desk' : stream.supported ? synchronized ? 'live · synchronized' : stream.state.phase : link.calls ? 'connected · legacy log' : 'disconnected'}`,
     loading: !sample && runs.loading,
