@@ -692,7 +692,7 @@ the verified bundle and its asset returns HTTP 200. Earlier automatic review app
 boundary is resolved. Full evidence
 and remaining checks: [w15-w18-testing.md](w15-w18-testing.md).
 
-General rendered document/media previews are future W21; SSH is now deferred W22.
+General rendered document/media previews are now covered by W21 below; SSH is deferred W22.
 
 ## W19 screens both ways
 
@@ -728,3 +728,19 @@ awake is required. Reserve cannot infer provider limits that are unavailable.
 Comparison uses durable assistant text, owned diffs, real check jobs, usage and
 previews. Pick/keep/toss preserve worktree recovery boundaries. Live two-Codex race,
 pick, cleanup and fixture details: [W19–W21 ledger](w19-w21-testing.md).
+
+## W21 documents and media
+
+One bounded document protocol serves owned Git-visible files through the host;
+desktop and phone viewers share format classification and exact source semantics.
+Chat/tool file references, keys previews and attached local entry documents use
+these viewers. Existing instruction review keeps its rendered/source/changes flow.
+Markdown and portable AsciiDoc render first; JSON offers formatted/exact modes.
+Supported raster images, audio and video use bounded filename-visible previews.
+
+The reader rechecks owner/scope and file identity after bounded reads, rejects
+traversal, ignored/linked files, invalid UTF-8 and incompatible media signatures.
+Text limit is 256 KiB; media limit is 8 MiB. HTML/SVG are inert source, unsupported
+formats are explicit, and AsciiDoc directives never execute or read includes.
+Formats, device verification and remaining codec boundaries:
+[W19–W21 ledger](w19-w21-testing.md).

@@ -547,12 +547,18 @@ Real two-Codex race, same-commit start, readable results, pick and QA cleanup pa
 Night timing/restart and group semantics have fixtures; live Claude excluded.
 See [test ledger](w19-w21-testing.md).
 
-### W21 · rendered documents and media `[ ]`
+### W21 · rendered documents and media `[x]`
 
 Render Markdown, AsciiDoc and other supported documents in chat and other file-opening
 surfaces, with a button to view the exact source. Preview images and other supported media
 visually; offer source only for formats where it makes sense. Keep filenames visible and
 use bounded viewers. Added 2026-10-14 before SSH; W16 instruction-file review is rendered now.
+
+Implemented 2026-10-14: shared bounded document protocol/viewers across chat,
+tool references, keys search and attached local documents. Markdown/portable
+AsciiDoc render first with exact UTF-8 source; supported raster/audio/video show
+named media controls. Physical phone document and desktop render/source checks pass.
+Supported formats and limits: [test ledger](w19-w21-testing.md).
 
 ### W22 · other hosts over ssh `[-]`
 

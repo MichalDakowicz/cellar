@@ -229,6 +229,20 @@ rules across selected projects or a shelf, with keep/toss and follow-up actions.
 Stop all also stops undispatched plan members. Unknown effects recover the original
 receipt instead of replaying. [Verification](../docs/desk/w19-w21-testing.md).
 
+## Documents and media
+
+Local file references in chat, tool details, keys results and attached entry docs
+open a shared named viewer. Markdown and a portable AsciiDoc prose subset render
+first; Source shows exact UTF-8 content, including original line endings. JSON can
+be pretty-printed or viewed exactly. Code/plain text remain literal. Raster images
+fit within the viewer; supported audio/video have explicit playback controls.
+
+Files must belong to the selected owned project/run checkout and be Git-visible.
+Ignored files, traversal and linked files are refused. Text is limited to 256 KiB;
+media to 8 MiB. HTML/SVG remain source text; PDF/office formats have no built-in
+viewer. AsciiDoc includes/macros and remote media never execute or fetch. See
+[format and verification details](../docs/desk/w19-w21-testing.md).
+
 W10 implements the independent renderer and controller extraction described in
 [`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence is recorded
 in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is

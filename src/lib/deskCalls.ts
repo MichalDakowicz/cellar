@@ -9,6 +9,7 @@ import { readApprovalReceipt, type ApprovalAnswer, type ApprovalReceipt } from '
 import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest } from '@/lib/deskWorktrees';
 import { readWorktreeReceipt, readWorktreeReview } from './deskWorktreeReply';
 import { readControlReceipt, readRunQueue, type RunControl, type ControlReceipt } from '@/lib/deskDispatch';
+import { readDocument } from './deskDocuments';
 
 
 export type DeskTransport = (method: 'GET' | 'POST', path: string, body?: unknown) => Promise<unknown>;
@@ -45,6 +46,9 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen'; acces
 export function deskCalls(send: DeskTransport, local = false) {
   return {
     phoneVideoTicket: async (serial: string) => ((await send('POST', '/phone-video-ticket', { serial })) as { url: string }).url,
+    document: async (request: import('./deskDocuments').DocumentRequest) => {
+      return readDocument(await send('POST', '/documents', request));
+    },
     orchestrations: async () => ((await send('GET', '/orchestrations')) as { plans: import('./deskOrchestration').OrchestrationView[] }).plans,
     orchestrate: async (request: import('./deskOrchestration').OrchestrationRequest) => await send('POST', '/orchestrations', request) as { id: string },
     orchestrationAction: async (request: import('./deskOrchestration').OrchestrationAction) => await send('POST', '/orchestration-actions', request) as { state: string; commandId: string; error?: string },

@@ -1,8 +1,10 @@
 import type { TurnItem } from "@/lib/deskEvents";
 import { Markdown } from "./Markdown";
 import { ToolGroup } from "./ToolGroup";
+import { ChatFiles } from './ChatFiles';
+import type { DocumentRequest } from '@/lib/deskDocuments';
 
-export function Transcript({ items }: { items: TurnItem[] }) {
+export function Transcript({ items, scope }: { items: TurnItem[]; scope?: Omit<DocumentRequest, 'path'> }) {
   const groups: TurnItem[][] = [];
   for (const item of items) {
     const tool = ![
@@ -29,6 +31,7 @@ export function Transcript({ items }: { items: TurnItem[] }) {
           return (
             <article className="user-message" key={item.id}>
               <Markdown value={item.text} />
+              <ChatFiles text={item.text} scope={scope} />
               <small className="muted">you</small>
             </article>
           );
@@ -39,9 +42,10 @@ export function Transcript({ items }: { items: TurnItem[] }) {
                 <small className="muted">legacy output · unconfirmed</small>
               )}
               <Markdown value={item.text} />
+              <ChatFiles text={item.text} scope={scope} />
             </article>
           );
-        return <ToolGroup key={item.id} items={group} />;
+        return <div key={item.id}><ToolGroup items={group} /><ChatFiles text={group.map((i) => i.text + '\n' + (i.detail ?? '')).join('\n')} scope={scope} /></div>;
       })}
     </>
   );

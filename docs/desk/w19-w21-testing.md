@@ -68,3 +68,36 @@ Night settings point to queue/digest; sample presenters remain behind sample mod
 Night scheduling requires an awake signed-in PC. Usage reserve applies only to
 reported provider windows; the run cap always applies. No push digest scheduler
 was added. No automatic shipping or recipe after-commands occur in night runs.
+
+## W21 — rendered documents and media
+
+Physical Android opened the actual owned `docs/desk/TASKS.md` in the new document
+route; exact returned source matched the filesystem. Actual desktop components
+rendered Markdown, AsciiDoc prose/tables/source blocks, image previews and source
+toggle in a local QA harness. Source controls preserved exact line endings.
+
+Text: Markdown, portable AsciiDoc, JSON, code and plain text; 256 KiB maximum.
+Media: PNG/JPEG/GIF/WebP; MP3/WAV/M4A/OGG; MP4/WebM; 8 MiB maximum. Playback
+depends on the device codec. Images fit bounded containers, audio/video require
+playback action, and filenames/paths remain visible. Full acoustic/video playback
+on every device/codec combination was not tested. HTML and SVG are source text;
+PDF and office documents report no built-in viewer. AsciiDoc includes, attributes
+and macros remain literal; supported subset is labelled in the viewer.
+
+Reader fixtures cover exact UTF-8 including BOM/CRLF, scope/ownership, traversal,
+ignored files, symlink/hardlink refusal, binary text, size limits and signatures.
+Pure tests cover classification, source/render conversion, media validation and
+chat references. No remote-file fetching, macro execution or schema migration.
+
+## Final build checks
+
+App: 106 suites / 926 tests. Desktop: 111 tests. App/host/renderer TypeScript and
+app/desktop lint pass. Final Android release and Windows unpacked package build
+successfully and are installed; final controller web export passes. Controller
+source-map inspection contains zero local host imports. No web publication,
+provider account change or production project deployment was performed.
+
+One desktop run hit an existing Windows child-teardown timing assertion; rerun
+passed. Packaging initially hit a Windows directory rename lock from the QA Vite
+watcher; stopping that watcher and packaging in a fresh folder passed. Temporary
+QA source pages and development server were removed/stopped before final builds.

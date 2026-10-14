@@ -35,6 +35,7 @@ import { runUsage } from './usage.ts';
 import type { ScreenControl } from './screenControl.ts';
 import type { Phones } from './phones.ts';
 import type { Orchestrations } from './orchestrations.ts';
+import { readHostDocument } from './documents.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -180,6 +181,8 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
         const identity = deps.identity();
         return ok({ url: `ws://127.0.0.1:${identity.port}/phone-video/${deps.tickets.issue({ kind: 'phone-video', owner, key: identity.key, serial })}` });
       }
+      case 'POST /documents':
+        return ok(await readHostDocument(deps, req.body));
       case 'GET /orchestrations':
         if (!deps.orchestrations) throw new DeskError('Update the PC for races, night and group runs.', 409);
         return ok({ plans: await deps.orchestrations.list() });

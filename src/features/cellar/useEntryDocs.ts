@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
 
 import { useAuth } from '@/features/auth/AuthProvider';
 import { addDoc, removeDoc } from '@/features/cellar/docsApi';
@@ -8,7 +9,7 @@ import { ENTRIES_KEY } from '@/lib/cellarKeys';
 import { docHref, docKind, docTitle, isDuplicateDoc, normalizeDocRef, type DocKind } from '@/lib/entryDocs';
 import type { Entry, EntryDoc, Project } from '@/types/cellar';
 
-export type DocRowView = EntryDoc & { kind: DocKind; title: string; href: string | null };
+export type DocRowView = EntryDoc & { kind: DocKind; title: string; href: string | null; local: boolean };
 
 /**
  * The docs on one thought: the rows as the entry screen draws them, the field
@@ -16,6 +17,7 @@ export type DocRowView = EntryDoc & { kind: DocKind; title: string; href: string
  * path, what to call it, where it opens — is `lib/entryDocs`.
  */
 export function useEntryDocs(entry: Entry | null, project: Project | null) {
+  const router = useRouter();
   const { user } = useAuth();
   const client = useQueryClient();
   const [draft, setDraft] = useState('');
@@ -37,6 +39,7 @@ export function useEntryDocs(entry: Entry | null, project: Project | null) {
         kind: docKind(doc.ref),
         title: docTitle(doc),
         href: docHref(doc.ref, project),
+        local: Platform.OS !== 'web' && !!project?.repoPath && docKind(doc.ref) === 'path',
       })),
     [entry?.docs, project],
   );
@@ -58,6 +61,7 @@ export function useEntryDocs(entry: Entry | null, project: Project | null) {
     },
     detach: (doc: DocRowView) => remove.mutate(doc.id),
     open: (doc: DocRowView) => {
+      if (doc.local && project) { router.push(`/desk/file?projectId=${encodeURIComponent(project.id)}&path=${encodeURIComponent(doc.ref)}` as Href); return; }
       if (doc.href) void Linking.openURL(doc.href).catch(() => undefined);
     },
   };

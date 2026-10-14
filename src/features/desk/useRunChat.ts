@@ -102,6 +102,7 @@ export function useRunChat(id: string) {
       : '';
 
   return {
+    documentScope: !sample && synchronized && link.calls && run?.projectId && run.agent !== 'job' ? { calls: link.calls, request: { projectId: run.projectId, runId: run.id, agent: run.agent } } : null,
     runId: !sample && run && run.agent !== 'job' ? run.id : null,
     found: sample !== null || run !== null,
     connection: `${link.name} · ${sample ? 'sample desk' : stream.supported ? synchronized ? 'live · synchronized' : stream.state.phase : link.calls ? 'connected · legacy log' : 'disconnected'}`,

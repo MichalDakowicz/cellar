@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { DeskKey, KeySuggestion } from '@/lib/deskKeys';
 import { COLORS } from '@/theme/colors';
+import type { DeskDocument } from '@/lib/deskDocuments';
+import { DocumentViewer } from './DocumentViewer';
 
 export type KeyListView = {
   key: DeskKey;
@@ -12,7 +14,7 @@ export type KeyListView = {
   notice?: string | null;
   selected?: number;
   scope?: string;
-  onPreview?: (pick: KeySuggestion) => Promise<string>;
+  onPreview?: (pick: KeySuggestion) => Promise<DeskDocument>;
   onPick: (id: string) => void;
 };
 
@@ -21,7 +23,7 @@ export type KeyListView = {
  * in thumb reach, the first one lit as the one a tap on it puts in.
  */
 export function KeyList({ list }: { list: KeyListView }) {
-  const [preview, setPreview] = useState<{ scope?: string; id: string; text: string } | null>(null);
+  const [preview, setPreview] = useState<{ scope?: string; id: string; text: string; file?: DeskDocument } | null>(null);
   const scroll = useRef<ScrollView>(null);
   const positions = useRef<Record<string, number>>({});
   const selectedId = list.suggestions[list.selected ?? 0]?.id;
@@ -54,7 +56,7 @@ export function KeyList({ list }: { list: KeyListView }) {
               if (!list.onPreview || !suggestion.id.startsWith('file:')) return;
               const scope = list.scope;
               setPreview({ scope, id: suggestion.id, text: 'Reading file…' });
-              void list.onPreview(suggestion).then((text) => setPreview((current) => current && current.scope === scope && current.id === suggestion.id ? { scope, id: suggestion.id, text } : current))
+              void list.onPreview(suggestion).then((file) => setPreview((current) => current && current.scope === scope && current.id === suggestion.id ? { scope, id: suggestion.id, text: '', file } : current))
                 .catch((error) => setPreview((current) => current && current.scope === scope && current.id === suggestion.id ? { scope, id: suggestion.id, text: String(error) } : current));
             }}
             className={`min-h-11 flex-row items-center gap-2.5 rounded-[10px] px-2.5 active:opacity-70 ${index === (list.selected ?? 0) ? 'bg-secondary' : ''}`}
@@ -72,7 +74,7 @@ export function KeyList({ list }: { list: KeyListView }) {
               </Text>
             )}
           </Pressable>
-          {preview?.scope === list.scope && preview?.id === suggestion.id && <Text selectable className="font-mono px-2.5 py-2 text-xs text-muted-foreground">{preview.text}</Text>}
+          {preview?.scope === list.scope && preview?.id === suggestion.id && (preview.file ? <DocumentViewer key={preview.file.path} file={preview.file} /> : <Text selectable className="font-mono px-2.5 py-2 text-xs text-muted-foreground">{preview.text}</Text>)}
         </View>
       ))}
       </ScrollView>

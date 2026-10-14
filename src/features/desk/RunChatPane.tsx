@@ -70,7 +70,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
             )}
             {chat.history && <Text className="font-sans text-xs text-muted-foreground">Saved history · last received {chat.historyAt ? new Date(chat.historyAt).toLocaleString() : 'unknown'}</Text>}
             {chat.canViewHistory && <Pressable accessibilityRole="button" onPress={chat.viewHistory} className="min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2"><Text className="font-sans text-sm text-foreground">View history</Text></Pressable>}
-            {chat.job ? <JobResults {...chat.job} /> : chat.turnItems ? <TurnChatItems items={chat.turnItems} youCaption={chat.youCaption} historical={chat.history} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
+            {chat.job ? <JobResults {...chat.job} /> : chat.turnItems ? <TurnChatItems items={chat.turnItems} youCaption={chat.youCaption} historical={chat.history} documentScope={chat.documentScope} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
             {!!chat.logError && <View className="gap-2"><Text className="font-sans text-xs text-muted-foreground">{chat.logError}</Text><Pressable accessibilityRole="button" onPress={chat.retryEvents} className="min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2"><Text className="font-sans text-sm text-foreground">Reconnect</Text></Pressable></View>}
             {!!chat.worktreeId && <WorktreeActions id={chat.worktreeId} />}
             {!!chat.runtimeOutcome && <Text className="font-sans text-xs text-muted-foreground">{chat.runtimeOutcome}</Text>}

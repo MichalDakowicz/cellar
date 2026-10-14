@@ -177,7 +177,7 @@ export function Chat({
                   {new Date(stored.at).toLocaleString()} · current state unknown
                 </p>
               )}
-              {snapshot && <Transcript items={items} />}
+              {snapshot && <Transcript items={items} scope={host.live && run?.projectId && run.agent !== 'job' ? { projectId: run.projectId, runId: run.id, agent: run.agent } : undefined} />}
               {host.live && !run && (
                 <p>Run unavailable. No completed state inferred.</p>
               )}

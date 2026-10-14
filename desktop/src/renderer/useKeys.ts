@@ -48,8 +48,8 @@ export function useKeys(text: string, write: (text: string) => void, host: Host,
     preview: async (id: string) => {
       const chosen = suggestions.find((row) => row.id === id);
       const wanted = request && chosen && keyPreviewRequest(request, chosen);
-      if (unavailable || !wanted) return 'File preview unavailable.';
-      return calls.keyPreview(wanted);
+      if (unavailable || !wanted) throw new Error('File preview unavailable.');
+      return calls.document({ projectId: wanted.projectId, runId: wanted.runId, agent: wanted.agent, path: wanted.path });
     } } : null,
     edit: (value: string) => { dismiss(''); write(value); },
     select: (end: number) => setCaret(end),
