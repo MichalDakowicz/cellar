@@ -9,6 +9,7 @@ export function eventSockets(server: Server, deps: HostDeps): void {
   if (!deps.events) return;
   const wss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
   server.on('upgrade', (request, socket, head) => {
+    if (!request.url?.startsWith('/events/')) return;
     const token = /^\/events\/([A-Za-z0-9_-]{16,})$/.exec(request.url ?? '')?.[1];
     const ticket = token ? deps.tickets.redeem(token) : null;
     if (!ticket || ticket.kind !== 'events' || ticket.owner !== deps.account.current?.userId || ticket.key !== deps.identity().key) {

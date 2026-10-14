@@ -19,18 +19,18 @@ const BOUNDARY = 'cellar-desk-frame';
 const FRAME_MS = 300;
 
 export class ScreenFeed {
-  private readonly viewers = new Set<ServerResponse>();
+  private readonly viewers = new Map<ServerResponse, () => boolean>();
   private running = false;
 
   constructor(private readonly frames: FrameSource) {}
 
-  watch(res: ServerResponse): void {
+  watch(res: ServerResponse, valid: () => boolean = () => true): void {
     res.writeHead(200, {
       'content-type': `multipart/x-mixed-replace; boundary=${BOUNDARY}`,
       'cache-control': 'no-store',
       connection: 'close',
     });
-    this.viewers.add(res);
+    this.viewers.set(res, valid);
     res.on('close', () => this.viewers.delete(res));
     if (!this.running) void this.loop();
   }
@@ -38,6 +38,8 @@ export class ScreenFeed {
   private async loop(): Promise<void> {
     this.running = true;
     while (this.viewers.size > 0) {
+      for (const [res, valid] of this.viewers) if (!valid()) { res.end(); this.viewers.delete(res); }
+      if (!this.viewers.size) break;
       const started = Date.now();
       let frame: Buffer | null = null;
       try {
@@ -47,7 +49,8 @@ export class ScreenFeed {
       }
       if (frame) {
         const head = `--${BOUNDARY}\r\ncontent-type: image/jpeg\r\ncontent-length: ${frame.length}\r\n\r\n`;
-        for (const res of this.viewers) {
+        for (const [res, valid] of this.viewers) {
+          if (!valid()) { res.end(); this.viewers.delete(res); continue; }
           if (res.writableNeedDrain) continue;
           res.write(head);
           res.write(frame);
@@ -67,6 +70,6 @@ export function screenPage(name: string): string {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${safe} — screen</title>
 <style>html,body{margin:0;height:100%;background:#09090b}
-img{display:block;width:100%;height:100%;object-fit:contain}</style></head>
-<body><img src="/screen/stream" alt="${safe}'s screen"></body></html>`;
+video{display:block;width:100%;height:100%;object-fit:contain}p{position:absolute;top:50%;width:100%;text-align:center;color:#aaa;font:14px sans-serif}</style></head>
+<body><video autoplay playsinline muted aria-label="${safe}'s screen"></video><p role="status">connecting low-latency video…</p><script src="/screen/player.js"></script></body></html>`;
 }

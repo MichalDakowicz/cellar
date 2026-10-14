@@ -40,10 +40,20 @@ export function refusal(status: number, body: unknown): Error {
 }
 
 
-export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { kind: 'apk'; app: string };
+export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen'; accessId?: string } | { kind: 'apk'; app: string };
 
 export function deskCalls(send: DeskTransport, local = false) {
   return {
+    phoneVideoTicket: async (serial: string) => ((await send('POST', '/phone-video-ticket', { serial })) as { url: string }).url,
+    screenAccess: async () => await send('POST', '/screen-access') as import('./deskRemote').ScreenAccess,
+    screenDisplay: async (id: string, displayId: string) => await send('POST', '/screen-display', { id, displayId }) as import('./deskRemote').ScreenAccess,
+    screenInput: async (id: string, sequence: number, input: import('./deskRemote').ScreenInput) => await send('POST', '/screen-input', { id, sequence, input }),
+    screenRelease: async (id: string) => await send('POST', '/screen-release', { id }),
+    screenRevoke: async () => await send('POST', '/screen-revoke'),
+    phones: async () => await send('GET', '/phones') as import('./deskRemote').PhoneState,
+    phoneAction: async (action: import('./deskRemote').PhoneAction) => await send('POST', '/phone-action', action) as { applied: boolean; output?: string },
+    phoneFrame: async (serial: string) => await send('POST', '/phone-frame', { serial }) as { url: string; width: number; height: number; taps: { x: number; y: number; at: number }[] },
+    phoneLogs: async (serial: string, packageName: string) => await send('POST', '/phone-logs', { serial, packageName }) as { text: string },
     usage: async (runId: string) => (await send('POST', '/usage', { runId })) as import('./deskUsage').DeskUsage,
     compact: async (runId: string) => (await send('POST', '/compact', { runId })) as { requested: boolean },
     providerAccounts: async () => ((await send('GET', '/provider-accounts')) as { accounts: { id: string; agent: 'codex' | 'claude'; label: string; policy: 'ask me'; kind: 'api' }[] }).accounts,

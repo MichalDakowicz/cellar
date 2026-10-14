@@ -1,6 +1,6 @@
 import { useRouter, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PreviewPage } from '@/components/desk/PreviewPage';
@@ -8,6 +8,7 @@ import { SampleDesktopScreen } from '@/components/desk/SampleDesktopScreen';
 import { Glass, ScreenIslands } from '@/components/desk/ScreenIslands';
 import { useDeskScreenView } from '@/features/desk/useDeskScreenView';
 import { COLORS } from '@/theme/colors';
+import { RemoteScreenInput } from '@/components/desk/RemoteScreenInput';
 
 /**
  * The live pc screen (docs/desk/screens.md, `Screen.dc.html`): landscape, the
@@ -26,7 +27,7 @@ export default function ScreenView() {
       <StatusBar hidden />
       <View style={{ flex: 1 }} pointerEvents="none">
         {screen.sample ? <SampleDesktopScreen /> : screen.url && !screen.unreachable ? (
-          <PreviewPage url={screen.url} reloads={0} {...screen.page} />
+          <PreviewPage key={screen.url} url={screen.url} reloads={0} {...screen.page} />
         ) : (
           <View className="flex-1 items-center justify-center px-10">
             <Text className="font-sans text-center text-sm text-muted-foreground">{screen.unreachable ?? 'asking the pc for its screen…'}</Text>
@@ -34,15 +35,18 @@ export default function ScreenView() {
         )}
       </View>
 
+      {screen.controls && screen.access && <RemoteScreenInput mode={screen.mode} aspect={screen.access.aspect} send={screen.input} />}
+
       <View
         style={{ position: 'absolute', top, left: Math.max(insets.left, 24), right: Math.max(insets.right, 24) }}
         className="flex-row items-start justify-between gap-3"
-        pointerEvents="none"
+        pointerEvents="box-none"
       >
         <Glass style={{ height: 32, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: screen.status.live ? COLORS.ok : COLORS.muted }} />
           <Text className="font-sans text-xs font-semibold text-foreground">{screen.name}</Text>
           <Text className="font-sans text-xs text-muted-foreground">{screen.status.text}</Text>
+          {screen.canSwitch && <Pressable accessibilityRole="button" accessibilityLabel={`Switch display. Current: ${screen.display}`} disabled={screen.switching} onPress={() => void screen.nextDisplay()} hitSlop={8}><Text className="font-sans text-xs text-primary">{screen.switching ? 'switching…' : `${screen.display} · switch`}</Text></Pressable>}
         </Glass>
         <Glass style={{ height: 32, paddingHorizontal: 12, justifyContent: 'center', flexShrink: 1 }}>
           <Text className="font-sans text-xs" style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>

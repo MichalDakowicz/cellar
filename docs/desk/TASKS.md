@@ -520,13 +520,21 @@ Cellar-debug-only crash reports. Physical cold/warm shares, full draft restart, 
 filing, JS/native crash review/filing and release capture guard verified. Binary shares
 unsupported and screenshots optional when capture fails; see the test ledger.
 
-### W19 · screens both ways `[ ]`
+### W19 · screens both ways `[x]`
 
 try Scrcpy as suggestion for phone to pc
 
 Control on the live pc screen (touch, trackpad, keyboard, dictate), asked on the pc unless the
 phone is trusted. The phone on the pc over adb: mirror, who drives, agent taps as rings, install,
 deep links, logcat, dev toggles.
+
+Implemented 2026-10-14: consented PC touch/trackpad/keyboard/voice controls and
+embedded ADB phone tools. PC video uses WebRTC; phone video embeds the verified
+scrcpy encoder, with bounded decoding and no external launcher. Initial controls
+confirmed by user; final streams verified locally and installed on both devices.
+User confirmed smooth video, then reported PC delay and mirror refresh after swipes.
+Mirror lifetime fix, minimal receiver buffering and requested monitor switch are
+installed; final PC latency remains user-observed. See [test ledger](w19-w21-testing.md).
 
 ### W20 · race, night shift, group runs `[ ]`
 

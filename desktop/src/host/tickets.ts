@@ -18,9 +18,10 @@ import { randomBytes } from 'node:crypto';
 
 export type Ticket =
   | { kind: 'view'; port: number }
-  | { kind: 'screen' }
+  | { kind: 'screen'; accessId?: string }
   | { kind: 'apk'; app: string }
-  | { kind: 'events'; owner: string; key: string };
+  | { kind: 'events'; owner: string; key: string }
+  | { kind: 'phone-video'; owner: string; key: string; serial: string };
 
 const TICKET_MS = 60_000;
 const SESSION_MS = 4 * 60 * 60_000;
@@ -29,7 +30,7 @@ export const VIEW_COOKIE = '__cellar_desk';
 
 export class Tickets {
   private readonly tickets = new Map<string, { ticket: Ticket; expires: number }>();
-  private readonly sessions = new Map<string, { expires: number; from: string }>();
+  private readonly sessions = new Map<string, { expires: number; from: string; screenId?: string }>();
 
   constructor(private readonly now: () => number = Date.now) {}
 
@@ -47,9 +48,9 @@ export class Tickets {
     return found.ticket;
   }
 
-  openSession(from: string): string {
+  openSession(from: string, screenId?: string): string {
     const token = randomBytes(24).toString('base64url');
-    this.sessions.set(token, { expires: this.now() + SESSION_MS, from });
+    this.sessions.set(token, { expires: this.now() + SESSION_MS, from, screenId });
     return token;
   }
 
@@ -62,6 +63,10 @@ export class Tickets {
       return false;
     }
     return session.from === from;
+  }
+
+  screenSession(token: string | null, from: string): string | null {
+    return this.validSession(token, from) ? this.sessions.get(token!)?.screenId ?? null : null;
   }
 
   /** Forget every browser at once — what "forget paired phones" also means for pages left open. */

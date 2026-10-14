@@ -23,7 +23,7 @@ export class ManagedRuns {
     if (this.closing) throw new DeskError('PC is shutting down; nothing started.', 409, { notStarted: true });
     const path = await toolPath(start.agent);
     if (!path) throw new DeskError(`${start.agent} is not installed on this PC.`, 409, { notStarted: true });
-    const secrets = [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.CLAUDE_CODE_OAUTH_TOKEN].filter((value): value is string => !!value);
+    const secrets = [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.CLAUDE_CODE_OAUTH_TOKEN, env.CELLAR_PHONE_TOKEN].filter((value): value is string => !!value);
     const log = (row: unknown) => { let text = JSON.stringify(row); for (const secret of secrets) text = text.split(secret).join('[redacted]'); appendFileSync(logFile, text + '\n'); };
     log({ type: 'diagnostic', message: `Provider executable: ${path}` });
     let ended = false; let lastCode: number | null | undefined;
@@ -49,7 +49,8 @@ export class ManagedRuns {
       };
       try { await this.checkpoints?.capture(owner, id, start.cwd, { turns: 0 }, 'before first turn'); }
       catch (error) { log({ type: 'diagnostic', message: `Initial checkpoint unavailable: ${String(error)}` }); }
-      const session = await (start.agent === 'codex' ? startCodex : startClaudeSdk)(path, start, id, owner, this.approvals, env, log, finish, changed);
+      const phoneHint = env.CELLAR_PHONE_URL ? '\n\nCellar phone tools: when the account allows device testing and the desktop driver is set to agent, POST JSON to process.env.CELLAR_PHONE_URL with Authorization: Bearer process.env.CELLAR_PHONE_TOKEN. Use increasing integer sequence (start at 1). Actions: devices (list), frame with serial (PNG data URL), tap (serial,x,y), swipe (serial,x,y,x2,y2), key (value back/home/recent/enter/delete), text (ASCII value). Coordinates are pixels from frame dimensions. If refused, ask the user to enable the driver; never bypass the gate with direct adb. Do not print the token.' : '';
+      const session = await (start.agent === 'codex' ? startCodex : startClaudeSdk)(path, { ...start, prompt: start.prompt + phoneHint }, id, owner, this.approvals, env, log, finish, changed);
       const send = session.send;
       const busy = session.busy; const rollback = session.rollback;
       session.busy = () => maintenanceFailed || exclusive || boundaryBusy || busy();

@@ -23,7 +23,7 @@ describe('screenHint', () => {
 
 describe('screenStatus', () => {
   it('is live only once the picture arrived', () => {
-    expect(screenStatus('live')).toEqual({ text: 'a few frames a second', live: true });
+    expect(screenStatus('live')).toEqual({ text: 'live video', live: true });
     expect(screenStatus('connecting').live).toBe(false);
     expect(screenStatus('gone').text).toBe('not answering');
   });

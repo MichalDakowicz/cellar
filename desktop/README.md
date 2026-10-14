@@ -194,6 +194,26 @@ earlier remote stop remains pending. Live checks, exact process exits, rebuilt a
 and fixture boundaries are recorded in [`how-it-works.md` W9](../docs/desk/how-it-works.md#w9--retained-chat-dispatch-and-stop-all).
 Claude remains fixture-only.
 
+## Screens and attached phones
+
+Phone PC-screen access asks on the desktop: Allow once, Trust this phone or Deny.
+Trust binds to the current account and pairing key. Sessions expire after ten
+minutes; release, lock, logout and forgetting phones revoke control. Screen
+video uses a dedicated WebRTC capture renderer. The phone can switch connected
+displays; video and input stay bound to its selection. Its preload exposes only the
+capture source, with no host API or account session. Input uses one persistent
+Windows worker per session; touch, trackpad, keys and dictated drafts share the
+same validated, sequenced input API.
+
+Desktop Phone embeds a pinned, integrity-checked scrcpy 4.0 server and decodes
+H.264 in Cellar. No separate scrcpy window or installation is needed. ADB and
+Android USB debugging authorization are required. Choose viewer, user or agent
+driver. Agent actions additionally require the existing account device-testing
+setting and a live owned run's private loopback token; taps appear as rings.
+APK installation, deep links, bounded package logcat and development toggles use
+the same selected authorized device. Video queues are bounded so stale frames
+cannot grow without limit. See [verification](../docs/desk/w19-w21-testing.md).
+
 W10 implements the independent renderer and controller extraction described in
 [`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence is recorded
 in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is

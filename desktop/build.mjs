@@ -60,3 +60,4 @@ await build({
 });
 
 console.log('built desktop/build/main.js and preload.js');
+await build({ ...shared, entryPoints: [join(here, 'src', 'capturePreload.ts')], outfile: join(here, 'build', 'capturePreload.js') });

@@ -106,6 +106,14 @@ export class Account {
     return deskFolders(rows, groups);
   }
 
+  async agentDevice(): Promise<boolean> {
+    const owner = this.current?.userId;
+    if (!owner) return false;
+    const { data, error } = await this.client().from('cellar_settings').select('agent_device').eq('user_id', owner).maybeSingle();
+    if (error || this.current?.userId !== owner) return false;
+    return data?.agent_device === true;
+  }
+
   async ruleContext(ids: string[]) {
     if (!this.current) throw new DeskError('Sign in on the PC.', 403);
     const [projects, entries] = await Promise.all([

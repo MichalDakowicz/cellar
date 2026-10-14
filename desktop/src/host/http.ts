@@ -7,6 +7,8 @@ import { pairPage } from './pairPage.ts';
 import { screenPage, type ScreenFeed } from './screen.ts';
 import { sessionCookie, viewCookie } from './tickets.ts';
 import { Signatures } from './verify.ts';
+import { phoneVideoSockets } from './phoneVideo.ts';
+import { screenPlayer } from './screenPlayer.ts';
 
 /**
  * The pc on the LAN.
@@ -54,14 +56,15 @@ async function redeem(deps: HostDeps, token: string, req: IncomingMessage, res: 
     res.writeHead(410, { 'content-type': 'text/plain' }).end('this link was used or is too old — open it again from cellar');
     return;
   }
-  if (ticket.kind === 'events') return void res.writeHead(403).end();
+  if (ticket.kind === 'events' || ticket.kind === 'phone-video') return void res.writeHead(403).end();
   if (ticket.kind === 'apk') {
     const workspace = deps.identity().workspace;
     const apk = (await findApks(workspace)).find((candidate) => candidate.app === ticket.app);
     if (!apk) return void res.writeHead(404).end();
     return sendApk(res, apkPath(workspace, apk), apk);
   }
-  const cookie = sessionCookie(deps.tickets.openSession(from(req)));
+  if (ticket.kind === 'screen' && (!ticket.accessId || !deps.screenControl?.valid(ticket.accessId))) return void res.writeHead(403).end('Screen consent expired.');
+  const cookie = sessionCookie(deps.tickets.openSession(from(req), ticket.kind === 'screen' ? ticket.accessId : undefined));
   const requestedHost = (req.headers.host ?? '').split(':')[0];
   const address = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(requestedHost) ? requestedHost : deps.lanHost();
   const where = ticket.kind === 'screen' ? '/screen' : `http://${address}:${await deps.proxies.open(ticket.port)}/`;
@@ -80,6 +83,14 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
       const path = url.split('?')[0];
       const method = req.method ?? 'GET';
 
+      if (method === 'POST' && path === '/agent-phone') {
+        if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(from(req)) || !deps.phones) return send(res, 403, { error: 'Agent phone endpoint is loopback only.' });
+        const token = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(req.headers.authorization ?? '')?.[1];
+        if (!token) return send(res, 403, { error: 'Per-run phone credential required.' });
+        try { return send(res, 200, await deps.phones.agent(token, JSON.parse(await readText(req)))); }
+        catch (e) { return send(res, 403, { error: e instanceof Error ? e.message : String(e) }); }
+      }
+
       if (method === 'GET' && (path === '/pair' || path === '/pair/')) {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
         return void res.end(pairPage(deps.identity().name));
@@ -87,11 +98,18 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
       const ticket = /^\/t\/([A-Za-z0-9_-]{16,})$/.exec(path);
       if (method === 'GET' && ticket) return redeem(deps, ticket[1], req, res);
 
-      if (method === 'GET' && (path === '/screen' || path === '/screen/stream')) {
-        if (!screen || !deps.tickets.validSession(viewCookie(req.headers.cookie), from(req))) {
+      if ((method === 'GET' && (path === '/screen' || path === '/screen/stream' || path === '/screen/player.js')) || (method === 'POST' && path === '/screen/offer')) {
+        const id = deps.tickets.screenSession(viewCookie(req.headers.cookie), from(req));
+        const valid = () => !!id && !!deps.screenControl?.valid(id) && deps.tickets.validSession(viewCookie(req.headers.cookie), from(req));
+        if (!screen || !valid()) {
           return void res.writeHead(403, { 'content-type': 'text/plain' }).end('open the screen from cellar on your phone');
         }
-        if (path === '/screen/stream') return screen.watch(res);
+        if (path === '/screen/offer') {
+          try { const answer = await deps.screenControl!.answer(id!, JSON.parse(await readText(req))); return send(res, 200, answer); }
+          catch (e) { return send(res, 403, { error: e instanceof Error ? e.message : String(e) }); }
+        }
+        if (path === '/screen/player.js') { res.writeHead(200, { 'content-type': 'application/javascript', 'cache-control': 'no-store' }); return void res.end(screenPlayer); }
+        if (path === '/screen/stream') return screen.watch(res, valid);
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
         return void res.end(screenPage(deps.identity().name));
       }
@@ -128,6 +146,7 @@ export function lanServer(deps: HostDeps, screen: ScreenFeed | null, log: (line:
     });
   });
   eventSockets(server, deps);
+  phoneVideoSockets(server, deps);
   return server;
 }
 

@@ -693,3 +693,20 @@ boundary is resolved. Full evidence
 and remaining checks: [w15-w18-testing.md](w15-w18-testing.md).
 
 General rendered document/media previews are future W21; SSH is now deferred W22.
+
+## W19 screens both ways
+
+PC control requests consent on the PC, optionally trusts the current account and
+pairing key, and expires/revokes video and input together. Phone screen route,
+voice drafts and input modes use these leases; navigation/background releases
+them. A dedicated hidden renderer captures the primary display for WebRTC video;
+an isolated source-only preload keeps the host bridge out of capture pages.
+Windows input uses a persistent hidden worker rather than recompiling per action.
+
+Desktop Phone now uses embedded scrcpy H.264 video, WebCodecs and bounded queues.
+This follows the user's scrcpy reference without adding an external launcher.
+ADB discovery/driver selection, tap rings, release APK install, links, logcat and
+safe developer toggles are wired to real devices. Account device-testing permission,
+driver choice, live owned run, private token and sequence all gate agent actions.
+No schema changes. Tests, device checks and latency boundaries:
+[W19–W21 ledger](w19-w21-testing.md).
