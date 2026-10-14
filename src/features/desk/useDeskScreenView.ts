@@ -1,72 +1,68 @@
-import { useQuery } from '@tanstack/react-query';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
-
+import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { pagePath } from '@/lib/deskPreview';
 import { screenHint, screenStatus, type ScreenLoad, type ScreenMode } from '@/lib/deskScreen';
-import { readError } from '@/lib/utils';
+import type { ScreenAccess, ScreenInput } from '@/lib/deskRemote';
 import { useDeskPrefs } from '@/store/deskPrefs';
-
 import { useDeskLink } from './useDeskLink';
 
-/**
- * The live pc screen (`Screen.dc.html`): the picture the pc already streams,
- * turned landscape, with the modes drawn ahead of the pc taking input
- * (docs/desk/TASKS.md W18).
- *
- * The phone turns sideways while this screen is open and back when you leave
- * it; leaving also drops the stream, because the page is unmounted with it.
- */
 export function useDeskScreenView() {
-  const link = useDeskLink();
-  const sample = useDeskPrefs((state) => state.sample);
+  const link = useDeskLink(); const sample = useDeskPrefs((s) => s.sample);
   const calls = link.can.local && !sample ? link.calls : null;
   const [mode, setMode] = useState<ScreenMode>('touch');
   const [load, setLoad] = useState<ScreenLoad>('connecting');
-
+  const [session, setSession] = useState<{ access: ScreenAccess; url: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [switching, setSwitching] = useState(false);
+  const switchingRef = useRef(false);
+  const sequence = useRef(0); const queue = useRef<Promise<unknown>>(Promise.resolve());
   useEffect(() => {
     void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => {});
-    return () => {
-      void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
-    };
+    return () => { void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {}); };
   }, []);
-
-  const ticket = useQuery({
-    queryKey: ['desk', 'screen-ticket'],
-    queryFn: () => calls!.ticket({ kind: 'screen' }),
-    enabled: calls !== null,
-    staleTime: Infinity,
-    gcTime: 0,
-    retry: false,
-  });
-
-  const unreachable = !calls
-    ? `${link.name} is not on this network — its screen shows over the same wi-fi`
-    : ticket.error
-      ? readError(ticket.error)
-      : null;
-  // The stream never finishes loading, so the page's load event may never
-  // come: reaching the screen page after the ticket's redirect is "live". The
-  // web's iframe cannot read its own address, so there a ticket is enough.
-  const shown: ScreenLoad = Platform.OS === 'web' && ticket.data ? 'live' : load;
-  const status = screenStatus(sample ? 'live' : unreachable ? 'gone' : shown);
-
+  useEffect(() => {
+    let active = true; let access: ScreenAccess | null = null;
+    setSession(null); setError(null); setLoad('connecting'); sequence.current = 0;
+    if (!calls) return;
+    void (async () => {
+      access = await calls.screenAccess();
+      if (!active) { await calls.screenRelease(access.id); return; }
+      const url = await calls.ticket({ kind: 'screen', accessId: access.id });
+      if (!active) { await calls.screenRelease(access.id); return; }
+      setSession({ access, url });
+    })().catch((e) => { if (access) void calls.screenRelease(access.id).catch(() => {}); if (active) setError(String(e)); });
+    const background = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') { active = false; if (access) void calls.screenRelease(access.id).catch(() => {}); setSession(null); setError('Screen ended in background. Leave and reopen it.'); }
+    });
+    return () => { active = false; background.remove(); if (access) void calls.screenRelease(access.id).catch(() => {}); };
+  }, [calls, link.ownerId]);
+  useEffect(() => {
+    if (!session) return;
+    const timer = setTimeout(() => { setSession(null); setError('Screen session expired. Leave and reopen it.'); void calls?.screenRelease(session.access.id).catch(() => {}); }, Math.max(0, session.access.expiresAt - Date.now()));
+    return () => clearTimeout(timer);
+  }, [session, calls]);
+  const controls = !!session && !error && !switching && load === 'live';
+  async function nextDisplay() {
+    if (!calls || !session || switching || !session.access.displays?.length) return;
+    const list = session.access.displays; const next = list[(list.findIndex((d) => d.id === session.access.displayId) + 1) % list.length];
+    switchingRef.current = true; setSwitching(true); setLoad('connecting');
+    try { const access = await calls.screenDisplay(session.access.id, next.id); const url = await calls.ticket({ kind: 'screen', accessId: access.id }); setError(null); setSession({ access, url }); }
+    catch (e) { setError(String(e)); setSession(null); void calls.screenRelease(session.access.id).catch(() => {}); }
+    finally { switchingRef.current = false; setSwitching(false); }
+  }
+  function input(input: ScreenInput) {
+    if (!calls || !session || !controls) return;
+    const id = session.access.id; const next = ++sequence.current;
+    queue.current = queue.current.catch(() => {}).then(() => calls.screenInput(id, next, input)).catch((e) => { setError(String(e)); setSession(null); void calls.screenRelease(id).catch(() => {}); });
+  }
+  const unreachable = error ?? (!calls && !sample ? `${link.name} needs a direct LAN connection for its screen` : null);
   return {
-    name: sample ? 'michu-pc · sample desk' : link.name,
-    sample,
-    status,
-    url: ticket.data ?? null,
-    unreachable,
-    mode,
-    onMode: setMode,
-    hint: screenHint(mode, false),
-    page: {
-      // Starts connecting; a redirect's second start must not undo "live".
-      onLoadStart: () => {},
-      onLoad: () => setLoad('live'),
-      onError: () => setLoad('gone'),
-      onUrl: (url: string) => pagePath(url) === '/screen' && setLoad('live'),
-    },
+    name: sample ? 'michu-pc · sample desk' : link.name, sample,
+    status: screenStatus(sample ? 'live' : unreachable ? 'gone' : load), url: session?.url ?? null,
+    unreachable, mode, onMode: setMode, hint: screenHint(mode, controls),
+    access: session?.access ?? null, controls, input,
+    display: session?.access.displays?.find((d) => d.id === session.access.displayId)?.name, canSwitch: (session?.access.displays?.length ?? 0) > 1, switching, nextDisplay,
+    page: { autoPlay: true, onMessage: (message: string) => { if (switchingRef.current) return; try { const row = JSON.parse(message); if (row.type === 'screen-video' && row.state === 'live') setLoad('live'); if (row.type === 'screen-video' && row.state === 'gone') { setLoad('gone'); setError(typeof row.error === 'string' ? row.error : 'Video disconnected.'); } } catch { /* Ignore unrelated page messages. */ } }, onLoadStart: () => {}, onLoad: () => {}, onError: () => { if (switchingRef.current) return; setLoad('gone'); if (session) void calls?.screenRelease(session.access.id).catch(() => {}); }, onUrl: (url: string) => { if (pagePath(url) === '/screen') setLoad('connecting'); } },
   };
 }

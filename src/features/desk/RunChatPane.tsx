@@ -18,6 +18,7 @@ import { COLORS } from '@/theme/colors';
 import type { useRunChat } from './useRunChat';
 import { WorktreeActions } from './WorktreeActions';
 import { RunWaitingDock } from './RunWaitingDock';
+import { RunTools } from './RunTools';
 
 /**
  * One run's chat (`Run.dc.html`): the header, what it said, and at the bottom in
@@ -61,6 +62,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
       >
         <ContentShell maxWidth={MAX_W.text}>
           <View className="gap-4 px-4 pt-4">
+            {chat.runId && <RunTools key={chat.runId} runId={chat.runId} />}
             {!chat.found && (
               <Text className="font-sans text-sm text-muted-foreground">
                 {chat.history ? 'Viewing saved chat; reconnect to check current run state.' : chat.loading ? 'reading…' : chat.missing ? 'this run is not on the pc any more' : 'Run data unavailable until the PC synchronizes.'}
@@ -68,7 +70,7 @@ export function RunChatPane({ chat, meter = false }: { chat: ReturnType<typeof u
             )}
             {chat.history && <Text className="font-sans text-xs text-muted-foreground">Saved history · last received {chat.historyAt ? new Date(chat.historyAt).toLocaleString() : 'unknown'}</Text>}
             {chat.canViewHistory && <Pressable accessibilityRole="button" onPress={chat.viewHistory} className="min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2"><Text className="font-sans text-sm text-foreground">View history</Text></Pressable>}
-            {chat.job ? <JobResults {...chat.job} /> : chat.turnItems ? <TurnChatItems items={chat.turnItems} youCaption={chat.youCaption} historical={chat.history} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
+            {chat.job ? <JobResults {...chat.job} /> : chat.turnItems ? <TurnChatItems items={chat.turnItems} youCaption={chat.youCaption} historical={chat.history} documentScope={chat.documentScope} /> : <RunChatItems items={chat.items} youCaption={chat.youCaption} />}
             {!!chat.logError && <View className="gap-2"><Text className="font-sans text-xs text-muted-foreground">{chat.logError}</Text><Pressable accessibilityRole="button" onPress={chat.retryEvents} className="min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2"><Text className="font-sans text-sm text-foreground">Reconnect</Text></Pressable></View>}
             {!!chat.worktreeId && <WorktreeActions id={chat.worktreeId} />}
             {!!chat.runtimeOutcome && <Text className="font-sans text-xs text-muted-foreground">{chat.runtimeOutcome}</Text>}

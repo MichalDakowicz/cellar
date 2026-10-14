@@ -6,6 +6,9 @@ inside the app — and its main process is the half a phone talks to:
 - **start agents** — claude, codex or antigravity, in a project's folder, from a thought, a
   project or a typed prompt
 - **follow runs** — what is running, what it said, stop it
+- **restore checkpoints** — review file diff, restore files and agent context; retain recovery evidence
+- **configure recipes and rules** — per-kind task defaults and reviewed scoped instruction blocks
+- **read usage** — provider limits, context, explicit compact and encrypted named API accounts
 - **manage worktrees** — start in a separate branch from local main, read Git workspaces
   per project, and review Keep/Merge/Remove after every source run finishes
 - **open the pc's pages** — anything listening on localhost (a dev server, `expo start --web`),
@@ -136,6 +139,20 @@ all relevant runs finish. Remove refuses dirty, locked, active/unknown or unmerg
 work; it keeps the Git branch and commits. A changed review requires another review.
 Lost replies recover one persisted command receipt, never optimistic success.
 
+Finished task worktrees are cleaned up automatically once their provider session
+closes (idle sessions close after 30 minutes), with no active/unknown runs or queued
+messages. The host also checks existing finished tasks on startup and every 30
+seconds. Explicit Keep opts out. Branches and commits remain; staged, unstaged and
+nonignored untracked edits are saved in a labelled Git stash pinned at
+`refs/cellar/archives/<worktree-id>` before removal. Generated dependencies/builds
+can be removed; other ignored files such as `.env` retain the folder for PC review.
+Only Cellar-owned, unlocked worktrees with confirmed completion are eligible.
+
+To recover a removed task, run `git worktree add <folder> <task-branch>` from the
+project, then `git -C <folder> stash apply --index refs/cellar/archives/<worktree-id>`
+if a snapshot exists. Snapshots also appear in `git stash list` as “Cellar finished
+task”. Recovery never changes the project's main checkout.
+
 Windows sandbox agents receive exact managed-folder Git trust in their process
 environment; global Git configuration and sandbox permissions stay unchanged.
 Verified phone flows and the machine's standalone Codex CLI limitation are recorded
@@ -176,6 +193,61 @@ sessions fail explicitly. Known local results allow a distinct new Stop all even
 earlier remote stop remains pending. Live checks, exact process exits, rebuilt artifacts
 and fixture boundaries are recorded in [`how-it-works.md` W9](../docs/desk/how-it-works.md#w9--retained-chat-dispatch-and-stop-all).
 Claude remains fixture-only.
+
+## Screens and attached phones
+
+Phone PC-screen access asks on the desktop: Allow once, Trust this phone or Deny.
+Trust binds to the current account and pairing key. Sessions expire after ten
+minutes; release, lock, logout and forgetting phones revoke control. Screen
+video uses a dedicated WebRTC capture renderer. The phone can switch connected
+displays; video and input stay bound to its selection. Its preload exposes only the
+capture source, with no host API or account session. Input uses one persistent
+Windows worker per session; touch, trackpad, keys and dictated drafts share the
+same validated, sequenced input API.
+Two-finger scroll follows content. The existing screen-island monitor button
+switches displays.
+
+Desktop Phone embeds a pinned, integrity-checked scrcpy 4.0 server and decodes
+H.264 in Cellar. No separate scrcpy window or installation is needed. ADB and
+Android USB debugging authorization are required. Choose viewer, user or agent
+driver. Agent actions additionally require the existing account device-testing
+setting and a live owned run's private loopback token; taps appear as rings.
+APK installation, deep links, bounded package logcat and development toggles use
+the same selected authorized device. Video queues are bounded so stale frames
+cannot grow without limit. See [verification](../docs/desk/w19-w21-testing.md).
+Mirror input carries its encoded frame dimensions; the host scales tap/swipe
+coordinates to Android's full display size, respecting rotation and display-size
+overrides. Agent screenshot coordinates stay in their original full pixel space;
+tap rings are normalized to the mirrored canvas.
+
+## Race, night and group plans
+
+Later desk creates plans from owned project checkouts. Race starts two independent
+worktrees from one pinned main commit. Compare summaries, diff statistics, checks,
+usage and previews; pick keeps the winner and archives eligible loser worktrees
+with Git recovery. Chats remain available for at least seven days.
+
+Night uses an explicit local start/end window, one run at a time, a run cap and a
+usage reserve when providers expose limits. It uses ask-first access, skips recipe
+after-commands and instructs agents not to ship. Pending approvals wait for you;
+the host must stay awake and signed in. Group applies one prompt plus scoped
+rules across selected projects or a shelf, with keep/toss and follow-up actions.
+Stop all also stops undispatched plan members. Unknown effects recover the original
+receipt instead of replaying. [Verification](../docs/desk/w19-w21-testing.md).
+
+## Documents and media
+
+Local file references in chat, tool details, keys results and attached entry docs
+open a shared named viewer. Markdown and a portable AsciiDoc prose subset render
+first; Source shows exact UTF-8 content, including original line endings. JSON can
+be pretty-printed or viewed exactly. Code/plain text remain literal. Raster images
+fit within the viewer; supported audio/video have explicit playback controls.
+
+Files must belong to the selected owned project/run checkout and be Git-visible.
+Ignored files, traversal and linked files are refused. Text is limited to 256 KiB;
+media to 8 MiB. HTML/SVG remain source text; PDF/office formats have no built-in
+viewer. AsciiDoc includes/macros and remote media never execute or fetch. See
+[format and verification details](../docs/desk/w19-w21-testing.md).
 
 W10 implements the independent renderer and controller extraction described in
 [`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence is recorded

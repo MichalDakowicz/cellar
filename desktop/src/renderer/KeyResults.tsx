@@ -1,9 +1,11 @@
 import type { Keys } from './useKeys';
 import { useEffect, useRef, useState } from 'react';
+import type { DeskDocument } from '@/lib/deskDocuments';
+import { DocumentViewer } from './DocumentViewer';
 
 /** Above composer; bounded independently from transcript and textarea scrolling. */
 export function KeyResults({ list }: { list: Keys['list'] }) {
-  const [preview, setPreview] = useState<{ scope: string; id: string; text: string } | null>(null);
+  const [preview, setPreview] = useState<{ scope: string; id: string; text: string; file?: DeskDocument } | null>(null);
   const menu = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const box = menu.current;
@@ -24,13 +26,13 @@ export function KeyResults({ list }: { list: Keys['list'] }) {
           if (!pick.id.startsWith('file:') || pick.id.endsWith('/')) return;
           const scope = list.scope;
           setPreview({ scope, id: pick.id, text: 'Reading file…' });
-          void list.preview(pick.id).then((text) => setPreview((current) => current?.scope === scope && current.id === pick.id ? { scope, id: pick.id, text } : current))
+          void list.preview(pick.id).then((file) => setPreview((current) => current?.scope === scope && current.id === pick.id ? { scope, id: pick.id, text: '', file } : current))
             .catch((error) => setPreview((current) => current?.scope === scope && current.id === pick.id ? { scope, id: pick.id, text: String(error) } : current));
         }}
         onMouseDown={(event) => event.preventDefault()} onClick={() => list.onPick(pick.id)}>
         <span className={pick.mono ? 'mono' : ''}>{pick.label}</span><small className="muted">{pick.detail}</small>
       </button>
-      {preview?.scope === list.scope && preview.id === pick.id && <pre className="key-preview muted">{preview.text}</pre>}
+      {preview?.scope === list.scope && preview.id === pick.id && (preview.file ? <DocumentViewer key={preview.file.path} file={preview.file} /> : <pre className="key-preview muted">{preview.text}</pre>)}
     </div>)}
     <small className="muted">↑↓ move · tab puts it in · esc closes</small>
   </div>;

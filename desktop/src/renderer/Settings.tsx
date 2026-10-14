@@ -159,7 +159,7 @@ export function Settings({
           </>
         )}
         {section === "usage" && <UsageSettings sample={sample} />}
-        {section === "recipes" && <RecipeSettings sample={sample} />}
+        {section === "recipes" && <RecipeSettings key={host.key} sample={sample} cellar={cellar} />}
         {section === "keys" && (
           <>
             <p className="muted">
@@ -179,7 +179,7 @@ export function Settings({
         {section === "notifications" && <NotificationsSettings />}
         {section === "night" && (
           <>
-            <p className="muted">Night shift unavailable yet.</p>
+            <button onClick={() => navigate('/desk/night')}>open night queue, window and morning digest</button>
             {NIGHT_SHIFT.map((row) => (
               <div className="settings-row" key={row.label}>
                 {row.label}

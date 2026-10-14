@@ -35,7 +35,7 @@ export type ScreenLoad = 'connecting' | 'live' | 'gone';
 
 /** The host pill: who, and how the picture is doing. */
 export function screenStatus(load: ScreenLoad): { text: string; live: boolean } {
-  if (load === 'live') return { text: 'a few frames a second', live: true };
+  if (load === 'live') return { text: 'live video', live: true };
   if (load === 'gone') return { text: 'not answering', live: false };
   return { text: 'connecting', live: false };
 }

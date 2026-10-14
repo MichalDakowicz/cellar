@@ -19,12 +19,14 @@ export function deskStartFrom(input: {
   where?: DeskStart['where'];
   mode?: DeskStart['mode'];
   entryIds?: string[];
+  afterCommands?: string[];
+  accountId?: string;
 }): { ok: true; start: DeskStart } | { ok: false; reason: string } {
   const cwd = normalizeRepoPath(input.repoPath);
   if (!cwd) return { ok: false, reason: 'this project has no folder on the pc — set where it lives first' };
   return {
     ok: true,
-    start: { agent: input.agent, prompt: input.prompt, cwd, name: null, entryId: input.entryId ?? null,
+    start: { agent: input.agent, prompt: input.prompt, cwd, name: null, entryId: input.entryId ?? null, afterCommands: input.afterCommands, accountId: input.accountId,
       ...(input.projectId ? { projectId: input.projectId, where: input.where ?? 'main', mode: input.mode ?? 'edits', entryIds: input.entryIds ?? (input.entryId ? [input.entryId] : []) } : {}) },
   };
 }

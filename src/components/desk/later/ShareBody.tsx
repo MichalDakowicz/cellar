@@ -25,6 +25,7 @@ export function ShareBody(props: {
   handoff: boolean;
   onHandoff: (on: boolean) => void;
   onCancel: () => void;
+  filingPending?: boolean;
 }) {
   return (
     <View className="gap-[18px]">
@@ -35,6 +36,8 @@ export function ShareBody(props: {
         </Pressable>
       </View>
 
+      {props.filingPending && <Text className="font-sans text-sm text-muted-foreground">Filing unconfirmed. Original words and choices are kept until you confirm the result.</Text>}
+
       <View className="gap-1.5">
         <Text className="font-sans text-xs text-muted-foreground">in your words</Text>
         <TextInput
@@ -42,6 +45,7 @@ export function ShareBody(props: {
           style={[{ fontSize: 14, lineHeight: 20, textAlignVertical: 'top' }, ANDROID_METRICS, NO_OUTLINE]}
           value={props.text}
           onChangeText={props.onText}
+          editable={!props.filingPending}
           multiline
           autoFocus
           placeholder="what is it about?"

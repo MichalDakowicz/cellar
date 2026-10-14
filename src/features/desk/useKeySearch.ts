@@ -28,7 +28,7 @@ export function useKeySearch(token: KeyToken | null, agent: string, context: Key
   return { ...(unavailable ? { suggestions: [], notice: unavailable } : keySearchView(scope, state)), scope,
     preview: async (pick: KeySuggestion) => {
       const wanted = request && keyPreviewRequest(request, pick);
-      if (unavailable || !wanted || !link.calls) return 'File preview unavailable.';
-      return link.calls.keyPreview(wanted);
+      if (unavailable || !wanted || !link.calls) throw new Error('File preview unavailable.');
+      return link.calls.document({ projectId: wanted.projectId, runId: wanted.runId, agent: wanted.agent, path: wanted.path });
     } };
 }

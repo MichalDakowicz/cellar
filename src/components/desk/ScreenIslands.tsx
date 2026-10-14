@@ -22,11 +22,19 @@ export function ScreenIslands({
   onMode,
   onLeave,
   bottom,
+  onSwitch,
+  canSwitch = false,
+  switching = false,
+  display,
 }: {
   mode: ScreenMode;
   onMode: (mode: ScreenMode) => void;
   onLeave: () => void;
   bottom: number;
+  onSwitch?: () => void;
+  canSwitch?: boolean;
+  switching?: boolean;
+  display?: string;
 }) {
   return (
     <View style={[styles.bar, { bottom }]} pointerEvents="box-none">
@@ -54,10 +62,9 @@ export function ScreenIslands({
         })}
       </Glass>
       <Glass style={styles.round}>
-        {/* One display until the pc says it has more (W18). */}
-        <View accessibilityLabel="switch display — this pc shows one" style={[styles.press, { opacity: 0.4 }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={canSwitch ? `switch display — current ${display}` : 'one display available'} disabled={!canSwitch || switching} onPress={onSwitch} style={[styles.press, { opacity: canSwitch && !switching ? 1 : 0.4 }]}>
           <MonitorUp size={20} color={COLORS.foreground} strokeWidth={2} />
-        </View>
+        </Pressable>
       </Glass>
     </View>
   );

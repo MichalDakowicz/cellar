@@ -70,6 +70,7 @@ export class Runs {
   private readonly logs: string;
   private readonly children = new Map<string, ChildProcess>();
   runtime?: ManagedRuns;
+  environment: (start: DeskStart, runId: string, base: NodeJS.ProcessEnv) => NodeJS.ProcessEnv = (_start, _id, base) => base;
   onChange: () => void = () => {};
   constructor(dir: string, private readonly readClaude = claudeRows, private readonly owner: () => string | null = () => null) {
     this.file = join(dir, 'runs.json');
@@ -112,7 +113,7 @@ export class Runs {
     if (!path) throw new DeskError(`${start.agent} is not installed on this pc`, 409, { notStarted: true });
     const id = randomBytes(4).toString('hex');
     const log = join(this.logs, `${id}.log`);
-    const env = start.where === 'worktree' && start.worktreeId ? worktreeEnv(start.cwd, process.env) : process.env;
+    const env = this.environment(start, id, start.where === 'worktree' && start.worktreeId ? worktreeEnv(start.cwd, process.env) : process.env);
     if (this.runtime && start.commandId && start.agent !== 'agy') {
       const owner = this.owner(); if (!owner) throw new DeskError('Sign in on the PC.', 409, { notStarted: true });
       const record: RunRecord = { id, ...base, owner, log, runtime: true };

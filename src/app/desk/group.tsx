@@ -1,9 +1,13 @@
 import { GroupBody } from '@/components/desk/later/GroupBody';
 import { LaterScreen } from '@/features/desk/LaterScreen';
 import { SAMPLE_GROUP } from '@/lib/deskSample';
+import { useDeskPrefs } from '@/store/deskPrefs';
+import { LiveRunPlans } from '@/features/desk/LiveRunPlans';
 
 /** A group run (docs/desk/screens.md, `DeskGroupRun.dc.html`): one task across a shelf. W19. */
 export default function GroupRunScreen() {
+  const sample = useDeskPrefs((s) => s.sample);
+  if (!sample) return <LiveRunPlans kind="group" />;
   return (
     <LaterScreen
       name="group run"

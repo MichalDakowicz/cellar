@@ -12,12 +12,14 @@ import {
 import { saved, useSaved } from "./preferences";
 import { SAMPLE_PHONE } from "@/lib/deskSample";
 import { PhoneMirror } from "./PhoneMirror";
+import { LivePhone } from './LivePhone';
 
 export function Phone() {
   useSaved();
   const sample = saved<boolean>("cellar-desk-prefs", "sample", false);
   const [driver, setDriver] = useState("agent drives");
   const [level, setLevel] = useState("info+");
+  if (!sample) return <LivePhone />;
   if (!sample)
     return (
       <div className="page stack">

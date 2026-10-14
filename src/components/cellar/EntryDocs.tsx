@@ -42,9 +42,9 @@ export function EntryDocs({ rows, draft, onDraft, canAttach, draftNote, onAttach
         return (
           <View key={doc.id} className="flex-row items-center gap-2.5">
             <Pressable
-              accessibilityRole={doc.href ? 'link' : 'text'}
+              accessibilityRole={doc.href || doc.local ? 'link' : 'text'}
               accessibilityLabel={doc.title}
-              disabled={!doc.href}
+              disabled={!doc.href && !doc.local}
               onPress={() => onOpen(doc)}
               className="min-w-0 flex-1 flex-row items-center gap-2.5 py-2 active:opacity-70"
             >

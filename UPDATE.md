@@ -1,5 +1,32 @@
 # Update notes
 
+## 1.16.0 — Unreleased
+
+### Added
+
+- Desk: control PC with consent and mirror an attached Android phone inside Cellar
+- Phone tools: choose driver, see agent taps, install builds, open links and inspect logcat
+- PC screen: switch between connected displays from the phone
+- Desk: race two agents from one commit, queue a bounded night shift and run across projects
+- Files: render Markdown/AsciiDoc, switch to exact source and preview supported images, audio and video
+- Desk: review turn checkpoints and restore files with the agent conversation
+- Desk: save per-kind recipes and review scoped rules before syncing instruction files
+- Desk: view provider usage, compact context and select encrypted API accounts
+- Capture: share Android text into Cellar and review debug crashes with evidence
+
+### Fixed
+
+- Screen streams use WebRTC and embedded H.264 video instead of repeated screenshots
+- Phone mirror stays connected after touch input and device refresh
+- PC control: correct two-finger scroll direction
+- Phone mirror: scale taps, swipes and agent rings to the full Android display
+- Shared drafts keep chosen kind/project after restart and retry filing without duplicates
+- Desk: queued messages resume after reviewed checkpoint restores
+- Desktop: completion notifications stay above the page without pushing chat off-screen
+- Rules review names instruction files, renders Markdown first, and offers source and focused changes
+- Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
+- Desktop: archive finished task edits and remove unused worktree folders automatically
+
 ## 1.15.0 — Unreleased
 
 ### Added

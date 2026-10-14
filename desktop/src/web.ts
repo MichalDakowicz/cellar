@@ -43,7 +43,7 @@ const CSP = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https: wss: ws://127.0.0.1:*",
-  "media-src 'self' blob: https:",
+  "media-src 'self' data: blob: https:",
   'frame-src https: http://127.0.0.1:*',
   "object-src 'none'",
   "base-uri 'none'",

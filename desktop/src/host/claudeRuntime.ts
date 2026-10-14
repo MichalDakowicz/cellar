@@ -5,6 +5,7 @@ import type { DeskStart } from '@/lib/deskProtocol';
 import type { Approvals } from './approvals.ts';
 import type { ManagedSession, TurnChanged } from './managedSession.ts';
 import { ClaudeInput } from './claudeInput.ts';
+import { forkClaudeSession } from './claudeFork.ts';
 
 /** Only exact session-scoped rule suggestions can be offered as a broader grant. */
 export function sessionSuggestions(suggestions: PermissionUpdate[] = []): PermissionUpdate[] {
@@ -38,9 +39,10 @@ export function claudeCanUseTool(start: DeskStart, runId: string, owner: string,
 }
 export async function startClaudeSdk(path: string, start: DeskStart, runId: string, owner: string, approvals: Approvals,
   env: NodeJS.ProcessEnv, log: (row: unknown) => void, done: (code: number | null) => void, turnChanged: TurnChanged = () => {},
-  injected?: { query: typeof import('@anthropic-ai/claude-agent-sdk').query; spawned?: Promise<void> }): Promise<ManagedSession> {
+  injected?: { query: typeof import('@anthropic-ai/claude-agent-sdk').query; spawned?: Promise<void>; resume?: string; turns?: number; forkSession?: typeof import('@anthropic-ai/claude-agent-sdk').forkSession }): Promise<ManagedSession> {
   const { query } = injected ?? await import('@anthropic-ai/claude-agent-sdk');
-  const abortController = new AbortController(); let stopping = false; let busy = true; let finished = false;
+  const abortController = new AbortController(); let stopping = false; let busy = true; let finished = false; let replacing = false;
+  let turns = injected?.turns ?? 0; let sessionId = ''; let anchor = ''; let replacement: ManagedSession | null = null; let resume: string | undefined; let compacting = false;
   const input = new ClaudeInput(); input.push(start.prompt, start.commandId ?? randomUUID());
   const pending = new Map<string, { resolve: () => void; reject: (error: Error) => void }>();
   let process: ReturnType<typeof spawn> | null = null;
@@ -48,6 +50,7 @@ export async function startClaudeSdk(path: string, start: DeskStart, runId: stri
   const spawned = new Promise<void>((resolve, reject) => { resolveSpawn = resolve; rejectSpawn = reject; });
   const session = query({ prompt: input, options: {
     cwd: start.cwd, env, pathToClaudeCodeExecutable: path, abortController, includePartialMessages: true,
+    ...(injected?.resume ? { resume: injected.resume } : {}),
     settingSources: ['user', 'project', 'local'],
     permissionMode: start.mode === 'full' ? 'bypassPermissions' : start.mode === 'edits' ? 'acceptEdits' : 'default',
     allowDangerouslySkipPermissions: start.mode === 'full', canUseTool: claudeCanUseTool(start, runId, owner, approvals),
@@ -61,14 +64,16 @@ export async function startClaudeSdk(path: string, start: DeskStart, runId: stri
   const ended = (async () => {
     let code: number | null = null;
     try { for await (const message of session) {
+      if ('session_id' in message && message.session_id) sessionId = message.session_id;
+      if ((message.type === 'assistant' || message.type === 'user') && message.uuid) anchor = message.uuid;
       const echo = message as typeof message & { user_message_uuid?: string; user_message_uuids?: string[] };
       for (const id of echo.user_message_uuids ?? (echo.user_message_uuid ? [echo.user_message_uuid] : [])) pending.get(id)?.resolve();
       // Cellar records submitted text only after a provider echo; tool-result user rows remain intact.
       if (!(message.type === 'user' && typeof message.message.content === 'string')) log(message);
-      if (message.type === 'result') { code = message.is_error ? 1 : 0; busy = false; approvals.expireRun(owner, runId); turnChanged(code); }
+      if (message.type === 'result') { code = message.is_error ? 1 : 0; busy = false; if (!compacting) turns++; approvals.expireRun(owner, runId); turnChanged(code, compacting); compacting = false; }
     } } catch (error) { rejectSpawn(error instanceof Error ? error : new Error(String(error))); log({ type: 'result', is_error: true, result: String(error) }); code = 1; }
     finally { finished = true; input.close(); for (const ack of pending.values()) ack.reject(new Error('Claude disconnected before confirming delivery.'));
-      pending.clear(); approvals.expireRun(owner, runId); done(stopping ? null : code); }
+      pending.clear(); approvals.expireRun(owner, runId); if (!replacing) done(stopping ? null : code); }
   })();
   await (injected?.spawned ?? spawned);
   const close = async () => { input.close(); abortController.abort(); process?.kill(); session.close(); await ended; };
@@ -79,9 +84,22 @@ export async function startClaudeSdk(path: string, start: DeskStart, runId: stri
     while (busy && !finished && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 20));
     if (finished || busy) throw new Error('Claude has not confirmed interruption.');
   };
-  return { busy: () => busy, close, interrupt,
-    stop: async () => { stopping = true; await interrupt(); await close(); },
+  return { busy: () => replacement?.busy() ?? busy, close: async () => { if (replacement) await replacement.close(); else await close(); }, interrupt: async () => { if (replacement) await replacement.interrupt(); else await interrupt(); },
+    point: () => replacement?.point?.() ?? ({ turns, sessionId, ...(anchor ? { anchor } : {}) }),
+    rollback: async (point) => {
+      if (replacement) { await replacement.rollback!(point); return; }
+      if (busy || (finished && !replacing) || point.turns > turns) throw new Error('Claude checkpoint conversation unavailable.');
+      if (point.turns && !point.anchor) throw new Error('Claude checkpoint has no conversation boundary.');
+      // Fork retains the old transcript as recovery evidence. Zero turns starts a fresh session.
+      const fork = point.turns ? injected?.forkSession ? await injected.forkSession(point.sessionId ?? sessionId, { dir: start.cwd, upToMessageId: point.anchor }) : await forkClaudeSession(point.sessionId ?? sessionId, start.cwd, point.anchor!, env) : null;
+      replacing = true; await close(); busy = false; resume = fork?.sessionId; sessionId = resume ?? ''; anchor = point.anchor ?? ''; turns = point.turns;
+    },
+    usage: async () => replacement?.usage ? replacement.usage() : { agent: 'claude', context: await session.getContextUsage({ detail: 'summary' }), limits: await session.usage_EXPERIMENTAL_MAY_CHANGE_DO_NOT_RELY_ON_THIS_API_YET({ skipBehaviors: true }) },
+    compact: async () => { if (replacement) { await replacement.compact?.(); return; } if (busy || finished) throw new Error('Wait for an idle Claude run.'); compacting = true; input.push('/compact', randomUUID()); busy = true; turnChanged(undefined); },
+    stop: async () => { if (replacement) { await replacement.stop(); return; } stopping = true; if (!finished) { await interrupt(); await close(); } else done(null); },
     send: async (text, id, displayText = text) => {
+      if (replacement) { await replacement.send(text, id, displayText); return; }
+      if (replacing) { replacement = await startClaudeSdk(path, { ...start, prompt: text, commandId: id }, runId, owner, approvals, env, log, done, turnChanged, { ...injected, query, resume, turns }); log({ type: 'cellar.message', id, text: displayText }); return; }
       if (finished || busy) throw new Error('Claude chat is unavailable or still busy.');
       busy = true; turnChanged(undefined);
       await new Promise<void>((resolve, reject) => {

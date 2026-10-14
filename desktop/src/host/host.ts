@@ -28,6 +28,13 @@ import { Receipts } from './receipts.ts';
 import { Worktrees } from './worktrees.ts';
 import { ScreenFeed, type FrameSource } from './screen.ts';
 import { Tickets } from './tickets.ts';
+import { Checkpoints } from './checkpoints.ts';
+import { Automation } from './automation.ts';
+import { ProviderAccounts, type SecretVault } from './providerAccounts.ts';
+import { WorktreeCleanup } from './worktreeCleanup.ts';
+import { ScreenControl, type ScreenAdapter } from './screenControl.ts';
+import { Phones } from './phones.ts';
+import { Orchestrations } from './orchestrations.ts';
 
 /**
  * The pc side, put together: one identity, one run list, one LAN server, one
@@ -58,6 +65,9 @@ function requestLog(file: string): (line: string) => void {
 }
 
 export type HostOptions = {
+  phoneServerFile?: string;
+  screenAdapter?: ScreenAdapter;
+  vault?: SecretVault;
   activity?: () => DeskActivity;
   dataDir: string;
   version: string;
@@ -77,12 +87,14 @@ export class DeskHost {
   readonly account: Account;
   readonly deps: HostDeps;
   readonly fallback: CellarFallback;
+  private readonly cleanup: WorktreeCleanup;
 
   constructor(private readonly options: HostOptions) {
     this.identity = loadIdentity(options.dataDir);
     this.account = new Account(options.supabaseUrl, options.supabaseAnonKey);
     const tickets = new Tickets();
     this.deps = {
+      phoneServerFile: options.phoneServerFile,
       identity: () => (this.boundPort ? { ...this.identity, port: this.boundPort } : this.identity),
       account: this.account,
       runs: new Runs(options.dataDir, undefined, () => this.account.current?.userId ?? null),
@@ -96,15 +108,30 @@ export class DeskHost {
     };
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
       join(this.identity.workspace, '.cellar-worktrees'));
+    if (options.screenAdapter) this.deps.screenControl = new ScreenControl(options.dataDir, () => ({ owner: this.account.current?.userId ?? null, key: this.identity.key }), options.screenAdapter);
+    this.deps.phones = new Phones(this.deps);
     this.deps.previews = new Previews(options.dataDir, this.deps);
     this.deps.notifications = new HostNotifications(this.deps, options.activity ?? (() => ({ idleSeconds: 300, locked: true })));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
-    this.deps.runs.onChange = () => this.deps.events!.invalidate();
-    this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
+    const changed = () => { this.deps.events!.invalidate(); if (this.boundPort && !this.stopping) void this.cleanup.tick(); };
+    this.deps.runs.onChange = changed;
+    this.deps.jobs!.onChange = changed;
     this.deps.approvals = new Approvals(join(options.dataDir, 'approvals.sqlite'), (owner, rows) => this.deps.events!.store.approvals(owner, rows));
     this.deps.runs.runtime = new ManagedRuns(this.deps.approvals);
+    this.deps.checkpoints = new Checkpoints(options.dataDir, this.deps);
+    this.deps.automation = new Automation(options.dataDir, this.deps);
+    this.deps.providerAccounts = new ProviderAccounts(options.dataDir, () => this.account.current?.userId ?? null, options.vault);
+    this.deps.runs.environment = (start, runId, base) => ({ ...this.deps.providerAccounts!.environment(start, runId, base), ...this.deps.phones!.environment(this.account.current!.userId, runId, this.deps.identity().port) });
+    this.deps.runs.runtime.checkpoints = this.deps.checkpoints;
+    this.deps.runs.runtime.afterTurn = async (owner, runId, start) => {
+      if (this.account.current?.userId !== owner || !start.projectId) throw new Error('Account changed before recipe commands.');
+      const plans = await Promise.all((start.afterCommands ?? []).map((command) => this.deps.commands!.plan(start.projectId!, command, start.cwd)));
+      if (plans.length) await this.deps.jobs!.start({ ...plans[0], steps: plans.flatMap((p) => p.steps) }, 'recipe-after', runId);
+    };
     this.deps.controls = new Controls(this.deps, new Dispatch(new ControlStore(join(options.dataDir, 'controls.sqlite')), this.deps.runs.runtime, (item, start) => dispatchCommand(this.deps, item, start)));
     this.fallback = new CellarFallback(this.deps);
+    this.cleanup = new WorktreeCleanup(this.deps);
+    this.deps.orchestrations = new Orchestrations(options.dataDir, this.deps);
   }
 
   /** Start listening. Resolves with the port actually bound, which may be one of the ten after the configured one. */
@@ -120,15 +147,21 @@ export class DeskHost {
     this.boundPort = port;
     this.deps.events!.start();
     this.deps.notifications?.start();
+    this.cleanup.start();
+    this.deps.orchestrations?.start();
     return port;
   }
 
   stop(): Promise<void> {
     if (this.stopping) return this.stopping;
     this.fallback.stop();
+    this.deps.screenControl?.revoke();
+    this.deps.phones?.reset();
     this.deps.notifications?.stop();
     this.server?.close();
     this.stopping = (async () => {
+      await this.deps.orchestrations?.close();
+      await this.cleanup.stop();
       // Providers must release callbacks while the event store can still publish expiry.
       await this.deps.runs.runtime?.close();
       await this.deps.previews?.close();
@@ -148,9 +181,11 @@ export class DeskHost {
 
   setSession(session: DeskSession | null): void {
     const previous = this.account.current?.userId;
+    if (previous !== session?.userId) { this.deps.screenControl?.revoke(); this.deps.phones?.reset(); this.deps.tickets.clear(); }
     if (previous && previous !== session?.userId) void this.deps.runs.runtime?.stopOwner(previous);
     if (previous && previous !== session?.userId) void this.deps.jobs?.stopOwner(previous).catch((error) => console.error('Jobs could not stop after account change', error));
     this.account.setSession(session);
+    if (this.boundPort && !this.stopping) void this.cleanup.tick();
   }
 
   /** What the QR code on the pc says. Only ever handed to this pc's own window, never served. */
@@ -164,6 +199,7 @@ export class DeskHost {
 
   /** Forget every paired phone, and every page or screen a phone has open. */
   forgetPhones(): void {
+    this.deps.screenControl?.forget();
     this.identity = rotateKey(this.options.dataDir, this.identity);
     this.deps.tickets.clear();
   }

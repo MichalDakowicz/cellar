@@ -53,3 +53,19 @@ actionable background notifications in both separated apps. Existing entry
 question cards, MCP answer writers, settings and pairing share the same exact
 answer/receipt boundaries. Verification, touched surfaces, setup and live limits:
 [how-it-works.md](how-it-works.md).
+
+W19 touches the existing phone PC-screen route, touch/trackpad/keyboard/voice
+controls, desktop Phone tools, account device-testing setting, build installer,
+link opener and provider launch environment. Real data replaces sample phone
+tools outside sample mode. Screen consent/trust and live-video verification:
+[W19–W21 ledger](w19-w21-testing.md).
+
+W20 wires existing race, night and group routes on phone and desktop Later desk.
+Night settings link to the real host queue/digest. Project/shelf selection, scoped
+rules, provider dispatch, worktree retention, Stop all, comparisons and follow-ups
+share durable host plans and receipts. Details: [test ledger](w19-w21-testing.md).
+
+W21 carries bounded rendered/source documents and media into existing phone and
+desktop chat/tool file references, keys results and attached local entry documents.
+Filename/path stay visible; instruction review retains its existing changes control.
+Supported formats, scope and verification: [test ledger](w19-w21-testing.md).

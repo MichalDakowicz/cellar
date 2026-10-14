@@ -28,6 +28,14 @@ import type { Worktrees } from './worktrees.ts';
 import type { WorktreeRequest, WorktreeAction } from '@/lib/deskWorktrees';
 import type { Previews } from './previews.ts';
 import type { HostNotifications } from './notifications.ts';
+import type { Checkpoints } from './checkpoints.ts';
+import type { Automation } from './automation.ts';
+import type { ProviderAccounts } from './providerAccounts.ts';
+import { runUsage } from './usage.ts';
+import type { ScreenControl } from './screenControl.ts';
+import type { Phones } from './phones.ts';
+import type { Orchestrations } from './orchestrations.ts';
+import { readHostDocument } from './documents.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -43,6 +51,13 @@ export type ApiRequest = { method: string; path: string; body?: unknown; source?
 export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
+  phoneServerFile?: string;
+  orchestrations?: Orchestrations;
+  screenControl?: ScreenControl;
+  phones?: Phones;
+  providerAccounts?: ProviderAccounts;
+  automation?: Automation;
+  checkpoints?: Checkpoints;
   notifications?: HostNotifications;
   previews?: Previews;
   controls?: Controls;
@@ -133,10 +148,11 @@ async function trust(deps: HostDeps, body: unknown): Promise<string> {
 }
 
 async function ticket(deps: HostDeps, body: unknown, source: 'phone' | 'pc' = 'phone', address?: string): Promise<string> {
-  const raw = (body ?? {}) as { kind?: string; port?: unknown; app?: unknown };
+  const raw = (body ?? {}) as { kind?: string; port?: unknown; app?: unknown; accessId?: string };
   let wanted: Ticket;
   if (raw.kind === 'screen') {
-    wanted = { kind: 'screen' };
+    if (!deps.screenControl || !raw.accessId || !deps.screenControl.valid(raw.accessId)) throw new DeskError('Request screen consent on the PC first.', 403);
+    wanted = { kind: 'screen', accessId: raw.accessId };
   } else if (raw.kind === 'view' && typeof raw.port === 'number') {
     const listening = await readPorts(await hiddenPorts(deps));
     if (!listening.some((port) => port.port === raw.port)) throw new DeskError(`nothing is listening on ${raw.port}`, 404);
@@ -158,6 +174,90 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
   const route = `${req.method.toUpperCase()} /${parts.map((part, i) => (['runs', 'commands', 'requests', 'worktrees', 'worktree-requests', 'approval-answers', 'run-controls'].includes(parts[0]) && i === 1 ? ':id' : part)).join('/')}`;
   try {
     switch (route) {
+      case 'POST /phone-video-ticket': {
+        const serial = (req.body as { serial?: unknown })?.serial;
+        const owner = deps.account.current?.userId;
+        if (req.source !== 'pc' || !owner || typeof serial !== 'string' || !deps.phones || !(await deps.phones.list()).devices.some((d) => d.serial === serial && d.state === 'device')) throw new DeskError('Choose an authorized phone on the desktop.', 403);
+        const identity = deps.identity();
+        return ok({ url: `ws://127.0.0.1:${identity.port}/phone-video/${deps.tickets.issue({ kind: 'phone-video', owner, key: identity.key, serial })}` });
+      }
+      case 'POST /documents':
+        return ok(await readHostDocument(deps, req.body));
+      case 'GET /orchestrations':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for races, night and group runs.', 409);
+        return ok({ plans: await deps.orchestrations.list() });
+      case 'POST /orchestrations':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for run plans.', 409);
+        return ok(await deps.orchestrations.create(req.body));
+      case 'POST /orchestration-actions':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for run plans.', 409);
+        return ok(await deps.orchestrations.act(req.body, req.source ?? 'phone'));
+      case 'POST /screen-access':
+        if (!deps.screenControl) throw new DeskError('Screen control unavailable.', 409);
+        return ok(await deps.screenControl.open(req.source ?? 'phone'));
+      case 'POST /screen-input':
+        if (!deps.screenControl) throw new DeskError('Screen control unavailable.', 409);
+        return ok(await deps.screenControl.input(req.body));
+      case 'POST /screen-display':
+        if (!deps.screenControl) throw new DeskError('Screen control unavailable.', 409);
+        return ok(await deps.screenControl.select(req.body));
+      case 'POST /screen-release': {
+        const id = (req.body as { id?: unknown })?.id;
+        if (typeof id === 'string') deps.screenControl?.release(id);
+        return ok({ released: true });
+      }
+      case 'POST /screen-revoke':
+        if (req.source !== 'pc') throw new DeskError('Revoke screen trust on the PC.', 403);
+        deps.screenControl?.forget(); return ok({ revoked: true });
+      case 'GET /phones':
+        if (!deps.phones || req.source !== 'pc') throw new DeskError('Open phone tools on the desktop.', 403);
+        return ok(await deps.phones.list());
+      case 'POST /phone-frame':
+      case 'POST /phone-logs': {
+        const raw = req.body as { serial?: string; packageName?: string };
+        if (!deps.phones || req.source !== 'pc' || typeof raw?.serial !== 'string') throw new DeskError('Choose a phone on the desktop.', 403);
+        return ok(route === 'POST /phone-frame' ? await deps.phones.frame(raw.serial) : await deps.phones.logs(raw.serial, raw.packageName ?? ''));
+      }
+      case 'POST /phone-action':
+        if (!deps.phones) throw new DeskError('ADB unavailable.', 409);
+        return ok(await deps.phones.act(req.body, req.source ?? 'phone'));
+      case 'GET /provider-accounts':
+        if (!deps.providerAccounts) throw new DeskError('Provider accounts unavailable.', 409);
+        return ok({ accounts: deps.providerAccounts.list() });
+      case 'POST /provider-accounts':
+        if (!deps.providerAccounts || req.source !== 'pc') throw new DeskError('Enter credentials on this PC only.', 403);
+        return ok({ accounts: deps.providerAccounts.save(req.body) });
+      case 'POST /usage':
+      case 'POST /compact': {
+        const runId = (req.body as { runId?: unknown })?.runId;
+        if (typeof runId !== 'string') throw new DeskError('Choose a provider run.');
+        return ok(await runUsage(deps, runId, route === 'POST /compact'));
+      }
+      case 'GET /automation':
+        if (!deps.automation) throw new DeskError('Recipes unavailable.', 409);
+        return ok(deps.automation.read());
+      case 'POST /automation':
+        if (!deps.automation) throw new DeskError('Recipes unavailable.', 409);
+        return ok(await deps.automation.save(req.body));
+      case 'POST /rules-review':
+      case 'POST /rules-apply': {
+        const raw = req.body as { projectId?: string; token?: string };
+        if (!deps.automation || typeof raw?.projectId !== 'string') throw new DeskError('Select a project.');
+        if (route === 'POST /rules-review') { const { cwd: _cwd, ...review } = await deps.automation.review(raw.projectId); return ok(review); }
+        if (typeof raw.token !== 'string') throw new DeskError('Review the rules diff first.');
+        return ok(await deps.automation.apply(raw.projectId, raw.token));
+      }
+      case 'POST /checkpoints': {
+        const raw = req.body as { runId?: string; checkpointId?: string };
+        if (!deps.checkpoints || typeof raw?.runId !== 'string') throw new DeskError('Checkpoints unavailable.', 409);
+        return ok(raw.checkpointId ? await deps.checkpoints.review(raw.runId, raw.checkpointId) : { checkpoints: await deps.checkpoints.list(raw.runId) });
+      }
+      case 'POST /checkpoint-rollback':
+        if (!deps.checkpoints) throw new DeskError('Checkpoints unavailable.', 409);
+        return ok({ receipt: await deps.checkpoints.rollback(req.body) });
+      case 'POST /checkpoint-receipt':
+        if (!deps.checkpoints) throw new DeskError('Checkpoints unavailable.', 409);
+        return ok({ receipt: deps.checkpoints.receipt(req.body) });
       case 'GET /notice-deliveries':
         if (req.source !== 'pc' || !deps.notifications) throw new DeskError('Desktop notifications require local renderer.', 403);
         return ok({ deliveries: await deps.notifications.deliveries(), error: deps.notifications.error });

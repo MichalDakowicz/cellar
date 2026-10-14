@@ -1,11 +1,10 @@
 import { SAMPLE_USAGE, SAMPLE_USAGE_MORE } from "@/lib/deskSample";
+import { ProviderAccounts } from './ProviderAccounts';
 
 export function UsageSettings({ sample }: { sample: boolean }) {
   if (!sample)
     return (
-      <p className="muted">
-        Provider context, usage limits and accounts unavailable yet.
-      </p>
+      <div className="stack"><p className="muted">Open a connected run for provider-reported windows, reset times and context. Context at 80% offers /compact. Missing limits remain unavailable.</p><ProviderAccounts /></div>
     );
   return (
     <div className="stack">

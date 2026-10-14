@@ -10,6 +10,7 @@ import { KeyResults } from './KeyResults';
 import { ComposerColors } from './ComposerColors';
 import { useDictation } from './useDictation';
 import { insertVoice } from '@/lib/deskVoice';
+import { AccountChoice } from './AccountChoice';
 
 export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
   const {
@@ -99,6 +100,7 @@ export function NewTask({ cellar, host }: { cellar: Cellar; host: Host }) {
             </button>
           ))}
       </div>
+      <AccountChoice key={host.key} agent={agent} disabled={task.pending || task.busy} />
       <span className="overline">permissions</span>
       <div className="chips">
         {DESK_MODES.map((row) => (

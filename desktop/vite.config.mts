@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "renderer-dist",
       sourcemap: true,
-      rollupOptions: { input: "index.html" },
+      rollupOptions: { input: ["index.html", "capture.html"] },
     },
   };
 });

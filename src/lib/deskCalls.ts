@@ -9,6 +9,7 @@ import { readApprovalReceipt, type ApprovalAnswer, type ApprovalReceipt } from '
 import { readProjectWorktrees, type WorktreeAction, type WorktreeRequest } from '@/lib/deskWorktrees';
 import { readWorktreeReceipt, readWorktreeReview } from './deskWorktreeReply';
 import { readControlReceipt, readRunQueue, type RunControl, type ControlReceipt } from '@/lib/deskDispatch';
+import { readDocument } from './deskDocuments';
 
 
 export type DeskTransport = (method: 'GET' | 'POST', path: string, body?: unknown) => Promise<unknown>;
@@ -40,10 +41,38 @@ export function refusal(status: number, body: unknown): Error {
 }
 
 
-export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen' } | { kind: 'apk'; app: string };
+export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen'; accessId?: string } | { kind: 'apk'; app: string };
 
 export function deskCalls(send: DeskTransport, local = false) {
   return {
+    phoneVideoTicket: async (serial: string) => ((await send('POST', '/phone-video-ticket', { serial })) as { url: string }).url,
+    document: async (request: import('./deskDocuments').DocumentRequest) => {
+      return readDocument(await send('POST', '/documents', request));
+    },
+    orchestrations: async () => ((await send('GET', '/orchestrations')) as { plans: import('./deskOrchestration').OrchestrationView[] }).plans,
+    orchestrate: async (request: import('./deskOrchestration').OrchestrationRequest) => await send('POST', '/orchestrations', request) as { id: string },
+    orchestrationAction: async (request: import('./deskOrchestration').OrchestrationAction) => await send('POST', '/orchestration-actions', request) as { state: string; commandId: string; error?: string },
+    screenAccess: async () => await send('POST', '/screen-access') as import('./deskRemote').ScreenAccess,
+    screenDisplay: async (id: string, displayId: string) => await send('POST', '/screen-display', { id, displayId }) as import('./deskRemote').ScreenAccess,
+    screenInput: async (id: string, sequence: number, input: import('./deskRemote').ScreenInput) => await send('POST', '/screen-input', { id, sequence, input }),
+    screenRelease: async (id: string) => await send('POST', '/screen-release', { id }),
+    screenRevoke: async () => await send('POST', '/screen-revoke'),
+    phones: async () => await send('GET', '/phones') as import('./deskRemote').PhoneState,
+    phoneAction: async (action: import('./deskRemote').PhoneAction) => await send('POST', '/phone-action', action) as { applied: boolean; output?: string },
+    phoneFrame: async (serial: string) => await send('POST', '/phone-frame', { serial }) as { url: string; width: number; height: number; taps: { x: number; y: number; at: number }[] },
+    phoneLogs: async (serial: string, packageName: string) => await send('POST', '/phone-logs', { serial, packageName }) as { text: string },
+    usage: async (runId: string) => (await send('POST', '/usage', { runId })) as import('./deskUsage').DeskUsage,
+    compact: async (runId: string) => (await send('POST', '/compact', { runId })) as { requested: boolean },
+    providerAccounts: async () => ((await send('GET', '/provider-accounts')) as { accounts: { id: string; agent: 'codex' | 'claude'; label: string; policy: 'ask me'; kind: 'api' }[] }).accounts,
+    saveProviderAccount: async (request: { agent: 'codex' | 'claude'; label: string; key: string }) => ((await send('POST', '/provider-accounts', request)) as { accounts: { id: string; agent: 'codex' | 'claude'; label: string; policy: 'ask me'; kind: 'api' }[] }).accounts,
+    automation: async () => (await send('GET', '/automation')) as import('./deskRecipes').DeskAutomation,
+    saveAutomation: async (config: import('./deskRecipes').DeskAutomation) => (await send('POST', '/automation', config)) as import('./deskRecipes').DeskAutomation,
+    rulesReview: async (projectId: string) => (await send('POST', '/rules-review', { projectId })) as { projectId: string; token: string; files: { name: string; before: string; after: string; diff: string }[] },
+    rulesApply: async (projectId: string, token: string) => (await send('POST', '/rules-apply', { projectId, token })) as { applied: boolean },
+    checkpoints: async (runId: string) => ((await send('POST', '/checkpoints', { runId })) as { checkpoints: import('./deskCheckpoints').DeskCheckpoint[] }).checkpoints,
+    checkpointReview: async (runId: string, checkpointId: string) => (await send('POST', '/checkpoints', { runId, checkpointId })) as import('./deskCheckpoints').CheckpointReview,
+    checkpointRollback: async (request: { runId: string; checkpointId: string; token: string; commandId: string }) => ((await send('POST', '/checkpoint-rollback', request)) as { receipt: import('./deskCheckpoints').CheckpointReceipt }).receipt,
+    checkpointReceipt: async (request: import('./deskCheckpoints').CheckpointRequest) => ((await send('POST', '/checkpoint-receipt', request)) as { receipt: import('./deskCheckpoints').CheckpointReceipt | null }).receipt,
     previews: async () => readManagedPreviews(((await send('GET', '/previews')) as { previews: unknown }).previews),
     previewAction: async (action: PreviewAction) => readPreviewReceipt(((await send('POST', '/preview-actions', action)) as { receipt: unknown }).receipt, action.commandId),
     previewReceipt: async (commandId: string) => { const raw = ((await send('POST', '/preview-receipt', { commandId })) as { receipt: unknown }).receipt; return raw === null ? null : readPreviewReceipt(raw, commandId); },

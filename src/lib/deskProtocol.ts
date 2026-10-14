@@ -34,6 +34,8 @@ export function agentLabel(agent: DeskAgent | 'job'): string {
 export const PROMPT_MAX = 8000;
 
 export type DeskStart = {
+  afterCommands?: string[];
+  accountId?: string;
   commandId?: string;
   projectId?: string;
   where?: 'main' | 'worktree';
@@ -59,6 +61,8 @@ type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
 export function parseDeskStart(raw: unknown): Parsed<DeskStart> {
   if (!raw || typeof raw !== 'object') return { ok: false, error: 'nothing to start' };
   const body = raw as Record<string, unknown>;
+  if (body.afterCommands !== undefined && (!Array.isArray(body.afterCommands) || body.afterCommands.length > 8 || body.afterCommands.some((c) => typeof c !== 'string' || !/^[\w:-]{1,80}$/.test(c)))) return { ok: false, error: 'invalid after commands' };
+  if (body.accountId !== undefined && (typeof body.accountId !== 'string' || !UUID.test(body.accountId))) return { ok: false, error: 'invalid agent account' };
 
   const agent = body.agent ?? 'claude';
   if (!isDeskAgent(agent)) return { ok: false, error: `unknown agent ${String(agent)}` };
@@ -81,7 +85,7 @@ export function parseDeskStart(raw: unknown): Parsed<DeskStart> {
   if (!Array.isArray(body.entryIds) || body.entryIds.length > 20 || body.entryIds.some((id) => typeof id !== 'string' || !UUID.test(id)) || new Set(body.entryIds).size !== body.entryIds.length) {
     return { ok: false, error: 'attach up to 20 distinct entry ids' };
   }
-  return { ok: true, value: { agent, prompt, cwd, name, entryId: body.entryIds[0] ?? null, commandId: body.commandId,
+  return { ok: true, value: { agent, prompt, cwd, name, ...(body.afterCommands ? { afterCommands: body.afterCommands as string[] } : {}), ...(body.accountId ? { accountId: body.accountId as string } : {}), entryId: body.entryIds[0] ?? null, commandId: body.commandId,
     projectId: body.projectId, where: body.where, mode: body.mode as DeskStart['mode'], entryIds: body.entryIds,
     ...(typeof body.worktreeId === 'string' ? { worktreeId: body.worktreeId } : {}) } };
 }

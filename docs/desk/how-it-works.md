@@ -1,13 +1,14 @@
 # Desk — how it works
 
-Reviewed 2026-10-14 through W14. The current canvas remains the visual baseline. Pass 2
+Reviewed 2026-10-14 through W18 implementation; device acceptance pending for W15–W18.
+The current canvas remains the visual baseline. Pass 2
 adds behavior through the existing view models, host API and transports.
 
 ## Current flows
 
 | Flow | Works now | Sample or missing |
 | --- | --- | --- |
-| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W21) |
+| Reach the PC | QR pairing; signed LAN HTTP; desktop IPC; one-use ticketed websocket with synchronized resume; account-owned mailbox and heartbeat snapshots | SSH deferred (W22) |
 | Desk totals | W1: shared global blocked-entry and host waiting-run counts; W8 waiting cards identify actual runtime approvals | Legacy host `waiting` remains coarse: an idle interactive session can need the PC |
 | Send a task | W4/W5: full task choices, durable receipts, attachment reservations, duplicate-safe recovery and managed worktrees from local main; W8 supervised Claude/Codex runtimes | Legacy sessions keep their original PC controls; Antigravity retains its existing mode |
 | Manage worktrees | W5: Git-confirmed catalogue and reviewed Keep/Merge/Remove; W12 runs previews/checks/deploy in the owned worktree | Merge requires clean checked-out main and fast-forward history |
@@ -16,16 +17,21 @@ adds behavior through the existing view models, host API and transports.
 | Commands and keys | W2 jobs/catalogue; W11 shared file/skill/command search, line previews, project/entry references and hex chips | Host sources require signed LAN or desktop IPC; browser retains mailbox limits. New-task files require a selected existing run |
 | Preview, screen, builds | W12 managed worktree server, allocated port, real check/deploy jobs and durable receipts; ticketed LAN/tailnet addressing; screen/APK discovery | Actual tailnet traversal unverified on this PC; remote input remains W19 |
 | Capture and boards | File thoughts, pictures, project routing; board selection and desktop shift-enter open task composition; W4 confirms starts/claims | Race, night shift and group execution remain samples (W20) |
-| Settings | Durable defaults; W13 voice drafts; W14 real ping kinds, quiet hours, push registration and receipts | Checkpoints, recipes/rules, usage/accounts and share/crash automation remain W15–W18 |
+| Settings and run tools | W15 checkpoints, W16 recipes/scoped rules, W17 usage/compact/encrypted API accounts | Named OAuth profiles and phone acceptance pending |
+| Android capture | W18 text/link shares, owner-scoped drafts and reviewed debug crash evidence | Physical share/crash tests pending; binary shares unsupported |
 
 Sample mode is off by default. Sample cards remain previews; they never contribute to
 real header or navigation totals. Sample actions do not confirm host execution.
 
+See [w15-w18-testing.md](w15-w18-testing.md) for exact behavior, provider constraints and
+remaining checks. Desktop run tools are available at small window widths. PC-local recipe
+configuration/rule sync require direct PC access; browser retains its mailbox boundary.
+
 ## Agreed wiring order
 
 W1 → W2 → W3 → W4 → W5 → W6 → W7 → W8 → W9 → W10 rebuild → W11 keys search
-→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W20.
-W21 stays deferred. Counts establish trustworthy status first; project commands are
+→ W12 previews/deploy → W13 voice → W14 notifications, then W15–W21.
+W22 stays deferred. Counts establish trustworthy status first; project commands are
 the next concrete phone-to-PC action. Structured answers precede task receipts and
 worktrees. Durable events precede streaming, approvals and dispatch controls.
 
@@ -195,7 +201,25 @@ and checked-out main, no active/unknown main run, and fast-forward history. Remo
 requires a clean unlocked tree with no unmerged commits; Git removes only the
 folder/registration, retaining branch and commits. Review tokens bind source and
 target commits, paths, local-change checks and run states; confirmation rechecks.
-No force removal, automatic conflict resolution or implicit checkout/stash.
+Manual actions never force removal or resolve conflicts automatically.
+
+Finished tasks now archive edits and remove their managed checkout automatically
+after the provider closes; an idle chat closes after 30 minutes so follow-up turns
+remain available. The host sweeps at startup, sign-in, run/job changes and every
+30 seconds. Live sessions, queued messages, active/unknown runs, Git locks,
+explicit Keep and protected ignored local files retain the checkout. Git branches
+remain even when unmerged. Dirty trees use a labelled stash that preserves the
+index, working files and nonignored untracked files, pinned under
+`refs/cellar/archives/<worktree-id>` before non-force Git removal. Recovery steps
+are in `desktop/README.md`. Workspace `.ignore` and `.gitignore` exclude managed
+checkout duplicates from file discovery.
+
+Verified 2026-10-14: 101 desktop tests and 917 app tests, lint/types, packaged
+Windows host and signed live API pass. Startup removed eight completed QA
+worktrees, with seven pinned stashes preserving staged/working/untracked edits;
+three unknown runs remain protected and excluded from workspace search. A Git
+removal left one empty directory after a Windows refusal; only that verified empty
+shell was removed separately. Existing desktop profile/pairing was preserved.
 
 Lifecycle intent is persisted before effects. Confirmed/failed/unknown/pending
 states stay distinct; restart during an action becomes unknown. Phone retains
@@ -487,7 +511,7 @@ unverified live. NSIS was built; the existing unpacked reachable payload was
 refreshed and launched without running the installer. No release or web publication.
 
 Historical live evidence and artifact ledgers remain in Git history. W11 keys
-search follows below; SSH remains deferred W21.
+search follows below; SSH remains deferred W22.
 
 ## W11 — scoped keys search
 
@@ -633,3 +657,90 @@ prebuilds install the native service through `plugins/withCellarPush.js`.
 The user explicitly approved web publication after the build checks. Firebase
 Hosting deployment succeeded at <https://cellar-stash.web.app>. No release tag,
 GitHub release, production project `$deploy`, or merge was performed.
+
+## W15–W18 verification
+
+W15 restores reviewed file snapshots and provider context behind one maintenance guard.
+Durable request fingerprints and receipts preserve original commands across timeouts and
+controller/host restart. Physical phone receipt recovery and live queued-during-restore
+wakeup pass. Restored conversation/file marker both return to ALPHA; retained transcript
+history is explicitly labelled. Real Codex forks at saved lastTurnId; Claude uses an
+isolated real SDK transcript fixture, without live Claude.
+
+W16 fills per-kind task defaults, preserves explicit choices and orders rules from
+everywhere through shelf to project. Phone save and reviewed instruction writes pass;
+original recipe/file settings restored. Instruction reviews name AGENTS.md/CLAUDE.md,
+render proposed Markdown first in bounded viewers, and offer source plus focused changes.
+Three normal turns produce three successful after-command jobs; restore maintenance
+produces none. Desktop completion notices float without pushing chat out of view.
+
+W17 exposes real Codex context/limit windows and labelled Claude estimates, guarded
+compaction, and owner-scoped encrypted named API accounts. Physical usage display passes;
+actual named API credentials, vault restart, live Claude and 80% compaction remain untested.
+Named subscription OAuth management is unsupported; no silent account switching.
+
+W18 receives Android text/link shares and stores full owner-scoped drafts. Frozen
+submissions use deterministic IDs for committed-response-loss recovery. Physical
+cold/warm SEND, restart/retry, reviewed JS/native crash filing and release capture guard
+pass. Final signed 1.16.0 release installed and launched with original pairing/data.
+Binary shares remain unsupported; evidence capture remains Cellar-debug-only.
+
+917 app tests, 96 desktop tests, types/lint, Windows package and Android release pass.
+No schema migration or MCP contract change. Rendered-review web update published to
+https://cellar-stash.web.app after explicit chat authorization. Live index references
+the verified bundle and its asset returns HTTP 200. Earlier automatic review approval
+boundary is resolved. Full evidence
+and remaining checks: [w15-w18-testing.md](w15-w18-testing.md).
+
+General rendered document/media previews are now covered by W21 below; SSH is deferred W22.
+
+## W19 screens both ways
+
+PC control requests consent on the PC, optionally trusts the current account and
+pairing key, and expires/revokes video and input together. Phone screen route,
+voice drafts and input modes use these leases; navigation/background releases
+them. A dedicated hidden renderer captures the primary display for WebRTC video;
+an isolated source-only preload keeps the host bridge out of capture pages.
+Windows input uses a persistent hidden worker rather than recompiling per action.
+
+Desktop Phone now uses embedded scrcpy H.264 video, WebCodecs and bounded queues.
+This follows the user's scrcpy reference without adding an external launcher.
+ADB discovery/driver selection, tap rings, release APK install, links, logcat and
+safe developer toggles are wired to real devices. Account device-testing permission,
+driver choice, live owned run, private token and sequence all gate agent actions.
+No schema changes. Tests, device checks and latency boundaries:
+[W19–W21 ledger](w19-w21-testing.md).
+
+## W20 race, night and group plans
+
+Owner-scoped persisted plans save member command IDs before dispatch. Race members
+start from one captured main commit, even if main advances during dispatch. Group
+members receive their own scoped project rules. Starting effects and action receipts
+become unknown after a host crash; the original receipt can reconcile a member,
+but unknown work never dispatches again automatically.
+
+The host night timer dispatches sequentially within a bounded window, with run cap,
+reported usage reserve, ask-first permissions and no recipe after-commands. Window
+end stops active work and skips undispatched members. Morning digest is available
+in the existing night route on both clients. This is host scheduling; keeping the PC
+awake is required. Reserve cannot infer provider limits that are unavailable.
+
+Comparison uses durable assistant text, owned diffs, real check jobs, usage and
+previews. Pick/keep/toss preserve worktree recovery boundaries. Live two-Codex race,
+pick, cleanup and fixture details: [W19–W21 ledger](w19-w21-testing.md).
+
+## W21 documents and media
+
+One bounded document protocol serves owned Git-visible files through the host;
+desktop and phone viewers share format classification and exact source semantics.
+Chat/tool file references, keys previews and attached local entry documents use
+these viewers. Existing instruction review keeps its rendered/source/changes flow.
+Markdown and portable AsciiDoc render first; JSON offers formatted/exact modes.
+Supported raster images, audio and video use bounded filename-visible previews.
+
+The reader rechecks owner/scope and file identity after bounded reads, rejects
+traversal, ignored/linked files, invalid UTF-8 and incompatible media signatures.
+Text limit is 256 KiB; media limit is 8 MiB. HTML/SVG are inert source, unsupported
+formats are explicit, and AsciiDoc directives never execute or read includes.
+Formats, device verification and remaining codec boundaries:
+[W19–W21 ledger](w19-w21-testing.md).

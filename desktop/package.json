@@ -65,6 +65,10 @@
       {
         "from": "../assets/images/icon.png",
         "to": "icon.png"
+      },
+      {
+        "from": "vendor",
+        "to": "scrcpy"
       }
     ],
     "win": {
