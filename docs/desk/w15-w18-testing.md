@@ -15,7 +15,8 @@ against the packaged desktop. Evidence: ignored `artifacts/qa/w15-w18/`.
 - [x] Android release compilation, including local capture module
 - [x] Real signed-host Codex checkpoint and usage integration
 - [x] Real Claude SDK transcript fork with isolated fixtures, without starting Claude
-- [x] Desktop computer use: retained sign-in, actual transcript and settings
+- [x] Desktop computer use: retained sign-in, actual transcript/settings, small-window usage
+  and checkpoint diff/confirmation/cancel
 - [x] Browser preview: recipes/rules rendered; sample actions disabled
 - [ ] Phone install, launch and native acceptance
 - [ ] Live Claude, named API credentials and real long-context compaction
@@ -37,6 +38,7 @@ locally, not published. Native behavior is not verified by desktop/browser check
 Live run `eb4a0875`: answers `W15_ALPHA`, `W15_BETA`, then `W15_ALPHA` after rollback.
 Reviewed restore changed `qa-marker.txt` from `file-beta` to `file-alpha`; duplicate request
 returned original applied receipt. Real context and two limit windows were reported.
+Signed receipt read after replacing/restarting the packaged host still returned applied.
 A separate direct adapter check independently produced the same marker sequence.
 
 Codex 0.162.1 uses `thread/fork` with saved `lastTurnId` because installed protocol removed
