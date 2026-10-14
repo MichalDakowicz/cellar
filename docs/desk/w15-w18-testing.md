@@ -186,4 +186,7 @@ removed. No live API keys, account switch/sign-out, live Claude or 80% compact t
 General Markdown/AsciiDoc/document/media previews remain future W21, before SSH W22.
 The earlier web deployment remains live. Publishing this rendered-review update was rejected
 by automatic approval review because external destination/payload need explicit user approval;
-Cellar question `6f586c5f` records that approval request.
+Cellar question `6f586c5f` records user approval to publish. Automatic review rejected a
+second attempt because it requires authorization in a trusted chat message; the Cellar
+answer was not accepted. Updated controller export passes and is ready in `dist/`, but
+the rendered-review update is not published. No alternative publishing path attempted.
