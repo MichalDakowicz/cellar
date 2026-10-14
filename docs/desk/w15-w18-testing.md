@@ -184,9 +184,9 @@ own-process ReactNativeJS/AndroidRuntime errors. Temporary pairing backup and US
 removed. No live API keys, account switch/sign-out, live Claude or 80% compact test.
 
 General Markdown/AsciiDoc/document/media previews remain future W21, before SSH W22.
-The earlier web deployment remains live. Publishing this rendered-review update was rejected
-by automatic approval review because external destination/payload need explicit user approval;
-Cellar question `6f586c5f` records user approval to publish. Automatic review rejected a
-second attempt because it requires authorization in a trusted chat message; the Cellar
-answer was not accepted. Updated controller export passes and is ready in `dist/`, but
-the rendered-review update is not published. No alternative publishing path attempted.
+Rendered-review update published to https://cellar-stash.web.app on 2026-10-14 after the
+user explicitly authorized publishing in chat. Earlier automatic review rejected two
+attempts, including Cellar approval `6f586c5f`; direct chat authorization resolved that
+boundary. Standard `npm run deploy:web` completed successfully. Live index references
+the verified `entry-4182d34ded3e63f511a27561292a68a8.js` bundle, which returns HTTP 200.
+Evidence: `phone/web-rendered-rules.log`. No alternative publishing path used.

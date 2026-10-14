@@ -668,10 +668,10 @@ pass. Final signed 1.16.0 release installed and launched with original pairing/d
 Binary shares remain unsupported; evidence capture remains Cellar-debug-only.
 
 917 app tests, 96 desktop tests, types/lint, Windows package and Android release pass.
-No schema migration or MCP contract change. Earlier web build remains deployed; latest
-rendered-review publication remains blocked by automatic review, which rejected even
-the explicit Cellar approval and requires a trusted chat message authorizing this exact
-build/destination. Updated controller export passes locally. Full evidence
+No schema migration or MCP contract change. Rendered-review web update published to
+https://cellar-stash.web.app after explicit chat authorization. Live index references
+the verified bundle and its asset returns HTTP 200. Earlier automatic review approval
+boundary is resolved. Full evidence
 and remaining checks: [w15-w18-testing.md](w15-w18-testing.md).
 
 General rendered document/media previews are future W21; SSH is now deferred W22.
