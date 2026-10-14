@@ -2,13 +2,13 @@
 
 Updated 2026-10-14. Branch: `feat/desk-w15-w18`.
 
-Implementation ready for review; phone acceptance pending by explicit user instruction.
+Implementation ready for review; phone testing authorized and performed later on 2026-10-14.
 Questions asked only through Cellar. Computer use initialized at the beginning, then used
 against the packaged desktop. Evidence: ignored `artifacts/qa/w15-w18/`.
 
 ## Available checks
 
-- [x] Root: 99 Jest suites / 909 tests; TypeScript and lint
+- [x] Root: 101 Jest suites / 913 tests; TypeScript and lint
 - [x] Desktop: 96 tests; host/renderer TypeScript, lint and production build
 - [x] Windows installer and unpacked application
 - [x] Controller export with source maps: 3,971 modules, zero desktop-host imports
@@ -18,11 +18,12 @@ against the packaged desktop. Evidence: ignored `artifacts/qa/w15-w18/`.
 - [x] Desktop computer use: retained sign-in, actual transcript/settings, small-window usage
   and checkpoint diff/confirmation/cancel
 - [x] Browser preview: recipes/rules rendered; sample actions disabled
-- [ ] Phone install, launch and native acceptance
+- [x] Phone release install/launch, shares, usage and controlled debug crash checks
 - [ ] Live Claude, named API credentials and real long-context compaction
 
-No MCP contract or database schema change; no migration required. Website exported
-locally, not published. Native behavior is not verified by desktop/browser checks.
+No MCP contract or database schema change; no migration required. After successful release
+installation, controller web deployed to https://cellar-stash.web.app under repository standing
+authorization. Native checks below supplement desktop/browser checks.
 
 ## W15: checkpoints
 
@@ -33,7 +34,8 @@ locally, not published. Native behavior is not verified by desktop/browser check
 - [x] Durable receipts, request fingerprints and pending client command IDs
 - [x] Duplicate/lost-reply/restart, owner isolation and directory-swap tests
 - [x] Desktop/controller list, diff and confirmation UI; retained history labelled clearly
-- [ ] Phone rollback, background/restart and dropped-response acceptance
+- [x] Phone reviewed rollback: file and remembered marker restored; pending request survives restart
+- [ ] Final phone receipt-button recovery after reconnect (intermittent transport; UI work interrupted)
 
 Live run `eb4a0875`: answers `W15_ALPHA`, `W15_BETA`, then `W15_ALPHA` after rollback.
 Reviewed restore changed `qa-marker.txt` from `file-beta` to `file-alpha`; duplicate request
@@ -56,7 +58,8 @@ links are refused; diffs above 100 KB cannot be confirmed. Excluded secrets rema
 - [x] Reviewed AGENTS.md/CLAUDE.md writes; stale tokens and account changes refused
 - [x] Unmanaged instructions preserved; malformed blocks/links/redirected paths refused
 - [x] Successful-turn host wiring starts existing project command jobs in run checkout
-- [ ] Phone editor/save/reconnect and live recipe-after-job acceptance
+- [x] Phone editor agent/mode save; persisted PC configuration verified; original settings restored
+- [ ] Live recipe-after-job and physical phone rule-write acceptance
 
 Cellar question `66ace317`: user chose “your call”. Existing thoughts carry scope, preserving
 seven capture kinds. Rules use thought text. Missing command IDs report follow-up failure;
@@ -86,8 +89,9 @@ vault tests use fixtures. Claude usage endpoint is experimental; absent limits s
 - [x] Bounded own-process log/stack, optional screenshot/thumbnail, repeat signatures
 - [x] Local queue; full evidence review before cloud filing; later retains local report
 - [x] Deterministic glitch/note IDs, redaction, owner guard and lost-response retry tests
-- [ ] Real share-sheet entry and debug crash/relaunch/repeat acceptance
-- [ ] Verify release build never offers debug capture on device
+- [x] Android share target registered; cold/warm SEND, edited draft restart, explicit kind/project filing
+- [x] Controlled JS/native crash, relaunch, full evidence review, repeat count and glitch filing
+- [x] Release native crash creates no debug report; final release restored and launched
 
 Cellar question `d518f215` selected Cellar debug builds only. Android text/links supported;
 binary attachments and SEND_MULTIPLE are outside this pass. Screenshots are optional when
@@ -113,3 +117,34 @@ activity capture fails. Reports stay local until explicitly filed into the Cella
    screenshot, choose later, then file. Repeat and check count/idempotency.
 9. Switch/sign out; other account must not see old drafts/reports. Release build must never
    collect debug reports. Ask remaining questions through Cellar only.
+
+## Physical-phone results, 2026-10-14
+
+Nothing A059P, Android 16. Installed 1.16.0 over 1.15.0 without clearing data. Final release
+installed and launched again after debug testing (PID 21823 at final verification).
+
+- Cold and warm Android SEND delivered text/link drafts. Edited text survived force-stop.
+  Found kind/project reset; fixed durable complete drafts and migrated prior text queues.
+- Injected one lost response after a synthetic share committed. Restart retained submission
+  `00b22931`; confirming original filing left exactly one entry. Submitted words/choices freeze
+  until confirmed, and notes use deterministic IDs. Synthetic share `1db894de` also filed
+  with explicit glitch kind and Cellar project after full-choice restart verification.
+- Phone run `27a02762` answered ALPHA → BETA → ALPHA after reviewed rollback, and
+  `phone-marker.txt` returned to `phone-alpha`. Applied receipt `0f6f6abf` survived controller
+  restart. The phone timed out while restore completed and kept its original pending command.
+  A temporary proxy did not record an injected rollback drop; do not call this proxy fault test
+  verified. Actual timeout/pending persistence and host receipt were verified.
+- Found restore-boundary queue wakeup gap; final host wakes queued work only after the
+  recovery checkpoint and applied receipt are saved. Desktop tests/types/lint/build/package pass.
+  Final live wakeup/after-command regression remains pending after UI interruption.
+- Real context and 5-hour/weekly values rendered on phone; unavailable provider sessions
+  remained explicitly unavailable. No real API credentials or 80% chat created for QA.
+- JS fatal captured stack/log/screenshot; identical repeat produced count 2 and survived
+  restart. Native `am crash` captured CrashedByAdbException with screenshot. Reviewed reports
+  filed as glitches `d70f3a8d` (JS) and `ce1f3f72` (native). Release crash left crash queue empty.
+- Recipe glitch agent=codex/mode=ask persisted from phone; original recipe restored afterward.
+  Original pairing restored; temporary USB forwards removed. No account switch/sign-out test.
+
+Computer use was stopped with physical Escape during final desktop relaunch. No further app
+input was issued. Final desktop package is built but was not relaunched/verified after that
+interruption. Remaining checks stay unchecked above. Phone test artifacts are under `phone/`.

@@ -79,10 +79,13 @@ export class Checkpoints {
       const receipt: CheckpointReceipt = { commandId: raw.commandId!, checkpointId: raw.checkpointId, state: 'unknown' };
       this.receipts[key] = receipt; this.requests[key] = fingerprint; this.save();
       try {
-        await p.live.session.restore!(p.row.point, () => restoreSnapshot(p.cwd, p.row.ref, p.current.ref));
-        p.unchanged(); receipt.state = 'applied';
-        await this.capture(owner, raw.runId, p.cwd, p.live.session.point!(), 'rollback restored');
-      } catch (error) { receipt.error = `Rollback incomplete; recovery ref ${p.current.ref}: ${String(error)}`; }
+        await p.live.session.restore!(p.row.point, async () => {
+          await restoreSnapshot(p.cwd, p.row.ref, p.current.ref);
+          p.unchanged();
+          await this.capture(owner, raw.runId!, p.cwd, p.live.session.point!(), 'rollback restored');
+          receipt.state = 'applied'; this.save();
+        });
+      } catch (error) { receipt.state = 'unknown'; receipt.error = `Rollback incomplete; recovery ref ${p.current.ref}: ${String(error)}`; }
       this.save(); return receipt;
     } finally { this.locked.delete(raw.runId); }
   }

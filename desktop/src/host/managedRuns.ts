@@ -65,7 +65,7 @@ export class ManagedRuns {
         await capture; if (maintenanceFailed || exclusive || boundaryBusy || busy()) throw new Error('Wait for idle run.'); exclusive = true;
         try { await rollback(point); await files(); log({ type: 'cellar.rollback', id: `${Date.now()}`, turns: point.turns, text: `Restored files and provider conversation to turn ${point.turns}. Earlier displayed messages after that turn are retained history, not active provider context.` }); }
         catch (error) { maintenanceFailed = true; throw error; }
-        finally { exclusive = false; }
+        finally { exclusive = false; if (!maintenanceFailed) queueMicrotask(() => this.onIdle(owner, id)); }
       };
       if (this.closing) { await session.close(); throw new DeskError('PC shut down during provider initialization; inspect the original run.', 409); }
       if (!ended) { this.sessions.set(id, { owner, session, start }); if (pendingCompletion !== undefined) changed(pendingCompletion); }

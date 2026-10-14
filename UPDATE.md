@@ -11,6 +11,8 @@
 
 ### Fixed
 
+- Shared drafts keep chosen kind/project after restart and retry filing without duplicates
+- Desk: queued messages resume after reviewed checkpoint restores
 - Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
 
 ## 1.15.0 — Unreleased
