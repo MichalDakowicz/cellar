@@ -139,6 +139,20 @@ all relevant runs finish. Remove refuses dirty, locked, active/unknown or unmerg
 work; it keeps the Git branch and commits. A changed review requires another review.
 Lost replies recover one persisted command receipt, never optimistic success.
 
+Finished task worktrees are cleaned up automatically once their provider session
+closes (idle sessions close after 30 minutes), with no active/unknown runs or queued
+messages. The host also checks existing finished tasks on startup and every 30
+seconds. Explicit Keep opts out. Branches and commits remain; staged, unstaged and
+nonignored untracked edits are saved in a labelled Git stash pinned at
+`refs/cellar/archives/<worktree-id>` before removal. Generated dependencies/builds
+can be removed; other ignored files such as `.env` retain the folder for PC review.
+Only Cellar-owned, unlocked worktrees with confirmed completion are eligible.
+
+To recover a removed task, run `git worktree add <folder> <task-branch>` from the
+project, then `git -C <folder> stash apply --index refs/cellar/archives/<worktree-id>`
+if a snapshot exists. Snapshots also appear in `git stash list` as “Cellar finished
+task”. Recovery never changes the project's main checkout.
+
 Windows sandbox agents receive exact managed-folder Git trust in their process
 environment; global Git configuration and sandbox permissions stay unchanged.
 Verified phone flows and the machine's standalone Codex CLI limitation are recorded

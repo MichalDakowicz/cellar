@@ -16,6 +16,7 @@
 - Desktop: completion notifications stay above the page without pushing chat off-screen
 - Rules review names instruction files, renders Markdown first, and offers source and focused changes
 - Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
+- Desktop: archive finished task edits and remove unused worktree folders automatically
 
 ## 1.15.0 — Unreleased
 

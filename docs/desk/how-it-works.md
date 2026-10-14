@@ -201,7 +201,25 @@ and checked-out main, no active/unknown main run, and fast-forward history. Remo
 requires a clean unlocked tree with no unmerged commits; Git removes only the
 folder/registration, retaining branch and commits. Review tokens bind source and
 target commits, paths, local-change checks and run states; confirmation rechecks.
-No force removal, automatic conflict resolution or implicit checkout/stash.
+Manual actions never force removal or resolve conflicts automatically.
+
+Finished tasks now archive edits and remove their managed checkout automatically
+after the provider closes; an idle chat closes after 30 minutes so follow-up turns
+remain available. The host sweeps at startup, sign-in, run/job changes and every
+30 seconds. Live sessions, queued messages, active/unknown runs, Git locks,
+explicit Keep and protected ignored local files retain the checkout. Git branches
+remain even when unmerged. Dirty trees use a labelled stash that preserves the
+index, working files and nonignored untracked files, pinned under
+`refs/cellar/archives/<worktree-id>` before non-force Git removal. Recovery steps
+are in `desktop/README.md`. Workspace `.ignore` and `.gitignore` exclude managed
+checkout duplicates from file discovery.
+
+Verified 2026-10-14: 101 desktop tests and 917 app tests, lint/types, packaged
+Windows host and signed live API pass. Startup removed eight completed QA
+worktrees, with seven pinned stashes preserving staged/working/untracked edits;
+three unknown runs remain protected and excluded from workspace search. A Git
+removal left one empty directory after a Windows refusal; only that verified empty
+shell was removed separately. Existing desktop profile/pairing was preserved.
 
 Lifecycle intent is persisted before effects. Confirmed/failed/unknown/pending
 states stay distinct; restart during an action becomes unknown. Phone retains

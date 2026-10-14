@@ -476,6 +476,10 @@ Physical approval-button and Windows speech boundaries: [how-it-works.md](how-it
 
 ### W15 · checkpoints `[x]`
 
+Follow-up: automatic finished-worktree cleanup saves recoverable Git snapshots,
+retains explicit Keep/live/queued/unknown work, and removes duplicate checkouts.
+Verification is recorded in `how-it-works.md`.
+
 Hidden git refs per turn, diffs from them, one-click roll back that also rolls the agent's
 conversation back.
 
@@ -517,6 +521,8 @@ filing, JS/native crash review/filing and release capture guard verified. Binary
 unsupported and screenshots optional when capture fails; see the test ledger.
 
 ### W19 · screens both ways `[ ]`
+
+try Scrcpy as suggestion for phone to pc
 
 Control on the live pc screen (touch, trackpad, keyboard, dictate), asked on the pc unless the
 phone is trusted. The phone on the pc over adb: mirror, who drives, agent taps as rings, install,

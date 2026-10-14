@@ -8,8 +8,9 @@ import type { Account } from './account.ts';
 import { DeskError } from './claudeRuns.ts';
 import { ancestor, clean, git, gitTrees, managedPath, repository } from './worktreeGit.ts';
 import { WorktreeReceipts } from './worktreeReceipts.ts';
+import { archiveWorktree, checkIgnoredWorktreeFiles } from './worktreeArchive.ts';
 
-type Managed = { id: string; owner: string; projectId: string; root: string; path: string; branch: string; kept: boolean; task: string };
+type Managed = { id: string; owner: string; projectId: string; root: string; path: string; branch: string; kept: boolean; task: string; removed?: boolean; archiveRef?: string };
 const refused = (message: string): never => { throw new DeskError(message, 409, { notStarted: true }); };
 
 /** Git is the workspace source of truth; JSON binds managed folders to account/project/start. */
@@ -158,6 +159,39 @@ export class Worktrees {
     const owner = this.owner();
     return this.inspect(this.record(id, owner), action, owner);
   }
+  /** Branches and a pinned Git stash preserve results without duplicate checkouts. */
+  async cleanup(inUse: (run: DeskRun) => boolean): Promise<string[]> {
+    const owner = this.owner();
+    const removed: string[] = [];
+    for (const row of this.records.filter((item) => item.owner === owner && !item.kept && !item.removed)) {
+      await this.exclusive(row.projectId, async () => {
+        try {
+          this.unchanged(owner);
+          if (row.kept || row.removed || !existsSync(row.path)) return;
+          const related = async () => (await this.runs()).filter((run) => run.worktreeId === row.id
+            || repoKey(run.cwd) === repoKey(row.path) || (repoKey(run.cwd) ?? '').startsWith(`${repoKey(row.path)}/`));
+          const finished = async () => { const runs = await related(); return runs.length > 0 && runs.every((run) => finishedWorktreeRun(run.state) && !inUse(run)); };
+          if (!(await finished())) return; // Missing/unknown run evidence is never permission to delete.
+          const tree = await this.checked(row, owner);
+          if (tree.locked) return;
+          if (!(await finished())) return;
+          const ref = await archiveWorktree(row.path, row.id);
+          if (ref) { row.archiveRef = ref; this.save(); }
+          this.unchanged(owner);
+          if (!(await finished()) || (await this.checked(row, owner)).locked || !(await clean(row.path))) return;
+          await checkIgnoredWorktreeFiles(row.path);
+          this.unchanged(owner);
+          if (!(await finished())) return;
+          await git(row.root, 'worktree', 'remove', row.path);
+          row.removed = true; this.save(); removed.push(row.id);
+        } catch (error) {
+          // A refused/failed tree cannot stop cleanup of other finished tasks.
+          console.error(`Worktree cleanup retained ${row.id}`, error);
+        }
+      });
+    }
+    return removed;
+  }
   async act(request: WorktreeRequest) {
     const owner = this.owner();
     return this.receipts.execute(owner, request, (mutating) => {
@@ -173,12 +207,13 @@ export class Worktrees {
           if (await git(review.target, 'rev-parse', 'HEAD') !== review.targetHead || await git(review.target, 'branch', '--show-current') !== 'main') throw new Error('Main changed before merge.');
           await git(review.target, 'merge', '--ff-only', '--no-overwrite-ignore', review.sourceHead);
           if (await git(review.target, 'rev-parse', 'HEAD') !== review.sourceHead) throw new Error('Merge result could not be verified.');
-          row.kept = true; this.save();
+          // Merge does not opt out of automatic cleanup. Only explicit Keep does.
         }
         if (request.action === 'remove') {
           managedPath(realpathSync.native(this.dir), realpathSync.native(row.path));
           await git(row.root, 'worktree', 'remove', row.path);
           if ((await gitTrees(row.root)).some((item) => repoKey(item.path) === repoKey(row.path))) throw new Error('Removal could not be verified.');
+          row.removed = true; this.save();
           // Branch and commits remain recoverable. Never use --force or delete a branch.
         }
         return { action: request.action, worktreeId: row.id,

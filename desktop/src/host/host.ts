@@ -31,6 +31,7 @@ import { Tickets } from './tickets.ts';
 import { Checkpoints } from './checkpoints.ts';
 import { Automation } from './automation.ts';
 import { ProviderAccounts, type SecretVault } from './providerAccounts.ts';
+import { WorktreeCleanup } from './worktreeCleanup.ts';
 
 /**
  * The pc side, put together: one identity, one run list, one LAN server, one
@@ -81,6 +82,7 @@ export class DeskHost {
   readonly account: Account;
   readonly deps: HostDeps;
   readonly fallback: CellarFallback;
+  private readonly cleanup: WorktreeCleanup;
 
   constructor(private readonly options: HostOptions) {
     this.identity = loadIdentity(options.dataDir);
@@ -103,8 +105,9 @@ export class DeskHost {
     this.deps.previews = new Previews(options.dataDir, this.deps);
     this.deps.notifications = new HostNotifications(this.deps, options.activity ?? (() => ({ idleSeconds: 300, locked: true })));
     this.deps.events = new RunEvents(options.dataDir, this.deps);
-    this.deps.runs.onChange = () => this.deps.events!.invalidate();
-    this.deps.jobs!.onChange = () => this.deps.events!.invalidate();
+    const changed = () => { this.deps.events!.invalidate(); if (this.boundPort && !this.stopping) void this.cleanup.tick(); };
+    this.deps.runs.onChange = changed;
+    this.deps.jobs!.onChange = changed;
     this.deps.approvals = new Approvals(join(options.dataDir, 'approvals.sqlite'), (owner, rows) => this.deps.events!.store.approvals(owner, rows));
     this.deps.runs.runtime = new ManagedRuns(this.deps.approvals);
     this.deps.checkpoints = new Checkpoints(options.dataDir, this.deps);
@@ -119,6 +122,7 @@ export class DeskHost {
     };
     this.deps.controls = new Controls(this.deps, new Dispatch(new ControlStore(join(options.dataDir, 'controls.sqlite')), this.deps.runs.runtime, (item, start) => dispatchCommand(this.deps, item, start)));
     this.fallback = new CellarFallback(this.deps);
+    this.cleanup = new WorktreeCleanup(this.deps);
   }
 
   /** Start listening. Resolves with the port actually bound, which may be one of the ten after the configured one. */
@@ -134,6 +138,7 @@ export class DeskHost {
     this.boundPort = port;
     this.deps.events!.start();
     this.deps.notifications?.start();
+    this.cleanup.start();
     return port;
   }
 
@@ -143,6 +148,7 @@ export class DeskHost {
     this.deps.notifications?.stop();
     this.server?.close();
     this.stopping = (async () => {
+      await this.cleanup.stop();
       // Providers must release callbacks while the event store can still publish expiry.
       await this.deps.runs.runtime?.close();
       await this.deps.previews?.close();
@@ -165,6 +171,7 @@ export class DeskHost {
     if (previous && previous !== session?.userId) void this.deps.runs.runtime?.stopOwner(previous);
     if (previous && previous !== session?.userId) void this.deps.jobs?.stopOwner(previous).catch((error) => console.error('Jobs could not stop after account change', error));
     this.account.setSession(session);
+    if (this.boundPort && !this.stopping) void this.cleanup.tick();
   }
 
   /** What the QR code on the pc says. Only ever handed to this pc's own window, never served. */
