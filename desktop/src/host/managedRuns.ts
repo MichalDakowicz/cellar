@@ -78,6 +78,12 @@ export class ManagedRuns {
     this.stopping.add(id);
     try { await value.session.stop(); } catch (error) { this.stopping.delete(id); throw error; }
   }
+  async releaseIdle(owner: string, id: string) {
+    const value = this.get(owner, id);
+    if (!value) return;
+    if (value.session.busy()) throw new DeskError('Wait for the provider turn to finish.', 409);
+    await value.session.close();
+  }
   private async closeSession(session: ManagedSession) {
     try { await session.stop(); } finally { await session.close(); }
   }

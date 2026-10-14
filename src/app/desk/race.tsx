@@ -1,9 +1,13 @@
 import { RaceBody } from '@/components/desk/later/RaceBody';
 import { LaterScreen } from '@/features/desk/LaterScreen';
 import { SAMPLE_RACE } from '@/lib/deskSample';
+import { useDeskPrefs } from '@/store/deskPrefs';
+import { LiveRunPlans } from '@/features/desk/LiveRunPlans';
 
 /** Race (docs/desk/screens.md, `PhoneRace.dc.html`): two runs off one commit, compared. W19. */
 export default function RaceScreen() {
+  const sample = useDeskPrefs((s) => s.sample);
+  if (!sample) return <LiveRunPlans kind="race" />;
   return (
     <LaterScreen
       name="race"

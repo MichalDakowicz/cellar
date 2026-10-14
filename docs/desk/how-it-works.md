@@ -710,3 +710,21 @@ safe developer toggles are wired to real devices. Account device-testing permiss
 driver choice, live owned run, private token and sequence all gate agent actions.
 No schema changes. Tests, device checks and latency boundaries:
 [W19–W21 ledger](w19-w21-testing.md).
+
+## W20 race, night and group plans
+
+Owner-scoped persisted plans save member command IDs before dispatch. Race members
+start from one captured main commit, even if main advances during dispatch. Group
+members receive their own scoped project rules. Starting effects and action receipts
+become unknown after a host crash; the original receipt can reconcile a member,
+but unknown work never dispatches again automatically.
+
+The host night timer dispatches sequentially within a bounded window, with run cap,
+reported usage reserve, ask-first permissions and no recipe after-commands. Window
+end stops active work and skips undispatched members. Morning digest is available
+in the existing night route on both clients. This is host scheduling; keeping the PC
+awake is required. Reserve cannot infer provider limits that are unavailable.
+
+Comparison uses durable assistant text, owned diffs, real check jobs, usage and
+previews. Pick/keep/toss preserve worktree recovery boundaries. Live two-Codex race,
+pick, cleanup and fixture details: [W19–W21 ledger](w19-w21-testing.md).

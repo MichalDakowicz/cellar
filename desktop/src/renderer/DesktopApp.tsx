@@ -160,7 +160,7 @@ export function DesktopApp({
       />
     );
   else if (["/desk/race", "/desk/night", "/desk/group"].includes(path))
-    content = <LaterDesk page={path.slice(6) as "race" | "night" | "group"} />;
+    content = <LaterDesk cellar={cellar} page={path.slice(6) as "race" | "night" | "group"} />;
   else if (path === "/desk/phone") content = <Phone />;
   else if (path.startsWith("/settings"))
     content = (

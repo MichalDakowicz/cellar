@@ -7,6 +7,7 @@
 - Desk: control PC with consent and mirror an attached Android phone inside Cellar
 - Phone tools: choose driver, see agent taps, install builds, open links and inspect logcat
 - PC screen: switch between connected displays from the phone
+- Desk: race two agents from one commit, queue a bounded night shift and run across projects
 - Desk: review turn checkpoints and restore files with the agent conversation
 - Desk: save per-kind recipes and review scoped rules before syncing instruction files
 - Desk: view provider usage, compact context and select encrypted API accounts

@@ -31,6 +31,7 @@ export class Controls {
       const result = await this.stopOne(owner, request.runId!);
       receipt = { ...receipt, state: result.state, runs: [result], error: result.error };
     } else {
+      this.deps.orchestrations?.stopQueued();
       const identity = this.deps.identity();
       const local: HostStop = { id: identity.id, name: identity.name, commandId: request.commandId, state: 'pending' };
       let hosts = [local]; let inventoryError: string | undefined;

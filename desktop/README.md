@@ -214,6 +214,21 @@ APK installation, deep links, bounded package logcat and development toggles use
 the same selected authorized device. Video queues are bounded so stale frames
 cannot grow without limit. See [verification](../docs/desk/w19-w21-testing.md).
 
+## Race, night and group plans
+
+Later desk creates plans from owned project checkouts. Race starts two independent
+worktrees from one pinned main commit. Compare summaries, diff statistics, checks,
+usage and previews; pick keeps the winner and archives eligible loser worktrees
+with Git recovery. Chats remain available for at least seven days.
+
+Night uses an explicit local start/end window, one run at a time, a run cap and a
+usage reserve when providers expose limits. It uses ask-first access, skips recipe
+after-commands and instructs agents not to ship. Pending approvals wait for you;
+the host must stay awake and signed in. Group applies one prompt plus scoped
+rules across selected projects or a shelf, with keep/toss and follow-up actions.
+Stop all also stops undispatched plan members. Unknown effects recover the original
+receipt instead of replaying. [Verification](../docs/desk/w19-w21-testing.md).
+
 W10 implements the independent renderer and controller extraction described in
 [`desktop-rebuild.md`](../docs/desk/desktop-rebuild.md). Acceptance evidence is recorded
 in [`w10-rebuild.md`](../docs/desk/w10-rebuild.md). Keys search is

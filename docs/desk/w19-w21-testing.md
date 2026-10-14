@@ -45,3 +45,26 @@ preserving its profile/pairing. Final Android release APK installed successfully
 and launched as `com.michaldakowicz.cellar`. No live Claude runs were performed.
 Raw evidence and logs are local ignored files under `artifacts/qa/w19-w21/` and
 `artifacts/qa/w19-w21-*.log`.
+
+## W20 — race, night shift and group runs
+
+Actual signed host race `db352882-bdb4-47d2-a221-0cdf146050bd` started Codex runs
+`05c34e7a` and `870333f0` from the same pinned main commit
+`af6989d5fb975cd74c38e6decf5a12c507e63e0b`. Both read README and finished with
+`CELLAR_RACE_OK`, without project changes. Real comparison initially exposed raw
+provider envelopes; fixed to use durable assistant messages. Installed final host
+returned readable summaries. Winner pick confirmed; both clean QA checkouts were
+removed through guarded cleanup/review APIs. Branches and chat remain recoverable.
+
+Real Git fixtures advance main between starts and assert identical member bases.
+They also cover restart/duplicate-ID recovery, pick/retention, sequential night
+dispatch, time expiry, cap and Stop all cancelling queued members. Pure parser
+tests bound windows, reserve, projects and agents; night rejects full-access mode.
+Group and night scheduling are fixture-verified; no actual overnight run or live
+Claude run was performed. Group shares the same verified start/rules/worktree path.
+
+Phone race route and final desktop run-plan components were inspected. Existing
+Night settings point to queue/digest; sample presenters remain behind sample mode.
+Night scheduling requires an awake signed-in PC. Usage reserve applies only to
+reported provider windows; the run cap always applies. No push digest scheduler
+was added. No automatic shipping or recipe after-commands occur in night runs.

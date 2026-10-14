@@ -34,6 +34,7 @@ import { ProviderAccounts, type SecretVault } from './providerAccounts.ts';
 import { WorktreeCleanup } from './worktreeCleanup.ts';
 import { ScreenControl, type ScreenAdapter } from './screenControl.ts';
 import { Phones } from './phones.ts';
+import { Orchestrations } from './orchestrations.ts';
 
 /**
  * The pc side, put together: one identity, one run list, one LAN server, one
@@ -130,6 +131,7 @@ export class DeskHost {
     this.deps.controls = new Controls(this.deps, new Dispatch(new ControlStore(join(options.dataDir, 'controls.sqlite')), this.deps.runs.runtime, (item, start) => dispatchCommand(this.deps, item, start)));
     this.fallback = new CellarFallback(this.deps);
     this.cleanup = new WorktreeCleanup(this.deps);
+    this.deps.orchestrations = new Orchestrations(options.dataDir, this.deps);
   }
 
   /** Start listening. Resolves with the port actually bound, which may be one of the ten after the configured one. */
@@ -146,6 +148,7 @@ export class DeskHost {
     this.deps.events!.start();
     this.deps.notifications?.start();
     this.cleanup.start();
+    this.deps.orchestrations?.start();
     return port;
   }
 
@@ -157,6 +160,7 @@ export class DeskHost {
     this.deps.notifications?.stop();
     this.server?.close();
     this.stopping = (async () => {
+      await this.deps.orchestrations?.close();
       await this.cleanup.stop();
       // Providers must release callbacks while the event store can still publish expiry.
       await this.deps.runs.runtime?.close();

@@ -34,6 +34,7 @@ import type { ProviderAccounts } from './providerAccounts.ts';
 import { runUsage } from './usage.ts';
 import type { ScreenControl } from './screenControl.ts';
 import type { Phones } from './phones.ts';
+import type { Orchestrations } from './orchestrations.ts';
 
 /**
  * Everything a paired phone can ask, as one function from request to answer.
@@ -50,6 +51,7 @@ export type ApiResponse = { status: number; body: unknown };
 
 export type HostDeps = {
   phoneServerFile?: string;
+  orchestrations?: Orchestrations;
   screenControl?: ScreenControl;
   phones?: Phones;
   providerAccounts?: ProviderAccounts;
@@ -178,6 +180,15 @@ export async function handle(deps: HostDeps, req: ApiRequest): Promise<ApiRespon
         const identity = deps.identity();
         return ok({ url: `ws://127.0.0.1:${identity.port}/phone-video/${deps.tickets.issue({ kind: 'phone-video', owner, key: identity.key, serial })}` });
       }
+      case 'GET /orchestrations':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for races, night and group runs.', 409);
+        return ok({ plans: await deps.orchestrations.list() });
+      case 'POST /orchestrations':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for run plans.', 409);
+        return ok(await deps.orchestrations.create(req.body));
+      case 'POST /orchestration-actions':
+        if (!deps.orchestrations) throw new DeskError('Update the PC for run plans.', 409);
+        return ok(await deps.orchestrations.act(req.body, req.source ?? 'phone'));
       case 'POST /screen-access':
         if (!deps.screenControl) throw new DeskError('Screen control unavailable.', 409);
         return ok(await deps.screenControl.open(req.source ?? 'phone'));

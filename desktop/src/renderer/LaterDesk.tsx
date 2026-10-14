@@ -4,12 +4,15 @@ import { groupLine, nightLine, raceRows } from "@/lib/deskLater";
 import { saved, useSaved } from "./preferences";
 import { RunChip } from "./RunChip";
 import { navigate } from "./useRoute";
+import { RunPlans } from './RunPlans';
+import type { Cellar } from './useCellar';
 
 /** Existing artboard presenters only. These controls never dispatch host operations. */
-export function LaterDesk({ page }: { page: "race" | "night" | "group" }) {
+export function LaterDesk({ page, cellar }: { page: "race" | "night" | "group"; cellar?: Cellar }) {
   useSaved();
   const sample = saved("cellar-desk-prefs", "sample", false);
   const [agent, setAgent] = useState(SAMPLE_RACE.runs[0].agent);
+  if (!sample && cellar) return <RunPlans kind={page} cellar={cellar} />;
   return (
     <section className="page stack">
       <header className="row">

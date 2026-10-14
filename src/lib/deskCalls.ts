@@ -45,6 +45,9 @@ export type TicketFor = { kind: 'view'; port: number } | { kind: 'screen'; acces
 export function deskCalls(send: DeskTransport, local = false) {
   return {
     phoneVideoTicket: async (serial: string) => ((await send('POST', '/phone-video-ticket', { serial })) as { url: string }).url,
+    orchestrations: async () => ((await send('GET', '/orchestrations')) as { plans: import('./deskOrchestration').OrchestrationView[] }).plans,
+    orchestrate: async (request: import('./deskOrchestration').OrchestrationRequest) => await send('POST', '/orchestrations', request) as { id: string },
+    orchestrationAction: async (request: import('./deskOrchestration').OrchestrationAction) => await send('POST', '/orchestration-actions', request) as { state: string; commandId: string; error?: string },
     screenAccess: async () => await send('POST', '/screen-access') as import('./deskRemote').ScreenAccess,
     screenDisplay: async (id: string, displayId: string) => await send('POST', '/screen-display', { id, displayId }) as import('./deskRemote').ScreenAccess,
     screenInput: async (id: string, sequence: number, input: import('./deskRemote').ScreenInput) => await send('POST', '/screen-input', { id, sequence, input }),

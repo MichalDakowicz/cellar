@@ -59,3 +59,8 @@ controls, desktop Phone tools, account device-testing setting, build installer,
 link opener and provider launch environment. Real data replaces sample phone
 tools outside sample mode. Screen consent/trust and live-video verification:
 [W19–W21 ledger](w19-w21-testing.md).
+
+W20 wires existing race, night and group routes on phone and desktop Later desk.
+Night settings link to the real host queue/digest. Project/shelf selection, scoped
+rules, provider dispatch, worktree retention, Stop all, comparisons and follow-ups
+share durable host plans and receipts. Details: [test ledger](w19-w21-testing.md).

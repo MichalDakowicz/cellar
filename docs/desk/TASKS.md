@@ -536,10 +536,16 @@ User confirmed smooth video, then reported PC delay and mirror refresh after swi
 Mirror lifetime fix, minimal receiver buffering and requested monitor switch are
 installed; final PC latency remains user-observed. See [test ledger](w19-w21-testing.md).
 
-### W20 · race, night shift, group runs `[ ]`
+### W20 · race, night shift, group runs `[x]`
 
 Two runs off one commit and a pick; tonight's queue in a window with a digest; one task across a
 shelf of projects.
+
+Implemented 2026-10-14: durable race/group plans, pinned worktree bases, comparison
+and pick; timed sequential night queue with caps, usage reserve and digest.
+Real two-Codex race, same-commit start, readable results, pick and QA cleanup pass.
+Night timing/restart and group semantics have fixtures; live Claude excluded.
+See [test ledger](w19-w21-testing.md).
 
 ### W21 · rendered documents and media `[ ]`
 

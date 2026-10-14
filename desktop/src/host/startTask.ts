@@ -7,7 +7,7 @@ import { toolPath } from './tools.ts';
 import { repository } from './worktreeGit.ts';
 
 /** Validate and reserve every attachment before starting any process. */
-export async function startTask(deps: HostDeps, start: DeskStart, probe = toolPath) {
+export async function startTask(deps: HostDeps, start: DeskStart, probe = toolPath, workspaceOptions: { baseCommit?: string; keep?: boolean } = {}) {
   const owner = deps.account.current?.userId;
   const refuse = (message: string): never => { throw new DeskError(message, 409, { notStarted: true }); };
   if (!owner || !start.commandId || !start.projectId || !start.mode || !start.where || !start.entryIds) refuse('Update the phone and select the complete task.');
@@ -39,7 +39,7 @@ export async function startTask(deps: HostDeps, start: DeskStart, probe = toolPa
       if (deps.account.current?.userId !== owner) refuse('Account changed before launch.');
       let workspace = null;
       if (start.where === 'worktree') {
-        try { workspace = await deps.worktrees!.create(start); }
+        try { workspace = await deps.worktrees!.create(start, workspaceOptions); }
         catch (error) { refuse(`Worktree creation failed before agent launch: ${error instanceof Error ? error.message : String(error)}. Inspect the workspace at the PC before retrying.`); }
       }
       if (deps.account.current?.userId !== owner) refuse('Account changed before launch.');

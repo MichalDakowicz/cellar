@@ -3,10 +3,14 @@ import { useToast } from '@/components/ui/Toast';
 import { LaterScreen } from '@/features/desk/LaterScreen';
 import { nightLine } from '@/lib/deskLater';
 import { SAMPLE_NIGHT } from '@/lib/deskSample';
+import { useDeskPrefs } from '@/store/deskPrefs';
+import { LiveRunPlans } from '@/features/desk/LiveRunPlans';
 
 /** The night shift's digest (docs/desk/screens.md, `PhoneNight.dc.html`). W19. */
 export default function NightScreen() {
+  const sample = useDeskPrefs((s) => s.sample);
   const { say } = useToast();
+  if (!sample) return <LiveRunPlans kind="night" />;
   return (
     <LaterScreen
       name="night shift"

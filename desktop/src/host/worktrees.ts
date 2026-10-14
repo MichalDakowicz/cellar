@@ -71,7 +71,7 @@ export class Worktrees {
     this.unchanged(owner);
     return result;
   }
-  async create(start: DeskStart): Promise<Managed> {
+  async create(start: DeskStart, options: { baseCommit?: string; keep?: boolean } = {}): Promise<Managed> {
     const owner = this.owner();
     const root = await this.root(start.projectId!, owner);
     const id = start.worktreeId ?? start.commandId!;
@@ -90,10 +90,11 @@ export class Worktrees {
     const parent = managedPath(realpathSync.native(this.dir), realpathSync.native(join(path, '..')));
     if (repoKey(parent) !== repoKey(join(path, '..'))) refused('Managed workspace parent was redirected.');
     const row: Managed = { id, owner, projectId: start.projectId!, root, path, task,
-      branch: `wt/${worktreeSlug(start.name ?? start.prompt.split(/\r?\n/)[0], id)}`, kept: false };
+      branch: `wt/${worktreeSlug(start.name ?? start.prompt.split(/\r?\n/)[0], id)}`, kept: options.keep === true };
     this.records.push(row); this.save(); // Persist identity before Git changes anything.
     this.unchanged(owner);
-    await git(root, 'worktree', 'add', '-b', row.branch, path, 'refs/heads/main');
+    if (options.baseCommit && !/^[a-f0-9]{40,64}$/.test(options.baseCommit)) refused('Invalid pinned worktree commit.');
+    await git(root, 'worktree', 'add', '-b', row.branch, path, options.baseCommit ?? 'refs/heads/main');
     await this.checked(row, owner);
     return row;
   }
@@ -110,6 +111,7 @@ export class Worktrees {
   private record(id: string, owner: string) {
     return this.records.find((row) => row.id === id && row.owner === owner) ?? refused('No managed worktree for this account.');
   }
+  async retain(id: string, kept: boolean) { const owner = this.owner(); const row = this.record(id, owner); await this.checked(row, owner); this.unchanged(owner); row.kept = kept; this.save(); }
   async allows(path: string): Promise<boolean> {
     const owner = this.owner();
     const row = this.records.find((item) => item.owner === owner && repoKey(item.path) === repoKey(path));
