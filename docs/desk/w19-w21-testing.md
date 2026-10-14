@@ -24,7 +24,7 @@ returned real packets. User confirmed smooth video but still reported PC delay
 and a phone-mirror refresh after swipes. Fixed the latter: input no longer resets
 device discovery or unmounts the video component; selected device stays pinned
 during driver refresh. PC receiver now requests zero additional jitter buffering.
-PC latency improvement from that tuning remains unconfirmed.
+User subsequently confirmed both video fixes.
 
 Added the requested display-switch button, visible when multiple monitors exist.
 Each lease selects its display; video and input use that same monitor, including
@@ -32,6 +32,20 @@ its physical origin/DPI. Disconnecting a selected monitor refuses input. Real
 capture/decode checks pass on both connected monitors (GO27Q24 and VG240Y), with
 4.8/8.2 ms average local jitter-buffer delays. Consent and switching fixtures
 cover invalid display IDs, video/input routing and unplugged displays.
+
+User next reported reversed PC scroll and touch controlling only the top-left
+quarter. The supplied Android drawing-app image clarified that the scaling bug
+was in phone mirroring controlled from the PC. Its reduced 576×1280 video pixel
+coordinates were being sent directly to Android's actual 1080×2392 touch surface.
+Mirror actions now carry source frame dimensions; the host scales tap/swipe
+endpoints to Android's full current display, honoring orientation and `wm size`
+overrides. Agent screenshot input retains full-size coordinates; ring overlays
+are normalized to the video canvas. Fixtures verify actual ADB argument vectors
+for bottom-right taps, portrait/landscape swipes, size overrides and invalid points.
+PC two-finger scrolling follows content direction. The existing monitor island
+button is wired to display switching. User confirmed “Full screen works” after
+the final phone-mirror fix was installed. The temporary PC-coordinate diagnostic
+approach was removed.
 
 Consent fixtures cover allow/deny/trust, account/pair-key revocation, sequence
 replay, expiry and SDP access after release. Preview cookies cannot authorize
@@ -91,7 +105,7 @@ chat references. No remote-file fetching, macro execution or schema migration.
 
 ## Final build checks
 
-App: 106 suites / 926 tests. Desktop: 111 tests. App/host/renderer TypeScript and
+App: 106 suites / 929 tests. Desktop: 112 tests. App/host/renderer TypeScript and
 app/desktop lint pass. Final Android release and Windows unpacked package build
 successfully and are installed; final controller web export passes. Controller
 source-map inspection contains zero local host imports. No web publication,

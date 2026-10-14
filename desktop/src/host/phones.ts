@@ -8,6 +8,7 @@ import type { HostDeps } from './api.ts';
 import { DeskError } from './claudeRuns.ts';
 import { apkPath, findApks } from './apks.ts';
 import { ScrcpyStream } from './scrcpy.ts';
+import { phoneInputPoint } from '@/lib/deskVideo';
 
 const exec = promisify(execFile);
 const quote = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
@@ -26,6 +27,11 @@ export function phoneDevices(output: string) {
     return m && /^[a-zA-Z0-9_.:[\]-]{1,160}$/.test(m[1]) ? [{ serial: m[1], state: m[2], model: /model:([^\s]+)/.exec(m[3])?.[1]?.replace(/_/g, ' ') ?? m[1] }] : [];
   });
 }
+export function phoneDisplaySize(output: string) {
+  const sizes = [...output.matchAll(/(?:Physical|Override) size:\s*(\d+)x(\d+)/g)]; const match = sizes.at(-1);
+  if (!match || ![Number(match[1]), Number(match[2])].every((n) => n >= 2 && n <= 16000)) throw new DeskError('Android display dimensions unavailable.', 409);
+  return { width: Number(match[1]), height: Number(match[2]) };
+}
 export class Phones {
   private state: Omit<PhoneState, 'devices' | 'video'> = { driver: 'watch', agentAccess: false, taps: [] };
   private ownerId: string | null = null;
@@ -33,9 +39,11 @@ export class Phones {
   private busy = false;
   private tokens = new Map<string, { runId: string; owner: string; sequence: number }>();
   private videos = new Set<ScrcpyStream>();
-  tapSnapshot() { return this.state.taps.filter((t) => Date.now() - t.at < 1500); }
+  private frameSizes = new Map<string, { width: number; height: number }>();
+  private displaySizes = new Map<string, { width: number; height: number; at: number }>();
+  tapSnapshot() { const size = this.serial && this.frameSizes.get(this.serial); return size ? this.state.taps.filter((t) => Date.now() - t.at < 1500).map((t) => ({ x: t.x / (size.width - 1), y: t.y / (size.height - 1), at: t.at })) : []; }
   constructor(private deps: HostDeps, private tool = deviceTool, private execute = exec) {}
-  reset() { for (const video of this.videos) void video.close(); this.videos.clear(); this.serial = null; this.tokens.clear(); this.state = { driver: 'watch', agentAccess: false, taps: [] }; }
+  reset() { for (const video of this.videos) void video.close(); this.videos.clear(); this.frameSizes.clear(); this.displaySizes.clear(); this.serial = null; this.tokens.clear(); this.state = { driver: 'watch', agentAccess: false, taps: [] }; }
   async video(serial: string, packet: (packet: Buffer) => void, ended: (error: string) => void) {
     const adb = await this.device(serial);
     if (!this.deps.phoneServerFile) throw new DeskError('Embedded phone video backend unavailable.', 409);
@@ -83,6 +91,7 @@ export class Phones {
     const { stdout } = await this.execute(adb, ['-s', serial, 'exec-out', 'screencap', '-p'], { windowsHide: true, timeout: 5000, encoding: 'buffer', maxBuffer: 6 * 1024 * 1024 });
     const png = Buffer.from(stdout);
     if (png.length < 24 || !png.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw new DeskError('Phone capture did not return PNG.');
+    this.frameSizes.set(serial, { width: png.readUInt32BE(16), height: png.readUInt32BE(20) });
     return { url: 'data:image/png;base64,' + png.toString('base64'), width: png.readUInt32BE(16), height: png.readUInt32BE(20), taps: this.state.taps.filter((t) => Date.now() - t.at < 2000) };
   }
   async logs(serial: string, packageName: string) {
@@ -114,8 +123,15 @@ export class Phones {
       } else if (['tap', 'swipe', 'key', 'text'].includes(v.action) && this.state.driver !== 'you') throw new DeskError('Choose “I drive” to control the phone.', 409);
       let args: string[];
       const point = (n: unknown) => { if (typeof n !== 'number' || !Number.isInteger(n) || n < 0 || n > 16000) throw new DeskError('Invalid phone coordinate.'); return String(n); };
-      if (v.action === 'tap') args = ['shell', 'input', 'tap', point(v.x), point(v.y)];
-      else if (v.action === 'swipe') args = ['shell', 'input', 'swipe', point(v.x), point(v.y), point(v.x2), point(v.y2), '300'];
+      let from = { x: v.x, y: v.y }; let to = { x: v.x2, y: v.y2 };
+      if (!agent && v.frameSize && ['tap', 'swipe'].includes(v.action)) {
+        let display = this.displaySizes.get(v.serial);
+        if (!display || Date.now() - display.at > 5000) { const { stdout } = await this.execute(adb, ['-s', v.serial, 'shell', 'wm', 'size'], { windowsHide: true, timeout: 5000, maxBuffer: 4096 }); display = { ...phoneDisplaySize(String(stdout)), at: Date.now() }; this.displaySizes.set(v.serial, display); }
+        from = phoneInputPoint(Number(point(v.x)), Number(point(v.y)), v.frameSize, display);
+        if (v.action === 'swipe') to = phoneInputPoint(Number(point(v.x2)), Number(point(v.y2)), v.frameSize, display);
+      }
+      if (v.action === 'tap') args = ['shell', 'input', 'tap', point(from.x), point(from.y)];
+      else if (v.action === 'swipe') args = ['shell', 'input', 'swipe', point(from.x), point(from.y), point(to.x), point(to.y), '300'];
       else if (v.action === 'key') {
         const keys: Record<string, string> = { back: '4', home: '3', recent: '187', power: '26', enter: '66', delete: '67' };
         if (!keys[v.value ?? '']) throw new DeskError('Unsupported phone key.'); args = ['shell', 'input', 'keyevent', keys[v.value!]];

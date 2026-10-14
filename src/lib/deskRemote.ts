@@ -29,8 +29,11 @@ export function screenPoint(x: number, y: number, width: number, height: number,
   return { x: (x - left) / w, y: (y - top) / h };
 }
 
+/** Natural touch scrolling: drag content up -> negative Windows wheel delta. */
+export function screenScroll(startY: number, endY: number) { return Math.max(-1200, Math.min(1200, Math.round((endY - startY) * 3))); }
+
 export type ScreenDisplay = { id: string; name: string; aspect: number; primary: boolean };
 export type ScreenAccess = { id: string; expiresAt: number; aspect: number; controls: boolean; displayId?: string; displays?: ScreenDisplay[] };
 export type PhoneDevice = { serial: string; state: string; model: string };
 export type PhoneState = { devices: PhoneDevice[]; driver: 'watch' | 'you' | 'agent'; agentAccess: boolean; taps: { x: number; y: number; at: number }[]; video: boolean };
-export type PhoneAction = { serial: string; action: 'driver' | 'agentAccess' | 'tap' | 'swipe' | 'key' | 'text' | 'link' | 'install' | 'toggle'; value?: string; enabled?: boolean; x?: number; y?: number; x2?: number; y2?: number; runId?: string; actor?: 'you' | 'agent' };
+export type PhoneAction = { serial: string; action: 'driver' | 'agentAccess' | 'tap' | 'swipe' | 'key' | 'text' | 'link' | 'install' | 'toggle'; value?: string; enabled?: boolean; x?: number; y?: number; x2?: number; y2?: number; frameSize?: { width: number; height: number }; runId?: string; actor?: 'you' | 'agent' };

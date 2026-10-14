@@ -1,4 +1,11 @@
 export type PhoneVideoPacket = { kind: 'session'; width: number; height: number } | { kind: 'config'; data: Uint8Array } | { kind: 'frame'; key: boolean; timestamp: number; data: Uint8Array };
+/** ADB input uses the device's current full display, not its reduced encoder size. */
+export function phoneInputPoint(x: number, y: number, frame: { width: number; height: number }, device: { width: number; height: number }) {
+  for (const size of [frame, device]) if (!size || ![size.width, size.height].every((n) => Number.isInteger(n) && n >= 2 && n <= 16000)) throw new Error('Invalid phone display dimensions.');
+  if (![x, y].every(Number.isInteger) || x < 0 || y < 0 || x >= frame.width || y >= frame.height) throw new Error('Phone point is outside the video frame.');
+  const target = (frame.width > frame.height) === (device.width > device.height) ? device : { width: device.height, height: device.width };
+  return { x: Math.round(x / (frame.width - 1) * (target.width - 1)), y: Math.round(y / (frame.height - 1) * (target.height - 1)) };
+}
 export function phoneVideoPacket(bytes: Uint8Array): PhoneVideoPacket {
   if (bytes.byteLength < 12) throw new Error('Incomplete phone video packet.');
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);

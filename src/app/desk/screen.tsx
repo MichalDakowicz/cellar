@@ -1,6 +1,6 @@
 import { useRouter, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PreviewPage } from '@/components/desk/PreviewPage';
@@ -46,7 +46,7 @@ export default function ScreenView() {
           <View className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: screen.status.live ? COLORS.ok : COLORS.muted }} />
           <Text className="font-sans text-xs font-semibold text-foreground">{screen.name}</Text>
           <Text className="font-sans text-xs text-muted-foreground">{screen.status.text}</Text>
-          {screen.canSwitch && <Pressable accessibilityRole="button" accessibilityLabel={`Switch display. Current: ${screen.display}`} disabled={screen.switching} onPress={() => void screen.nextDisplay()} hitSlop={8}><Text className="font-sans text-xs text-primary">{screen.switching ? 'switching…' : `${screen.display} · switch`}</Text></Pressable>}
+          {screen.canSwitch && <Text className="font-sans text-xs text-primary">{screen.switching ? 'switching…' : screen.display}</Text>}
         </Glass>
         <Glass style={{ height: 32, paddingHorizontal: 12, justifyContent: 'center', flexShrink: 1 }}>
           <Text className="font-sans text-xs" style={{ color: COLORS.foregroundSoft }} numberOfLines={1}>
@@ -60,6 +60,10 @@ export default function ScreenView() {
         onMode={screen.onMode}
         onLeave={() => (router.canGoBack() ? router.back() : router.replace('/desk' as Href))}
         bottom={insets.bottom + 10}
+        onSwitch={() => void screen.nextDisplay()}
+        canSwitch={screen.canSwitch}
+        switching={screen.switching}
+        display={screen.display}
       />
     </View>
   );

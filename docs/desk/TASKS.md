@@ -534,7 +534,9 @@ scrcpy encoder, with bounded decoding and no external launcher. Initial controls
 confirmed by user; final streams verified locally and installed on both devices.
 User confirmed smooth video, then reported PC delay and mirror refresh after swipes.
 Mirror lifetime fix, minimal receiver buffering and requested monitor switch are
-installed; final PC latency remains user-observed. See [test ledger](w19-w21-testing.md).
+installed. User confirmed video fixes. Subsequent PC scroll direction and phone-mirror
+input scaling corrections installed; user confirmed full-screen phone control.
+See [test ledger](w19-w21-testing.md).
 
 ### W20 · race, night shift, group runs `[x]`
 

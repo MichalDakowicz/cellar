@@ -204,6 +204,8 @@ displays; video and input stay bound to its selection. Its preload exposes only 
 capture source, with no host API or account session. Input uses one persistent
 Windows worker per session; touch, trackpad, keys and dictated drafts share the
 same validated, sequenced input API.
+Two-finger scroll follows content. The existing screen-island monitor button
+switches displays.
 
 Desktop Phone embeds a pinned, integrity-checked scrcpy 4.0 server and decodes
 H.264 in Cellar. No separate scrcpy window or installation is needed. ADB and
@@ -213,6 +215,10 @@ setting and a live owned run's private loopback token; taps appear as rings.
 APK installation, deep links, bounded package logcat and development toggles use
 the same selected authorized device. Video queues are bounded so stale frames
 cannot grow without limit. See [verification](../docs/desk/w19-w21-testing.md).
+Mirror input carries its encoded frame dimensions; the host scales tap/swipe
+coordinates to Android's full display size, respecting rotation and display-size
+overrides. Agent screenshot coordinates stay in their original full pixel space;
+tap rings are normalized to the mirrored canvas.
 
 ## Race, night and group plans
 

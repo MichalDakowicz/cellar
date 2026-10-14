@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import type { ScreenInput } from '@/lib/deskRemote';
-import { screenPoint } from '@/lib/deskRemote';
+import { screenPoint, screenScroll } from '@/lib/deskRemote';
 import type { ScreenMode } from '@/lib/deskScreen';
 import { useDictation } from '@/features/desk/useDictation';
 import { COLORS } from '@/theme/colors';
@@ -19,7 +19,7 @@ export function RemoteScreenInput({ mode, aspect, send }: { mode: ScreenMode; as
       onResponderMove={(e) => { start.current.fingers = Math.max(start.current.fingers, e.nativeEvent.touches.length); }}
       onResponderRelease={(e) => {
         const s = start.current; const x = e.nativeEvent.locationX; const y = e.nativeEvent.locationY;
-        if (s.fingers > 1) send({ kind: 'scroll', amount: Math.max(-1200, Math.min(1200, Math.round((s.y - y) * 3))) });
+        if (s.fingers > 1) send({ kind: 'scroll', amount: screenScroll(s.y, y) });
         else if (mode === 'pad' && Math.hypot(x - s.x, y - s.y) > 5) send({ kind: 'move', x: (x - s.x) / size.width, y: (y - s.y) / size.height });
         else { const p = screenPoint(x, y, size.width, size.height, aspect); if (p) send(mode === 'pad' ? { kind: 'click', right: Date.now() - s.at > 600 } : { kind: 'tap', ...p, right: Date.now() - s.at > 600 }); }
       }} />}

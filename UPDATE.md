@@ -18,6 +18,8 @@
 
 - Screen streams use WebRTC and embedded H.264 video instead of repeated screenshots
 - Phone mirror stays connected after touch input and device refresh
+- PC control: correct two-finger scroll direction
+- Phone mirror: scale taps, swipes and agent rings to the full Android display
 - Shared drafts keep chosen kind/project after restart and retry filing without duplicates
 - Desk: queued messages resume after reviewed checkpoint restores
 - Desktop: completion notifications stay above the page without pushing chat off-screen
