@@ -93,14 +93,15 @@ of `{ text, age }`, kept apart as the brief keeps them), and `questions` (each `
 options, taken, answer, status }` with `status` one of `pending | answered | dismissed` and
 `taken` the options the answer picked).
 
-## Ask instead of guessing
+## Ask only when necessary
 
-**This is a correct outcome**, not a failure to finish.
+Read the entry, its follow-ups and the repo first. Proceed when intent is clear or a
+reasonable, reversible default fits; report meaningful assumptions on the entry.
 
-- **idea** and **removal** — ask essentially always. An idea is a direction, not a spec, and
-  a removal destroys work. Name what it would mean concretely and what you would do, then
-  ask before building or deleting.
-- **everything else** — ask when two readings of the line would lead to different work.
+Ask only when unresolved ambiguity materially changes the work, essential information
+is missing, or a destructive action needs authorization not already given. An **idea** or
+**removal** label alone never requires a question. Do not re-confirm existing authorization
+or ask the user to decide routine implementation details.
 
 Ask **one concrete question, naming the options**. "which surface — the dump field, the
 filter sheet, or both?" is answerable in four words. "could you clarify what you meant?" is
@@ -142,8 +143,8 @@ a/b/c/d taps in the app, and a question answerable in one tap gets answered.
 
 | kind         | the job                                                                |
 | ------------ | ---------------------------------------------------------------------- |
-| **idea**     | work out what it would actually mean, then **ask before building**      |
-| **removal**  | find everything it touches, say what goes with it, **ask before deleting** |
+| **idea**     | infer the intended change from the entry and repo, then build it        |
+| **removal**  | trace dependencies and remove the requested scope within authorization  |
 | **glitch**   | reproduce, fix, cover with a test, report the cause in one line         |
 | **question** | answer from the repo — do not change code to answer a question          |
 | **research** | find out, report back compactly, no code changes unless asked           |

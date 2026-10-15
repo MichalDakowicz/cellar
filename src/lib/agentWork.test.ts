@@ -165,23 +165,17 @@ describe('kindWork', () => {
     for (const kind of KINDS) expect(kindWork(kind.value).kind).toBe(kind.value);
   });
 
-  it('makes the two destructive-or-underspecified kinds always ask', () => {
-    expect(kindWork('idea').ask).toBe('always');
-    expect(kindWork('removal').ask).toBe('always');
-  });
-
   it('falls back rather than throwing on a kind this build does not know', () => {
     expect(kindWork('nonsense' as never).kind).toBe('idea');
   });
 });
 
 describe('askRule', () => {
-  it('tells an idea to stop before building', () => {
-    expect(askRule('idea')).toContain('ask before you act');
-  });
-
-  it('tells a glitch to ask only when two readings would differ', () => {
-    expect(askRule('glitch')).toContain('two readings');
+  it('asks only for material uncertainty or missing authorization', () => {
+    expect(askRule()).toContain('ask only when necessary');
+    expect(askRule()).toContain('materially changes the work');
+    expect(askRule()).toContain('without existing authorization');
+    expect(askRule()).toContain('an idea or removal label alone never requires a question');
   });
 });
 

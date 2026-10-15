@@ -150,7 +150,7 @@ export function entryBrief(entry: Entry, cellar: Cellar, now = Date.now()): stri
 
   out.push(...questionBlocks(entry.questions, now));
 
-  out.push('', `asking     ${askRule(entry.kind)}`, `ask where  ${ASK_WHERE}`, `line voice ${LINE_VOICE}`);
+  out.push('', `asking     ${askRule()}`, `ask where  ${ASK_WHERE}`, `line voice ${LINE_VOICE}`);
 
   return out.join('\n');
 }
