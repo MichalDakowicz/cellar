@@ -1,136 +1,26 @@
 # Update notes
 
-## 1.16.0 — Unreleased
+## 1.16.1 — Unreleased
+
+## 1.16.0 — 2026-10-15
 
 ### Added
 
-- Desk: control PC with consent and mirror an attached Android phone inside Cellar
-- Phone tools: choose driver, see agent taps, install builds, open links and inspect logcat
-- PC screen: switch between connected displays from the phone
-- Desk: race two agents from one commit, queue a bounded night shift and run across projects
-- Files: render Markdown/AsciiDoc, switch to exact source and preview supported images, audio and video
-- Desk: review turn checkpoints and restore files with the agent conversation
-- Desk: save per-kind recipes and review scoped rules before syncing instruction files
-- Desk: view provider usage, compact context and select encrypted API accounts
-- Capture: share Android text into Cellar and review debug crashes with evidence
+- Desktop: run Cellar in its own Windows app, with tray startup and phone pairing
+- Desk: send thoughts to Claude, Codex or Antigravity, follow live chats, queue messages and review approvals
+- Worktrees: start isolated tasks, review changes, restore checkpoints and recover archived edits
+- Desk: search files, skills and commands, preview local pages, run checks and deploy projects
+- Desk: control PC displays with consent and mirror an attached Android phone inside Cellar
+- Phone tools: choose a driver, see agent taps, install builds, open links and inspect logcat
+- Desk: race two agents, queue a bounded night shift and run tasks across projects
+- Settings: save recipes and scoped rules, view usage and choose encrypted API accounts
+- Capture: share Android text, attach pictures, edit thoughts and keep chosen kind and project in saved drafts
+- Files: read Markdown and AsciiDoc, inspect exact source and preview supported images, audio and video
+- Notifications: receive background questions and approvals, answer from phone actions and dictate editable drafts
 
 ### Fixed
 
-- Screen streams use WebRTC and embedded H.264 video instead of repeated screenshots
-- Phone mirror stays connected after touch input and device refresh
-- PC control: correct two-finger scroll direction
-- Phone mirror: scale taps, swipes and agent rings to the full Android display
-- Shared drafts keep chosen kind/project after restart and retry filing without duplicates
-- Desk: queued messages resume after reviewed checkpoint restores
-- Desktop: completion notifications stay above the page without pushing chat off-screen
-- Rules review names instruction files, renders Markdown first, and offers source and focused changes
-- Desktop: use Codex CLI when the installed desktop app appears earlier on PATH
-- Desktop: archive finished task edits and remove unused worktree folders automatically
-
-## 1.15.0 — Unreleased
-
-### Added
-
-- Desk: start worktree previews, run project checks and deploy with durable action receipts
-- Desk: dictate tasks, chat messages and question choices into editable drafts
-- Notifications: answer approvals and questions from phone actions or routed desk banners
-
-### Fixed
-
-- Questions arrive through background push instead of waiting for the next app launch
-
-## 1.14.0 — Unreleased
-
-### Added
-
-- Desk: search owned run files, installed agent skills and project commands with @, / and $
-- Desk: preview file lines and insert references with keyboard or touch
-
-### Changed
-
-- Desktop: start in the tray with --tray while keeping the paired host reachable
-
-## 1.13.0 — Unreleased
-
-### Changed
-
-- Phone and browser keep remote controls; local host settings move to the desktop app
-- Desktop has its own renderer, with Cellar views and Desk controls preserved across upgrades
-
-## 1.12.0 — Unreleased
-
-### Added
-
-- Desk: queue chat messages, edit or send them now, and track stop results per PC
-- Desk: answer real Claude and Codex approvals, with durable receipts and first answer wins
-- Desk: follow real agent turns live, with full tool output and durable run history
-- Desk: reconnect without duplicate turns; open labelled saved chats while the PC is offline
-
-- Desk: start tasks in worktrees from main; keep, review merges or remove finished workspaces
-- Desk: run project commands as jobs, with readable test results and raw output
-- Questions: keep exact choices and a separate note, with drafts retained on failed saves
-- Desk: send complete tasks, claim all attached thoughts and recover starts without duplicates
-- Project: a dump field at the top files a thought straight into that project
-- Project: add a picture to a thought from the dump field, as its cover
-- Entry: edit rewords the thought, and the trail keeps what it said before
-- Dump: add a picture to a thought as you drop it, cropped to any shape you like
-- Entry: add, replace or remove the thought's picture, and add pictures as notes in the thread
-- Entry: tap a picture to see it full screen
-- Sign-in screen: continue with bazaar when it is installed on this phone
-- Entry, project: start on pc hands the thought to claude, codex or antigravity on your pc
-- Settings: pair with cellar on your pc by scanning its code, then send it prompts and follow its runs
-- Your pc: on the same wi-fi, open its local pages, watch its screen and install its app builds
-- Projects: a group has a folder of its own, set under where it lives on the group
-- Your pc: start in a group's folder, and trust a new folder for claude from the phone
-- Entry: colour codes like #64748B are drawn in their colour, and a tap copies them
-- Settings: show a sample desk, to see the desk's coming screens filled in
-- Desk: new task — say what to do, pick the project, agent and how much it may do, send it to your pc
-- Desk: a run opens as a chat, with its tool steps folded and stop at the top
-- Desk: an agent's replies show as formatted text — code, lists, tables, bold and links
-- Desk: preview a page from your pc at phone, tablet or desktop size, with its checks and deploy
-- Desk: type $ in a task to pick a project, then one of its entries, from a list over the field
-- Desk: under a task, a line per $, @, / and colour says what each will do before you send
-- Desk: tap a colour under a task to copy it or nudge it lighter or darker
-- Desk: your pc's screen opens sideways in the app, edge to edge, with its control modes drawn
-- Desk: on a wide window, a capture bar files a thought on enter and hands it off on shift+enter
-- Desk: on a wide window, waiting on you, runs, your pc, commands and today sit side by side
-- Desk: stop all agents stops every run you started from cellar
-- Desk: on a wide window, a run opens beside every run grouped by project, searchable and filtered
-- Project: hold thoughts and hand them to an agent on your pc, as one run or one run each
-- Project, inbox, search: a thought shows which agent is on it
-- Project: on a wide window, the aside shows the project's checkout on your pc
-- Settings: in sections — dump, agents, hosts, recipes, keys, devices, notifications, night shift, usage, account
-- Settings: agents picks the agent and how much it may do for every new task
-- Settings: keys, where pings go, usage, recipes, hosts and night shift show what is coming
-- Settings: see how desk notifications will look, built from your live runs and waiting questions
-- Desk: file it into cellar — type a thing, its kind is guessed, pick a project and hand it off
-- Desk: with the sample desk on, see races, the night shift, group runs and the phone over adb
-
-### Changed
-
-- Desk: shared real counts across navigation and headers; unavailable reads hide totals,
-  retry and reconnect wait for confirmed results, and remote counts show snapshot freshness
-- Desk: match canvas layouts, typography, task sheet, chat composer and desktop sample panels
-
-- Entry: start on pc opens the new task screen with the thought attached
-- Entry: an agent's question takes a pick and an answer tap, can pick more than one, and can carry a note
-- Desk: the right plate of the bar is now your pc, badged with what is waiting on you
-- Settings: your account and the size of your cellar moved here from profile
-- Your pc: its local pages open in the desk's preview instead of the browser
-- Settings: on a wide window, a column of sections sits beside the page
-- Desktop: the sidebar has a desk section — home, chat, commands, previews, phone — and pinned projects
-- Settings: show a sample desk moved into devices and pairing
-- Desk: your desk opens on the pc's card, then runs waiting on you, running and lately
-- Dump: file it puts each group's own project first, then pinned projects
-- Projects: a group is a tile in the grid that opens in place, with one outline round its projects
-- Projects: a tile inside an open group says which group it is in
-- Sign-in screen: ping apps on this phone sit behind one choose an app button
-
-### Fixed
-
-- Desk: stop new runs while another PC still has an earlier Stop all pending
-- Sign-in screen: continuing with an app that is already open now signs you in
-- The app icon, splash and web favicon are the same size as the other Ping apps
+- Desktop and phone: correct mirrored touch coordinates and PC scrolling, keep video connected, restore queued messages and resolve Codex CLI reliably
 
 ## 1.11.0 — 2026-10-01
 
