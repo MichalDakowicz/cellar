@@ -17,7 +17,7 @@ test('full task creates one workspace/run; a proven trust refusal retries the sa
   const events: string[] = [];
   let untrusted = true;
   const deps = { account: f.account, worktrees: f.manager, runs: { start: async (task: DeskStart & { branch?: string }) => {
-    events.push('launch'); assert.notEqual(task.cwd, f.root); assert.ok(task.branch?.startsWith('wt/'));
+    events.push('launch'); assert.notEqual(task.cwd, f.root); assert.ok(task.branch?.startsWith('test/isolated-workspace-'));
     if (untrusted) throw new DeskError('trust this workspace', 409, { notStarted: true, untrusted: task.cwd });
     const run = { ...task, id: 'abcdef01', name: 'test', state: 'done', origin: 'phone', startedAt: Date.now() } as DeskRun;
     f.runs.push(run); return run;
@@ -38,6 +38,7 @@ test('full task creates one workspace/run; a proven trust refusal retries the sa
     assert.ok(one.cwd.length - f.data.length < 90, 'managed directory nesting stays short on Windows');
     assert.deepEqual(events, ['claim', 'launch']);
     assert.equal((await f.manager.list())[0].worktrees.length, 2);
+    assert.equal(f.names.length, 1, 'a proven pre-launch retry reuses the generated name');
     await assert.rejects(startTask(deps, { ...retry, commandId: randomUUID() }, async () => 'test-agent'), /already has a run/);
   } finally { await f.dispose(); }
 });

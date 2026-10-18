@@ -7,9 +7,9 @@ export class CodexRpc {
   readonly child: ChildProcessWithoutNullStreams;
   private next = 0;
   private pending = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>();
-  constructor(path: string, cwd: string, env: NodeJS.ProcessEnv, receive: (row: RpcRow) => void, diagnostic: (text: string) => void) {
+  constructor(path: string, cwd: string, env: NodeJS.ProcessEnv, receive: (row: RpcRow) => void, diagnostic: (text: string) => void, extraArgs: string[] = []) {
     const accountArgs = env.CELLAR_API_ACCOUNT === '1' ? ['-c', 'model_provider="cellar_api"', '-c', 'model_providers.cellar_api.name="OpenAI"', '-c', 'model_providers.cellar_api.base_url="https://api.openai.com/v1"', '-c', 'model_providers.cellar_api.env_key="OPENAI_API_KEY"', '-c', 'model_providers.cellar_api.wire_api="responses"'] : [];
-    this.child = spawn(path, ['app-server', '--listen', 'stdio://', ...accountArgs], { cwd, env, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    this.child = spawn(path, ['app-server', '--listen', 'stdio://', ...accountArgs, ...extraArgs], { cwd, env, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     const lines = createInterface({ input: this.child.stdout });
     lines.on('line', (line) => {
       try {

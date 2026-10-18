@@ -8,6 +8,19 @@ import { Worktrees } from './worktrees.ts';
 import { worktreeFixture } from './worktreeFixture.ts';
 import type { WorktreeAction } from '@/lib/deskWorktrees';
 
+test('invalid names and provider failures do not create a branch or launch a task', async () => {
+  const f = await worktreeFixture();
+  try {
+    for (const nameBranch of [async () => 'wt/unsafe', async () => { throw new Error('provider unavailable'); }]) {
+      const manager = new Worktrees(f.data, f.account, async () => f.runs, undefined, nameBranch);
+      await assert.rejects(manager.create(f.request), /valid task branch|provider unavailable/);
+      assert.equal((await manager.list())[0].worktrees.length, 1);
+      assert.equal(await git(f.root, 'branch', '--format=%(refname:short)'), 'main');
+      assert.equal(f.runs.length, 0);
+    }
+  } finally { await f.dispose(); }
+});
+
 test('Git-confirmed creation leaves checkout changes intact; finished keep/merge/remove survive restart', async () => {
   const f = await worktreeFixture();
   const action = async (name: WorktreeAction) => {
@@ -96,6 +109,6 @@ test('a missing external Git worktree is unavailable without disabling healthy p
     assert.equal(project.available, true);
     const row = project.worktrees.find((item) => item.branch === 'external')!;
     assert.equal(row.dirty, null); assert.ok(row.unavailable);
-    assert.ok((await f.manager.create(f.request)).branch.startsWith('wt/'));
+    assert.ok((await f.manager.create(f.request)).branch.startsWith('test/isolated-workspace-'));
   } finally { await f.dispose(); }
 });

@@ -20,7 +20,8 @@ export async function worktreeFixture() {
   const runs: DeskRun[] = [];
   const account = { current: { userId: 'owner' }, commandProjects: async () => [{ projectId, path: root }],
     claimTaskEntries: async () => {}, releaseTaskEntries: async () => {} } as unknown as Account;
-  const manager = new Worktrees(data, account, async () => runs);
+  const names: string[] = [];
+  const manager = new Worktrees(data, account, async () => runs, undefined, async (start) => { names.push(start.prompt); return 'test/isolated-workspace'; });
   const request: DeskStart = { commandId, worktreeId: commandId, projectId, cwd: root, where: 'worktree', agent: 'codex',
     mode: 'ask', prompt: 'test isolated workspace', name: null, entryId: null, entryIds: [] };
   const finished = (path: string, id = commandId) => {
@@ -31,5 +32,5 @@ export async function worktreeFixture() {
     assert.ok(dir.startsWith(join(tmpdir(), 'cellar-worktrees-')));
     rmSync(dir, { recursive: true, force: true });
   };
-  return { dir, root, data, runs, account, manager, request, finished, dispose };
+  return { dir, root, data, runs, account, manager, request, finished, dispose, names };
 }

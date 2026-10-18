@@ -3,12 +3,13 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, writeFil
 import { join } from 'node:path';
 import type { DeskStart, DeskRun } from '@/lib/deskProtocol';
 import { repoKey } from '@/lib/repoLink';
-import { finishedWorktreeRun, worktreeSlug, type DeskProjectWorktrees, type DeskWorktree, type WorktreeAction, type WorktreeRequest, type WorktreeReview } from '@/lib/deskWorktrees';
+import { finishedWorktreeRun, namedWorktreeBranch, type DeskProjectWorktrees, type DeskWorktree, type WorktreeAction, type WorktreeRequest, type WorktreeReview } from '@/lib/deskWorktrees';
 import type { Account } from './account.ts';
 import { DeskError } from './claudeRuns.ts';
 import { ancestor, clean, git, gitTrees, managedPath, repository } from './worktreeGit.ts';
 import { WorktreeReceipts } from './worktreeReceipts.ts';
 import { archiveWorktree, checkIgnoredWorktreeFiles } from './worktreeArchive.ts';
+import { generateWorktreeName } from './worktreeName.ts';
 
 type Managed = { id: string; owner: string; projectId: string; root: string; path: string; branch: string; kept: boolean; task: string; removed?: boolean; archiveRef?: string };
 const refused = (message: string): never => { throw new DeskError(message, 409, { notStarted: true }); };
@@ -20,7 +21,7 @@ export class Worktrees {
   private readonly dir: string;
   private readonly records: Managed[];
   private readonly locks = new Map<string, Promise<unknown>>();
-  constructor(dir: string, private readonly account: Account, private readonly runs: () => Promise<DeskRun[]>, managedDir = join(dir, 'worktrees')) {
+  constructor(dir: string, private readonly account: Account, private readonly runs: () => Promise<DeskRun[]>, managedDir = join(dir, 'worktrees'), private readonly nameBranch = generateWorktreeName) {
     this.dir = managedDir; mkdirSync(this.dir, { recursive: true });
     this.file = join(dir, 'worktrees.json');
     this.records = existsSync(this.file) ? JSON.parse(readFileSync(this.file, 'utf8')) : [];
@@ -89,8 +90,10 @@ export class Worktrees {
     mkdirSync(join(path, '..'), { recursive: true });
     const parent = managedPath(realpathSync.native(this.dir), realpathSync.native(join(path, '..')));
     if (repoKey(parent) !== repoKey(join(path, '..'))) refused('Managed workspace parent was redirected.');
+    const branch = namedWorktreeBranch(await this.nameBranch(start), id);
+    this.unchanged(owner);
     const row: Managed = { id, owner, projectId: start.projectId!, root, path, task,
-      branch: `wt/${worktreeSlug(start.name ?? start.prompt.split(/\r?\n/)[0], id)}`, kept: options.keep === true };
+      branch, kept: options.keep === true };
     this.records.push(row); this.save(); // Persist identity before Git changes anything.
     this.unchanged(owner);
     if (options.baseCommit && !/^[a-f0-9]{40,64}$/.test(options.baseCommit)) refused('Invalid pinned worktree commit.');

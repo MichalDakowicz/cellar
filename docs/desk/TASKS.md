@@ -326,8 +326,12 @@ New worktrees remain W5; phone approvals remain W8. No GitHub push or website de
 
 ### W5 · worktrees `[x]`
 
-"New worktree" creates `wt/<slug>` off main on the host; the project panel lists worktrees per
+"New worktree" creates an AI-named `fix/<slug>`, `docs/<slug>` or other task-type branch off main on the host; the project panel lists worktrees per
 project; a finished run's worktree can be kept, merged or removed.
+
+2026-10-18: bounded naming request uses the selected Codex/Claude account before Git creation;
+Antigravity uses installed Codex or Claude. Names are validated and persisted once; retries reuse
+them, and naming failures stop before task launch. Existing worktrees retain their names.
 
 2026-10-11: Git-confirmed worktrees from local main, owner-scoped workspace/start
 identity, reviewed Keep/Merge/Remove and durable lifecycle recovery verified.

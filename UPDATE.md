@@ -10,6 +10,7 @@
 
 - Entry: agents receive attached pictures when reading or claiming thoughts
 - Entry: keep screenshot text sharp with lossless images and gentler photo compression
+- Desk: new worktree branches use AI-generated task names with fix, docs and other prefixes
 
 ## 1.16.0 — Unreleased
 
