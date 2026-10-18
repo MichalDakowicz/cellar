@@ -128,6 +128,13 @@ describe('fitPixels', () => {
 });
 
 describe('PICTURE_STEPS', () => {
+  it('keeps a full phone screenshot lossless before trying JPEG', () => {
+    expect(PICTURE_STEPS[0].format).toBe('png');
+    expect(fitPixels(1440, 3200, PICTURE_STEPS[0].pixels)).toBeNull();
+    expect(pictureDataUri('AAAA', 'png')).toBe('data:image/png;base64,AAAA');
+    expect(pictureOf(pictureDataUri('A'.repeat(1_000_000), 'png'))).not.toBeNull();
+    expect(PICTURE_STEPS.filter((step) => step.format === 'jpeg').every((step) => step.quality >= 0.88)).toBe(true);
+  });
   it('only ever asks for less than the step before it', () => {
     PICTURE_STEPS.slice(1).forEach((step, index) => {
       const before = PICTURE_STEPS[index];

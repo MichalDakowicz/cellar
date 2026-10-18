@@ -5,6 +5,7 @@
 ### Fixed
 
 - Entry: agents receive attached pictures when reading or claiming thoughts
+- Entry: keep screenshot text sharp with lossless images and gentler photo compression
 
 ## 1.16.0 — Unreleased
 

@@ -5,6 +5,7 @@ import {
   fitPixels,
   fitSize,
   PICTURE_STEPS,
+  pictureOf,
   pictureDataUri,
   THUMB_QUALITY,
   THUMB_SIZE,
@@ -14,7 +15,7 @@ import {
 
 /**
  * Pick a picture, let the person crop it, and turn it into the text a picture
- * row holds: a JPEG in base64, and a `THUMB_SIZE` thumb of it. `null` when you
+ * row holds: a lossless PNG or high-quality JPEG, and a `THUMB_SIZE` thumb. `null` when you
  * backed out, which is not an error; a picture that will not fit as text even
  * at the hardest compression throws, because "nothing happened" would read as
  * the app ignoring you.
@@ -42,9 +43,11 @@ export async function pickPicture(): Promise<NewPicture | null> {
     const resize = fitPixels(asset.width, asset.height, step.pixels);
     const big = await manipulateAsync(asset.uri, resize ? [{ resize }] : [], {
       compress: step.quality,
-      format: SaveFormat.JPEG,
+      format: step.format === 'png' ? SaveFormat.PNG : SaveFormat.JPEG,
       base64: true,
     });
+    const data = big.base64 ? pictureDataUri(big.base64, step.format) : null;
+    if (!pictureOf(data)) continue;
     const thumbResize = fitSize(big.width, big.height, THUMB_SIZE);
     const small = await manipulateAsync(big.uri, thumbResize ? [{ resize: thumbResize }] : [], {
       compress: THUMB_QUALITY,
@@ -55,7 +58,7 @@ export async function pickPicture(): Promise<NewPicture | null> {
 
     const picture = {
       thumb: pictureDataUri(small.base64),
-      data: pictureDataUri(big.base64),
+      data: data!,
       width: big.width,
       height: big.height,
     };
