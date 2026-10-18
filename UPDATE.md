@@ -2,6 +2,10 @@
 
 ## 1.17.0 — Unreleased
 
+### Added
+
+- Entry: agents can attach document links and repo paths through MCP
+
 ### Fixed
 
 - Entry: agents receive attached pictures when reading or claiming thoughts
