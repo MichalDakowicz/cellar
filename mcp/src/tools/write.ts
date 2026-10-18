@@ -20,6 +20,7 @@ import { answerQuestion, askQuestion, resolveQuestion } from '../questions.ts';
 import { byAgent, logMoves } from '../trail.ts';
 import { guard, text, withAnswered, withCellar, type CtxProvider } from '../context.ts';
 import { entryBrief, shortId } from '../format.ts';
+import { withPictures } from '../pictures.ts';
 
 /**
  * The writes, and the shape of the loop they make:
@@ -72,7 +73,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           { what: 'claimed', fromValue: 'open', toValue: 'doing', source: 'agent', agent: ctx.agent },
         ]);
 
-        return text(
+        return withPictures(ctx.client, target.id,
           withAnswered(
             [
               `Claimed as "${ctx.agent}". It is now doing, and the user sees your name on it.`,

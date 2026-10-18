@@ -1,5 +1,11 @@
 # Update notes
 
+## 1.17.0 — Unreleased
+
+### Fixed
+
+- Entry: agents receive attached pictures when reading or claiming thoughts
+
 ## 1.16.0 — Unreleased
 
 ### Added

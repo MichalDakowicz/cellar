@@ -5,6 +5,7 @@ import { registerReadTools } from './tools/read.ts';
 import { registerSettleTools } from './tools/settle.ts';
 import { registerStructureTools } from './tools/structure.ts';
 import { registerWriteTools } from './tools/write.ts';
+import { registerPictureTools } from './tools/pictures.ts';
 
 /**
  * The server itself — the tools and what the client is told they are for.
@@ -47,6 +48,7 @@ export function createCellarServer(getCtx: CtxProvider): McpServer {
   registerWriteTools(server, getCtx);
   registerSettleTools(server, getCtx);
   registerStructureTools(server, getCtx);
+  registerPictureTools(server, getCtx);
 
   return server;
 }
