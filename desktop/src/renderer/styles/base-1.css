@@ -39,6 +39,7 @@ body,
 }
 body,
 button,
+.route-link,
 input,
 textarea,
 select {
@@ -52,7 +53,8 @@ textarea,
 select {
   color: inherit;
 }
-button {
+button,
+.route-link {
   cursor: pointer;
   border: 1px solid hsl(var(--border));
   background: hsl(var(--secondary));
@@ -64,7 +66,8 @@ button {
   gap: 8px;
   min-height: 36px;
 }
-button:hover:not(:disabled) {
+button:hover:not(:disabled),
+.route-link:hover {
   filter: brightness(1.12);
 }
 button:disabled {

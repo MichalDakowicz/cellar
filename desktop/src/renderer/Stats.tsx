@@ -1,7 +1,7 @@
 import type { Cellar } from "./useCellar";
 import { save } from "./preferences";
 import { useStatsView } from "./useStatsView";
-import { navigate } from "./useRoute";
+import { RouteLink } from './RouteLink';
 
 export function Stats({ cellar }: { cellar: Cellar }) {
   const view = useStatsView(cellar);
@@ -63,16 +63,16 @@ export function Stats({ cellar }: { cellar: Cellar }) {
       ))}
       <h2 className="overline">busiest projects</h2>
       {view.busiest.map((row) => (
-        <button
+        <RouteLink
           className="settings-row"
           key={row.id}
-          onClick={() => navigate(`/project/${row.id}`)}
+          href={`/project/${row.id}`}
         >
           <span>{row.name}</span>
           <small className="muted">
             {row.total} entries · {row.open} open
           </small>
-        </button>
+        </RouteLink>
       ))}
     </div>
   );

@@ -9,7 +9,7 @@ import { signInInBrowser } from './oauth.ts';
 import { readSession } from './session.ts';
 import { createTray } from './tray.ts';
 import { registerWebScheme, serveWeb } from './web.ts';
-import { createWindow, showWindow } from './window.ts';
+import { createWindow, ownsRenderer, showWindow } from './window.ts';
 import { isCellarOrigin, isRendererSender, readIpcRequest } from './ipcBoundary.ts';
 
 /**
@@ -59,7 +59,7 @@ function registerIpc(desk: DeskHost): void {
   const guard = <A extends unknown[], R>(fn: (...args: A) => R) =>
     (event: Electron.IpcMainInvokeEvent, ...args: A): R => {
       if (!isRendererSender({ url: event.senderFrame?.url ?? '', dev, senderId: event.sender.id,
-        windowId: window?.webContents.id ?? null, topLevel: event.senderFrame === event.sender.mainFrame })) throw new Error('not cellar');
+        windowId: ownsRenderer(event.sender.id) ? event.sender.id : null, topLevel: event.senderFrame === event.sender.mainFrame })) throw new Error('not cellar');
       return fn(...args);
     };
 

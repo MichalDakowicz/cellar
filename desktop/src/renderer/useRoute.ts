@@ -5,9 +5,9 @@ export function navigate(path: string) {
   dispatchEvent(new PopStateEvent("popstate"));
 }
 export function useRoute() {
-  const [path, setPath] = useState(location.pathname);
+  const [path, setPath] = useState(location.pathname + location.search);
   useEffect(() => {
-    const update = () => setPath(location.pathname);
+    const update = () => setPath(location.pathname + location.search);
     addEventListener("popstate", update);
     return () => removeEventListener("popstate", update);
   }, []);

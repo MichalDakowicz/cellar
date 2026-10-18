@@ -30,6 +30,7 @@ import { presentationRuns, subscribedRun } from "./deskPresentation";
 import { SampleChat } from "./SampleChat";
 import { sampleData } from "./sampleData";
 import { SAMPLE_PROJECTS } from "@/lib/deskSample";
+import { FilePage } from './FilePage';
 import { saved, useSaved } from "./preferences";
 
 export function DesktopApp({
@@ -42,7 +43,8 @@ export function DesktopApp({
   name: string;
 }) {
   const prefs = useAccountPreferences();
-  const path = useRoute();
+  const route = useRoute();
+  const path = route.split('?')[0];
   const workspace = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     workspace.current?.scrollTo({ top: 0, left: 0 });
@@ -122,6 +124,7 @@ export function DesktopApp({
     );
   else if (path.startsWith("/entry/"))
     content = <EntryDetail key={path} cellar={cellar} id={path.slice(7)} />;
+  else if (path === '/desk/file') content = <FilePage key={route} search={location.search} />;
   else if (path === "/desk/new")
     content = <NewTask cellar={cellar} host={host} />;
   else if (path === "/desk/share") content = <Share cellar={cellar} />;

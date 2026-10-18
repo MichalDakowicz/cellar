@@ -1,4 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import type { Href } from 'expo-router';
+import { RoutePressable } from '@/components/ui/RoutePressable';
 
 /**
  * A thing on the pc the phone can open — a page, the screen, a build. A title,
@@ -7,12 +9,14 @@ import { Pressable, Text, View } from 'react-native';
  */
 export function DeskLocalRow({
   title,
+  href,
   detail,
   verb,
   busy,
   onPress,
 }: {
   title: string;
+  href?: Href;
   detail: string;
   verb: string;
   busy?: boolean;
@@ -28,7 +32,8 @@ export function DeskLocalRow({
           {detail}
         </Text>
       </View>
-      <Pressable
+      <RoutePressable
+        href={href}
         accessibilityRole="button"
         accessibilityLabel={`${verb} ${title}`}
         disabled={busy}
@@ -37,7 +42,7 @@ export function DeskLocalRow({
         className={['rounded-full border border-border px-3 py-1.5 active:opacity-70', busy ? 'opacity-50' : ''].join(' ')}
       >
         <Text className="font-sans text-xs font-semibold text-foreground">{busy ? '…' : verb}</Text>
-      </Pressable>
+      </RoutePressable>
     </View>
   );
 }

@@ -45,8 +45,10 @@ from the repository root. Keep the graphs separate: only pure contracts, domain 
 tokens and assets cross their boundary.
 
 The packaged renderer retains `cellar-desk://app`, existing profile/auth storage and MMKV
-web preference namespaces. It alone refreshes the account session; main receives only
-an access token and user ID. IPC accepts only this window’s top-level renderer.
+web preference namespaces. Renderers share the normal Supabase browser session; main receives only
+an access token and user ID. IPC accepts only Cellar-created windows' top-level renderers.
+Middle-click or Ctrl/Cmd-click navigation to open another Cellar window. External links
+open in the system browser; embedded preview frames never receive the host bridge.
 Development `?sample=1` fixtures are isolated from account operations; production sample
 presenters remain labelled and never execute later unwired features.
 

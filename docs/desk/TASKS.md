@@ -333,6 +333,9 @@ project; a finished run's worktree can be kept, merged or removed.
 Antigravity uses installed Codex or Claude. Names are validated and persisted once; retries reuse
 them, and naming failures stop before task launch. Existing worktrees retain their names.
 
+2026-10-18: project, entry, run, preview and document navigation supports middle-click;
+Cellar-owned secondary desktop windows retain top-level IPC checks, while embeds stay untrusted.
+
 2026-10-11: Git-confirmed worktrees from local main, owner-scoped workspace/start
 identity, reviewed Keep/Merge/Remove and durable lifecycle recovery verified.
 Merge is clean fast-forward only; remove refuses dirty/locked/unmerged or

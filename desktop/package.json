@@ -1,7 +1,7 @@
 {
   "name": "cellar-desktop",
   "productName": "Cellar",
-  "version": "0.1.0",
+  "version": "1.17.0",
   "private": true,
   "description": "Cellar on the pc: the app in a window, and the side of it the phone talks to — start agents, open the pc's local pages and screen, drop builds to install.",
   "main": "build/main.js",

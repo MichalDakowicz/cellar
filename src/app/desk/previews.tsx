@@ -39,6 +39,7 @@ export default function DeskPreviews() {
       )}
       {local.ports.map((port) => (
         <DeskLocalRow
+          href={`/desk/preview/${port.port}` as Href}
           key={port.port}
           title={`localhost:${port.port}`}
           detail={port.process ?? `process ${port.pid}`}

@@ -5,6 +5,7 @@
 ### Added
 
 - Entry: agents can attach document links and repo paths through MCP
+- Browser and desktop: middle-click projects, entries and previews to open a new page
 
 ### Fixed
 

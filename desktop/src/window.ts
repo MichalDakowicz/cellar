@@ -4,9 +4,12 @@ import { join } from 'node:path';
 import { APP_ORIGIN } from './web.ts';
 import { RENDERER_DEV_ORIGIN } from './ipcBoundary.ts';
 
+const ownedWindows = new Map<number, BrowserWindow>();
+export function ownsRenderer(id: number): boolean { return ownedWindows.has(id); }
+
 /**
- * The one window. It opens on Cellar; closing it hides it, because the pc has
- * to stay reachable for the phone while it is out of the way.
+ * The primary window hides on close so the phone can still reach the host.
+ * Secondary Cellar pages close normally and share the existing profile.
  *
  * Anything that is not Cellar opens in the real browser: a link in a thought, a
  * repo, a sign-in provider. The window never becomes a general browser, because
@@ -22,6 +25,7 @@ export function createWindow(options: {
   startHidden?: boolean;
   isQuitting: () => boolean;
   fromCellar: (url: string) => boolean;
+  url?: string;
 }): BrowserWindow {
   const window = new BrowserWindow({
     width: 1180,
@@ -40,14 +44,22 @@ export function createWindow(options: {
     },
   });
 
+  const rendererId = window.webContents.id;
+  ownedWindows.set(rendererId, window);
+  window.once('closed', () => ownedWindows.delete(rendererId));
+
   window.once('ready-to-show', () => { if (!options.startHidden) window.show(); });
   window.on('close', (event) => {
-    if (options.isQuitting()) return;
+    if (options.isQuitting() || options.url) return;
     event.preventDefault();
     window.hide();
   });
 
   window.webContents.setWindowOpenHandler(({ url }) => {
+    if (options.fromCellar(url)) {
+      createWindow({ ...options, startHidden: false, url });
+      return { action: 'deny' };
+    }
     if (/^https?:/i.test(url)) void shell.openExternal(url);
     return { action: 'deny' };
   });
@@ -57,7 +69,7 @@ export function createWindow(options: {
     if (/^https?:/i.test(url)) void shell.openExternal(url);
   });
 
-  void window.loadURL(options.dev ? RENDERER_DEV_ORIGIN : `${APP_ORIGIN}/`);
+  void window.loadURL(options.url ?? (options.dev ? RENDERER_DEV_ORIGIN : `${APP_ORIGIN}/`));
   return window;
 }
 

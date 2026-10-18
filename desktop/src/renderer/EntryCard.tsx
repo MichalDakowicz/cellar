@@ -7,6 +7,8 @@ import { shortRel } from "@/lib/relTime";
 import { useAccountPreferences } from "./accountPreferences";
 import { useCellarPictures } from "./cellarContext";
 import { KindGlyph } from "./KindGlyph";
+import { RouteLink } from './RouteLink';
+import { plainNavigation } from '@/lib/navigation';
 
 export function EntryCard({
   entry,
@@ -44,11 +46,18 @@ export function EntryCard({
       )}
       <div
         className="entry-content quiet"
-        role="button"
+        role="link"
         tabIndex={0}
         onClick={(event) => {
-          if (!(event.target as HTMLElement).closest("a,button"))
-            navigate(`/entry/${entry.id}`);
+          if ((event.target as HTMLElement).closest("a,button")) return;
+          if (plainNavigation(event)) navigate(`/entry/${entry.id}`);
+          else if (event.button === 0) window.open(`/entry/${entry.id}`, '_blank', 'noopener,noreferrer');
+        }}
+        onMouseDown={(event) => { if (event.button === 1 && !(event.target as HTMLElement).closest('a,button')) event.preventDefault(); }}
+        onAuxClick={(event) => {
+          if (event.button !== 1 || (event.target as HTMLElement).closest('a,button')) return;
+          event.preventDefault();
+          window.open(`/entry/${entry.id}`, '_blank', 'noopener,noreferrer');
         }}
         onKeyDown={(event) => {
           if (
@@ -63,7 +72,7 @@ export function EntryCard({
         <Markdown value={entry.text} />
         {variant !== "hit" && (
           <small className="muted">
-            {shortRel(entry.createdAt)}
+            <RouteLink className="quiet" href={`/entry/${entry.id}`}>{shortRel(entry.createdAt)}</RouteLink>
             {entry.agent ? ` · ${entry.agent}` : ""}
             {entry.lines.length ? ` · ${entry.lines.length} notes` : ""}
             {entry.docs.length ? ` · ${entry.docs.length} docs` : ""}
@@ -82,13 +91,13 @@ export function EntryCard({
         </span>
       )}
       {cover && (
-        <button
+        <RouteLink
           className="entry-thumb quiet"
           aria-label="open thought picture"
-          onClick={() => navigate(`/entry/${entry.id}`)}
+          href={`/entry/${entry.id}`}
         >
           <img src={cover.thumb} alt="thought cover" />
-        </button>
+        </RouteLink>
       )}
     </article>
   );
