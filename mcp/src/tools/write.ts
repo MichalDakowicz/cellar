@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { canClaim, LINE_VOICE } from '@/lib/agentWork';
+import { askRule, canClaim, LINE_VOICE } from '@/lib/agentWork';
 import { patchEvents } from '@/lib/entryTrail';
 import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
@@ -119,10 +119,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
     {
       title: 'Ask the user about an entry, then move on',
       description:
-        'Put a question on the entry and block it. THIS IS A CORRECT OUTCOME, not a failure — for an idea or a ' +
-        'removal it is usually the right one. A dumped thought is one line and the decisions behind it were never ' +
-        'written down, so anything with two plausible readings that lead to different work is a question, not a ' +
-        'guess.\n\n' +
+        'Put a necessary question on the entry and block it. ' + askRule() + '\n\n' +
         'WHERE TO ASK. If this session has one task, do not use this tool — ask in the chat, because the user is ' +
         'right there and blocking the only thing they asked for helps nobody. Use this when they have handed you ' +
         'several: it blocks this one thought and leaves the rest of the list workable, and the answer may well be ' +

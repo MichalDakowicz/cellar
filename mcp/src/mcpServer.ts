@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { askRule } from '@/lib/agentWork';
 
 import type { CtxProvider } from './context.ts';
 import { registerReadTools } from './tools/read.ts';
@@ -29,10 +30,7 @@ export function createCellarServer(getCtx: CtxProvider): McpServer {
         'and lists what is open. Claim a thought with cellar_claim_entry before doing anything about it, report back',
         'with cellar_append_line, and settle it with cellar_finish_entry.',
         '',
-        'The rule that matters most: a dumped thought is one line, and the reasoning behind it was never written',
-        'down. When two readings of it would lead to different work — and for every idea and every removal — use',
-        'cellar_ask rather than guessing. A blocked entry with a good question is a better outcome than a confident',
-        'wrong build.',
+        askRule(),
         '',
         'Write like the user does: lowercase, one line, no full stop, no markdown. These lines sit in a list next to',
         'their own thoughts, and an assistant voice in that list makes it unreadable.',
