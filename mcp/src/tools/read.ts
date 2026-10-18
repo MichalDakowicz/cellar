@@ -11,6 +11,7 @@ import { resolveEntry, resolveProject, type Cellar } from '../cellar.ts';
 import { loadAgentDevice } from '../settings.ts';
 import { guard, text, withCellar, type CtxProvider } from '../context.ts';
 import { answeredBlock, entryBrief, entryData, entryTable, projectRow, ROW_LEGEND, shortId } from '../format.ts';
+import { withPictures } from '../pictures.ts';
 
 /**
  * The reads. `cellar_orient` is the one that matters.
@@ -298,8 +299,9 @@ export function registerReadTools(server: McpServer, getCtx: CtxProvider): void 
     },
     async ({ entry }) =>
       guard(async () => {
-        const { cellar } = await withCellar(getCtx);
-        return text(entryBrief(resolveEntry(entry, cellar.entries), cellar));
+        const { ctx, cellar } = await withCellar(getCtx);
+        const target = resolveEntry(entry, cellar.entries);
+        return withPictures(ctx.client, target.id, entryBrief(target, cellar));
       }),
   );
 }

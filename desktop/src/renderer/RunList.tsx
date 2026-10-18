@@ -4,7 +4,7 @@ import type { DeskRun } from "@/lib/deskProtocol";
 import type { RuntimeRequest } from "@/lib/deskApprovals";
 import type { RunFilter } from "@/lib/deskRunList";
 import { detailParts, metaParts } from "@/lib/deskView";
-import { navigate } from "./useRoute";
+import { RouteLink } from './RouteLink';
 import { RunChip } from "./RunChip";
 import type { Cellar } from "./useCellar";
 import { useRunCards } from "./useRunCards";
@@ -38,13 +38,13 @@ export function RunList({
         <>
           <header className="row">
             <h2>chat</h2>
-            <button
+            <RouteLink
               className="icon"
               aria-label="new task"
-              onClick={() => navigate("/desk/new")}
+              href="/desk/new"
             >
               <Plus size={16} />
-            </button>
+            </RouteLink>
           </header>
           <input
             aria-label="search runs"
@@ -79,10 +79,10 @@ export function RunList({
                   : ` · ${group.runs.length}${group.runs.some((row) => row.id.startsWith("sample-")) ? " · includes sample" : ""}`}
               </h2>
               {group.runs.map((run) => (
-                <button
+                <RouteLink
                   className={`run-row ${selected === run.id ? "selected" : ""}`}
                   key={run.id}
-                  onClick={() => navigate(`/desk/run/${run.id}`)}
+                  href={`/desk/run/${run.id}`}
                 >
                   <div className="run-card-line">
                     {!compact && ["waiting", "running"].includes(run.state) && (
@@ -125,7 +125,7 @@ export function RunList({
                       )}
                     </div>
                   </div>
-                </button>
+                </RouteLink>
               ))}
             </section>
           ),

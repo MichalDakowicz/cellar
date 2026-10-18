@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 import { answeredForAgent } from '@/lib/entryQuestions';
 
@@ -54,7 +55,7 @@ export function withAnswered(body: string, cellar: Cellar, agent: string, except
   return body + answeredTail(answered, exceptId);
 }
 
-export type ToolResult ={ content: { type: 'text'; text: string }[]; isError?: boolean };
+export type ToolResult = Pick<CallToolResult, 'content' | 'isError'>;
 
 export function text(body: string): ToolResult {
   return { content: [{ type: 'text', text: body }] };

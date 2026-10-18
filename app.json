@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cellar",
     "slug": "cellar",
-    "version": "1.16.0",
+    "version": "1.17.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cellar",
@@ -17,7 +17,7 @@
       "package": "com.michaldakowicz.cellar",
       "intentFilters": [{ "action": "SEND", "category": ["DEFAULT"], "data": [{ "mimeType": "text/*" }] }],
       "googleServicesFile": "./config/google-services.json",
-      "versionCode": 18
+      "versionCode": 19
     },
     "web": {
       "output": "single",

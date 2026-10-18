@@ -1,8 +1,9 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { NavDestination } from '@/components/layout/navDestinations';
 import { useHover, webTransition } from '@/hooks/useResponsive';
 import { COLORS } from '@/theme/colors';
+import { RoutePressable } from '@/components/ui/RoutePressable';
 
 export const DEST_WIDTH = 46;
 export const DEST_HEIGHT = 42;
@@ -32,7 +33,8 @@ export function NavDestinationButton({
   const { hovered, bind } = useHover();
 
   return (
-    <Pressable
+    <RoutePressable
+      href={destination.href}
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       accessibilityLabel={destination.label}
@@ -69,6 +71,6 @@ export function NavDestinationButton({
           </Text>
         </View>
       )}
-    </Pressable>
+    </RoutePressable>
   );
 }

@@ -50,6 +50,15 @@ export function finishedWorktreeRun(state: string): boolean {
   return ['done', 'failed', 'stopped'].includes(state);
 }
 
+/** Only a narrow Git-safe vocabulary from model output reaches Git. */
+export function namedWorktreeBranch(proposal: string, id: string): string {
+  const name = proposal.trim();
+  if (!/^(feat|fix|docs|test|refactor|perf|build|ci|chore)\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || name.length > 65) {
+    throw new Error('Agent did not return a valid task branch name. Retry the task.');
+  }
+  return `${name}-${id.replace(/-/g, '')}`;
+}
+
 export function readProjectWorktrees(raw: unknown): DeskProjectWorktrees[] {
   if (!Array.isArray(raw) || raw.some((project) => !project || typeof project.projectId !== 'string'
     || project.base !== 'main' || typeof project.available !== 'boolean'

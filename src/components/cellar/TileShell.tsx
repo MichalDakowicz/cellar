@@ -4,6 +4,8 @@ import { Pressable, Text, View, type ViewStyle } from 'react-native';
 
 import { useHover, useIsDesktop, webTransition } from '@/hooks/useResponsive';
 import { showsHoverControl } from '@/lib/hoverReveal';
+import type { Href } from 'expo-router';
+import { RoutePressable } from '@/components/ui/RoutePressable';
 
 /**
  * The frame every tile on the shelf shares — a project's and a folder's — so the
@@ -15,6 +17,7 @@ import { showsHoverControl } from '@/lib/hoverReveal';
  */
 export function TileShell({
   label,
+  href,
   expanded,
   onPress,
   onEdit,
@@ -26,6 +29,7 @@ export function TileShell({
   meta,
 }: {
   label: string;
+  href?: Href;
   /** Only a tile that opens (a folder) says whether it is. */
   expanded?: boolean;
   onPress: () => void;
@@ -63,7 +67,8 @@ export function TileShell({
       // The lift renders over its neighbours, or the tile to its right clips it.
       style={[webTransition('transform'), hovered ? { transform: [{ scale: 1.035 }], zIndex: 10 } : null]}
     >
-      <Pressable
+      <RoutePressable
+        href={href}
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityState={expanded === undefined ? undefined : { expanded }}
@@ -80,7 +85,7 @@ export function TileShell({
         <Text className="mt-0.5 text-xs text-muted-foreground" numberOfLines={1}>
           {meta}
         </Text>
-      </Pressable>
+      </RoutePressable>
 
       {!!onEdit && (
         // The dot belongs to the artwork, not to the card. Offsetting it from

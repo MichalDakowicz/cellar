@@ -19,24 +19,24 @@
 
 /** Longest side of the list thumb. */
 export const THUMB_SIZE = 160;
-export const THUMB_QUALITY = 0.7;
+export const THUMB_QUALITY = 0.85;
 
 /**
  * What the stored picture may cost, tried in order until one fits under
  * `PICTURE_MAX_CHARS`: a pixel budget and a JPEG quality. The first step is the
- * usual one — about 1.5 megapixels, which keeps a full phone screenshot
- * readable — and the rest only happen for a picture that will not compress, a
- * busy one. A picture already under the budget is not resized, only re-encoded.
+ * usual one — lossless PNG up to 12 megapixels, preserving screenshot text.
+ * High-quality JPEG is tried only if that exceeds the byte budget. Resizing
+ * happens last, and every attempt starts from the original selected image.
  */
-export const PICTURE_STEPS: readonly { pixels: number; quality: number }[] = [
-  { pixels: 1_500_000, quality: 0.6 },
-  { pixels: 1_500_000, quality: 0.45 },
-  { pixels: 900_000, quality: 0.45 },
-  { pixels: 450_000, quality: 0.4 },
-  { pixels: 200_000, quality: 0.35 },
+export const PICTURE_STEPS: readonly { pixels: number; quality: number; format: 'png' | 'jpeg' }[] = [
+  { pixels: 12_000_000, quality: 1, format: 'png' },
+  { pixels: 12_000_000, quality: 0.95, format: 'jpeg' },
+  { pixels: 8_000_000, quality: 0.92, format: 'jpeg' },
+  { pixels: 4_000_000, quality: 0.9, format: 'jpeg' },
+  { pixels: 2_000_000, quality: 0.88, format: 'jpeg' },
 ];
 /** Past these a write is refused and a read is not drawn, so one bad row cannot bloat a screen. */
-export const PICTURE_MAX_CHARS = 450_000;
+export const PICTURE_MAX_CHARS = 4_000_000;
 export const THUMB_MAX_CHARS = 40_000;
 
 /** What a note that is only a picture says, for whoever reads the thread as text. */
@@ -44,8 +44,8 @@ export const PICTURE_LINE = '(picture)';
 
 const DATA_URI = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
 
-export function pictureDataUri(base64: string): string {
-  return `data:image/jpeg;base64,${base64}`;
+export function pictureDataUri(base64: string, format: 'jpeg' | 'png' = 'jpeg'): string {
+  return `data:image/${format};base64,${base64}`;
 }
 
 /** What is safe to draw: an image data URI under the cap, or nothing. */

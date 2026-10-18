@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { canClaim, LINE_VOICE } from '@/lib/agentWork';
+import { askRule, canClaim, LINE_VOICE } from '@/lib/agentWork';
 import { patchEvents } from '@/lib/entryTrail';
 import { MAX_OPTIONS, optionLabel, pendingQuestions } from '@/lib/entryQuestions';
 import { isKind } from '@/lib/kinds';
@@ -20,6 +20,7 @@ import { answerQuestion, askQuestion, resolveQuestion } from '../questions.ts';
 import { byAgent, logMoves } from '../trail.ts';
 import { guard, text, withAnswered, withCellar, type CtxProvider } from '../context.ts';
 import { entryBrief, shortId } from '../format.ts';
+import { withPictures } from '../pictures.ts';
 
 /**
  * The writes, and the shape of the loop they make:
@@ -72,7 +73,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
           { what: 'claimed', fromValue: 'open', toValue: 'doing', source: 'agent', agent: ctx.agent },
         ]);
 
-        return text(
+        return withPictures(ctx.client, target.id,
           withAnswered(
             [
               `Claimed as "${ctx.agent}". It is now doing, and the user sees your name on it.`,
@@ -118,10 +119,7 @@ export function registerWriteTools(server: McpServer, getCtx: CtxProvider): void
     {
       title: 'Ask the user about an entry, then move on',
       description:
-        'Put a question on the entry and block it. THIS IS A CORRECT OUTCOME, not a failure — for an idea or a ' +
-        'removal it is usually the right one. A dumped thought is one line and the decisions behind it were never ' +
-        'written down, so anything with two plausible readings that lead to different work is a question, not a ' +
-        'guess.\n\n' +
+        'Put a necessary question on the entry and block it. ' + askRule() + '\n\n' +
         'WHERE TO ASK. If this session has one task, do not use this tool — ask in the chat, because the user is ' +
         'right there and blocking the only thing they asked for helps nobody. Use this when they have handed you ' +
         'several: it blocks this one thought and leaves the rest of the list workable, and the answer may well be ' +

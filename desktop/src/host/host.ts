@@ -9,6 +9,8 @@ import type { Server } from 'node:http';
 import { appendFileSync, statSync, writeFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
 import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
+import { generateWorktreeName } from './worktreeName.ts';
 
 import { deskPairUrl, type DeskPair } from '@/lib/deskPair';
 
@@ -107,7 +109,11 @@ export class DeskHost {
       version: options.version,
     };
     this.deps.worktrees = new Worktrees(options.dataDir, this.account, async () => [...await this.deps.runs.list(), ...this.deps.jobs!.list()],
-      join(this.identity.workspace, '.cellar-worktrees'));
+      join(this.identity.workspace, '.cellar-worktrees'), async (start) => {
+        const context = start.entryIds?.length ? await this.account.ruleContext(start.entryIds) : null;
+        return generateWorktreeName({ ...start, prompt: context ? `${start.prompt}\nAttached thoughts: ${JSON.stringify(context.entries)}` : start.prompt },
+          this.deps.providerAccounts!.environment(start, randomBytes(8).toString('hex'), process.env));
+      });
     if (options.screenAdapter) this.deps.screenControl = new ScreenControl(options.dataDir, () => ({ owner: this.account.current?.userId ?? null, key: this.identity.key }), options.screenAdapter);
     this.deps.phones = new Phones(this.deps);
     this.deps.previews = new Previews(options.dataDir, this.deps);

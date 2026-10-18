@@ -1,7 +1,7 @@
 import type { Project } from "@/types/cellar";
 import { countLive, tallyKinds } from "@/lib/entryGroups";
 import type { Entry } from "@/types/cellar";
-import { navigate } from "./useRoute";
+import { RouteLink } from './RouteLink';
 
 export function ProjectTile({
   project,
@@ -14,9 +14,9 @@ export function ProjectTile({
 }) {
   const mine = entries.filter((row) => row.projectId === project.id);
   return (
-    <button
+    <RouteLink
       className="project-tile stack"
-      onClick={() => navigate(`/project/${project.id}`)}
+      href={`/project/${project.id}`}
     >
       {project.icon ? (
         <img src={project.icon} alt="" />
@@ -41,6 +41,6 @@ export function ProjectTile({
           .map((row) => `${row.count} ${row.kind}`)
           .join(" · ")}
       </small>
-    </button>
+    </RouteLink>
   );
 }

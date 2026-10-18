@@ -11,6 +11,8 @@ import { addDoc, removeDoc } from "./data/docsApi";
 import { calls } from './client';
 import { DocumentViewer } from './DocumentViewer';
 import type { DeskDocument } from '@/lib/deskDocuments';
+import { RouteLink } from './RouteLink';
+import { plainNavigation } from '@/lib/navigation';
 
 export function EntryDocs({
   entry,
@@ -53,7 +55,11 @@ export function EntryDocs({
         const href = docHref(doc.ref, project);
         return (
           <div className="row" key={doc.id}>
-            {project?.repoPath && docKind(doc.ref) === 'path' ? <button className="quiet mono" onClick={() => { setFile(null); setMessage('Reading project file…'); void calls.document({ projectId: project.id, path: doc.ref }).then((file) => { setFile(file); setMessage(null); }).catch((e) => setMessage(String(e))); }}>{docTitle(doc)}</button> : href ? (
+            {project?.repoPath && docKind(doc.ref) === 'path' ? <RouteLink className="quiet mono" href={`/desk/file?projectId=${encodeURIComponent(project.id)}&path=${encodeURIComponent(doc.ref)}`} onClick={(event) => {
+              if (!plainNavigation(event)) return;
+              event.preventDefault(); setFile(null); setMessage('Reading project file…');
+              void calls.document({ projectId: project.id, path: doc.ref }).then((file) => { setFile(file); setMessage(null); }).catch((e) => setMessage(String(e)));
+            }}>{docTitle(doc)}</RouteLink> : href ? (
               <a href={href} target="_blank" rel="noreferrer">
                 {docTitle(doc)}
               </a>

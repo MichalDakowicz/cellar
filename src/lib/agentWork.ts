@@ -140,56 +140,46 @@ export const LINE_VOICE = [
 /**
  * What each kind asks of an agent.
  *
- * `ask` is the important column. Two kinds must never be guessed at: an idea is
- * a direction rather than a spec, and a removal destroys something. For both,
- * stopping to ask is the correct outcome, not a failure to complete.
+ * A kind describes the work, not whether permission is needed. Ask only when
+ * the entry and repo leave a material decision unresolved; see `askRule`.
  */
 export type KindWork = {
   kind: Kind;
   /** One line, handed to the agent as the job. */
   brief: string;
-  /** Stop and ask rather than proceed on an assumption. */
-  ask: 'always' | 'when-unclear';
 };
 
 export const KIND_WORK: KindWork[] = [
   {
     kind: 'idea',
     brief:
-      'a direction, not a spec. work out what it would actually mean, then ask before building it — the thought is one line and the decisions behind it were never written down',
-    ask: 'always',
+      'work out the intended change from the entry, its follow-ups and the repo, then build it; ask only when a material decision cannot reasonably be inferred',
   },
   {
     kind: 'removal',
     brief:
-      'something should go. find every place it touches, say what goes with it, and ask before deleting anything — this is the one kind that destroys work',
-    ask: 'always',
+      'something should go. find every place it touches and remove the requested scope; ask only when scope is materially unclear or a destructive action lacks authorization',
   },
   {
     kind: 'glitch',
     brief: 'something is broken. reproduce it, fix it, cover it with a test, and report the cause in one line',
-    ask: 'when-unclear',
   },
   {
     kind: 'question',
     brief: 'answer it from the repo. the answer goes back as a line — do not change code to answer a question',
-    ask: 'when-unclear',
   },
   {
     kind: 'research',
     brief: 'find out and report back compactly. no code changes unless the entry asks for them',
-    ask: 'when-unclear',
   },
   {
     kind: 'copy',
     brief: 'write the string. match the voice already in the surrounding UI rather than inventing a register',
-    ask: 'when-unclear',
   },
   {
     kind: 'design',
     brief:
       'a design problem — layout, hierarchy, what a screen should feel like. general design work; only reach for a design system if this project actually has one',
-    ask: 'when-unclear',
   },
 ];
 
@@ -199,11 +189,9 @@ export function kindWork(kind: Kind): KindWork {
   return BY_KIND.get(kind) ?? BY_KIND.get('idea')!;
 }
 
-/** The sentence that goes in the brief when a kind must not be guessed at. */
-export function askRule(kind: Kind): string {
-  return kindWork(kind).ask === 'always'
-    ? 'ask before you act — a question waiting on an answer is the right result here, not a half-built guess'
-    : 'if the entry is ambiguous enough that two readings would produce different work, ask instead of picking one';
+/** One asking rule for every kind, handed over in each brief. */
+export function askRule(): string {
+  return 'ask only when necessary: read the entry, its follow-ups and the repo first; proceed when intent is clear or a reasonable, reversible default fits, and report meaningful assumptions; ask only for unresolved ambiguity that materially changes the work, essential missing information, or a destructive action without existing authorization; an idea or removal label alone never requires a question';
 }
 
 /**

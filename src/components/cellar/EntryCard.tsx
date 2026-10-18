@@ -13,6 +13,7 @@ import { isDimmed } from '@/lib/entryState';
 import { shortRel } from '@/lib/relTime';
 import { COLORS } from '@/theme/colors';
 import type { Entry } from '@/types/cellar';
+import { EntryPressable } from '@/components/ui/EntryPressable';
 
 export type EntryVariant = 'line' | 'inbox' | 'hit';
 
@@ -113,7 +114,8 @@ export const EntryCard = memo(function EntryCard({
         </View>
       )}
 
-      <Pressable
+      <EntryPressable
+        href={`/entry/${entry.id}`}
         accessibilityRole="button"
         accessibilityLabel={entry.text}
         onPress={() => onPress(entry)}
@@ -150,7 +152,7 @@ export const EntryCard = memo(function EntryCard({
             {where}
           </Text>
         )}
-      </Pressable>
+      </EntryPressable>
 
       {onCopy && (
         // Muted and small, never the accent: it is on every row, and an accent

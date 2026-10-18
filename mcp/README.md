@@ -6,6 +6,14 @@ Cellar is a mind dump: one-line thoughts filed under projects. This server turns
 into a work queue an agent can read, claim, report against and — when the thought is too
 thin to act on — ask you about.
 
+Entry reads and claims return attached cover and note pictures as MCP image content.
+Inspect them alongside the text. Large image sets list deferred picture ids; fetch each
+with `cellar_get_picture` using the entry id and full picture id. Lists remain text only.
+
+Use `cellar_add_doc` to attach a document URL or repo-relative file path, with an optional
+label. This adds the same reference shown in the app's docs section; it does not upload
+file contents. Duplicate references return the existing attachment.
+
 ```
 open ──claim──▶ doing ──finish──▶ done | dropped
                   │

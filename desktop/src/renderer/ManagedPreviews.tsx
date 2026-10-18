@@ -3,7 +3,7 @@ import type { Host } from './useHost';
 import { useHostQuery } from './useHostQuery';
 import { calls } from './client';
 import { saved, saveRecord } from './preferences';
-import { navigate } from './useRoute';
+import { RouteLink } from './RouteLink';
 import { managedChecks, type PreviewAction } from '@/lib/deskManagedPreview';
 
 export function ManagedPreviews({ host, port }: { host: Host; port?: string }) {
@@ -39,10 +39,10 @@ export function ManagedPreviews({ host, port }: { host: Host; port?: string }) {
   return <section className="stack">
     {!port && <><h2 className="overline">worktree previews</h2>{jobs.data?.filter((r) => r.projectId && r.agent !== 'job').map((run) => <div key={run.id} className="row wrap">
       <span>{run.name} · {run.branch ?? 'main'}</span><button disabled={busy || !!pending} onClick={() => void act(run.projectId!, run.id, 'start')}>start preview</button>
-    </div>)}{previews.data?.map((p) => <div key={p.id} className="row wrap"><span className="mono">:{p.port} · {p.state}</span><button disabled={p.state !== 'live'} onClick={() => navigate(`/desk/preview/${p.port}`)}>open</button><button disabled={busy || !!pending} onClick={() => void act(p.projectId, p.runId, 'stop')}>stop</button></div>)}</>}
-    {selected && <><div className="row"><button disabled={busy || !!pending} onClick={() => void act(selected.projectId, selected.runId, 'checks')}>run checks</button><button disabled={busy || !!pending} onClick={() => void act(selected.projectId, selected.runId, 'deploy', !selected.openedAt)}>$deploy</button><button onClick={() => navigate(`/desk/run/${selected.runId}`)}>tell the agent</button></div>
+    </div>)}{previews.data?.map((p) => <div key={p.id} className="row wrap"><span className="mono">:{p.port} · {p.state}</span>{p.state === 'live' ? <RouteLink href={`/desk/preview/${p.port}`}>open</RouteLink> : <button disabled>open</button>}<button disabled={busy || !!pending} onClick={() => void act(p.projectId, p.runId, 'stop')}>stop</button></div>)}</>}
+    {selected && <><div className="row"><button disabled={busy || !!pending} onClick={() => void act(selected.projectId, selected.runId, 'checks')}>run checks</button><button disabled={busy || !!pending} onClick={() => void act(selected.projectId, selected.runId, 'deploy', !selected.openedAt)}>$deploy</button><RouteLink href={`/desk/run/${selected.runId}`}>tell the agent</RouteLink></div>
       {managedChecks(selected, jobs.data ?? []).map((c) => <p key={c.label} className="mono">{c.label} · {c.detail}</p>)}
-      {jobs.data?.filter((j) => selected.checks.some((c) => c.jobId === j.id) || selected.deployJobId === j.id).map((j) => <button key={j.id} onClick={() => navigate(`/desk/run/${j.id}`)}>{j.name} · {j.state} · open output</button>)}
+      {jobs.data?.filter((j) => selected.checks.some((c) => c.jobId === j.id) || selected.deployJobId === j.id).map((j) => <RouteLink key={j.id} href={`/desk/run/${j.id}`}>{j.name} · {j.state} · open output</RouteLink>)}
     </>}
     {(error ?? previews.error ?? jobs.error) && <p role="status">{error ?? previews.error ?? jobs.error}</p>}
     {pending && <button onClick={() => void recover()}>check original preview receipt</button>}

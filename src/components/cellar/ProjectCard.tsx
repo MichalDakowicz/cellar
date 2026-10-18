@@ -54,6 +54,7 @@ export const ProjectCard = memo(function ProjectCard({
 }) {
   return (
     <TileShell
+      href={`/project/${project.id}`}
       label={project.name}
       onPress={() => onPress(project.id)}
       onEdit={onEdit && (() => onEdit(project.id))}

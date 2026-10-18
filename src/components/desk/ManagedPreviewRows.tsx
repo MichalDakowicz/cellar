@@ -1,6 +1,8 @@
 import { Pressable, Text, View } from 'react-native';
 import type { DeskRun } from '@/lib/deskProtocol';
 import type { ManagedPreview, PreviewAction } from '@/lib/deskManagedPreview';
+import { RoutePressable } from '@/components/ui/RoutePressable';
+import type { Href } from 'expo-router';
 
 export function ManagedPreviewRows({ runs, previews, busy, onAction, onOpen }: {
   runs: DeskRun[]; previews: ManagedPreview[]; busy: boolean;
@@ -15,7 +17,7 @@ export function ManagedPreviewRows({ runs, previews, busy, onAction, onOpen }: {
       <View className="flex-row flex-wrap gap-3">
         <Pressable disabled={busy} onPress={() => onAction(run.projectId!, run.id, 'start')} className="min-h-11 justify-center"><Text className="text-foreground">start preview</Text></Pressable>
         {preview && <>
-          <Pressable disabled={preview.state !== 'live'} onPress={() => onOpen(preview.port)} className="min-h-11 justify-center"><Text className="text-foreground">open :{preview.port}</Text></Pressable>
+          <RoutePressable href={`/desk/preview/${preview.port}` as Href} disabled={preview.state !== 'live'} onPress={() => onOpen(preview.port)} className="min-h-11 justify-center"><Text className="text-foreground">open :{preview.port}</Text></RoutePressable>
           <Pressable disabled={busy} onPress={() => onAction(run.projectId!, run.id, 'checks')} className="min-h-11 justify-center"><Text className="text-foreground">run checks</Text></Pressable>
           <Pressable disabled={busy} onPress={() => onAction(run.projectId!, run.id, 'stop')} className="min-h-11 justify-center"><Text className="text-foreground">stop preview</Text></Pressable>
         </>}

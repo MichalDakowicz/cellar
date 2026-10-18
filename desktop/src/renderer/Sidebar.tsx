@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { Cellar } from "./useCellar";
 import type { Host } from "./useHost";
-import { navigate } from "./useRoute";
+import { RouteLink } from './RouteLink';
 import { save, saved, useSaved } from "./preferences";
 
 const cellarLinks = [
@@ -49,15 +49,15 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-scroll">
         <div className="brand">cellar</div>
-        <button
+        <RouteLink
           className="jump"
           aria-label="jump to anything"
-          onClick={() => navigate("/search")}
+          href="/search"
         >
           <Search size={16} />
           <span>jump to anything</span>
           <kbd>ctrl k</kbd>
-        </button>
+        </RouteLink>
         <label className="shelf-switch">
           <span className="overline">shelf</span>
           <select
@@ -77,12 +77,12 @@ export function Sidebar({
         <div className="side-group">
           <span className="overline">cellar</span>
           {cellarLinks.map(([href, label, Icon]) => (
-            <button
+            <RouteLink
               title={label}
               aria-label={label}
               key={href}
               className={`side-link ${path === href ? "active" : ""}`}
-              onClick={() => navigate(href)}
+              href={href}
             >
               <Icon size={17} />
               <span>{label}</span>
@@ -95,22 +95,22 @@ export function Sidebar({
                   ).length || ""}
                 </small>
               )}
-            </button>
+            </RouteLink>
           ))}
         </div>
         <div className="side-group">
           <span className="overline">desk</span>
           {deskLinks.map(([href, label, Icon]) => (
-            <button
+            <RouteLink
               aria-label={label}
               title={label}
               key={href}
               className={`side-link ${path === href || (href === "/desk/chat" && path.startsWith("/desk/run/")) ? "active" : ""}`}
-              onClick={() => navigate(href)}
+              href={href}
             >
               <Icon size={17} />
               <span>{label}</span>
-            </button>
+            </RouteLink>
           ))}
         </div>
         <div className="side-group">
@@ -120,14 +120,14 @@ export function Sidebar({
               (project) => project.pinned && project.shelfId === activeShelfId,
             )
             .map((project) => (
-              <button
+              <RouteLink
                 className="side-link"
                 key={project.id}
-                onClick={() => navigate(`/project/${project.id}`)}
+                href={`/project/${project.id}`}
               >
                 <span className="project-glyph">{project.name[0]}</span>
                 {project.name}
-              </button>
+              </RouteLink>
             ))}
         </div>
       </div>
@@ -135,10 +135,10 @@ export function Sidebar({
         <small className="muted">
           {host.live ? `● on ${host.info?.name}` : "○ reconnecting"}
         </small>
-        <button
+        <RouteLink
           className="side-link"
           aria-label="account and settings"
-          onClick={() => navigate("/settings")}
+          href="/settings"
         >
           <span className="avatar">
             {avatar ? (
@@ -149,7 +149,7 @@ export function Sidebar({
           </span>
           <span>{name}</span>
           <Settings size={16} />
-        </button>
+        </RouteLink>
       </footer>
     </aside>
   );

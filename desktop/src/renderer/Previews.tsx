@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { calls } from "./client";
-import { navigate } from "./useRoute";
+import { RouteLink } from './RouteLink';
 import { useHostQuery } from "./useHostQuery";
 import type { Host } from "./useHost";
 import { ManagedPreviews } from './ManagedPreviews';
@@ -50,17 +50,17 @@ export function Previews({ host, port }: { host: Host; port?: string }) {
       {!port && (
         <>
           {result.data?.map((row) => (
-            <button
+            <RouteLink
               className="run-row row"
               key={row.port}
-              onClick={() => navigate(`/desk/preview/${row.port}`)}
+              href={`/desk/preview/${row.port}`}
             >
               <strong className="mono">localhost:{row.port}</strong>
               <span className="muted">
                 {row.process ?? `process ${row.pid}`}
               </span>
               <span>preview →</span>
-            </button>
+            </RouteLink>
           ))}
           {result.data?.length === 0 && (
             <p className="empty muted">nothing listening on this pc</p>
@@ -69,6 +69,7 @@ export function Previews({ host, port }: { host: Host; port?: string }) {
       )}
       {port && (
         <>
+          <RouteLink href={`/desk/preview/${port}`} target="_blank" rel="noopener noreferrer">open preview in new page ↗</RouteLink>
           <div className="chips">
             {["phone", "tablet", "desktop"].map((value) => (
               <button

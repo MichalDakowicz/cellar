@@ -13,6 +13,7 @@ import { createProject } from "./data/structureApi";
 import { useProjectView } from "./useProjectView";
 import { ProjectGrid } from "./ProjectGrid";
 import { ProjectEntries } from "./ProjectEntries";
+import { RouteLink } from './RouteLink';
 
 export function Projects({
   cellar,
@@ -196,23 +197,15 @@ export function Projects({
                     open repo
                   </a>
                 )}
-                <button
-                  onClick={() =>
-                    navigate(`/settings/project/${view.project!.id}`)
-                  }
-                >
+                <RouteLink href={`/settings/project/${view.project!.id}`}>
                   project settings
-                </button>
-                <button
-                  onClick={() =>
-                    navigate(`/arrange/project/${view.project!.id}`)
-                  }
-                >
+                </RouteLink>
+                <RouteLink href={`/arrange/project/${view.project!.id}`}>
                   arrange entries
-                </button>
-                <button onClick={() => navigate("/desk/previews")}>
+                </RouteLink>
+                <RouteLink href="/desk/previews">
                   previews
-                </button>
+                </RouteLink>
               </section>
             </aside>
           </div>
